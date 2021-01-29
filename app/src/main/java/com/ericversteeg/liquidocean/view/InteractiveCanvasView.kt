@@ -60,31 +60,13 @@ class InteractiveCanvasView : SurfaceView {
     var interactiveCanvas = InteractiveCanvas()
 
     private fun commonInit() {
-        val displayMetrics = DisplayMetrics()
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
-        axisYMax = displayMetrics.heightPixels.toFloat()
-        axisXMax = displayMetrics.widthPixels.toFloat()
-
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-
-        val canvasWidthPx = interactiveCanvas.rows * interactiveCanvas.ppu
-        val canvasHeightPx = interactiveCanvas.cols * interactiveCanvas.ppu
-
-        val top = (canvasHeightPx / 2 - screenHeight / 2) / interactiveCanvas.ppu.toFloat()
-        val bottom = (canvasHeightPx / 2 + screenHeight / 2) / interactiveCanvas.ppu.toFloat()
-        val left = (canvasWidthPx / 2 - screenWidth / 2) / interactiveCanvas.ppu.toFloat()
-        val right = (canvasWidthPx / 2 + screenWidth / 2) / interactiveCanvas.ppu.toFloat()
-
-        interactiveCanvas.deviceViewport = RectF(left, top, right, bottom)
+        interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
         // Let the ScaleGestureDetector inspect all events.
         mPanDetector.onTouchEvent(ev)
-       // mScaleDetector.onTouchEvent(ev)
+        mScaleDetector.onTouchEvent(ev)
 
         return true
     }
@@ -127,11 +109,11 @@ class InteractiveCanvasView : SurfaceView {
             mScaleFactor *= detector.scaleFactor
 
             // Don't let the object get too small or too large.
-            mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f))
+            mScaleFactor = Math.max(0.5f, Math.min(mScaleFactor, 10.0f))
 
-            val canvas = holder.lockCanvas()
-            canvas.scale(2F, 2F)
-            holder.unlockCanvasAndPost(canvas)
+            interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
+            interactiveCanvas.updateDeviceViewport(context)
+            interactiveCanvas.drawCallbackListener?.notifyRedraw()
 
             return true
         }

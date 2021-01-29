@@ -1,7 +1,10 @@
 package com.ericversteeg.liquidocean.model
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.RectF
+import android.util.DisplayMetrics
+import android.view.WindowManager
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 
 class InteractiveCanvas {
@@ -10,7 +13,8 @@ class InteractiveCanvas {
 
     var arr =  arrayOfNulls<Array<Int>>(rows)
 
-    var ppu = 100
+    val basePpu = 100
+    var ppu = basePpu
 
     var deviceViewport: RectF? = null
 
@@ -26,6 +30,32 @@ class InteractiveCanvas {
                 }
                 row[j] = color
             }
+        }
+    }
+
+    fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float) {
+        val displayMetrics = DisplayMetrics()
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+
+        val canvasCenterXPx = (canvasCenterX * ppu).toInt()
+        val canvasCenterYPx = (canvasCenterY * ppu).toInt()
+
+        val top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
+        val bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
+        val left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
+        val right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
+
+        deviceViewport = RectF(left, top, right, bottom)
+    }
+
+    fun updateDeviceViewport(context: Context) {
+        deviceViewport?.apply {
+            updateDeviceViewport(context, (left + right) / 2, (top + bottom) / 2)
         }
     }
 
