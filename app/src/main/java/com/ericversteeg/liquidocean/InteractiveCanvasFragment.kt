@@ -1,0 +1,126 @@
+package com.ericversteeg.liquidocean
+
+import android.graphics.*
+import android.os.Bundle
+import android.view.*
+import androidx.fragment.app.Fragment
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import kotlin.math.ceil
+import kotlin.math.round
+
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
+
+    val drawMatrix = Matrix()
+    val transformedPath = Path()
+
+    var scaleFactor = 1f
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_interactive_canvas, container, false)
+
+        // setup views here
+
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        surface_view.interactiveCanvas.drawCallbackListener = this
+
+        val holder = surface_view.holder
+        holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder?) {
+                if (holder != null) {
+                    drawTestPixels(holder)
+                }
+            }
+
+            override fun surfaceDestroyed(p0: SurfaceHolder?) {
+
+            }
+
+            override fun surfaceChanged(p0: SurfaceHolder?, p1: Int, p2: Int, p3: Int) {
+
+            }
+        })
+
+        // gesture recognizer
+        val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                scaleFactor *= detector.scaleFactor
+
+                // Don't let the object get too small or too large.
+                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f))
+
+                return true
+            }
+        }
+    }
+
+    fun drawTestPixels(holder: SurfaceHolder) {
+        val paint = Paint()
+        paint.color = Color.parseColor("#FFFFFFFF")
+
+        val canvas = holder.lockCanvas()
+
+        canvas.drawARGB(255, 0, 0, 0)
+
+        if (surface_view.interactiveCanvas.ppu >= 50) {
+            val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+            val ppu = surface_view.interactiveCanvas.ppu
+
+            val gridLinePaint = Paint()
+            gridLinePaint.strokeWidth = 1f
+            gridLinePaint.color = Color.WHITE
+
+            val gridLinePaintAlt = Paint()
+            gridLinePaintAlt.strokeWidth = 1f
+            gridLinePaintAlt.color = Color.WHITE
+
+            val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
+            val unitsTall = canvas.height / surface_view.interactiveCanvas.ppu
+
+            val deviceViewportPx = RectF(deviceViewport.left * ppu, deviceViewport.top * ppu, deviceViewport.right * ppu, deviceViewport.bottom * ppu)
+
+            val gridXOffsetPx = (ceil(deviceViewport.left) - deviceViewport.left) * ppu
+            val gridYOffsetPx = (ceil(deviceViewport.top) - deviceViewport.top) * ppu
+
+            for (y in 0..unitsTall) {
+                if (y % 2 == 0) {
+                    canvas.drawLine(0F, y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, gridLinePaint)
+                }
+                else {
+                    canvas.drawLine(0F, y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, gridLinePaintAlt)
+                }
+            }
+
+            for (x in 0..unitsWide) {
+                if (x % 2 == 0) {
+                    canvas.drawLine(x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, 0F, x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaint)
+                }
+                else {
+                    canvas.drawLine(x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, 0F, x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaintAlt)
+                }
+            }
+        }
+
+        holder.unlockCanvasAndPost(canvas)
+    }
+
+    // interactive canvas drawer callback
+    override fun notifyRedraw() {
+        drawTestPixels(surface_view.holder)
+    }
+}
