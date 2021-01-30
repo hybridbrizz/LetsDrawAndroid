@@ -18,6 +18,8 @@ class InteractiveCanvasView : SurfaceView {
 
     private var mode = Mode.EXPLORING
 
+    var undo = false
+
     constructor(context: Context) : super(context) {
         commonInit()
     }
@@ -57,13 +59,28 @@ class InteractiveCanvasView : SurfaceView {
             mScaleDetector.onTouchEvent(ev)
         }
         else if (mode == Mode.PAINTING) {
-            if(ev.action == MotionEvent.ACTION_UP) {
+
+            if(ev.action == MotionEvent.ACTION_DOWN) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                unitPoint?.apply {
+                    undo = interactiveCanvas.unitInRestorePoints(this) != null
+                }
+            }
+            else if(ev.action == MotionEvent.ACTION_MOVE) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 unitPoint?.apply {
                     Log.i("Unit Tap", "Tapped on unit $unitPoint")
 
-                    interactiveCanvas.paintUnitOrUndo(unitPoint)
+                    if (undo) {
+                        // undo
+                        interactiveCanvas.paintUnitOrUndo(unitPoint, 1)
+                    }
+                    else {
+                        // paint
+                        interactiveCanvas.paintUnitOrUndo(unitPoint)
+                    }
                 }
             }
         }

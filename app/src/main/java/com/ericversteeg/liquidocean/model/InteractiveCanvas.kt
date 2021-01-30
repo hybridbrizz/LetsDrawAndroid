@@ -84,16 +84,25 @@ class InteractiveCanvas(var context: Context) {
         return null
     }
 
-    fun paintUnitOrUndo(unitPoint: Point) {
+    fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0) {
         val restorePoint = unitInRestorePoints(unitPoint)
-        if (restorePoint != null) {
-            // undo
-            restorePoints.remove(restorePoint)
-            arr[unitPoint.y][unitPoint.x] = restorePoint.color
+        if (mode == 0) {
+            if (restorePoint == null) {
+                // paint
+                restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x]))
+                arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+
+                SessionSettings.instance.dropsAmt -= 1
+            }
         }
-        else {
-            restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x]))
-            arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+        else if (mode == 1) {
+            if (restorePoint != null) {
+                // undo
+                restorePoints.remove(restorePoint)
+                arr[unitPoint.y][unitPoint.x] = restorePoint.color
+
+                SessionSettings.instance.dropsAmt += 1
+            }
         }
 
         drawCallbackListener?.notifyRedraw()
@@ -106,10 +115,11 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun clearRestorePoints() {
+
         restorePoints = ArrayList()
     }
 
-    private fun unitInRestorePoints(unitPoint: Point): RestorePoint? {
+    fun unitInRestorePoints(unitPoint: Point): RestorePoint? {
         for(restorePoint: RestorePoint in restorePoints) {
             if (restorePoint.point.x == unitPoint.x && restorePoint.point.y == unitPoint.y) {
                 return restorePoint
@@ -196,7 +206,7 @@ class InteractiveCanvas(var context: Context) {
 
         val ed = SessionSettings.instance.getSharedPrefs(context).edit()
         ed.putString("arr", jsonArr.toString())
-        ed.commit()
+        ed.apply()
     }
 
     class RestorePoint(var point: Point, var color: Int)

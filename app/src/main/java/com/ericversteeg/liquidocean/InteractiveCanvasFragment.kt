@@ -4,19 +4,22 @@ import android.graphics.*
 import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import top.defaults.colorpicker.ColorObserver
 import kotlin.math.ceil
 import kotlin.math.floor
+
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
     var scaleFactor = 1f
+
+    var initalColor = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,33 +32,73 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         return view
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        context?.apply {
+            SessionSettings.instance.save(this)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        context?.apply {
+            SessionSettings.instance.load(this)
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        color_picker_view.subscribe(object: ColorObserver {
+            override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                paint_indicator_view.setPaintColor(color)
+                DrawableCompat.setTint(paint_yes.drawable, color)
+            }
+        })
 
         paint_panel_button.setOnClickListener {
             paint_panel_button.visibility = View.GONE
             paint_panel.visibility = View.VISIBLE
 
+            drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+
             surface_view.startPainting()
         }
 
         paint_yes.setOnClickListener {
-            surface_view.endPainting(true)
+            if (color_picker_frame.visibility == View.VISIBLE) {
+                DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
+                color_picker_frame.visibility = View.GONE
+            }
+            else {
+                surface_view.endPainting(true)
 
-            paint_panel_button.visibility = View.VISIBLE
-            paint_panel.visibility = View.GONE
+                paint_panel_button.visibility = View.VISIBLE
+                paint_panel.visibility = View.GONE
+            }
         }
 
         paint_no.setOnClickListener {
-            surface_view.endPainting(false)
+            if (color_picker_frame.visibility == View.VISIBLE) {
+                DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
+                paint_indicator_view.setPaintColor(initalColor)
+                color_picker_frame.visibility = View.GONE
+            }
+            else {
+                surface_view.endPainting(false)
 
-            paint_panel_button.visibility = View.VISIBLE
-            paint_panel.visibility = View.GONE
+                paint_panel_button.visibility = View.VISIBLE
+                paint_panel.visibility = View.GONE
+            }
         }
 
         paint_indicator_view.setOnClickListener {
-            paint_indicator_view.setPaintColor(Color.argb(255, (Math.random() * 255).toInt(), (Math.random() * 255).toInt(), (Math.random() * 255).toInt()))
+            color_picker_frame.visibility = View.VISIBLE
+            initalColor = SessionSettings.instance.paintColor
+            color_picker_view.setInitialColor(initalColor)
         }
 
         context?.apply {
@@ -95,6 +138,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
+        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+
         val paint = Paint()
         paint.color = Color.parseColor("#FFFFFFFF")
 
@@ -124,19 +169,43 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
             for (y in 0..unitsTall) {
                 if (y % 2 == 0) {
-                    canvas.drawLine(0F, y * ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * ppu.toFloat() + gridYOffsetPx, gridLinePaint)
+                    canvas.drawLine(
+                        0F,
+                        y * ppu.toFloat() + gridYOffsetPx,
+                        canvas.width.toFloat(),
+                        y * ppu.toFloat() + gridYOffsetPx,
+                        gridLinePaint
+                    )
                 }
                 else {
-                    canvas.drawLine(0F, y * ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * ppu.toFloat() + gridYOffsetPx, gridLinePaintAlt)
+                    canvas.drawLine(
+                        0F,
+                        y * ppu.toFloat() + gridYOffsetPx,
+                        canvas.width.toFloat(),
+                        y * ppu.toFloat() + gridYOffsetPx,
+                        gridLinePaintAlt
+                    )
                 }
             }
 
             for (x in 0..unitsWide) {
                 if (x % 2 == 0) {
-                    canvas.drawLine(x * ppu.toFloat() + gridXOffsetPx, 0F, x * ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaint)
+                    canvas.drawLine(
+                        x * ppu.toFloat() + gridXOffsetPx,
+                        0F,
+                        x * ppu.toFloat() + gridXOffsetPx,
+                        canvas.height.toFloat(),
+                        gridLinePaint
+                    )
                 }
                 else {
-                    canvas.drawLine(x * ppu.toFloat() + gridXOffsetPx, 0F, x * ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaintAlt)
+                    canvas.drawLine(
+                        x * ppu.toFloat() + gridXOffsetPx,
+                        0F,
+                        x * ppu.toFloat() + gridXOffsetPx,
+                        canvas.height.toFloat(),
+                        gridLinePaintAlt
+                    )
                 }
             }
         }
@@ -162,7 +231,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             for (x in 0..rangeX) {
                 for (y in 0..rangeY) {
                     paint.color = interactiveCanvas.arr[y + startUnitIndexY][x + startUnitIndexX]
-                    val rect = interactiveCanvas.getScreenSpaceForUnit(x + startUnitIndexX, y + startUnitIndexY)
+                    val rect = interactiveCanvas.getScreenSpaceForUnit(
+                        x + startUnitIndexX,
+                        y + startUnitIndexY
+                    )
 
                     canvas.drawRect(rect, paint)
                 }
