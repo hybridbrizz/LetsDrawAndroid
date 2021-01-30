@@ -1,17 +1,9 @@
 package com.ericversteeg.liquidocean.view
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Rect
-import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.xor
-import androidx.core.view.ViewCompat
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 
 class InteractiveCanvasView : SurfaceView {

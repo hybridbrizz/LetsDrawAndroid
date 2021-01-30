@@ -5,25 +5,13 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.max
-import kotlin.math.round
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
-    val drawMatrix = Matrix()
-    val transformedPath = Path()
-
     var scaleFactor = 1f
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
