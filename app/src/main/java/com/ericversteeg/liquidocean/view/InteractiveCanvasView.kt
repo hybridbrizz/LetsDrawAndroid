@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintSet
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 
@@ -64,7 +65,18 @@ class InteractiveCanvasView : SurfaceView {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 unitPoint?.apply {
+                    Log.i("Unit Tap", "Tapped on unit $unitPoint")
+
                     undo = interactiveCanvas.unitInRestorePoints(this) != null
+
+                    if (undo) {
+                        // undo
+                        interactiveCanvas.paintUnitOrUndo(unitPoint, 1)
+                    }
+                    else {
+                        // paint
+                        interactiveCanvas.paintUnitOrUndo(unitPoint)
+                    }
                 }
             }
             else if(ev.action == MotionEvent.ACTION_MOVE) {
@@ -96,6 +108,8 @@ class InteractiveCanvasView : SurfaceView {
     fun endPainting(accept: Boolean) {
         if (!accept) {
             interactiveCanvas.undoPendingPaint()
+            SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
+            SessionSettings.instance.dropsUsed -= interactiveCanvas.restorePoints.size
         }
 
         interactiveCanvas.clearRestorePoints()

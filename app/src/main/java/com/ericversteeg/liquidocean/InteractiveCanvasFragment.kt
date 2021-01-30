@@ -8,9 +8,11 @@ import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import top.defaults.colorpicker.ColorObserver
+import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -46,6 +48,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         context?.apply {
             SessionSettings.instance.load(this)
         }
+
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                val millisSinceStart = System.currentTimeMillis() - SessionSettings.instance.startTimeMillis
+                SessionSettings.instance.dropsAmt = 250 + (millisSinceStart / 1000 / 60 / 5).toInt() - SessionSettings.instance.dropsUsed
+
+                drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+            }
+        }, 0, 1000 * 60 * 5)
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -55,7 +66,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         color_picker_view.subscribe(object: ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
                 paint_indicator_view.setPaintColor(color)
-                DrawableCompat.setTint(paint_yes.drawable, color)
+
+                /* if (Utils.isColorDark(color)) {
+                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white_border))
+                }
+                else {
+                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white))
+                    DrawableCompat.setTint(paint_yes.drawable, color)
+                } */
             }
         })
 
@@ -65,20 +83,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
             drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
 
+            paint_warning_frame.visibility = View.VISIBLE
+
             surface_view.startPainting()
         }
 
         paint_yes.setOnClickListener {
-            if (color_picker_frame.visibility == View.VISIBLE) {
-                DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
-                color_picker_frame.visibility = View.GONE
-            }
-            else {
-                surface_view.endPainting(true)
+            surface_view.endPainting(true)
 
-                paint_panel_button.visibility = View.VISIBLE
-                paint_panel.visibility = View.GONE
-            }
+            paint_panel_button.visibility = View.VISIBLE
+            paint_panel.visibility = View.GONE
+
+            paint_warning_frame.visibility = View.GONE
         }
 
         paint_no.setOnClickListener {
@@ -86,12 +102,22 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                 DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
                 paint_indicator_view.setPaintColor(initalColor)
                 color_picker_frame.visibility = View.GONE
+
+                paint_warning_frame.visibility = View.VISIBLE
+
+                paint_yes.visibility = View.VISIBLE
+
+                paint_color_accept_image.visibility = View.GONE
             }
             else {
                 surface_view.endPainting(false)
 
                 paint_panel_button.visibility = View.VISIBLE
                 paint_panel.visibility = View.GONE
+
+                paint_warning_frame.visibility = View.GONE
+
+                paint_yes.visibility = View.VISIBLE
             }
         }
 
@@ -99,6 +125,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             color_picker_frame.visibility = View.VISIBLE
             initalColor = SessionSettings.instance.paintColor
             color_picker_view.setInitialColor(initalColor)
+
+            paint_warning_frame.visibility = View.GONE
+
+            paint_color_accept_image.visibility = View.VISIBLE
+
+            paint_yes.visibility = View.GONE
+        }
+
+        paint_color_accept_image.setOnClickListener {
+            DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
+            color_picker_frame.visibility = View.GONE
+
+            paint_warning_frame.visibility = View.VISIBLE
+
+            paint_yes.visibility = View.VISIBLE
+
+            paint_color_accept_image.visibility = View.GONE
         }
 
         context?.apply {
@@ -218,7 +261,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
         interactiveCanvas.deviceViewport?.apply {
             val startUnitIndexX = floor(left).toInt()
-            val endUnitIndexX = ceil(right).toInt()
+            val endUnitIndexX = ceil(right).toInt() + 2
             val startUnitIndexY = floor(top).toInt()
             val endUnitIndexY = ceil(bottom).toInt() + 2
 
@@ -230,7 +273,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
             for (x in 0..rangeX) {
                 for (y in 0..rangeY) {
-                    paint.color = interactiveCanvas.arr[y + startUnitIndexY][x + startUnitIndexX]
+                    val unitX = x + startUnitIndexX
+                    val unitY = y + startUnitIndexY
+
+                    if (unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows) {
+                        paint.color = interactiveCanvas.arr[unitY][unitX]
+                    }
+                    else {
+                        paint.color = Color.BLACK
+                    }
                     val rect = interactiveCanvas.getScreenSpaceForUnit(
                         x + startUnitIndexX,
                         y + startUnitIndexY

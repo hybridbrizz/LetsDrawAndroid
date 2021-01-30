@@ -87,11 +87,12 @@ class InteractiveCanvas(var context: Context) {
     fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
-            if (restorePoint == null) {
+            if (restorePoint == null && SessionSettings.instance.dropsAmt > 0) {
                 // paint
                 restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x]))
                 arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
+                SessionSettings.instance.dropsUsed += 1
                 SessionSettings.instance.dropsAmt -= 1
             }
         }
@@ -101,6 +102,7 @@ class InteractiveCanvas(var context: Context) {
                 restorePoints.remove(restorePoint)
                 arr[unitPoint.y][unitPoint.x] = restorePoint.color
 
+                SessionSettings.instance.dropsUsed -= 1
                 SessionSettings.instance.dropsAmt += 1
             }
         }
@@ -115,7 +117,6 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun clearRestorePoints() {
-
         restorePoints = ArrayList()
     }
 

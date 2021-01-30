@@ -10,6 +10,8 @@ class SessionSettings {
 
     var paintColor = Color.WHITE
     var dropsAmt = 0
+    var dropsUsed = 0
+    var startTimeMillis = 0L
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -19,12 +21,16 @@ class SessionSettings {
         val ed = getSharedPrefs(context).edit()
         ed.putInt("paint_color", paintColor)
         ed.putInt("drops_amt", dropsAmt)
+        ed.putInt("drops_used", dropsUsed)
+        ed.putLong("start_time", startTimeMillis)
         ed.apply()
     }
 
     fun load(context: Context) {
         paintColor = getSharedPrefs(context).getInt("paint_color", Color.WHITE)
-        dropsAmt = getSharedPrefs(context).getInt("drops_amt", 0)
+        // dropsAmt = getSharedPrefs(context).getInt("drops_amt", 0)
+        dropsUsed = getSharedPrefs(context).getInt("drops_used", 0)
+        startTimeMillis = getSharedPrefs(context).getLong("start_time", System.currentTimeMillis())
     }
 
     companion object {
