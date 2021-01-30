@@ -8,6 +8,8 @@ import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.max
 import kotlin.math.round
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
@@ -43,7 +45,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder?) {
                 if (holder != null) {
-                    drawTestPixels(holder)
+                    drawInteractiveCanvas(holder)
                 }
             }
 
@@ -69,18 +71,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         }
     }
 
-    fun drawTestPixels(holder: SurfaceHolder) {
+    fun drawInteractiveCanvas(holder: SurfaceHolder) {
         val paint = Paint()
         paint.color = Color.parseColor("#FFFFFFFF")
 
         val canvas = holder.lockCanvas()
 
+        val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+        val ppu = surface_view.interactiveCanvas.ppu
+
         canvas.drawARGB(255, 0, 0, 0)
 
-        if (surface_view.interactiveCanvas.ppu >= 50) {
-            val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
-            val ppu = surface_view.interactiveCanvas.ppu
+        drawUnits(canvas, deviceViewport, ppu)
 
+        if (surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.gridLineThreshold) {
             val gridLinePaint = Paint()
             gridLinePaint.strokeWidth = 1f
             gridLinePaint.color = Color.WHITE
@@ -92,26 +96,24 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
             val unitsTall = canvas.height / surface_view.interactiveCanvas.ppu
 
-            val deviceViewportPx = RectF(deviceViewport.left * ppu, deviceViewport.top * ppu, deviceViewport.right * ppu, deviceViewport.bottom * ppu)
-
             val gridXOffsetPx = (ceil(deviceViewport.left) - deviceViewport.left) * ppu
             val gridYOffsetPx = (ceil(deviceViewport.top) - deviceViewport.top) * ppu
 
             for (y in 0..unitsTall) {
                 if (y % 2 == 0) {
-                    canvas.drawLine(0F, y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, gridLinePaint)
+                    canvas.drawLine(0F, y * ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * ppu.toFloat() + gridYOffsetPx, gridLinePaint)
                 }
                 else {
-                    canvas.drawLine(0F, y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * surface_view.interactiveCanvas.ppu.toFloat() + gridYOffsetPx, gridLinePaintAlt)
+                    canvas.drawLine(0F, y * ppu.toFloat() + gridYOffsetPx, canvas.width.toFloat(), y * ppu.toFloat() + gridYOffsetPx, gridLinePaintAlt)
                 }
             }
 
             for (x in 0..unitsWide) {
                 if (x % 2 == 0) {
-                    canvas.drawLine(x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, 0F, x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaint)
+                    canvas.drawLine(x * ppu.toFloat() + gridXOffsetPx, 0F, x * ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaint)
                 }
                 else {
-                    canvas.drawLine(x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, 0F, x * surface_view.interactiveCanvas.ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaintAlt)
+                    canvas.drawLine(x * ppu.toFloat() + gridXOffsetPx, 0F, x * ppu.toFloat() + gridXOffsetPx, canvas.height.toFloat(), gridLinePaintAlt)
                 }
             }
         }
@@ -119,8 +121,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         holder.unlockCanvasAndPost(canvas)
     }
 
+    private fun drawUnits(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
+        val interactiveCanvas = surface_view.interactiveCanvas
+
+        interactiveCanvas.deviceViewport?.apply {
+            val startUnitIndexX = floor(left).toInt()
+            val endUnitIndexX = ceil(right).toInt()
+            val startUnitIndexY = floor(top).toInt()
+            val endUnitIndexY = ceil(bottom).toInt() + 2
+
+            val rangeX = endUnitIndexX - startUnitIndexX
+            val rangeY = endUnitIndexY - startUnitIndexY
+
+            val paint = Paint()
+            paint.color = Color.BLACK
+
+            for (x in 0..rangeX) {
+                for (y in 0..rangeY) {
+                    paint.color = interactiveCanvas.arr[y + startUnitIndexY][x + startUnitIndexX]
+                    val rect = interactiveCanvas.getScreenSpaceForUnit(x + startUnitIndexX, y + startUnitIndexY)
+
+                    canvas.drawRect(rect, paint)
+                }
+            }
+        }
+    }
+
     // interactive canvas drawer callback
     override fun notifyRedraw() {
-        drawTestPixels(surface_view.holder)
+        drawInteractiveCanvas(surface_view.holder)
     }
 }

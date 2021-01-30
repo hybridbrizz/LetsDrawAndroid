@@ -11,10 +11,12 @@ class InteractiveCanvas {
     val rows = 2048
     val cols = 2048
 
-    var arr =  arrayOfNulls<Array<Int>>(rows)
+    val arr = Array(rows) { IntArray(cols) }
 
     val basePpu = 100
     var ppu = basePpu
+
+    val gridLineThreshold = 50
 
     var deviceViewport: RectF? = null
 
@@ -22,15 +24,16 @@ class InteractiveCanvas {
 
     init {
         for (i in 0 until rows - 1) {
-            var row = arrayOfNulls<Int>(cols)
             for (j in 0 until cols - 1) {
                 var color = Color.parseColor("#FF333333")
                 if ((i + j) % 2 == 0) {
                     color = Color.parseColor("#FF666666")
                 }
-                row[j] = color
+                arr[j][i] = color
             }
         }
+
+        arr[1024][1024] = Color.parseColor("#FF00FF00")
     }
 
     fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float) {
@@ -57,6 +60,17 @@ class InteractiveCanvas {
         deviceViewport?.apply {
             updateDeviceViewport(context, (left + right) / 2, (top + bottom) / 2)
         }
+    }
+
+    fun getScreenSpaceForUnit(x: Int, y: Int): RectF {
+        deviceViewport?.apply {
+            val offsetX = (x - left) * ppu
+            val offsetY = (y - top) * ppu
+
+            return RectF(offsetX, offsetY, offsetX + ppu, offsetY + ppu)
+        }
+
+        return RectF(0F, 0F, 0F, 0F)
     }
 
     fun translateBy(x: Float, y: Float) {
