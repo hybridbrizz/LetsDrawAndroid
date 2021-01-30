@@ -1,9 +1,14 @@
 package com.ericversteeg.liquidocean
 
 import android.graphics.*
+import android.os.Build
 import android.os.Bundle
 import android.view.*
+import android.widget.LinearLayout
+import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlin.math.ceil
@@ -24,8 +29,38 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         return view
     }
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        paint_panel_button.setOnClickListener {
+            paint_panel_button.visibility = View.GONE
+            paint_panel.visibility = View.VISIBLE
+
+            surface_view.startPainting()
+        }
+
+        paint_yes.setOnClickListener {
+            surface_view.endPainting(true)
+
+            paint_panel_button.visibility = View.VISIBLE
+            paint_panel.visibility = View.GONE
+        }
+
+        paint_no.setOnClickListener {
+            surface_view.endPainting(false)
+
+            paint_panel_button.visibility = View.VISIBLE
+            paint_panel.visibility = View.GONE
+        }
+
+        paint_indicator_view.setOnClickListener {
+            paint_indicator_view.setPaintColor(Color.argb(255, (Math.random() * 255).toInt(), (Math.random() * 255).toInt(), (Math.random() * 255).toInt()))
+        }
+
+        context?.apply {
+            // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
+        }
 
         surface_view.interactiveCanvas.drawCallbackListener = this
 

@@ -1,12 +1,22 @@
 package com.ericversteeg.liquidocean.view
 
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 
 class InteractiveCanvasView : SurfaceView {
+
+    enum class Mode {
+        EXPLORING,
+        PAINTING
+    }
+
+    private var mode = Mode.EXPLORING
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -33,18 +43,50 @@ class InteractiveCanvasView : SurfaceView {
         commonInit()
     }
 
-    var interactiveCanvas = InteractiveCanvas()
+    var interactiveCanvas = InteractiveCanvas(context)
 
     private fun commonInit() {
         interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
-        // Let the ScaleGestureDetector inspect all events.
-        mPanDetector.onTouchEvent(ev)
-        mScaleDetector.onTouchEvent(ev)
+
+        if (mode == Mode.EXPLORING) {
+            // Let the ScaleGestureDetector inspect all events.
+            mPanDetector.onTouchEvent(ev)
+            mScaleDetector.onTouchEvent(ev)
+        }
+        else if (mode == Mode.PAINTING) {
+            if(ev.action == MotionEvent.ACTION_UP) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                unitPoint?.apply {
+                    Log.i("Unit Tap", "Tapped on unit $unitPoint")
+
+                    interactiveCanvas.paintUnitOrUndo(unitPoint)
+                }
+            }
+        }
 
         return true
+    }
+
+    fun startPainting() {
+        mode = Mode.PAINTING
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun endPainting(accept: Boolean) {
+        if (!accept) {
+            interactiveCanvas.undoPendingPaint()
+        }
+
+        interactiveCanvas.clearRestorePoints()
+
+        interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        mode = Mode.EXPLORING
+
+        interactiveCanvas.saveUnits(context)
     }
 
     // panning

@@ -1,15 +1,25 @@
 package com.ericversteeg.liquidocean.model
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.Point
+import android.graphics.PointF
 import android.graphics.RectF
+import android.os.Build
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.WindowManager
+import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import org.json.JSONArray
+import java.io.File
+import kotlin.math.floor
 
-class InteractiveCanvas {
-    val rows = 2048
-    val cols = 2048
+class InteractiveCanvas(var context: Context) {
+    val rows = 512
+    val cols = 512
 
     val arr = Array(rows) { IntArray(cols) }
 
@@ -22,7 +32,28 @@ class InteractiveCanvas {
 
     var drawCallbackListener: InteractiveCanvasDrawerCallback? = null
 
+    var restorePoints = ArrayList<RestorePoint>()
+
     init {
+        val arrJson = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
+
+        if (arrJson == null) {
+            loadDefault()
+        }
+        else {
+            val outerArray = JSONArray(arrJson)
+
+            for (i in 0 until outerArray.length()) {
+                val innerArr = outerArray.getJSONArray(i)
+                for (j in 0 until innerArr.length()) {
+                    val color = innerArr.getInt(j)
+                    arr[i][j] = color
+                }
+            }
+        }
+    }
+
+    private fun loadDefault() {
         for (i in 0 until rows - 1) {
             for (j in 0 until cols - 1) {
                 var color = Color.parseColor("#FF333333")
@@ -33,7 +64,59 @@ class InteractiveCanvas {
             }
         }
 
-        arr[1024][1024] = Color.parseColor("#FF00FF00")
+        arr[rows / 2][cols / 2] = Color.parseColor("#FF00FF00")
+    }
+
+    fun screenPointToUnit(x: Float, y: Float): Point? {
+        deviceViewport?.apply {
+            val topViewportPx = top * ppu
+            val leftViewportPx = left * ppu
+
+            val absXPx = leftViewportPx + x
+            val absYPx = topViewportPx + y
+
+            val absX = absXPx / ppu
+            val absY = absYPx / ppu
+
+            return Point(floor(absX).toInt(), floor(absY).toInt())
+        }
+
+        return null
+    }
+
+    fun paintUnitOrUndo(unitPoint: Point) {
+        val restorePoint = unitInRestorePoints(unitPoint)
+        if (restorePoint != null) {
+            // undo
+            restorePoints.remove(restorePoint)
+            arr[unitPoint.y][unitPoint.x] = restorePoint.color
+        }
+        else {
+            restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x]))
+            arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+        }
+
+        drawCallbackListener?.notifyRedraw()
+    }
+
+    fun undoPendingPaint() {
+        for(restorePoint: RestorePoint in restorePoints) {
+            arr[restorePoint.point.y][restorePoint.point.x] = restorePoint.color
+        }
+    }
+
+    fun clearRestorePoints() {
+        restorePoints = ArrayList()
+    }
+
+    private fun unitInRestorePoints(unitPoint: Point): RestorePoint? {
+        for(restorePoint: RestorePoint in restorePoints) {
+            if (restorePoint.point.x == unitPoint.x && restorePoint.point.y == unitPoint.y) {
+                return restorePoint
+            }
+        }
+
+        return null
     }
 
     fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float) {
@@ -106,4 +189,15 @@ class InteractiveCanvas {
 
         drawCallbackListener?.notifyRedraw()
     }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun saveUnits(context: Context) {
+        val jsonArr = JSONArray(arr)
+
+        val ed = SessionSettings.instance.getSharedPrefs(context).edit()
+        ed.putString("arr", jsonArr.toString())
+        ed.commit()
+    }
+
+    class RestorePoint(var point: Point, var color: Int)
 }
