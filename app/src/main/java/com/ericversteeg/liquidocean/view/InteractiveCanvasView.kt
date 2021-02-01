@@ -9,15 +9,19 @@ import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintSet
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import org.json.JSONArray
+import kotlin.math.min
 
 class InteractiveCanvasView : SurfaceView {
 
     enum class Mode {
         EXPLORING,
-        PAINTING
+        PAINTING,
+        PAINT_SELECTION
     }
 
     private var mode = Mode.EXPLORING
+    private var lastMode = Mode.EXPLORING
 
     var undo = false
 
@@ -96,6 +100,15 @@ class InteractiveCanvasView : SurfaceView {
                 }
             }
         }
+        else if (mode == Mode.PAINT_SELECTION) {
+            if (ev.action == MotionEvent.ACTION_DOWN) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+                unitPoint?.apply {
+                    SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
+                    interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                }
+            }
+        }
 
         return true
     }
@@ -111,6 +124,10 @@ class InteractiveCanvasView : SurfaceView {
             SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
             SessionSettings.instance.dropsUsed -= interactiveCanvas.restorePoints.size
         }
+        else {
+            // before restore points are cleared
+            interactiveCanvas.commitPixels()
+        }
 
         interactiveCanvas.clearRestorePoints()
 
@@ -118,6 +135,14 @@ class InteractiveCanvasView : SurfaceView {
         mode = Mode.EXPLORING
 
         interactiveCanvas.saveUnits(context)
+    }
+
+    fun startPaintSelection() {
+        mode = Mode.PAINT_SELECTION
+    }
+
+    fun endPaintSelection() {
+        mode = Mode.PAINTING
     }
 
     // panning

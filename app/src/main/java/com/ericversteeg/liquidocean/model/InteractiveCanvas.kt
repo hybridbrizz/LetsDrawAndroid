@@ -11,10 +11,17 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import org.json.JSONArray
 import java.io.File
+import java.util.HashMap
 import kotlin.math.floor
 
 class InteractiveCanvas(var context: Context) {
@@ -35,22 +42,65 @@ class InteractiveCanvas(var context: Context) {
     var restorePoints = ArrayList<RestorePoint>()
 
     init {
-        val arrJson = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
+        val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
 
-        if (arrJson == null) {
-            loadDefault()
+        if (arrJsonStr == null) {
+            // loadDefault()
+            downloadCanvasPixels(context)
         }
         else {
-            val outerArray = JSONArray(arrJson)
+            initPixels(arrJsonStr)
+        }
+    }
 
-            for (i in 0 until outerArray.length()) {
-                val innerArr = outerArray.getJSONArray(i)
-                for (j in 0 until innerArr.length()) {
-                    val color = innerArr.getInt(j)
-                    arr[i][j] = color
-                }
+    private fun initPixels(arrJsonStr: String) {
+        val outerArray = JSONArray(arrJsonStr)
+
+        for (i in 0 until outerArray.length()) {
+            val innerArr = outerArray.getJSONArray(i)
+            for (j in 0 until innerArr.length()) {
+                val color = innerArr.getInt(j)
+                arr[i][j] = color
             }
         }
+
+        drawCallbackListener?.notifyRedraw()
+    }
+
+    private fun downloadCanvasPixels(context: Context) {
+        val requestQueue = Volley.newRequestQueue(context)
+
+        val jsonObjRequest: StringRequest = object : StringRequest(
+            Method.GET,
+            "http://192.168.200.69:5000/api/v1/canvas/pixels",
+            Response.Listener { response ->
+                initPixels(response)
+            },
+            Response.ErrorListener { error ->
+                error.message?.apply {
+                    Log.i("Error", this)
+                }
+            }) {
+            override fun getBodyContentType(): String {
+                return "application/x-www-form-urlencoded; charset=UTF-8"
+            }
+
+            override fun getParams(): Map<String, String> {
+                val params: MutableMap<String, String> = HashMap()
+                val pixelData = SessionSettings.instance.getSharedPrefs(context).getString(
+                    "arr",
+                    ""
+                )
+
+                pixelData?.apply {
+                    params["arr"] = this
+                }
+
+                return params
+            }
+        }
+
+        requestQueue.add(jsonObjRequest)
     }
 
     private fun loadDefault() {
@@ -89,7 +139,7 @@ class InteractiveCanvas(var context: Context) {
         if (mode == 0) {
             if (restorePoint == null && SessionSettings.instance.dropsAmt > 0) {
                 // paint
-                restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x]))
+                restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x], SessionSettings.instance.paintColor))
                 arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
                 SessionSettings.instance.dropsUsed += 1
@@ -108,6 +158,36 @@ class InteractiveCanvas(var context: Context) {
         }
 
         drawCallbackListener?.notifyRedraw()
+    }
+
+    // sends pixel updates to the web server
+    fun commitPixels() {
+        val requestQueue = Volley.newRequestQueue(context)
+
+        val arr = arrayOfNulls<Map<String, Int>>(restorePoints.size)
+
+        for((index, restorePoint) in restorePoints.withIndex()) {
+            val map = HashMap<String, Int>()
+            map["id"] = restorePoint.point.y * cols + restorePoint.point.x
+            map["color"] = restorePoint.newColor
+
+            arr[index] = map
+        }
+
+        val jsonArr = JSONArray(arr)
+
+        val request = JsonArrayRequest(
+            Request.Method.POST,
+            "http://192.168.200.69:5000/api/v1/canvas/pixels",
+            jsonArr,
+            { response ->
+                Log.i("Foo","Success")
+            },
+            { error ->
+                Log.i("Error", error.message!!)
+            })
+
+        requestQueue.add(request)
     }
 
     fun undoPendingPaint() {
@@ -210,5 +290,5 @@ class InteractiveCanvas(var context: Context) {
         ed.apply()
     }
 
-    class RestorePoint(var point: Point, var color: Int)
+    class RestorePoint(var point: Point, var color: Int, var newColor: Int)
 }

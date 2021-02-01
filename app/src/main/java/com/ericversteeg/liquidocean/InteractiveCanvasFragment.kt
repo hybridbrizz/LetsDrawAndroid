@@ -1,14 +1,20 @@
 package com.ericversteeg.liquidocean
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.*
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
+import com.android.volley.AuthFailureError
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
-import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import top.defaults.colorpicker.ColorObserver
@@ -49,10 +55,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             SessionSettings.instance.load(this)
         }
 
-        Timer().schedule(object: TimerTask() {
+        Timer().schedule(object : TimerTask() {
             override fun run() {
-                val millisSinceStart = System.currentTimeMillis() - SessionSettings.instance.startTimeMillis
-                SessionSettings.instance.dropsAmt = 250 + (millisSinceStart / 1000 / 60 / 5).toInt() - SessionSettings.instance.dropsUsed
+                val millisSinceStart =
+                    System.currentTimeMillis() - SessionSettings.instance.startTimeMillis
+                SessionSettings.instance.dropsAmt =
+                    250 + (millisSinceStart / 1000 / 60 / 5).toInt() - SessionSettings.instance.dropsUsed
 
                 drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
             }
@@ -63,7 +71,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        color_picker_view.subscribe(object: ColorObserver {
+        color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
                 paint_indicator_view.setPaintColor(color)
 
@@ -108,6 +116,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                 paint_yes.visibility = View.VISIBLE
 
                 paint_color_accept_image.visibility = View.GONE
+
+                surface_view.endPaintSelection()
             }
             else {
                 surface_view.endPainting(false)
@@ -131,6 +141,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             paint_color_accept_image.visibility = View.VISIBLE
 
             paint_yes.visibility = View.GONE
+
+            surface_view.startPaintSelection()
         }
 
         paint_color_accept_image.setOnClickListener {
@@ -142,6 +154,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             paint_yes.visibility = View.VISIBLE
 
             paint_color_accept_image.visibility = View.GONE
+
+            surface_view.endPaintSelection()
         }
 
         context?.apply {
@@ -296,5 +310,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     // interactive canvas drawer callback
     override fun notifyRedraw() {
         drawInteractiveCanvas(surface_view.holder)
+    }
+
+    override fun notifyPaintColorUpdate(color: Int) {
+        paint_indicator_view.setPaintColor(color)
     }
 }

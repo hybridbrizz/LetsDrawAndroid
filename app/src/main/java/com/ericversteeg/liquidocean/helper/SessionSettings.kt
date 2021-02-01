@@ -33,6 +33,10 @@ class SessionSettings {
         startTimeMillis = getSharedPrefs(context).getLong("start_time", System.currentTimeMillis())
     }
 
+    fun loadPixelData() {
+        
+    }
+
     companion object {
         val instance = SessionSettings()
     }
