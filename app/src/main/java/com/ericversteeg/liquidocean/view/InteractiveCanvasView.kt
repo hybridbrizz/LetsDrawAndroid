@@ -133,8 +133,6 @@ class InteractiveCanvasView : SurfaceView {
 
         interactiveCanvas.drawCallbackListener?.notifyRedraw()
         mode = Mode.EXPLORING
-
-        interactiveCanvas.saveUnits(context)
     }
 
     fun startPaintSelection() {

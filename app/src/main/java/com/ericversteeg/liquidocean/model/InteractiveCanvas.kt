@@ -1,10 +1,9 @@
 package com.ericversteeg.liquidocean.model
 
+import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.PointF
 import android.graphics.RectF
 import android.os.Build
 import android.util.DisplayMetrics
@@ -14,15 +13,27 @@ import androidx.annotation.RequiresApi
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.google.gson.Gson
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
 import org.json.JSONArray
-import java.io.File
-import java.util.HashMap
+import org.json.JSONException
+import org.json.JSONObject
+import java.net.URI
+import java.net.URISyntaxException
+import java.util.*
+import javax.net.ssl.HostnameVerifier
+import javax.net.ssl.SSLSession
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.set
 import kotlin.math.floor
+
 
 class InteractiveCanvas(var context: Context) {
     val rows = 512
@@ -41,6 +52,11 @@ class InteractiveCanvas(var context: Context) {
 
     var restorePoints = ArrayList<RestorePoint>()
 
+    var gson = Gson()
+
+    // socket.io websocket for handling real-time pixel updates
+    private lateinit var socket: Socket
+
     init {
         val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
 
@@ -51,6 +67,53 @@ class InteractiveCanvas(var context: Context) {
         else {
             initPixels(arrJsonStr)
         }
+
+        try {
+            socket = IO.socket("http://192.168.200.69:5010")
+
+            socket.connect()
+
+            socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+                Log.i("okay", it.toString())
+
+                //val map = HashMap<String, String>()
+                //map["data"] = "connected to the SocketServer android..."
+                //socket.emit("my_event", gson.toJson(map))
+            })
+
+            socket.on(Socket.EVENT_CONNECT_ERROR) {
+                Log.i("Error", it.toString())
+            }
+
+            // socket.emit("my_event", "test")
+
+            registerForSocketEvents(socket)
+        } catch (e: URISyntaxException) {
+
+        }
+    }
+
+    private fun registerForSocketEvents(socket: Socket) {
+        socket.on("pixels_commit", object : Emitter.Listener {
+            override fun call(vararg args: Any) {
+                (context as Activity).runOnUiThread(Runnable {
+                    val pixelsJsonArr = args[0] as JSONArray
+                    for (i in 0 until pixelsJsonArr.length()) {
+                        val pixelObj = pixelsJsonArr.get(i) as JSONObject
+
+                        // update color
+                        val unit1DIndex = pixelObj.getInt("id") - 1
+
+                        val y = unit1DIndex / cols
+                        val x = unit1DIndex % cols
+
+                        arr[y][x] = pixelObj.getInt("color")
+                    }
+
+                    drawCallbackListener?.notifyRedraw()
+                })
+            }
+        })
     }
 
     private fun initPixels(arrJsonStr: String) {
@@ -139,7 +202,13 @@ class InteractiveCanvas(var context: Context) {
         if (mode == 0) {
             if (restorePoint == null && SessionSettings.instance.dropsAmt > 0) {
                 // paint
-                restorePoints.add(RestorePoint(unitPoint, arr[unitPoint.y][unitPoint.x], SessionSettings.instance.paintColor))
+                restorePoints.add(
+                    RestorePoint(
+                        unitPoint,
+                        arr[unitPoint.y][unitPoint.x],
+                        SessionSettings.instance.paintColor
+                    )
+                )
                 arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
                 SessionSettings.instance.dropsUsed += 1
@@ -168,7 +237,7 @@ class InteractiveCanvas(var context: Context) {
 
         for((index, restorePoint) in restorePoints.withIndex()) {
             val map = HashMap<String, Int>()
-            map["id"] = restorePoint.point.y * cols + restorePoint.point.x
+            map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
             map["color"] = restorePoint.newColor
 
             arr[index] = map
@@ -176,18 +245,20 @@ class InteractiveCanvas(var context: Context) {
 
         val jsonArr = JSONArray(arr)
 
-        val request = JsonArrayRequest(
+        socket.emit("pixels_event", jsonArr)
+
+        /*val request = JsonArrayRequest(
             Request.Method.POST,
             "http://192.168.200.69:5000/api/v1/canvas/pixels",
             jsonArr,
             { response ->
-                Log.i("Foo","Success")
+                Log.i("Foo", "Success")
             },
             { error ->
                 Log.i("Error", error.message!!)
             })
 
-        requestQueue.add(request)
+        requestQueue.add(request)*/
     }
 
     fun undoPendingPaint() {

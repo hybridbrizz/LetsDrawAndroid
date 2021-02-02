@@ -44,15 +44,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         super.onPause()
 
         context?.apply {
-            SessionSettings.instance.save(this)
+            SessionSettings.instance.save(this, surface_view.interactiveCanvas)
         }
     }
 
     override fun onResume() {
         super.onResume()
 
+        val sv = surface_view
+
         context?.apply {
-            SessionSettings.instance.load(this)
+            SessionSettings.instance.load(this, surface_view.interactiveCanvas)
         }
 
         Timer().schedule(object : TimerTask() {
