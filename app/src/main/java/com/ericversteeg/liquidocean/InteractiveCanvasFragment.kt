@@ -1,24 +1,26 @@
 package com.ericversteeg.liquidocean
 
-import android.content.Context
-import android.content.SharedPreferences
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
-import com.android.volley.AuthFailureError
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import org.json.JSONObject
 import top.defaults.colorpicker.ColorObserver
-import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -55,18 +57,69 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
         context?.apply {
             SessionSettings.instance.load(this, surface_view.interactiveCanvas)
-        }
-
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                val millisSinceStart =
-                    System.currentTimeMillis() - SessionSettings.instance.startTimeMillis
-                SessionSettings.instance.dropsAmt =
-                    250 + (millisSinceStart / 1000 / 60 / 5).toInt() - SessionSettings.instance.dropsUsed
-
-                drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+            if (SessionSettings.instance.sentUniqueId) {
+                getPaintQty()
             }
-        }, 0, 1000 * 60 * 5)
+            else {
+                sendDeviceId()
+            }
+        }
+    }
+
+    private fun sendDeviceId() {
+        context?.apply {
+            val uniqueId = SessionSettings.instance.uniqueId
+
+            uniqueId?.apply {
+                val requestQueue = Volley.newRequestQueue(context)
+
+                val requestParams = HashMap<String, String>()
+
+                requestParams["uuid"] = uniqueId
+
+                val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+                val request = JsonObjectRequest(
+                    Request.Method.POST,
+                    "http://192.168.200.69:5000/api/v1/devices/register",
+                    paramsJson,
+                    { response ->
+                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+
+                        SessionSettings.instance.sentUniqueId = true
+                    },
+                    { error ->
+                        Log.i("Error", error.message!!)
+                    })
+
+                requestQueue.add(request)
+            }
+        }
+    }
+
+    private fun getPaintQty() {
+        context?.apply {
+            val uniqueId = SessionSettings.instance.uniqueId
+
+            uniqueId?.apply {
+                val requestQueue = Volley.newRequestQueue(context)
+
+                val request = JsonObjectRequest(
+                    Request.Method.GET,
+                    "http://192.168.200.69:5000/api/v1/devices/$uniqueId/paint",
+                    null,
+                    { response ->
+                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+                    },
+                    { error ->
+                        Log.i("Error", error.message!!)
+                    })
+
+                requestQueue.add(request)
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -88,12 +141,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         })
 
         paint_panel_button.setOnClickListener {
-            paint_panel_button.visibility = View.GONE
             paint_panel.visibility = View.VISIBLE
+            paint_panel_button.visibility = View.GONE
+
 
             drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
 
-            paint_warning_frame.visibility = View.VISIBLE
+
+            paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
+                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
+                    AccelerateDecelerateInterpolator()
+                ).start()
+                paint_warning_frame.visibility = View.VISIBLE
+                paint_warning_frame.alpha = 0F
+                paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+            }.start()
 
             surface_view.startPainting()
         }
@@ -277,9 +339,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
         interactiveCanvas.deviceViewport?.apply {
             val startUnitIndexX = floor(left).toInt()
-            val endUnitIndexX = ceil(right).toInt() + 2
+            val endUnitIndexX = ceil(right).toInt()
             val startUnitIndexY = floor(top).toInt()
-            val endUnitIndexY = ceil(bottom).toInt() + 2
+            val endUnitIndexY = ceil(bottom).toInt()
+
+            val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
 
             val rangeX = endUnitIndexX - startUnitIndexX
             val rangeY = endUnitIndexY - startUnitIndexY
@@ -315,6 +379,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     }
 
     override fun notifyPaintColorUpdate(color: Int) {
+        color_picker_view.setInitialColor(color)
         paint_indicator_view.setPaintColor(color)
+    }
+
+    override fun notifyPaintQtyUpdate(qty: Int) {
+        drops_amt_text.text = qty.toString()
     }
 }

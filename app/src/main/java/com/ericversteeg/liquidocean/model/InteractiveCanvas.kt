@@ -10,6 +10,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonArrayRequest
@@ -114,6 +115,22 @@ class InteractiveCanvas(var context: Context) {
                 })
             }
         })
+
+        socket.on("paint_qty") {
+            val deviceJsonObject = it[0] as JSONObject
+            SessionSettings.instance.dropsAmt = deviceJsonObject.getInt("paint_qty")
+            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
+        }
+
+        socket.on("add_paint") {
+            SessionSettings.instance.dropsAmt++
+            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
+        }
+
+        socket.on("add_paint_canvas_setup") {
+            SessionSettings.instance.dropsAmt += 50
+            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
+        }
     }
 
     private fun initPixels(arrJsonStr: String) {
@@ -163,6 +180,8 @@ class InteractiveCanvas(var context: Context) {
             }
         }
 
+        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 3, 1.0f)
+
         requestQueue.add(jsonObjRequest)
     }
 
@@ -211,7 +230,6 @@ class InteractiveCanvas(var context: Context) {
                 )
                 arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
-                SessionSettings.instance.dropsUsed += 1
                 SessionSettings.instance.dropsAmt -= 1
             }
         }
@@ -221,7 +239,6 @@ class InteractiveCanvas(var context: Context) {
                 restorePoints.remove(restorePoint)
                 arr[unitPoint.y][unitPoint.x] = restorePoint.color
 
-                SessionSettings.instance.dropsUsed -= 1
                 SessionSettings.instance.dropsAmt += 1
             }
         }
@@ -243,9 +260,13 @@ class InteractiveCanvas(var context: Context) {
             arr[index] = map
         }
 
+        val reqObj = JSONObject()
         val jsonArr = JSONArray(arr)
 
-        socket.emit("pixels_event", jsonArr)
+        reqObj.put("uuid", SessionSettings.instance.uniqueId)
+        reqObj.put("pixels", jsonArr)
+
+        socket.emit("pixels_event", reqObj)
 
         /*val request = JsonArrayRequest(
             Request.Method.POST,
@@ -285,7 +306,7 @@ class InteractiveCanvas(var context: Context) {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        windowManager.defaultDisplay.getRealMetrics(displayMetrics)
 
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels

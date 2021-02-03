@@ -122,7 +122,6 @@ class InteractiveCanvasView : SurfaceView {
         if (!accept) {
             interactiveCanvas.undoPendingPaint()
             SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
-            SessionSettings.instance.dropsUsed -= interactiveCanvas.restorePoints.size
         }
         else {
             // before restore points are cleared
