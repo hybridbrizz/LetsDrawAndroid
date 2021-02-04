@@ -10,17 +10,17 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.plattysoft.leonids.ParticleSystem
+import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorObserver
-import kotlin.collections.HashMap
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -30,6 +30,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     var scaleFactor = 1f
 
     var initalColor = 0
+
+    lateinit var topLeftParticleSystem: ParticleSystem
+    lateinit var topRightParticleSystem: ParticleSystem
+    lateinit var bottomLeftParticleSystem: ParticleSystem
+    lateinit var bottomRightParticleSystem: ParticleSystem
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -85,7 +90,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                     paramsJson,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
 
                         SessionSettings.instance.sentUniqueId = true
                     },
@@ -111,10 +116,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                     null,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
                     },
                     { error ->
-                        Log.i("Error", error.message!!)
+                        error.message?.apply {
+                            Log.i("Error", this)
+                        }
                     })
 
                 requestQueue.add(request)
@@ -140,18 +147,27 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
             }
         })
 
+        paint_panel.setOnClickListener {
+
+        }
+
         paint_panel_button.setOnClickListener {
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
 
 
-            drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+            drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
 
 
             paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
                 paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
                     AccelerateDecelerateInterpolator()
-                ).start()
+                ).withEndAction {
+
+                    startParticleEmitters()
+
+                }.start()
+
                 paint_warning_frame.visibility = View.VISIBLE
                 paint_warning_frame.alpha = 0F
                 paint_warning_frame.animate().alpha(1F).setDuration(50).start()
@@ -163,15 +179,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         paint_yes.setOnClickListener {
             surface_view.endPainting(true)
 
-            paint_panel_button.visibility = View.VISIBLE
-            paint_panel.visibility = View.GONE
+            paint_yes.visibility = View.GONE
+            paint_no.visibility = View.GONE
+            close_paint_panel.visibility = View.VISIBLE
 
-            paint_warning_frame.visibility = View.GONE
+            surface_view.startPainting()
         }
 
         paint_no.setOnClickListener {
             if (color_picker_frame.visibility == View.VISIBLE) {
-                DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
                 paint_indicator_view.setPaintColor(initalColor)
                 color_picker_frame.visibility = View.GONE
 
@@ -182,44 +198,97 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                 paint_color_accept_image.visibility = View.GONE
 
                 surface_view.endPaintSelection()
+
+                paint_no.setColorFilter(Color.parseColor("#FA3A47"))
+
+                if (surface_view.interactiveCanvas.restorePoints.size == 0) {
+                    paint_yes.visibility = View.GONE
+                    paint_no.visibility = View.GONE
+                    close_paint_panel.visibility = View.VISIBLE
+                }
+                else {
+                    paint_yes.visibility = View.VISIBLE
+                    paint_no.visibility = View.VISIBLE
+                    close_paint_panel.visibility = View.GONE
+                }
+
+                startParticleEmitters()
             }
             else {
                 surface_view.endPainting(false)
 
-                paint_panel_button.visibility = View.VISIBLE
-                paint_panel.visibility = View.GONE
+                paint_yes.visibility = View.GONE
+                paint_no.visibility = View.GONE
+                close_paint_panel.visibility = View.VISIBLE
 
-                paint_warning_frame.visibility = View.GONE
-
-                paint_yes.visibility = View.VISIBLE
+                surface_view.startPainting()
             }
         }
 
-        paint_indicator_view.setOnClickListener {
-            color_picker_frame.visibility = View.VISIBLE
-            initalColor = SessionSettings.instance.paintColor
-            color_picker_view.setInitialColor(initalColor)
+        close_paint_panel.setOnClickListener {
+            surface_view.endPainting(false)
 
+            paint_panel.visibility = View.GONE
             paint_warning_frame.visibility = View.GONE
 
-            paint_color_accept_image.visibility = View.VISIBLE
+            paint_panel_button.visibility = View.VISIBLE
 
-            paint_yes.visibility = View.GONE
-
-            surface_view.startPaintSelection()
+            topLeftParticleSystem.stopEmitting()
+            topRightParticleSystem.stopEmitting()
+            bottomLeftParticleSystem.stopEmitting()
+            bottomRightParticleSystem.stopEmitting()
         }
 
-        paint_color_accept_image.setOnClickListener {
-            DrawableCompat.setTint(paint_yes.drawable, Color.WHITE)
-            color_picker_frame.visibility = View.GONE
+        paint_indicator_view.setOnClickListener {
+            // accept selected color
+            if (color_picker_frame.visibility == View.VISIBLE) {
+                color_picker_frame.visibility = View.GONE
 
-            paint_warning_frame.visibility = View.VISIBLE
+                paint_warning_frame.visibility = View.VISIBLE
 
-            paint_yes.visibility = View.VISIBLE
+                paint_yes.visibility = View.VISIBLE
 
-            paint_color_accept_image.visibility = View.GONE
+                paint_color_accept_image.visibility = View.GONE
 
-            surface_view.endPaintSelection()
+                surface_view.endPaintSelection()
+
+                paint_no.setColorFilter(Color.parseColor("#FA3A47"))
+
+                if (surface_view.interactiveCanvas.restorePoints.size == 0) {
+                    paint_yes.visibility = View.GONE
+                    paint_no.visibility = View.GONE
+                    close_paint_panel.visibility = View.VISIBLE
+                }
+                else {
+                    paint_yes.visibility = View.VISIBLE
+                    paint_no.visibility = View.VISIBLE
+                    close_paint_panel.visibility = View.GONE
+                }
+
+                startParticleEmitters()
+            }
+            // start color selection mode
+            else {
+                color_picker_frame.visibility = View.VISIBLE
+                initalColor = SessionSettings.instance.paintColor
+                color_picker_view.setInitialColor(initalColor)
+
+                paint_warning_frame.visibility = View.GONE
+
+                paint_color_accept_image.visibility = View.VISIBLE
+
+                paint_yes.visibility = View.GONE
+                close_paint_panel.visibility = View.GONE
+                paint_no.visibility = View.VISIBLE
+                paint_no.setColorFilter(Color.parseColor("#FFFFFF"))
+
+                surface_view.startPaintSelection()
+
+                topLeftParticleSystem.stopEmitting()
+                topRightParticleSystem.stopEmitting()
+                bottomLeftParticleSystem.stopEmitting()
+                bottomRightParticleSystem.stopEmitting()
+            }
         }
 
         context?.apply {
@@ -259,7 +328,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
-        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString()
+        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
 
         val paint = Paint()
         paint.color = Color.parseColor("#FFFFFFFF")
@@ -373,6 +442,36 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         }
     }
 
+    private fun startParticleEmitters() {
+        topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+        topLeftParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
+        topLeftParticleSystem.setRotationSpeed(144f)
+        topLeftParticleSystem.setAcceleration(0.00005f, 90)
+        topLeftParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
+        topLeftParticleSystem.emit(top_left_anchor, 16)
+
+        topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+        topRightParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
+        topRightParticleSystem.setRotationSpeed(144f)
+        topRightParticleSystem.setAcceleration(0.00005f, 90)
+        topRightParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
+        topRightParticleSystem.emit(top_right_anchor, 16)
+
+        bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+        bottomLeftParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
+        bottomLeftParticleSystem.setRotationSpeed(144f)
+        bottomLeftParticleSystem.setAcceleration(0.00005f, 90)
+        bottomLeftParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
+        bottomLeftParticleSystem.emit(bottom_left_anchor, 16)
+
+        bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+        bottomRightParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
+        bottomRightParticleSystem.setRotationSpeed(144f)
+        bottomRightParticleSystem.setAcceleration(0.00005f, 90)
+        bottomRightParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
+        bottomRightParticleSystem.emit(bottom_right_anchor, 16)
+    }
+
     // interactive canvas drawer callback
     override fun notifyRedraw() {
         drawInteractiveCanvas(surface_view.holder)
@@ -384,6 +483,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     }
 
     override fun notifyPaintQtyUpdate(qty: Int) {
-        drops_amt_text.text = qty.toString()
+        drops_amt_text.text = qty.toString() + "/1000"
+    }
+
+    override fun notifyPaintingStarted() {
+        close_paint_panel.visibility = View.GONE
+        paint_yes.visibility = View.VISIBLE
+        paint_no.visibility = View.VISIBLE
+    }
+
+    override fun notifyPaintingEnded() {
+        close_paint_panel.visibility = View.VISIBLE
+        paint_yes.visibility = View.GONE
+        paint_no.visibility = View.GONE
     }
 }

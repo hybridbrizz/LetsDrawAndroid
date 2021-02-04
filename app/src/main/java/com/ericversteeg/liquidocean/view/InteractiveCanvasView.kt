@@ -8,11 +8,12 @@ import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintSet
 import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import org.json.JSONArray
 import kotlin.math.min
 
-class InteractiveCanvasView : SurfaceView {
+class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
     enum class Mode {
         EXPLORING,
@@ -24,6 +25,9 @@ class InteractiveCanvasView : SurfaceView {
     private var lastMode = Mode.EXPLORING
 
     var undo = false
+
+    var oldScaleFactor = 0F
+    var oldPpu = 0
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -53,6 +57,7 @@ class InteractiveCanvasView : SurfaceView {
     var interactiveCanvas = InteractiveCanvas(context)
 
     private fun commonInit() {
+        interactiveCanvas.scaleCallbackListener = this
         interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
     }
 
@@ -82,6 +87,13 @@ class InteractiveCanvasView : SurfaceView {
                         interactiveCanvas.paintUnitOrUndo(unitPoint)
                     }
                 }
+
+                if (interactiveCanvas.restorePoints.size == 1) {
+                    interactiveCanvas.drawCallbackListener?.notifyPaintingStarted()
+                }
+                else if (interactiveCanvas.restorePoints.size == 0) {
+                    interactiveCanvas.drawCallbackListener?.notifyPaintingEnded()
+                }
             }
             else if(ev.action == MotionEvent.ACTION_MOVE) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
@@ -97,6 +109,13 @@ class InteractiveCanvasView : SurfaceView {
                         // paint
                         interactiveCanvas.paintUnitOrUndo(unitPoint)
                     }
+                }
+
+                if (interactiveCanvas.restorePoints.size == 1) {
+                    interactiveCanvas.drawCallbackListener?.notifyPaintingStarted()
+                }
+                else if (interactiveCanvas.restorePoints.size == 0) {
+                    interactiveCanvas.drawCallbackListener?.notifyPaintingEnded()
                 }
             }
         }
@@ -168,13 +187,16 @@ class InteractiveCanvasView : SurfaceView {
     private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
+            oldScaleFactor = mScaleFactor
             mScaleFactor *= detector.scaleFactor
 
             // Don't let the object get too small or too large.
             mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 10.0f))
 
+            oldPpu = interactiveCanvas.ppu
             interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
-            interactiveCanvas.updateDeviceViewport(context)
+
+            interactiveCanvas.updateDeviceViewport(context, true)
             interactiveCanvas.drawCallbackListener?.notifyRedraw()
 
             return true
@@ -182,4 +204,9 @@ class InteractiveCanvasView : SurfaceView {
     }
 
     private val mScaleDetector = ScaleGestureDetector(context, scaleListener)
+
+    override fun notifyScaleCancelled() {
+        mScaleFactor = oldScaleFactor
+        interactiveCanvas.ppu = oldPpu
+    }
 }

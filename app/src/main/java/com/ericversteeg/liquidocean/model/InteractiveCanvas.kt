@@ -18,6 +18,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
 import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -33,6 +34,7 @@ import javax.net.ssl.SSLSession
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
+import kotlin.math.abs
 import kotlin.math.floor
 
 
@@ -50,6 +52,7 @@ class InteractiveCanvas(var context: Context) {
     var deviceViewport: RectF? = null
 
     var drawCallbackListener: InteractiveCanvasDrawerCallback? = null
+    var scaleCallbackListener: InteractiveCanvasScaleCallback? = null
 
     var restorePoints = ArrayList<RestorePoint>()
 
@@ -129,6 +132,9 @@ class InteractiveCanvas(var context: Context) {
 
         socket.on("add_paint_canvas_setup") {
             SessionSettings.instance.dropsAmt += 50
+            if (SessionSettings.instance.dropsAmt > 1000) {
+                SessionSettings.instance.dropsAmt = 1000
+            }
             drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
         }
     }
@@ -302,7 +308,7 @@ class InteractiveCanvas(var context: Context) {
         return null
     }
 
-    fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float) {
+    fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float, fromScale: Boolean = false) {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
@@ -314,17 +320,25 @@ class InteractiveCanvas(var context: Context) {
         val canvasCenterXPx = (canvasCenterX * ppu).toInt()
         val canvasCenterYPx = (canvasCenterY * ppu).toInt()
 
-        val top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
-        val bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
-        val left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
-        val right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
+        var top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
+        var bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
+        var left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
+        var right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
+
+
+        if (top < 0 || bottom > rows || left < 0 || right > cols) {
+            if (fromScale) {
+                scaleCallbackListener?.notifyScaleCancelled()
+                return
+            }
+        }
 
         deviceViewport = RectF(left, top, right, bottom)
     }
 
-    fun updateDeviceViewport(context: Context) {
+    fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
         deviceViewport?.apply {
-            updateDeviceViewport(context, (left + right) / 2, (top + bottom) / 2)
+            updateDeviceViewport(context, (left + right) / 2, (top + bottom) / 2, fromScale)
         }
     }
 

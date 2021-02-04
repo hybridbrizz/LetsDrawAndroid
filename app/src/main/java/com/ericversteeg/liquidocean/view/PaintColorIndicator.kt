@@ -65,22 +65,24 @@ class PaintColorIndicator : View {
             it.drawCircle(width / 2F, height / 2F, width / 3F, paint)
 
             if (Utils.isColorDark(paint.color)) {
-                // inner border
-                it.drawCircle(
-                    width / 2F,
-                    height / 2F,
-                    (width / 3F) - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                    borderPaint
-                )
 
-                // outer border
-                it.drawCircle(
-                    width / 2F,
-                    height / 2F,
-                    (width / 3F) + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                    borderPaint
-                )
             }
+
+            // inner border
+            it.drawCircle(
+                width / 2F,
+                height / 2F,
+                (width / 3F) - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                borderPaint
+            )
+
+            // outer border
+            it.drawCircle(
+                width / 2F,
+                height / 2F,
+                (width / 3F) + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                borderPaint
+            )
 
             it.restore()
         }

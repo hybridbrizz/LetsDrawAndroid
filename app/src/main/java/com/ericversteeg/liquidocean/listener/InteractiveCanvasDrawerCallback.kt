@@ -5,4 +5,7 @@ interface InteractiveCanvasDrawerCallback {
 
     fun notifyPaintColorUpdate(color: Int)
     fun notifyPaintQtyUpdate(qty: Int)
+
+    fun notifyPaintingStarted()
+    fun notifyPaintingEnded()
 }
