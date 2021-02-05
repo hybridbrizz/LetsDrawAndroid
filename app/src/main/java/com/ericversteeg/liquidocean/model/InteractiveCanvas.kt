@@ -48,6 +48,7 @@ class InteractiveCanvas(var context: Context) {
     var ppu = basePpu
 
     val gridLineThreshold = 50
+    val initialScaleFactor = 0.25f
 
     var deviceViewport: RectF? = null
 
@@ -122,12 +123,10 @@ class InteractiveCanvas(var context: Context) {
         socket.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
             SessionSettings.instance.dropsAmt = deviceJsonObject.getInt("paint_qty")
-            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
         }
 
         socket.on("add_paint") {
             SessionSettings.instance.dropsAmt++
-            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
         }
 
         socket.on("add_paint_canvas_setup") {
@@ -135,7 +134,6 @@ class InteractiveCanvas(var context: Context) {
             if (SessionSettings.instance.dropsAmt > 1000) {
                 SessionSettings.instance.dropsAmt = 1000
             }
-            drawCallbackListener?.notifyPaintQtyUpdate(SessionSettings.instance.dropsAmt)
         }
     }
 

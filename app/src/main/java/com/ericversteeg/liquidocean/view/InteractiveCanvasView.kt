@@ -58,6 +58,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
     private fun commonInit() {
         interactiveCanvas.scaleCallbackListener = this
+
+        mScaleFactor = interactiveCanvas.initialScaleFactor
+        interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
+
         interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
     }
 

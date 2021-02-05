@@ -16,6 +16,9 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.view.PaintQuantityBar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
@@ -25,7 +28,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener {
 
     var scaleFactor = 1f
 
@@ -90,8 +93,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                     paramsJson,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
-
                         SessionSettings.instance.sentUniqueId = true
                     },
                     { error ->
@@ -116,7 +117,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                     null,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
                     },
                     { error ->
                         error.message?.apply {
@@ -132,6 +132,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
+        SessionSettings.instance.paintQtyListeners.add(this)
+
+        paint_yes.type = ActionButtonView.Type.YES
+        paint_yes.colorMode = ActionButtonView.ColorMode.COLOR
+
+        paint_no.type = ActionButtonView.Type.NO
+        paint_no.colorMode = ActionButtonView.ColorMode.COLOR
+
+        close_paint_panel.type = ActionButtonView.Type.BACK
+
+        paint_color_accept_image.type = ActionButtonView.Type.YES
+        paint_color_accept_image.colorMode = ActionButtonView.ColorMode.NONE
 
         color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
@@ -154,10 +168,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         paint_panel_button.setOnClickListener {
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
-
-
-            drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
-
 
             paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
                 paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
@@ -199,7 +209,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
                 surface_view.endPaintSelection()
 
-                paint_no.setColorFilter(Color.parseColor("#FA3A47"))
+                paint_no.colorMode = ActionButtonView.ColorMode.COLOR
 
                 if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                     paint_yes.visibility = View.GONE
@@ -252,7 +262,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
 
                 surface_view.endPaintSelection()
 
-                paint_no.setColorFilter(Color.parseColor("#FA3A47"))
+                paint_no.colorMode = ActionButtonView.ColorMode.COLOR
 
                 if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                     paint_yes.visibility = View.GONE
@@ -280,7 +290,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
                 paint_yes.visibility = View.GONE
                 close_paint_panel.visibility = View.GONE
                 paint_no.visibility = View.VISIBLE
-                paint_no.setColorFilter(Color.parseColor("#FFFFFF"))
+
+                paint_no.colorMode = ActionButtonView.ColorMode.NONE
 
                 surface_view.startPaintSelection()
 
@@ -328,8 +339,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
-        drops_amt_text.text = SessionSettings.instance.dropsAmt.toString() + "/1000"
-
         val paint = Paint()
         paint.color = Color.parseColor("#FFFFFFFF")
 
@@ -482,10 +491,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         paint_indicator_view.setPaintColor(color)
     }
 
-    override fun notifyPaintQtyUpdate(qty: Int) {
-        drops_amt_text.text = qty.toString() + "/1000"
-    }
-
     override fun notifyPaintingStarted() {
         close_paint_panel.visibility = View.GONE
         paint_yes.visibility = View.VISIBLE
@@ -496,5 +501,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback {
         close_paint_panel.visibility = View.VISIBLE
         paint_yes.visibility = View.GONE
         paint_no.visibility = View.GONE
+    }
+
+    // paint qty listener
+    override fun paintQtyChanged(qty: Int) {
+        drops_amt_text.text = qty.toString()
     }
 }

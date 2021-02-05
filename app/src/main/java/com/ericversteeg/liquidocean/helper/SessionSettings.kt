@@ -3,8 +3,10 @@ package com.ericversteeg.liquidocean.helper
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import java.util.*
+import kotlin.collections.ArrayList
 
 class SessionSettings {
 
@@ -16,7 +18,18 @@ class SessionSettings {
     var paintColor = Color.WHITE
 
     var dropsAmt = 0
+    set(value) {
+        field = value
+        for (x in paintQtyListeners.indices) {
+            paintQtyListeners[x]?.paintQtyChanged(field)
+        }
+    }
+
     var startTimeMillis = 0L
+
+    val maxPaintAmt = 1000
+
+    var paintQtyListeners: MutableList<PaintQtyListener?> = ArrayList()
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
