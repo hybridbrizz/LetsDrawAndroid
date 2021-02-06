@@ -75,6 +75,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         else if (mode == Mode.PAINTING) {
 
             if(ev.action == MotionEvent.ACTION_DOWN) {
+                interactiveCanvas.drawCallbackListener?.notifyCloseRecentColors()
+
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 unitPoint?.apply {

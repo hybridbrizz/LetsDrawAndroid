@@ -24,8 +24,11 @@ class ActionButtonView: View {
             pxWidth = width / value
         }
 
+    var semiPaint = Paint()
     val greenPaint = Paint()
     val lightGreenPaint = Paint()
+    val altGreenPaint = Paint()
+    val lightAltGreenPaint = Paint()
     val whitePaint = Paint()
     val redPaint = Paint()
     val yellowPaint = Paint()
@@ -37,7 +40,10 @@ class ActionButtonView: View {
         NONE,
         BACK,
         YES,
-        NO
+        NO,
+        PAINT,
+        RECENT_COLORS,
+        RECENT_COLOR
     }
 
     enum class TouchState {
@@ -52,6 +58,16 @@ class ActionButtonView: View {
 
     var type = Type.NONE
     var touchState = TouchState.INACTIVE
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    var representingColor: Int? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     var colorMode = ColorMode.NONE
     set(value) {
@@ -89,12 +105,17 @@ class ActionButtonView: View {
     }
 
     private fun commonInit() {
+        semiPaint.color = Color.parseColor("#99FFFFFF")
+
         greenPaint.color = Color.parseColor("#05AD2E")
+        altGreenPaint.color = Color.parseColor("#42ff7b")
+
         whitePaint.color = Color.WHITE
         yellowPaint.color = Color.parseColor("#FAD452")
         redPaint.color = Color.parseColor("#FA3A47")
 
         lightGreenPaint.color = Color.parseColor("#62AD6C")
+        lightAltGreenPaint.color = Color.parseColor("#B0FFC5")
         lightYellowPaint.color = Color.parseColor("#FAE38D")
         lightRedPaint.color = Color.parseColor("#FB7E87")
 
@@ -117,6 +138,15 @@ class ActionButtonView: View {
             else if (type == Type.NO) {
                 drawNoAction(touchState == TouchState.ACTIVE,colorMode == ColorMode.COLOR, canvas)
             }
+            else if (type == Type.PAINT) {
+                drawPaintAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.RECENT_COLORS) {
+                drawRecentColorsAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.RECENT_COLOR) {
+                drawRecentColorAction(touchState == TouchState.ACTIVE, canvas)
+            }
 
             restore()
         }
@@ -130,8 +160,9 @@ class ActionButtonView: View {
         else if(ev.action == MotionEvent.ACTION_UP) {
             touchState = TouchState.INACTIVE
         }
-
-        invalidate()
+        else if (ev.action == MotionEvent.ACTION_CANCEL) {
+            touchState = TouchState.INACTIVE
+        }
 
         return super.onTouchEvent(ev)
     }
@@ -241,6 +272,99 @@ class ActionButtonView: View {
             // row 5
             drawPixel(0, 4, paint, canvas)
             drawPixel(4, 4, paint, canvas)
+        }
+    }
+
+    private fun drawPaintAction(light: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 4
+
+        var primaryPaint = altGreenPaint
+        if (light) {
+            primaryPaint = lightAltGreenPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(3, 0, primaryPaint, canvas)
+
+            // row 2
+            drawPixel(2, 1, whitePaint, canvas)
+
+            // row 3
+            drawPixel(1, 2, whitePaint, canvas)
+
+            // row 4
+            drawPixel(0, 3, whitePaint, canvas)
+        }
+    }
+
+    private fun drawRecentColorsAction(light: Boolean, canvas: Canvas) {
+        rows = 3
+        cols = 3
+
+        var paint = semiPaint
+        if (light) {
+            paint = altGreenPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(2, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+        }
+    }
+
+    private fun drawRecentColorAction(light: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 4
+
+        var paint = semiPaint
+        if (light) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(1, 1, colorPaint, canvas)
+            drawPixel(2, 1, colorPaint, canvas)
+            drawPixel(3, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, colorPaint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(3, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+            drawPixel(3, 3, paint, canvas)
         }
     }
 

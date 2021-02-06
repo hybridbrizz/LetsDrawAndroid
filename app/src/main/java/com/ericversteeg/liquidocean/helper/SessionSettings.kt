@@ -60,22 +60,13 @@ class SessionSettings {
         interactiveCanvas.saveUnits(context)
     }
 
-    fun load(context: Context, interactiveCanvas: InteractiveCanvas) {
+    fun load(context: Context) {
         paintColor = getSharedPrefs(context).getInt("paint_color", Color.WHITE)
         dropsAmt = getSharedPrefs(context).getInt("drops_amt", 0)
         startTimeMillis = getSharedPrefs(context).getLong("start_time", System.currentTimeMillis())
 
         uniqueId = getSharedPrefs(context).getString("installation_id", UUID.randomUUID().toString())
         sentUniqueId = getSharedPrefs(context).getBoolean("sent_uuid", false)
-
-        val left = getSharedPrefs(context).getFloat("viewport_left", -1F)
-        val top = getSharedPrefs(context).getFloat("viewport_top", 0F)
-        val right = getSharedPrefs(context).getFloat("viewport_right", 0F)
-        val bottom = getSharedPrefs(context).getFloat("viewport_bottom", 0F)
-
-        if (left >= 0F) {
-            // interactiveCanvas.deviceViewport = RectF(left, top, right, bottom)
-        }
     }
 
     companion object {

@@ -10,31 +10,22 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.ericversteeg.liquidocean.listener.PaintSelectionListener
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
+import com.ericversteeg.liquidocean.listener.RecentColorsListener
 import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONArray
-import org.json.JSONException
 import org.json.JSONObject
-import java.net.URI
 import java.net.URISyntaxException
-import java.util.*
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.SSLSession
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
-import kotlin.math.abs
 import kotlin.math.floor
 
 
@@ -54,6 +45,11 @@ class InteractiveCanvas(var context: Context) {
 
     var drawCallbackListener: InteractiveCanvasDrawerCallback? = null
     var scaleCallbackListener: InteractiveCanvasScaleCallback? = null
+    var paintSelectionListener: PaintSelectionListener? = null
+    var recentColorsListener: RecentColorsListener? = null
+
+    var recentColorsList: MutableList<Int> = ArrayList()
+    val maxRecents = 8
 
     var restorePoints = ArrayList<RestorePoint>()
 
@@ -66,8 +62,7 @@ class InteractiveCanvas(var context: Context) {
         val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
 
         if (arrJsonStr == null) {
-            // loadDefault()
-            downloadCanvasPixels(context)
+            Log.i("Error", "Error displaying canvas, no data in shared prefs to display.")
         }
         else {
             initPixels(arrJsonStr)
@@ -96,29 +91,46 @@ class InteractiveCanvas(var context: Context) {
         } catch (e: URISyntaxException) {
 
         }
+
+        val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors", null)
+
+        if (recentColorsJsonStr != null) {
+            val recentColorsArr = JSONArray(recentColorsJsonStr)
+            for (i in 0 until recentColorsArr.length()) {
+                recentColorsList.add(recentColorsArr.getInt(i))
+            }
+        }
+        else {
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.BLACK)
+            recentColorsList.add(Color.WHITE)
+        }
     }
 
     private fun registerForSocketEvents(socket: Socket) {
-        socket.on("pixels_commit", object : Emitter.Listener {
-            override fun call(vararg args: Any) {
-                (context as Activity).runOnUiThread(Runnable {
-                    val pixelsJsonArr = args[0] as JSONArray
-                    for (i in 0 until pixelsJsonArr.length()) {
-                        val pixelObj = pixelsJsonArr.get(i) as JSONObject
+        socket.on("pixels_commit") {
+            (context as Activity).runOnUiThread(Runnable {
+                val pixelsJsonArr = it[0] as JSONArray
+                for (i in 0 until pixelsJsonArr.length()) {
+                    val pixelObj = pixelsJsonArr.get(i) as JSONObject
 
-                        // update color
-                        val unit1DIndex = pixelObj.getInt("id") - 1
+                    // update color
+                    val unit1DIndex = pixelObj.getInt("id") - 1
 
-                        val y = unit1DIndex / cols
-                        val x = unit1DIndex % cols
+                    val y = unit1DIndex / cols
+                    val x = unit1DIndex % cols
 
-                        arr[y][x] = pixelObj.getInt("color")
-                    }
+                    arr[y][x] = pixelObj.getInt("color")
+                }
 
-                    drawCallbackListener?.notifyRedraw()
-                })
-            }
-        })
+                drawCallbackListener?.notifyRedraw()
+            })
+        }
 
         socket.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
@@ -149,44 +161,6 @@ class InteractiveCanvas(var context: Context) {
         }
 
         drawCallbackListener?.notifyRedraw()
-    }
-
-    private fun downloadCanvasPixels(context: Context) {
-        val requestQueue = Volley.newRequestQueue(context)
-
-        val jsonObjRequest: StringRequest = object : StringRequest(
-            Method.GET,
-            "http://192.168.200.69:5000/api/v1/canvas/pixels",
-            Response.Listener { response ->
-                initPixels(response)
-            },
-            Response.ErrorListener { error ->
-                error.message?.apply {
-                    Log.i("Error", this)
-                }
-            }) {
-            override fun getBodyContentType(): String {
-                return "application/x-www-form-urlencoded; charset=UTF-8"
-            }
-
-            override fun getParams(): Map<String, String> {
-                val params: MutableMap<String, String> = HashMap()
-                val pixelData = SessionSettings.instance.getSharedPrefs(context).getString(
-                    "arr",
-                    ""
-                )
-
-                pixelData?.apply {
-                    params["arr"] = this
-                }
-
-                return params
-            }
-        }
-
-        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 3, 1.0f)
-
-        requestQueue.add(jsonObjRequest)
     }
 
     private fun loadDefault() {
@@ -272,6 +246,9 @@ class InteractiveCanvas(var context: Context) {
 
         socket.emit("pixels_event", reqObj)
 
+        updateRecentColors()
+        recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
+
         /*val request = JsonArrayRequest(
             Request.Method.POST,
             "http://192.168.200.69:5000/api/v1/canvas/pixels",
@@ -284,6 +261,26 @@ class InteractiveCanvas(var context: Context) {
             })
 
         requestQueue.add(request)*/
+    }
+
+    private fun updateRecentColors() {
+        for (restorePoint in restorePoints) {
+            var contains = false
+            for (i in 0 until recentColorsList.size) {
+                if (restorePoint.newColor == recentColorsList[i]) {
+                    recentColorsList.removeAt(i)
+                    recentColorsList.add(restorePoint.newColor)
+
+                    contains = true
+                }
+            }
+            if (!contains) {
+                if (recentColorsList.size == maxRecents) {
+                    recentColorsList.removeAt(0)
+                }
+                recentColorsList.add(restorePoint.newColor)
+            }
+        }
     }
 
     fun undoPendingPaint() {
@@ -391,6 +388,8 @@ class InteractiveCanvas(var context: Context) {
 
         val ed = SessionSettings.instance.getSharedPrefs(context).edit()
         ed.putString("arr", jsonArr.toString())
+        ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
+
         ed.apply()
     }
 

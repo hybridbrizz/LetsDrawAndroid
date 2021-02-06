@@ -4,13 +4,14 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity() {
+class FullscreenActivity : AppCompatActivity(), DataLoadingCallback {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -44,6 +45,16 @@ class FullscreenActivity : AppCompatActivity() {
 
         hide()
 
+        showLoadingFragment()
+    }
+
+    private fun showLoadingFragment() {
+        val frag = LoadingScreenFragment()
+        frag.dataLoadingCallback = this
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showInteractiveCanvasFragment() {
         val frag = InteractiveCanvasFragment()
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
@@ -66,5 +77,9 @@ class FullscreenActivity : AppCompatActivity() {
     private fun delayedHide(delayMillis: Int) {
         mHideHandler.removeCallbacks(mHideRunnable)
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
+    }
+
+    override fun onDataLoaded() {
+        showInteractiveCanvasFragment()
     }
 }

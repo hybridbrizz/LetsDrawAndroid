@@ -6,29 +6,25 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.ericversteeg.liquidocean.listener.RecentColorsListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import com.ericversteeg.liquidocean.view.PaintQuantityBar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import org.json.JSONObject
 import top.defaults.colorpicker.ColorObserver
 import kotlin.math.ceil
 import kotlin.math.floor
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener {
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener {
 
     var scaleFactor = 1f
 
@@ -58,83 +54,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        val sv = surface_view
-
-        context?.apply {
-            SessionSettings.instance.load(this, surface_view.interactiveCanvas)
-            if (SessionSettings.instance.sentUniqueId) {
-                getPaintQty()
-            }
-            else {
-                sendDeviceId()
-            }
-        }
-    }
-
-    private fun sendDeviceId() {
-        context?.apply {
-            val uniqueId = SessionSettings.instance.uniqueId
-
-            uniqueId?.apply {
-                val requestQueue = Volley.newRequestQueue(context)
-
-                val requestParams = HashMap<String, String>()
-
-                requestParams["uuid"] = uniqueId
-
-                val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-                val request = JsonObjectRequest(
-                    Request.Method.POST,
-                    "http://192.168.200.69:5000/api/v1/devices/register",
-                    paramsJson,
-                    { response ->
-                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        SessionSettings.instance.sentUniqueId = true
-                    },
-                    { error ->
-                        Log.i("Error", error.message!!)
-                    })
-
-                requestQueue.add(request)
-            }
-        }
-    }
-
-    private fun getPaintQty() {
-        context?.apply {
-            val uniqueId = SessionSettings.instance.uniqueId
-
-            uniqueId?.apply {
-                val requestQueue = Volley.newRequestQueue(context)
-
-                val request = JsonObjectRequest(
-                    Request.Method.GET,
-                    "http://192.168.200.69:5000/api/v1/devices/$uniqueId/paint",
-                    null,
-                    { response ->
-                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                    },
-                    { error ->
-                        error.message?.apply {
-                            Log.i("Error", this)
-                        }
-                    })
-
-                requestQueue.add(request)
-            }
-        }
-    }
-
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
         SessionSettings.instance.paintQtyListeners.add(this)
+        surface_view.interactiveCanvas.recentColorsListener = this
+
+        color_picker_view.setSelectorColor(Color.WHITE)
+
+        paint_panel_button.actionBtnView = paint_panel_action_view
+        paint_panel_action_view.type = ActionButtonView.Type.PAINT
 
         paint_yes.type = ActionButtonView.Type.YES
         paint_yes.colorMode = ActionButtonView.ColorMode.COLOR
@@ -146,6 +77,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         paint_color_accept_image.type = ActionButtonView.Type.YES
         paint_color_accept_image.colorMode = ActionButtonView.ColorMode.NONE
+
+        recent_colors.type = ActionButtonView.Type.RECENT_COLORS
+        recent_colors_button.actionBtnView = recent_colors
+
+        setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
 
         color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
@@ -184,6 +120,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }.start()
 
             surface_view.startPainting()
+
+            recent_colors_button.visibility = View.VISIBLE
+            recent_colors_container.visibility = View.GONE
         }
 
         paint_yes.setOnClickListener {
@@ -206,6 +145,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_yes.visibility = View.VISIBLE
 
                 paint_color_accept_image.visibility = View.GONE
+
+                recent_colors_button.visibility = View.VISIBLE
+                recent_colors_container.visibility = View.GONE
 
                 surface_view.endPaintSelection()
 
@@ -231,6 +173,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_no.visibility = View.GONE
                 close_paint_panel.visibility = View.VISIBLE
 
+                recent_colors_button.visibility = View.VISIBLE
+                recent_colors_container.visibility = View.GONE
+
                 surface_view.startPainting()
             }
         }
@@ -242,6 +187,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             paint_warning_frame.visibility = View.GONE
 
             paint_panel_button.visibility = View.VISIBLE
+
+            recent_colors_button.visibility = View.GONE
+            recent_colors_container.visibility = View.GONE
 
             topLeftParticleSystem.stopEmitting()
             topRightParticleSystem.stopEmitting()
@@ -263,6 +211,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 surface_view.endPaintSelection()
 
                 paint_no.colorMode = ActionButtonView.ColorMode.COLOR
+
+                recent_colors_container.visibility = View.GONE
+                recent_colors_button.visibility = View.VISIBLE
 
                 if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                     paint_yes.visibility = View.GONE
@@ -293,6 +244,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 paint_no.colorMode = ActionButtonView.ColorMode.NONE
 
+                recent_colors_button.visibility = View.GONE
+                recent_colors_container.visibility = View.GONE
+
                 surface_view.startPaintSelection()
 
                 topLeftParticleSystem.stopEmitting()
@@ -300,6 +254,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 bottomLeftParticleSystem.stopEmitting()
                 bottomRightParticleSystem.stopEmitting()
             }
+        }
+
+        // recent colors
+        recent_colors_button.setOnClickListener {
+            recent_colors_container.visibility = View.VISIBLE
+            recent_colors_button.visibility = View.GONE
         }
 
         context?.apply {
@@ -334,6 +294,36 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f))
 
                 return true
+            }
+        }
+    }
+
+    private fun setupRecentColors(recentColors: Array<Int>?) {
+        if (recentColors != null) {
+            var i = 0
+            for (v in recent_colors_container.children) {
+                (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
+
+                if (i < recentColors.size) {
+                    v.representingColor = recentColors[recentColors.size - 1 - i]
+                }
+
+                v.setOnClickListener {
+                    v.representingColor?.apply {
+                        SessionSettings.instance.paintColor = this
+                        notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+
+                        recent_colors_container.visibility = View.GONE
+                        recent_colors_button.visibility = View.VISIBLE
+                    }
+                }
+
+                i++
+            }
+        }
+        else {
+            for (v in recent_colors_container.children) {
+                (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
             }
         }
     }
@@ -503,8 +493,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_no.visibility = View.GONE
     }
 
+    override fun notifyCloseRecentColors() {
+        recent_colors_button.visibility = View.VISIBLE
+        recent_colors_container.visibility = View.GONE
+    }
+
     // paint qty listener
     override fun paintQtyChanged(qty: Int) {
         drops_amt_text.text = qty.toString()
+    }
+
+    override fun onNewRecentColors(colors: Array<Int>) {
+        setupRecentColors(colors)
     }
 }

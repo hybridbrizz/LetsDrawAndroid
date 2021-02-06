@@ -9,8 +9,11 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.PaintSelectionListener
 
 class PaintColorIndicator : View {
+
+    var paintSelectionListeners: MutableList<PaintSelectionListener> = ArrayList()
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -44,6 +47,8 @@ class PaintColorIndicator : View {
     fun setPaintColor(color: Int) {
         SessionSettings.instance.paintColor = color
         invalidate()
+
+        paintSelected(color)
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -53,7 +58,7 @@ class PaintColorIndicator : View {
             it.save()
             val paint = Paint()
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = 25F
+            paint.strokeWidth = Utils.dpToPx(context, 12).toFloat()
             paint.color = SessionSettings.instance.paintColor
 
             val borderPaint = Paint()
@@ -85,6 +90,12 @@ class PaintColorIndicator : View {
             )
 
             it.restore()
+        }
+    }
+
+    fun paintSelected(color: Int) {
+        for (listener in paintSelectionListeners) {
+            listener.onPaintSelected(color)
         }
     }
 }
