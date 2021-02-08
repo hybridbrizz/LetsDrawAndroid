@@ -16,6 +16,7 @@ import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
 import com.ericversteeg.liquidocean.listener.PaintSelectionListener
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
 import com.ericversteeg.liquidocean.listener.RecentColorsListener
+import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -39,7 +40,6 @@ class InteractiveCanvas(var context: Context) {
     var ppu = basePpu
 
     val gridLineThreshold = 50
-    val initialScaleFactor = 0.25f
 
     var deviceViewport: RectF? = null
 
@@ -53,62 +53,117 @@ class InteractiveCanvas(var context: Context) {
 
     var restorePoints = ArrayList<RestorePoint>()
 
-    var gson = Gson()
+    val maxScaleFactor = 10.0F
+    val minScaleFactor = 0.15F
+
+    val startScaleFactor = 0.5f
+
+    var world = false
+    set(value) {
+        field = value
+        initType()
+    }
+
+    lateinit var singlePlayBackgroundType: ActionButtonView.Type
 
     // socket.io websocket for handling real-time pixel updates
     private lateinit var socket: Socket
 
-    init {
-        val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
+    private fun initType() {
+        if (world) {
+            val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
 
-        if (arrJsonStr == null) {
-            Log.i("Error", "Error displaying canvas, no data in shared prefs to display.")
-        }
-        else {
-            initPixels(arrJsonStr)
-        }
-
-        try {
-            socket = IO.socket("http://192.168.200.69:5010")
-
-            socket.connect()
-
-            socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
-                Log.i("okay", it.toString())
-
-                //val map = HashMap<String, String>()
-                //map["data"] = "connected to the SocketServer android..."
-                //socket.emit("my_event", gson.toJson(map))
-            })
-
-            socket.on(Socket.EVENT_CONNECT_ERROR) {
-                Log.i("Error", it.toString())
+            if (arrJsonStr == null) {
+                Log.i("Error", "Error displaying canvas, no data in shared prefs to display.")
+            }
+            else {
+                initPixels(arrJsonStr)
             }
 
-            // socket.emit("my_event", "test")
+            try {
+                socket = IO.socket("http://192.168.200.69:5010")
 
-            registerForSocketEvents(socket)
-        } catch (e: URISyntaxException) {
+                socket.connect()
 
-        }
+                socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+                    Log.i("okay", it.toString())
 
-        val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors", null)
+                    //val map = HashMap<String, String>()
+                    //map["data"] = "connected to the SocketServer android..."
+                    //socket.emit("my_event", gson.toJson(map))
+                })
 
-        if (recentColorsJsonStr != null) {
-            val recentColorsArr = JSONArray(recentColorsJsonStr)
-            for (i in 0 until recentColorsArr.length()) {
-                recentColorsList.add(recentColorsArr.getInt(i))
+                socket.on(Socket.EVENT_CONNECT_ERROR) {
+                    Log.i("Error", it.toString())
+                }
+
+                // socket.emit("my_event", "test")
+
+                registerForSocketEvents(socket)
+            } catch (e: URISyntaxException) {
+
+            }
+
+            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors", null)
+
+            if (recentColorsJsonStr != null) {
+                val recentColorsArr = JSONArray(recentColorsJsonStr)
+                for (i in 0 until recentColorsArr.length()) {
+                    recentColorsList.add(recentColorsArr.getInt(i))
+                }
+            }
+            else {
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.BLACK)
+                recentColorsList.add(Color.WHITE)
             }
         }
+        // single play
         else {
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.BLACK)
-            recentColorsList.add(Color.WHITE)
+            val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr_single", null)
+
+            if (arrJsonStr != null) {
+                initPixels(arrJsonStr)
+            }
+            else {
+                initSinglePlayPixels(singlePlayBackgroundType)
+            }
+
+            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors_single", null)
+
+            if (recentColorsJsonStr != null) {
+                val recentColorsArr = JSONArray(recentColorsJsonStr)
+                for (i in 0 until recentColorsArr.length()) {
+                    recentColorsList.add(recentColorsArr.getInt(i))
+                }
+            }
+            else {
+                if (getGridLineColor() == Color.BLACK) {
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.BLACK)
+                    recentColorsList.add(Color.WHITE)
+                }
+                else {
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.WHITE)
+                    recentColorsList.add(Color.BLACK)
+                }
+            }
         }
     }
 
@@ -149,6 +204,52 @@ class InteractiveCanvas(var context: Context) {
         }
     }
 
+    private fun initSinglePlayPixels(type: ActionButtonView.Type) {
+        var paint1 = ActionButtonView.redPaint
+        var paint2 = ActionButtonView.redPaint
+
+        when (type) {
+            ActionButtonView.Type.BACKGROUND_WHITE -> {
+                paint1 = ActionButtonView.whitePaint
+                paint2 = ActionButtonView.whitePaint
+            }
+            ActionButtonView.Type.BACKGROUND_BLACK -> {
+                paint1 = ActionButtonView.blackPaint
+                paint2 = ActionButtonView.blackPaint
+            }
+            ActionButtonView.Type.BACKGROUND_GRAY_THIRDS -> {
+                paint1 = ActionButtonView.thirdGray
+                paint2 = ActionButtonView.twoThirdGray
+            }
+            ActionButtonView.Type.BACKGROUND_PHOTOSHOP -> {
+                paint1 = ActionButtonView.whitePaint
+                paint2 = ActionButtonView.photoshopGray
+            }
+            ActionButtonView.Type.BACKGROUND_CLASSIC -> {
+                paint1 = ActionButtonView.classicGrayLight
+                paint2 = ActionButtonView.classicGrayDark
+            }
+            ActionButtonView.Type.BACKGROUND_CHESS -> {
+                paint1 = ActionButtonView.chessTan
+                paint2 = ActionButtonView.blackPaint
+            }
+        }
+
+        for (i in 0 until rows - 1) {
+            for (j in 0 until cols - 1) {
+                var paint = paint2
+                if ((i + j) % 2 == 0) {
+                    paint = paint1
+                }
+                arr[j][i] = paint.color
+            }
+        }
+
+        if ((paint1.color == Color.BLACK && paint2.color == Color.BLACK) || (paint1.color == Color.WHITE && paint2.color == Color.WHITE)) {
+            arr[rows / 2 - 4][cols / 2 - 4] = ActionButtonView.altGreenPaint.color
+        }
+    }
+
     private fun initPixels(arrJsonStr: String) {
         val outerArray = JSONArray(arrJsonStr)
 
@@ -177,6 +278,32 @@ class InteractiveCanvas(var context: Context) {
         arr[rows / 2][cols / 2] = Color.parseColor("#FF00FF00")
     }
 
+    fun getGridLineColor(): Int {
+        if (world) {
+            return Color.WHITE
+        }
+        else {
+            context.apply {
+                val gridLineColor = SessionSettings.instance.getSharedPrefs(this).getInt("grid_line_color", Int.MAX_VALUE)
+                if (gridLineColor < Int.MAX_VALUE) {
+                    return gridLineColor
+                }
+                else {
+                    when (singlePlayBackgroundType) {
+                        ActionButtonView.Type.BACKGROUND_BLACK -> return Color.WHITE
+                        ActionButtonView.Type.BACKGROUND_WHITE -> return Color.BLACK
+                        ActionButtonView.Type.BACKGROUND_GRAY_THIRDS -> return Color.WHITE
+                        ActionButtonView.Type.BACKGROUND_PHOTOSHOP -> return Color.BLACK
+                        ActionButtonView.Type.BACKGROUND_CLASSIC -> return Color.WHITE
+                        ActionButtonView.Type.BACKGROUND_CHESS -> return Color.WHITE
+                    }
+                }
+            }
+        }
+
+        return Color.RED
+    }
+
     fun screenPointToUnit(x: Float, y: Float): Point? {
         deviceViewport?.apply {
             val topViewportPx = top * ppu
@@ -197,7 +324,7 @@ class InteractiveCanvas(var context: Context) {
     fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
-            if (restorePoint == null && SessionSettings.instance.dropsAmt > 0) {
+            if (restorePoint == null && (SessionSettings.instance.dropsAmt > 0 || !world)) {
                 // paint
                 restorePoints.add(
                     RestorePoint(
@@ -208,7 +335,9 @@ class InteractiveCanvas(var context: Context) {
                 )
                 arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
-                SessionSettings.instance.dropsAmt -= 1
+                if (world) {
+                    SessionSettings.instance.dropsAmt -= 1
+                }
             }
         }
         else if (mode == 1) {
@@ -217,7 +346,9 @@ class InteractiveCanvas(var context: Context) {
                 restorePoints.remove(restorePoint)
                 arr[unitPoint.y][unitPoint.x] = restorePoint.color
 
-                SessionSettings.instance.dropsAmt += 1
+                if (world) {
+                    SessionSettings.instance.dropsAmt += 1
+                }
             }
         }
 
@@ -226,41 +357,28 @@ class InteractiveCanvas(var context: Context) {
 
     // sends pixel updates to the web server
     fun commitPixels() {
-        val requestQueue = Volley.newRequestQueue(context)
+        if (world) {
+            val arr = arrayOfNulls<Map<String, Int>>(restorePoints.size)
 
-        val arr = arrayOfNulls<Map<String, Int>>(restorePoints.size)
+            for((index, restorePoint) in restorePoints.withIndex()) {
+                val map = HashMap<String, Int>()
+                map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
+                map["color"] = restorePoint.newColor
 
-        for((index, restorePoint) in restorePoints.withIndex()) {
-            val map = HashMap<String, Int>()
-            map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
-            map["color"] = restorePoint.newColor
+                arr[index] = map
+            }
 
-            arr[index] = map
+            val reqObj = JSONObject()
+            val jsonArr = JSONArray(arr)
+
+            reqObj.put("uuid", SessionSettings.instance.uniqueId)
+            reqObj.put("pixels", jsonArr)
+
+            socket.emit("pixels_event", reqObj)
         }
-
-        val reqObj = JSONObject()
-        val jsonArr = JSONArray(arr)
-
-        reqObj.put("uuid", SessionSettings.instance.uniqueId)
-        reqObj.put("pixels", jsonArr)
-
-        socket.emit("pixels_event", reqObj)
 
         updateRecentColors()
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
-
-        /*val request = JsonArrayRequest(
-            Request.Method.POST,
-            "http://192.168.200.69:5000/api/v1/canvas/pixels",
-            jsonArr,
-            { response ->
-                Log.i("Foo", "Success")
-            },
-            { error ->
-                Log.i("Error", error.message!!)
-            })
-
-        requestQueue.add(request)*/
     }
 
     private fun updateRecentColors() {
@@ -387,8 +505,16 @@ class InteractiveCanvas(var context: Context) {
         val jsonArr = JSONArray(arr)
 
         val ed = SessionSettings.instance.getSharedPrefs(context).edit()
-        ed.putString("arr", jsonArr.toString())
-        ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
+
+        if (world) {
+            ed.putString("arr", jsonArr.toString())
+            ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
+        }
+        else {
+            ed.putString("arr_single", jsonArr.toString())
+            ed.putString("recent_colors_single", JSONArray(recentColorsList.toTypedArray()).toString())
+            ed.putInt("grid_line_color", getGridLineColor())
+        }
 
         ed.apply()
     }

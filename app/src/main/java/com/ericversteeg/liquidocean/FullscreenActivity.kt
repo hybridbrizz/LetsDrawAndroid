@@ -4,14 +4,24 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
+import com.ericversteeg.liquidocean.fragment.LoadingScreenFragment
+import com.ericversteeg.liquidocean.fragment.MenuFragment
+import com.ericversteeg.liquidocean.fragment.OptionsFragment
+import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasFragmentListener
+import com.ericversteeg.liquidocean.listener.MenuButtonListener
+import com.ericversteeg.liquidocean.listener.OptionsListener
+import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback {
+class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -45,17 +55,53 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback {
 
         hide()
 
-        showLoadingFragment()
+        showMenuFragment()
     }
 
-    private fun showLoadingFragment() {
-        val frag = LoadingScreenFragment()
-        frag.dataLoadingCallback = this
+    override fun onResume() {
+        super.onResume()
+
+        // load session settings
+        SessionSettings.instance.load(this)
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        SessionSettings.instance.save(this)
+    }
+
+    private fun showMenuFragment() {
+        val frag = MenuFragment()
+        frag.menuButtonListener = this
+
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showInteractiveCanvasFragment() {
+    private fun showOptionsFragment() {
+        val frag = OptionsFragment()
+        frag.optionsListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showLoadingFragment(world: Boolean) {
+        val frag = LoadingScreenFragment()
+        frag.dataLoadingCallback = this
+        frag.world = world
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showInteractiveCanvasFragment(world: Boolean, backgroundOption: ActionButtonView.Type? = null) {
         val frag = InteractiveCanvasFragment()
+        frag.world = world
+        frag.interactiveCanvasFragmentListener = this
+
+        if (backgroundOption != null) {
+            frag.singlePlayBackgroundType = backgroundOption
+        }
+
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
@@ -79,7 +125,48 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback {
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
-    override fun onDataLoaded() {
-        showInteractiveCanvasFragment()
+    override fun onDataLoaded(world: Boolean) {
+        showInteractiveCanvasFragment(world)
+    }
+
+    // menu buttons
+
+    override fun onMenuButtonSelected(index: Int) {
+        when (index) {
+            MenuFragment.playMenuIndex -> {
+
+            }
+            MenuFragment.optionsMenuIndex -> {
+                showOptionsFragment()
+            }
+            MenuFragment.statsMenuIndex -> {
+
+            }
+            MenuFragment.exitMenuIndex -> {
+                finish()
+            }
+            MenuFragment.singleMenuIndex -> {
+                showInteractiveCanvasFragment(false, null)
+            }
+            MenuFragment.worldMenuIndex -> {
+                showLoadingFragment(true)
+            }
+        }
+    }
+
+    override fun onSingleBackgroundOptionSelected(backgroundOption: ActionButtonView.Type) {
+        showInteractiveCanvasFragment(false, backgroundOption)
+    }
+
+    override fun onResetSinglePlay() {
+        showMenuFragment()
+    }
+
+    override fun onOptionsBack() {
+        showMenuFragment()
+    }
+
+    override fun onInteractiveCanvasBack() {
+        showMenuFragment()
     }
 }

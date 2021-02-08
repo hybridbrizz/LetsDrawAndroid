@@ -1,4 +1,4 @@
-package com.ericversteeg.liquidocean
+package com.ericversteeg.liquidocean.fragment
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -11,8 +11,10 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasFragmentListener
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import com.ericversteeg.liquidocean.listener.RecentColorsListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -30,10 +32,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     var initalColor = 0
 
-    lateinit var topLeftParticleSystem: ParticleSystem
-    lateinit var topRightParticleSystem: ParticleSystem
-    lateinit var bottomLeftParticleSystem: ParticleSystem
-    lateinit var bottomRightParticleSystem: ParticleSystem
+    var topLeftParticleSystem: ParticleSystem? = null
+    var topRightParticleSystem: ParticleSystem? = null
+    var bottomLeftParticleSystem: ParticleSystem? = null
+    var bottomRightParticleSystem: ParticleSystem? = null
+
+    var world = false
+    var singlePlayBackgroundType: ActionButtonView.Type? = null
+
+    var interactiveCanvasFragmentListener: InteractiveCanvasFragmentListener? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,8 +56,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     override fun onPause() {
         super.onPause()
 
+        stopEmittingParticles()
+
+        // unregister listeners
+        SessionSettings.instance.paintQtyListeners.remove(this)
+
         context?.apply {
-            SessionSettings.instance.save(this, surface_view.interactiveCanvas)
+            surface_view.interactiveCanvas.saveUnits(this)
         }
     }
 
@@ -58,11 +70,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // set single play background type, must call before setting interactiveCanvas.world
+        if (!world) {
+            singlePlayBackgroundType?.apply {
+                surface_view.interactiveCanvas.singlePlayBackgroundType = this
+            }
+        }
+
+        // must call before darkIcons
+        surface_view.interactiveCanvas.world = world
+
+        SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)
+
         SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
         SessionSettings.instance.paintQtyListeners.add(this)
+
+        SessionSettings.instance.paintColor = surface_view.interactiveCanvas.getGridLineColor()
+
         surface_view.interactiveCanvas.recentColorsListener = this
 
+        paint_qty_bar.world = world
+
         color_picker_view.setSelectorColor(Color.WHITE)
+
+        back_button.actionBtnView = back_action
+        back_action.type = ActionButtonView.Type.BACK
 
         paint_panel_button.actionBtnView = paint_panel_action_view
         paint_panel_action_view.type = ActionButtonView.Type.PAINT
@@ -73,7 +105,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_no.type = ActionButtonView.Type.NO
         paint_no.colorMode = ActionButtonView.ColorMode.COLOR
 
-        close_paint_panel.type = ActionButtonView.Type.BACK
+        close_paint_panel.type = ActionButtonView.Type.PAINT_CLOSE
 
         paint_color_accept_image.type = ActionButtonView.Type.YES
         paint_color_accept_image.colorMode = ActionButtonView.ColorMode.NONE
@@ -123,6 +155,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             recent_colors_button.visibility = View.VISIBLE
             recent_colors_container.visibility = View.GONE
+
+            back_button.visibility = View.GONE
         }
 
         paint_yes.setOnClickListener {
@@ -191,10 +225,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             recent_colors_button.visibility = View.GONE
             recent_colors_container.visibility = View.GONE
 
-            topLeftParticleSystem.stopEmitting()
-            topRightParticleSystem.stopEmitting()
-            bottomLeftParticleSystem.stopEmitting()
-            bottomRightParticleSystem.stopEmitting()
+            back_button.visibility = View.VISIBLE
+
+            stopEmittingParticles()
         }
 
         paint_indicator_view.setOnClickListener {
@@ -249,10 +282,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 surface_view.startPaintSelection()
 
-                topLeftParticleSystem.stopEmitting()
-                topRightParticleSystem.stopEmitting()
-                bottomLeftParticleSystem.stopEmitting()
-                bottomRightParticleSystem.stopEmitting()
+                stopEmittingParticles()
             }
         }
 
@@ -260,6 +290,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         recent_colors_button.setOnClickListener {
             recent_colors_container.visibility = View.VISIBLE
             recent_colors_button.visibility = View.GONE
+        }
+
+        // back button
+        back_button.setOnClickListener {
+            interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
         }
 
         context?.apply {
@@ -340,7 +375,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         canvas.drawARGB(255, 0, 0, 0)
 
         drawUnits(canvas, deviceViewport, ppu)
+        drawGridLines(canvas, deviceViewport, ppu)
 
+        holder.unlockCanvasAndPost(canvas)
+    }
+
+    private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
         if (surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.gridLineThreshold) {
             val gridLinePaint = Paint()
             gridLinePaint.strokeWidth = 1f
@@ -349,6 +389,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             val gridLinePaintAlt = Paint()
             gridLinePaintAlt.strokeWidth = 1f
             gridLinePaintAlt.color = Color.WHITE
+
+            if (!world) {
+                gridLinePaint.color = surface_view.interactiveCanvas.getGridLineColor()
+                gridLinePaintAlt.color = surface_view.interactiveCanvas.getGridLineColor()
+            }
+
+
 
             val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
             val unitsTall = canvas.height / surface_view.interactiveCanvas.ppu
@@ -399,7 +446,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         }
 
-        holder.unlockCanvasAndPost(canvas)
     }
 
     private fun drawUnits(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
@@ -443,32 +489,40 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     private fun startParticleEmitters() {
         topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        topLeftParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
-        topLeftParticleSystem.setRotationSpeed(144f)
-        topLeftParticleSystem.setAcceleration(0.00005f, 90)
-        topLeftParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
-        topLeftParticleSystem.emit(top_left_anchor, 16)
+        topLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
+        topLeftParticleSystem?.setRotationSpeed(144f)
+        topLeftParticleSystem?.setAcceleration(0.00005f, 90)
+        topLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+        topLeftParticleSystem?.emit(top_left_anchor, 16)
 
         topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        topRightParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
-        topRightParticleSystem.setRotationSpeed(144f)
-        topRightParticleSystem.setAcceleration(0.00005f, 90)
-        topRightParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
-        topRightParticleSystem.emit(top_right_anchor, 16)
+        topRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
+        topRightParticleSystem?.setRotationSpeed(144f)
+        topRightParticleSystem?.setAcceleration(0.00005f, 90)
+        topRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+        topRightParticleSystem?.emit(top_right_anchor, 16)
 
         bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        bottomLeftParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
-        bottomLeftParticleSystem.setRotationSpeed(144f)
-        bottomLeftParticleSystem.setAcceleration(0.00005f, 90)
-        bottomLeftParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
-        bottomLeftParticleSystem.emit(bottom_left_anchor, 16)
+        bottomLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
+        bottomLeftParticleSystem?.setRotationSpeed(144f)
+        bottomLeftParticleSystem?.setAcceleration(0.00005f, 90)
+        bottomLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+        bottomLeftParticleSystem?.emit(bottom_left_anchor, 16)
 
         bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        bottomRightParticleSystem.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
-        bottomRightParticleSystem.setRotationSpeed(144f)
-        bottomRightParticleSystem.setAcceleration(0.00005f, 90)
-        bottomRightParticleSystem.addModifier(AlphaModifier(0, 255, 0, 1000))
-        bottomRightParticleSystem.emit(bottom_right_anchor, 16)
+        bottomRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
+        bottomRightParticleSystem?.setRotationSpeed(144f)
+        bottomRightParticleSystem?.setAcceleration(0.00005f, 90)
+        bottomRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+        bottomRightParticleSystem?.emit(bottom_right_anchor, 16)
+
+    }
+
+    private fun stopEmittingParticles() {
+        topLeftParticleSystem?.stopEmitting()
+        topRightParticleSystem?.stopEmitting()
+        bottomLeftParticleSystem?.stopEmitting()
+        bottomRightParticleSystem?.stopEmitting()
     }
 
     // interactive canvas drawer callback

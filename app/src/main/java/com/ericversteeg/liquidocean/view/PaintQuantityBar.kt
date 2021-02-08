@@ -20,6 +20,8 @@ class PaintQuantityBar: View, PaintQtyListener {
     val lightGrayPaint = Paint()
     val linePaint = Paint()
 
+    var world = true
+
     constructor(context: Context) : super(context) {
         commonInit()
     }
@@ -113,7 +115,11 @@ class PaintQuantityBar: View, PaintQtyListener {
         val pxWidth = (width / cols)
         val pxHeight = (height / rows)
 
-        val relQty = SessionSettings.instance.dropsAmt / SessionSettings.instance.maxPaintAmt.toFloat()
+        var relQty = SessionSettings.instance.dropsAmt / SessionSettings.instance.maxPaintAmt.toFloat()
+
+        if (!world) {
+            relQty = 1F
+        }
 
         val numPixels = cols - 2
         val qtyPer = 1F / numPixels
@@ -122,8 +128,12 @@ class PaintQuantityBar: View, PaintQtyListener {
         canvas.apply {
             for (x in 1 until cols - 1) {
                 if (relQty > curProg) {
-                    drawRect(rectForPixel((cols - 1) - x, 1), bluePaint)
-
+                    if (world) {
+                        drawRect(rectForPixel((cols - 1) - x, 1), bluePaint)
+                    }
+                    else {
+                        drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.twoThirdGray)
+                    }
                 }
                 else {
                     drawRect(rectForPixel((cols - 1) - x, 1), brownPaint)

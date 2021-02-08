@@ -1,4 +1,4 @@
-package com.ericversteeg.liquidocean
+package com.ericversteeg.liquidocean.fragment
 
 import android.content.Context
 import android.os.Bundle
@@ -14,8 +14,10 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.SessionSettings
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
+import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -29,6 +31,8 @@ class LoadingScreenFragment : Fragment() {
     var dataLoadingCallback: DataLoadingCallback? = null
 
     private lateinit var requestQueue: RequestQueue
+
+    var world = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,8 +51,7 @@ class LoadingScreenFragment : Fragment() {
         requestQueue = Volley.newRequestQueue(context)
 
         context?.apply {
-            // load session settings
-            SessionSettings.instance.load(this)
+
 
             // sync paint qty or register device
             if (SessionSettings.instance.sentUniqueId) {
@@ -58,7 +61,6 @@ class LoadingScreenFragment : Fragment() {
                 sendDeviceId()
             }
 
-            // load pixel data
             downloadCanvasPixels(this)
         }
     }
@@ -187,7 +189,7 @@ class LoadingScreenFragment : Fragment() {
     private fun downloadFinished() {
         updateNumLoaded()
         if (loadingDone()) {
-            dataLoadingCallback?.onDataLoaded()
+            dataLoadingCallback?.onDataLoaded(world)
         }
     }
 
