@@ -83,7 +83,7 @@ class SignInFragment: Fragment() {
         activity?.apply {
             googleAccount = GoogleSignIn.getLastSignedInAccount(this)
 
-            if (googleAccount != null) {
+            if (googleAccount != null || SessionSettings.instance.googleAuth) {
                 status_text.text = "Account signed in."
                 google_sign_in_button.isEnabled = false
                 sendGoogleToken(googleAccount)
@@ -99,6 +99,7 @@ class SignInFragment: Fragment() {
             googleAccount = completedTask.getResult(ApiException::class.java)
             sendGoogleToken(googleAccount)
 
+            google_sign_in_button.isEnabled = false
             status_text.text = "Signed in"
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
@@ -115,7 +116,11 @@ class SignInFragment: Fragment() {
                 val requestParams = HashMap<String, String>()
 
                 googleAccount.idToken?.apply {
-                    requestParams["token_id"] = this
+                    if (SessionSettings.instance.uniqueId == null) {
+                        SessionSettings.instance.uniqueId == "####"
+                    }
+
+                    requestParams["token_id"] = this.substring(0, 64)
 
                     val paramsJson = JSONObject(requestParams as Map<String, String>)
 
@@ -127,6 +132,8 @@ class SignInFragment: Fragment() {
                             SessionSettings.instance.uniqueId = response.getString("uuid")
                             SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                             SessionSettings.instance.xp = response.getInt("xp")
+
+                            SessionSettings.instance.sentUniqueId = true
 
                             StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
                             StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")

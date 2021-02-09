@@ -8,13 +8,14 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.fragment.*
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCerts
+import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
+import org.json.JSONObject
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -56,7 +57,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         showMenuFragment()
 
-        TrustAllSSLCerts.trust()
+        TrustAllSSLCertsDebug.trust()
 
         // load session settings
         SessionSettings.instance.load(this)
@@ -65,7 +66,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         StatTracker.instance.load(this)
 
         // after device settings have been loaded
-        getDeviceInfo()
+        if (!SessionSettings.instance.sentUniqueId) {
+            sendDeviceId()
+        }
+        else {
+            getDeviceInfo()
+        }
     }
 
     override fun onPause() {
@@ -162,6 +168,43 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
                 })
 
+            requestQueue.add(request)
+        }
+    }
+
+    private fun sendDeviceId() {
+        val requestQueue = Volley.newRequestQueue(this)
+
+        val uniqueId = SessionSettings.instance.uniqueId
+
+        uniqueId?.apply {
+            val requestParams = HashMap<String, String>()
+
+            requestParams["uuid"] = uniqueId
+
+            val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+            val request = JsonObjectRequest(
+                Request.Method.POST,
+                Utils.baseUrlApi + "/api/v1/devices/register",
+                paramsJson,
+                { response ->
+                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                    SessionSettings.instance.xp = response.getInt("xp")
+
+                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
+                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
+                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
+
+                    SessionSettings.instance.sentUniqueId = true
+                },
+                { error ->
+
+                })
+
+            request.tag = "download"
             requestQueue.add(request)
         }
     }

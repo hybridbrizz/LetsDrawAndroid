@@ -52,7 +52,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             android:elevation="3dp"
-            android:background="@drawable/wood_texture_light">
+            android:background="@drawable/marble_2">
 
         <TextView
                 android:id="@+id/drops_amt_text"

@@ -10,6 +10,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
@@ -70,6 +71,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         context?.apply {
             surface_view.interactiveCanvas.saveUnits(this)
             surface_view.interactiveCanvas.drawCallbackListener = null
+
+            SessionSettings.instance.saveLastPaintColor(this, world)
         }
     }
 
@@ -165,7 +168,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
         SessionSettings.instance.paintQtyListeners.add(this)
 
-        SessionSettings.instance.paintColor = surface_view.interactiveCanvas.getGridLineColor()
+        context?.apply {
+            if (world) {
+                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt("last_world_paint_color", surface_view.interactiveCanvas.getGridLineColor())
+            }
+            else {
+                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt("last_single_paint_color", surface_view.interactiveCanvas.getGridLineColor())
+            }
+        }
 
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.socketStatusCallback = this
@@ -224,6 +234,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 ).withEndAction {
 
                     startParticleEmitters()
+
+                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
+                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
 
                 }.start()
 

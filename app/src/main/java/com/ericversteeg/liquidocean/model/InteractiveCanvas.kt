@@ -10,22 +10,15 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCerts
-import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
-import okhttp3.OkHttpClient
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URISyntaxException
-import java.security.KeyManagementException
-import java.security.NoSuchAlgorithmException
-import java.security.cert.X509Certificate
 import java.util.*
-import javax.net.ssl.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
@@ -75,6 +68,8 @@ class InteractiveCanvas(var context: Context) {
 
     var socketStatusCallback: SocketStatusCallback? = null
 
+    var receivedPaintRecently = false
+
     private fun initType() {
         if (world) {
             val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr", null)
@@ -87,7 +82,7 @@ class InteractiveCanvas(var context: Context) {
             }
 
             try {
-                socket = TrustAllSSLCerts.getAllCertsIOSocket()
+                socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
 
                 socket.connect()
 
@@ -221,9 +216,18 @@ class InteractiveCanvas(var context: Context) {
         }
 
         socket.on("add_paint_canvas_setup") {
-            SessionSettings.instance.dropsAmt += 50
-            if (SessionSettings.instance.dropsAmt > 1000) {
-                SessionSettings.instance.dropsAmt = 1000
+            if (!receivedPaintRecently) {
+                SessionSettings.instance.dropsAmt += 50
+                if (SessionSettings.instance.dropsAmt > 1000) {
+                    SessionSettings.instance.dropsAmt = 1000
+                }
+
+                receivedPaintRecently = true
+                Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        receivedPaintRecently = false
+                    }
+                }, 1000 * 10)
             }
         }
 

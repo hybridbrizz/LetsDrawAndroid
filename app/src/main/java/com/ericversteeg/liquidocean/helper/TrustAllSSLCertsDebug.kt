@@ -11,7 +11,7 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.*
 
 // TODO: Delete this class and get an SSL certificate from a CA
-object TrustAllSSLCerts {
+object TrustAllSSLCertsDebug {
     internal const val TAG = "TrustSSLCerts"
     fun trust() {
         try {

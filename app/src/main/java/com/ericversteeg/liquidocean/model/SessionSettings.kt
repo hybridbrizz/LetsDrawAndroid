@@ -69,6 +69,17 @@ class SessionSettings {
         ed.apply()
     }
 
+    fun saveLastPaintColor(context: Context, world: Boolean) {
+        val ed = getSharedPrefs(context).edit()
+        if (world) {
+            ed.putInt("last_world_paint_color", paintColor)
+        }
+        else {
+            ed.putInt("last_single_paint_color", paintColor)
+        }
+        ed.apply()
+    }
+
     fun load(context: Context) {
         paintColor = getSharedPrefs(context).getInt("paint_color", Color.WHITE)
 
