@@ -3,4 +3,14 @@
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="stat_num_pixels_painted_single">Pixels Single</string>
+    <string name="stat_num_pixels_painted_world">Pixels World</string>
+
+    <string name="stat_num_pixel_overwrites_in">Pixel Overwrites In</string>
+    <string name="stat_num_pixel_overwrites_out">Pixel Overwrites Out</string>
+
+    <string name="stat_paint_accrued">Paint Accrued</string>
+
+    <string name="client_id">454898966293-ii55sno355a2jvrr0qllcljgfe49u9rj.apps.googleusercontent.com</string>
 </resources>

@@ -10,20 +10,22 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
-import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.helper.SessionSettings
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
-import com.ericversteeg.liquidocean.listener.PaintSelectionListener
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
-import com.ericversteeg.liquidocean.listener.RecentColorsListener
+import com.ericversteeg.liquidocean.helper.TrustAllSSLCerts
+import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import com.google.gson.Gson
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import okhttp3.OkHttpClient
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URISyntaxException
+import java.security.KeyManagementException
+import java.security.NoSuchAlgorithmException
+import java.security.cert.X509Certificate
+import java.util.*
+import javax.net.ssl.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
@@ -68,6 +70,10 @@ class InteractiveCanvas(var context: Context) {
 
     // socket.io websocket for handling real-time pixel updates
     private lateinit var socket: Socket
+    var checkEventTimeout = 20000L
+    var checkStatusReceived = false
+
+    var socketStatusCallback: SocketStatusCallback? = null
 
     private fun initType() {
         if (world) {
@@ -81,7 +87,7 @@ class InteractiveCanvas(var context: Context) {
             }
 
             try {
-                socket = IO.socket("http://192.168.200.69:5010")
+                socket = TrustAllSSLCerts.getAllCertsIOSocket()
 
                 socket.connect()
 
@@ -91,20 +97,32 @@ class InteractiveCanvas(var context: Context) {
                     //val map = HashMap<String, String>()
                     //map["data"] = "connected to the SocketServer android..."
                     //socket.emit("my_event", gson.toJson(map))
+
+                    if (!checkStatusReceived) {
+                        socket.emit("check_event")
+                    }
                 })
 
                 socket.on(Socket.EVENT_CONNECT_ERROR) {
                     Log.i("Error", it.toString())
                 }
 
+                socket.on(Socket.EVENT_DISCONNECT) {
+                    Log.i("Socket", "Socket disconnected.")
+                }
+
                 // socket.emit("my_event", "test")
 
                 registerForSocketEvents(socket)
+
             } catch (e: URISyntaxException) {
 
             }
 
-            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors", null)
+            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+                "recent_colors",
+                null
+            )
 
             if (recentColorsJsonStr != null) {
                 val recentColorsArr = JSONArray(recentColorsJsonStr)
@@ -125,7 +143,10 @@ class InteractiveCanvas(var context: Context) {
         }
         // single play
         else {
-            val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("arr_single", null)
+            val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+                "arr_single",
+                null
+            )
 
             if (arrJsonStr != null) {
                 initPixels(arrJsonStr)
@@ -134,7 +155,10 @@ class InteractiveCanvas(var context: Context) {
                 initSinglePlayPixels(singlePlayBackgroundType)
             }
 
-            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString("recent_colors_single", null)
+            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+                "recent_colors_single",
+                null
+            )
 
             if (recentColorsJsonStr != null) {
                 val recentColorsArr = JSONArray(recentColorsJsonStr)
@@ -202,6 +226,23 @@ class InteractiveCanvas(var context: Context) {
                 SessionSettings.instance.dropsAmt = 1000
             }
         }
+
+        socket.on("check_success") {
+            checkStatusReceived = true
+        }
+    }
+
+    fun checkSocketStatus() {
+        socket.emit("check_event")
+
+        checkStatusReceived = false
+        Timer().schedule(object : TimerTask() {
+            override fun run() {
+                if (!checkStatusReceived) {
+                    socketStatusCallback?.onSocketStatusError()
+                }
+            }
+        }, checkEventTimeout)
     }
 
     private fun initSinglePlayPixels(type: ActionButtonView.Type) {
@@ -284,7 +325,10 @@ class InteractiveCanvas(var context: Context) {
         }
         else {
             context.apply {
-                val gridLineColor = SessionSettings.instance.getSharedPrefs(this).getInt("grid_line_color", Int.MAX_VALUE)
+                val gridLineColor = SessionSettings.instance.getSharedPrefs(this).getInt(
+                    "grid_line_color",
+                    Int.MAX_VALUE
+                )
                 if (gridLineColor < Int.MAX_VALUE) {
                     return gridLineColor
                 }
@@ -375,6 +419,17 @@ class InteractiveCanvas(var context: Context) {
             reqObj.put("pixels", jsonArr)
 
             socket.emit("pixels_event", reqObj)
+
+            StatTracker.instance.reportEvent(context,
+                StatTracker.EventType.PIXEL_PAINTED_WORLD,
+                restorePoints.size
+            )
+        }
+        else {
+            StatTracker.instance.reportEvent(context,
+                StatTracker.EventType.PIXEL_PAINTED_SINGLE,
+                restorePoints.size
+            )
         }
 
         updateRecentColors()
@@ -421,7 +476,12 @@ class InteractiveCanvas(var context: Context) {
         return null
     }
 
-    fun updateDeviceViewport(context: Context, canvasCenterX: Float, canvasCenterY: Float, fromScale: Boolean = false) {
+    fun updateDeviceViewport(
+        context: Context,
+        canvasCenterX: Float,
+        canvasCenterY: Float,
+        fromScale: Boolean = false
+    ) {
         val displayMetrics = DisplayMetrics()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
@@ -512,7 +572,10 @@ class InteractiveCanvas(var context: Context) {
         }
         else {
             ed.putString("arr_single", jsonArr.toString())
-            ed.putString("recent_colors_single", JSONArray(recentColorsList.toTypedArray()).toString())
+            ed.putString(
+                "recent_colors_single",
+                JSONArray(recentColorsList.toTypedArray()).toString()
+            )
             ed.putInt("grid_line_color", getGridLineColor())
         }
 

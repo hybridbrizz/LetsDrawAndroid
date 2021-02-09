@@ -4,4 +4,5 @@ import com.ericversteeg.liquidocean.view.ActionButtonView
 
 interface DataLoadingCallback {
     fun onDataLoaded(world: Boolean)
+    fun onConnectionError(type: Int)
 }

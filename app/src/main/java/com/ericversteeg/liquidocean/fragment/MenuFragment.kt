@@ -7,14 +7,19 @@ import android.view.ViewGroup
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_menu.*
+import kotlinx.android.synthetic.main.fragment_menu.back_action
+import kotlinx.android.synthetic.main.fragment_menu.back_button
+import kotlinx.android.synthetic.main.fragment_options.*
 
 class MenuFragment: Fragment() {
 
     var menuButtonListener: MenuButtonListener? = null
+
+    var backCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,9 +35,21 @@ class MenuFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.setOnClickListener {
-            resetMenu()
+        back_button.actionBtnView = back_action
+        back_action.type = ActionButtonView.Type.BACK
+
+        back_button.setOnClickListener {
+            if (backCount == 1) {
+                resetMenu()
+            }
+            else if (backCount == 2) {
+                resetToPlayMode()
+            }
+
+            backCount--
         }
+
+        back_button.visibility = View.GONE
 
         play_button.type = ActionButtonView.Type.PLAY
         options_button.type = ActionButtonView.Type.OPTIONS
@@ -61,6 +78,9 @@ class MenuFragment: Fragment() {
             world_button.visibility = View.VISIBLE
             empty_button_1.visibility = View.VISIBLE
             empty_button_2.visibility = View.VISIBLE
+
+            back_button.visibility = View.VISIBLE
+            backCount++
         }
 
         options_button.setOnClickListener {
@@ -82,6 +102,8 @@ class MenuFragment: Fragment() {
                 }
                 else {
                     showSingleBackgroundOptions()
+
+                    backCount++
                 }
             }
         }
@@ -124,6 +146,16 @@ class MenuFragment: Fragment() {
         world_button.visibility = View.GONE
         empty_button_1.visibility = View.GONE
         empty_button_2.visibility = View.GONE
+
+        single_background_options.visibility = View.GONE
+        back_button.visibility = View.GONE
+    }
+
+    private fun resetToPlayMode() {
+        single_button.visibility = View.VISIBLE
+        world_button.visibility = View.VISIBLE
+        empty_button_1.visibility = View.VISIBLE
+        empty_button_2.visibility = View.VISIBLE
 
         single_background_options.visibility = View.GONE
     }

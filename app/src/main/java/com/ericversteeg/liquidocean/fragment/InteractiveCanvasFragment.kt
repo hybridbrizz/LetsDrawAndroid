@@ -1,5 +1,9 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -11,22 +15,24 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.helper.SessionSettings
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasDrawerCallback
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasFragmentListener
-import com.ericversteeg.liquidocean.listener.PaintQtyListener
-import com.ericversteeg.liquidocean.listener.RecentColorsListener
+import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.*
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import top.defaults.colorpicker.ColorObserver
+import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener {
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener, SocketStatusCallback {
 
     var scaleFactor = 1f
 
@@ -63,7 +69,81 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         context?.apply {
             surface_view.interactiveCanvas.saveUnits(this)
+            surface_view.interactiveCanvas.drawCallbackListener = null
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (world) {
+            Timer().schedule(object : TimerTask() {
+                override fun run() {
+                    context?.apply {
+                        var connected = Utils.isNetworkAvailable(this)
+                        if (!connected) {
+                            (context as Activity).runOnUiThread {
+                                showDisconnectedMessage(0)
+                            }
+                        }
+                        else {
+                            sendApiStatusCheck()
+                        }
+                    }
+                }
+            }, 0, 1000 * 60)
+        }
+    }
+
+    private fun sendApiStatusCheck() {
+        val requestQueue = Volley.newRequestQueue(context)
+        context?.apply {
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                Utils.baseUrlApi + "/api/v1/status",
+                null,
+                { response ->
+                    (context as Activity).runOnUiThread {
+                        sendSocketStatusCheck()
+                    }
+                },
+                { error ->
+                    (context as Activity).runOnUiThread {
+                        showDisconnectedMessage(1)
+                    }
+                })
+
+            requestQueue.add(request)
+        }
+    }
+
+    private fun sendSocketStatusCheck() {
+        surface_view.interactiveCanvas.checkSocketStatus()
+    }
+
+    // socket check callback
+    override fun onSocketStatusError() {
+        (context as Activity?)?.runOnUiThread {
+            showDisconnectedMessage(2)
+        }
+    }
+
+    private fun showDisconnectedMessage(type: Int) {
+        AlertDialog.Builder(context)
+            .setMessage("Lost connection to world server (code=$type)")
+            // The dialog is automatically dismissed when a dialog button is clicked.
+            .setPositiveButton(
+                android.R.string.ok,
+                object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, id: Int) {
+                        interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+                        dialog?.dismiss()
+                    }
+                })
+            .setOnDismissListener {
+                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+            }
+            .show()
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -88,6 +168,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         SessionSettings.instance.paintColor = surface_view.interactiveCanvas.getGridLineColor()
 
         surface_view.interactiveCanvas.recentColorsListener = this
+        surface_view.interactiveCanvas.socketStatusCallback = this
 
         paint_qty_bar.world = world
 

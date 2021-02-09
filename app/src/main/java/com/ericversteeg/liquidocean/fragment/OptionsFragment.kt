@@ -1,14 +1,20 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.SignInActivity
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.OptionsListener
+import com.ericversteeg.liquidocean.view.ActionButtonView
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_options.*
+import kotlinx.android.synthetic.main.fragment_options.back_action
+import kotlinx.android.synthetic.main.fragment_options.back_button
 
 class OptionsFragment: Fragment() {
 
@@ -28,6 +34,18 @@ class OptionsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        back_button.actionBtnView = back_action
+        back_action.type = ActionButtonView.Type.BACK
+
+        back_button.setOnClickListener {
+            optionsListener?.onOptionsBack()
+        }
+
+        sign_in_button.setOnClickListener {
+            val intent = Intent(context, SignInActivity::class.java)
+            startActivity(intent)
+        }
+
         context?.apply {
             if (!SessionSettings.instance.getSharedPrefs(this).contains("arr_single")) {
                 reset_single_play.isEnabled = false
@@ -36,10 +54,6 @@ class OptionsFragment: Fragment() {
             reset_single_play.setOnClickListener {
                 resetSinglePlay()
             }
-        }
-
-        view.setOnClickListener {
-            optionsListener?.onOptionsBack()
         }
     }
 

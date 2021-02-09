@@ -1,6 +1,9 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -15,9 +18,10 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
-import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.model.StatTracker
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -50,12 +54,13 @@ class LoadingScreenFragment : Fragment() {
 
         requestQueue = Volley.newRequestQueue(context)
 
-        context?.apply {
+        updateNumLoaded()
 
+        context?.apply {
 
             // sync paint qty or register device
             if (SessionSettings.instance.sentUniqueId) {
-                getPaintQty()
+                getDeviceInfo()
             }
             else {
                 sendDeviceId()
@@ -93,7 +98,7 @@ class LoadingScreenFragment : Fragment() {
     private fun downloadCanvasPixels(context: Context) {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
-            "http://192.168.200.69:5000/api/v1/canvas/pixels",
+            Utils.baseUrlApi + "/api/v1/canvas/pixels",
             Response.Listener { response ->
                 initPixels(response)
 
@@ -101,6 +106,7 @@ class LoadingScreenFragment : Fragment() {
                 downloadFinished()
             },
             Response.ErrorListener { error ->
+                showConnectionErrorMessage()
                 error.message?.apply {
                     Log.i("Error", this)
                 }
@@ -124,8 +130,9 @@ class LoadingScreenFragment : Fragment() {
             }
         }
 
-        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 3, 1.0f)
+        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 1, 1.0f)
 
+        jsonObjRequest.tag = "download"
         requestQueue.add(jsonObjRequest)
     }
 
@@ -142,7 +149,7 @@ class LoadingScreenFragment : Fragment() {
 
                 val request = JsonObjectRequest(
                     Request.Method.POST,
-                    "http://192.168.200.69:5000/api/v1/devices/register",
+                    Utils.baseUrlApi + "/api/v1/devices/register",
                     paramsJson,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
@@ -152,37 +159,76 @@ class LoadingScreenFragment : Fragment() {
                         downloadFinished()
                     },
                     { error ->
-                        Log.i("Error", error.message!!)
+                        showConnectionErrorMessage()
                     })
 
+                request.tag = "download"
                 requestQueue.add(request)
             }
         }
     }
 
-    private fun getPaintQty() {
+    private fun getDeviceInfo() {
         context?.apply {
             val uniqueId = SessionSettings.instance.uniqueId
 
             uniqueId?.apply {
                 val request = JsonObjectRequest(
                     Request.Method.GET,
-                    "http://192.168.200.69:5000/api/v1/devices/$uniqueId/paint",
+                    Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
                     null,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                        SessionSettings.instance.xp = response.getInt("xp")
+
+                        StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                        StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                        StatTracker.instance.totalPaintAccrued = response.getInt("tp")
+                        StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
+                        StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
 
                         doneLoadingPaintQty = true
                         downloadFinished()
                     },
                     { error ->
-                        error.message?.apply {
-                            Log.i("Error", this)
-                        }
+                        showConnectionErrorMessage()
                     })
 
+                request.tag = "download"
                 requestQueue.add(request)
             }
+        }
+    }
+
+    private fun showConnectionErrorMessage() {
+        (context as Activity).runOnUiThread {
+            requestQueue.cancelAll("download")
+
+            var errorType = 0
+            var message = "Oops, could not find world pixel data. Please try again"
+
+            context?.apply {
+                if (!Utils.isNetworkAvailable(this)) {
+                    errorType = 1
+                    message = "No network connectivity"
+                }
+            }
+
+            AlertDialog.Builder(context)
+                .setMessage(message)
+                // The dialog is automatically dismissed when a dialog button is clicked.
+                .setPositiveButton(
+                    android.R.string.ok,
+                    object : DialogInterface.OnClickListener {
+                        override fun onClick(dialog: DialogInterface?, id: Int) {
+                            dialog?.dismiss()
+                            dataLoadingCallback?.onConnectionError(errorType)
+                        }
+                    })
+                .setOnDismissListener {
+                    dataLoadingCallback?.onConnectionError(errorType)
+                }
+                .show()
         }
     }
 

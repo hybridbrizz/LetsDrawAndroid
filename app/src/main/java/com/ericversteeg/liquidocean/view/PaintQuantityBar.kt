@@ -5,7 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
-import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 
 class PaintQuantityBar: View, PaintQtyListener {

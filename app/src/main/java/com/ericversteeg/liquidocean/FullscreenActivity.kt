@@ -4,24 +4,23 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
-import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
-import com.ericversteeg.liquidocean.fragment.LoadingScreenFragment
-import com.ericversteeg.liquidocean.fragment.MenuFragment
-import com.ericversteeg.liquidocean.fragment.OptionsFragment
-import com.ericversteeg.liquidocean.helper.SessionSettings
-import com.ericversteeg.liquidocean.listener.DataLoadingCallback
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasFragmentListener
-import com.ericversteeg.liquidocean.listener.MenuButtonListener
-import com.ericversteeg.liquidocean.listener.OptionsListener
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.fragment.*
+import com.ericversteeg.liquidocean.helper.TrustAllSSLCerts
+import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.*
+import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener {
+class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener, StatsFragmentListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -56,19 +55,33 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         hide()
 
         showMenuFragment()
-    }
 
-    override fun onResume() {
-        super.onResume()
+        TrustAllSSLCerts.trust()
 
         // load session settings
         SessionSettings.instance.load(this)
+
+        // load stat tracker
+        StatTracker.instance.load(this)
+
+        // after device settings have been loaded
+        getDeviceInfo()
     }
 
     override fun onPause() {
         super.onPause()
 
         SessionSettings.instance.save(this)
+
+        StatTracker.instance.save(this)
+    }
+
+    private fun showStatsFragment() {
+        val frag = StatsFragment()
+
+        frag.statsFragmentListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
     private fun showMenuFragment() {
@@ -125,8 +138,41 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
+    private fun getDeviceInfo() {
+        val requestQueue = Volley.newRequestQueue(this)
+
+        val uniqueId = SessionSettings.instance.uniqueId
+
+        uniqueId?.apply {
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
+                null,
+                { response ->
+                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                    SessionSettings.instance.xp = response.getInt("xp")
+
+                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
+                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
+                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
+                },
+                { error ->
+
+                })
+
+            requestQueue.add(request)
+        }
+    }
+
+    // data load callback
     override fun onDataLoaded(world: Boolean) {
         showInteractiveCanvasFragment(world)
+    }
+
+    override fun onConnectionError(type: Int) {
+        showMenuFragment()
     }
 
     // menu buttons
@@ -140,7 +186,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 showOptionsFragment()
             }
             MenuFragment.statsMenuIndex -> {
-
+                showStatsFragment()
             }
             MenuFragment.exitMenuIndex -> {
                 finish()
@@ -167,6 +213,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     override fun onInteractiveCanvasBack() {
+        showMenuFragment()
+    }
+
+    override fun onStatsBack() {
         showMenuFragment()
     }
 }

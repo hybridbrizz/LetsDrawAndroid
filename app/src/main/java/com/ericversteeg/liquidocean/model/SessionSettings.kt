@@ -1,11 +1,9 @@
-package com.ericversteeg.liquidocean.helper
+package com.ericversteeg.liquidocean.model
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
-import android.util.Log
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -14,6 +12,9 @@ class SessionSettings {
     private val spKey = "MyPrefs"
 
     var uniqueId: String? = null
+
+    var googleAuth = false
+
     var sentUniqueId = false
 
     var paintColor = Color.WHITE
@@ -33,6 +34,8 @@ class SessionSettings {
     var paintQtyListeners: MutableList<PaintQtyListener?> = ArrayList()
 
     var darkIcons = false
+
+    var xp = 0
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -59,6 +62,10 @@ class SessionSettings {
 
         ed.putBoolean("sent_uuid", sentUniqueId)
 
+        ed.putInt("xp", xp)
+
+        ed.putBoolean("google_auth", googleAuth)
+
         ed.apply()
     }
 
@@ -71,6 +78,10 @@ class SessionSettings {
 
         uniqueId = getSharedPrefs(context).getString("installation_id", UUID.randomUUID().toString())
         sentUniqueId = getSharedPrefs(context).getBoolean("sent_uuid", false)
+
+        xp = getSharedPrefs(context).getInt("xp", 0)
+
+        googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
     }
 
     companion object {

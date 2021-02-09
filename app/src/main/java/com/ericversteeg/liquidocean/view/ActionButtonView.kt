@@ -7,8 +7,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
-import com.ericversteeg.liquidocean.helper.SessionSettings
-import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.ericversteeg.liquidocean.model.SessionSettings
 
 class ActionButtonView: View {
 

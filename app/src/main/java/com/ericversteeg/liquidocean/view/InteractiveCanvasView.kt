@@ -6,12 +6,9 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintSet
-import com.ericversteeg.liquidocean.helper.SessionSettings
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import org.json.JSONArray
-import kotlin.math.min
 
 class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
