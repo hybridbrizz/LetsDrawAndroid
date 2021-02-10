@@ -8,6 +8,7 @@ import android.view.*
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
+import com.ericversteeg.liquidocean.listener.PaintActionListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 
 class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
@@ -25,6 +26,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
     var oldScaleFactor = 0F
     var oldPpu = 0
+
+    var paintActionListener: PaintActionListener? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -89,6 +92,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                         // paint
                         interactiveCanvas.paintUnitOrUndo(unitPoint)
                     }
+
+                    paintActionListener?.onPaintStart()
                 }
 
                 if (interactiveCanvas.restorePoints.size == 1) {

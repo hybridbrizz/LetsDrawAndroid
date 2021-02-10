@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
 
 class ActionButtonView: View {
@@ -308,7 +309,12 @@ class ActionButtonView: View {
         }
 
         if (!color) {
-            paint = whitePaint
+            if (SessionSettings.instance.panelBackgroundResId == R.drawable.marble_2) {
+                paint = blackPaint
+            }
+            else {
+                paint = whitePaint
+            }
 
             val outValue = TypedValue()
             context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
@@ -345,7 +351,12 @@ class ActionButtonView: View {
         }
 
         if (!color) {
-            paint = whitePaint
+            if (SessionSettings.instance.panelBackgroundResId == R.drawable.marble_2) {
+                paint = blackPaint
+            }
+            else {
+                paint = whitePaint
+            }
 
             val outValue = TypedValue()
             context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)

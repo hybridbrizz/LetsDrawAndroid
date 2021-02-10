@@ -5,10 +5,12 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.listener.PaintActionListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import java.util.*
 
-class PaintQuantityBar: View, PaintQtyListener {
+class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
     val rows = 3
     val cols = 13
@@ -21,6 +23,8 @@ class PaintQuantityBar: View, PaintQtyListener {
     val linePaint = Paint()
 
     var world = true
+
+    var flashingError = false
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -136,7 +140,12 @@ class PaintQuantityBar: View, PaintQtyListener {
                     }
                 }
                 else {
-                    drawRect(rectForPixel((cols - 1) - x, 1), brownPaint)
+                    if (flashingError) {
+                        drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.redPaint)
+                    }
+                    else {
+                        drawRect(rectForPixel((cols - 1) - x, 1), brownPaint)
+                    }
                 }
 
                 if (x < cols - 2) {
@@ -148,7 +157,25 @@ class PaintQuantityBar: View, PaintQtyListener {
         }
     }
 
+    private fun flashError() {
+        flashingError = true
+        invalidate()
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                flashingError = false
+                invalidate()
+            }
+
+        }, 1500)
+    }
+
     override fun paintQtyChanged(qty: Int) {
         invalidate()
+    }
+
+    override fun onPaintStart() {
+        if (SessionSettings.instance.dropsAmt == 0) {
+            flashError()
+        }
     }
 }

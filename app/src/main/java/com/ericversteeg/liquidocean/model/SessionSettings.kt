@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.model
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import java.util.*
 import kotlin.collections.ArrayList
@@ -37,6 +38,16 @@ class SessionSettings {
 
     var xp = 0
 
+    var panelBackgroundResId = R.drawable.wood_texture_light
+
+    private val defaultCanvasLockBorderColor = Color.parseColor("#66FF0000")
+
+    var emittersEnabled = true
+    var canvasLockBorder = true
+    var canvasLockBorderColor = defaultCanvasLockBorderColor
+
+    var promptToExit = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -66,6 +77,16 @@ class SessionSettings {
 
         ed.putBoolean("google_auth", googleAuth)
 
+        ed.putInt("panel_texture_id", panelBackgroundResId)
+
+        ed.putBoolean("emitters", emittersEnabled)
+
+        ed.putBoolean("lock_border", canvasLockBorder)
+
+        ed.putInt("lock_border_color", canvasLockBorderColor)
+
+        ed.putBoolean("prompt_to_exit", promptToExit)
+
         ed.apply()
     }
 
@@ -93,6 +114,20 @@ class SessionSettings {
         xp = getSharedPrefs(context).getInt("xp", 0)
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
+
+        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.wood_texture_light)
+
+        emittersEnabled = getSharedPrefs(context).getBoolean("emitters", true)
+
+        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", true)
+
+        canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
+
+        promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", false)
+    }
+
+    fun resetCanvasLockBorderColor() {
+        canvasLockBorderColor = defaultCanvasLockBorderColor
     }
 
     companion object {

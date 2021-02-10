@@ -35,6 +35,8 @@ class StatsFragment: Fragment() {
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
 
+        stats_image.type = ActionButtonView.Type.STATS
+
         back_button.setOnClickListener {
             statsFragmentListener?.onStatsBack()
         }

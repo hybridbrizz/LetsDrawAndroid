@@ -2,12 +2,12 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.DialogInterface
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -88,8 +88,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                             (context as Activity).runOnUiThread {
                                 showDisconnectedMessage(0)
                             }
-                        }
-                        else {
+                        } else {
                             sendApiStatusCheck()
                         }
                     }
@@ -170,19 +169,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         context?.apply {
             if (world) {
-                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt("last_world_paint_color", surface_view.interactiveCanvas.getGridLineColor())
+                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
+                    "last_world_paint_color",
+                    surface_view.interactiveCanvas.getGridLineColor()
+                )
             }
             else {
-                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt("last_single_paint_color", surface_view.interactiveCanvas.getGridLineColor())
+                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
+                    "last_single_paint_color",
+                    surface_view.interactiveCanvas.getGridLineColor()
+                )
             }
         }
 
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.socketStatusCallback = this
+        surface_view.paintActionListener = paint_qty_bar
 
         paint_qty_bar.world = world
 
         color_picker_view.setSelectorColor(Color.WHITE)
+
+        context?.apply {
+            paint_panel.setBackgroundDrawable(resources.getDrawable(SessionSettings.instance.panelBackgroundResId))
+        }
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
@@ -240,9 +250,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 }.start()
 
-                paint_warning_frame.visibility = View.VISIBLE
-                paint_warning_frame.alpha = 0F
-                paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+                if (SessionSettings.instance.canvasLockBorder) {
+                    context?.apply {
+                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
+                        drawable.setStroke(Utils.dpToPx(this, 4), SessionSettings.instance.canvasLockBorderColor) // set stroke width and stroke color
+                    }
+
+                    paint_warning_frame.visibility = View.VISIBLE
+                    paint_warning_frame.alpha = 0F
+                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+                }
             }.start()
 
             surface_view.startPainting()
@@ -388,7 +405,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // back button
         back_button.setOnClickListener {
-            interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+            if (SessionSettings.instance.promptToExit) {
+                showExitPrompt()
+            }
+            else {
+                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+            }
         }
 
         context?.apply {
@@ -582,41 +604,58 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     private fun startParticleEmitters() {
-        topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        topLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
-        topLeftParticleSystem?.setRotationSpeed(144f)
-        topLeftParticleSystem?.setAcceleration(0.00005f, 90)
-        topLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-        topLeftParticleSystem?.emit(top_left_anchor, 16)
+        if (SessionSettings.instance.emittersEnabled) {
+            topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+            topLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
+            topLeftParticleSystem?.setRotationSpeed(144f)
+            topLeftParticleSystem?.setAcceleration(0.00005f, 90)
+            topLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+            topLeftParticleSystem?.emit(top_left_anchor, 16)
 
-        topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        topRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
-        topRightParticleSystem?.setRotationSpeed(144f)
-        topRightParticleSystem?.setAcceleration(0.00005f, 90)
-        topRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-        topRightParticleSystem?.emit(top_right_anchor, 16)
+            topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+            topRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
+            topRightParticleSystem?.setRotationSpeed(144f)
+            topRightParticleSystem?.setAcceleration(0.00005f, 90)
+            topRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+            topRightParticleSystem?.emit(top_right_anchor, 16)
 
-        bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        bottomLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
-        bottomLeftParticleSystem?.setRotationSpeed(144f)
-        bottomLeftParticleSystem?.setAcceleration(0.00005f, 90)
-        bottomLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-        bottomLeftParticleSystem?.emit(bottom_left_anchor, 16)
+            bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+            bottomLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
+            bottomLeftParticleSystem?.setRotationSpeed(144f)
+            bottomLeftParticleSystem?.setAcceleration(0.00005f, 90)
+            bottomLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+            bottomLeftParticleSystem?.emit(bottom_left_anchor, 16)
 
-        bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-        bottomRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
-        bottomRightParticleSystem?.setRotationSpeed(144f)
-        bottomRightParticleSystem?.setAcceleration(0.00005f, 90)
-        bottomRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-        bottomRightParticleSystem?.emit(bottom_right_anchor, 16)
-
+            bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
+            bottomRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
+            bottomRightParticleSystem?.setRotationSpeed(144f)
+            bottomRightParticleSystem?.setAcceleration(0.00005f, 90)
+            bottomRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
+            bottomRightParticleSystem?.emit(bottom_right_anchor, 16)
+        }
     }
 
     private fun stopEmittingParticles() {
-        topLeftParticleSystem?.stopEmitting()
-        topRightParticleSystem?.stopEmitting()
-        bottomLeftParticleSystem?.stopEmitting()
-        bottomRightParticleSystem?.stopEmitting()
+        if (SessionSettings.instance.emittersEnabled) {
+            topLeftParticleSystem?.stopEmitting()
+            topRightParticleSystem?.stopEmitting()
+            bottomLeftParticleSystem?.stopEmitting()
+            bottomRightParticleSystem?.stopEmitting()
+        }
+    }
+
+    private fun showExitPrompt() {
+        AlertDialog.Builder(context)
+            .setMessage(resources.getString(R.string.alert_message_exit_canvas))
+            .setPositiveButton(
+                android.R.string.yes
+            ) { dialog, _ ->
+                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+                dialog?.dismiss()
+            }
+            .setNegativeButton(android.R.string.no
+            ) { dialog, _ -> dialog?.dismiss() }
+            .show()
     }
 
     // interactive canvas drawer callback
