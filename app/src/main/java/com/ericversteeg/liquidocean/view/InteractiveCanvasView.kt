@@ -1,15 +1,19 @@
 package com.ericversteeg.liquidocean.view
 
 import android.content.Context
+import android.graphics.Point
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasGestureListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
 import com.ericversteeg.liquidocean.listener.PaintActionListener
+import com.ericversteeg.liquidocean.listener.PixelHistoryListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import org.json.JSONArray
 
 class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
@@ -28,6 +32,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
     var oldPpu = 0
 
     var paintActionListener: PaintActionListener? = null
+
+    var lastPanOrScaleTime = 0L
+
+    var pixelHistoryListener: PixelHistoryListener? = null
+    var gestureListener: InteractiveCanvasGestureListener? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -71,6 +80,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             // Let the ScaleGestureDetector inspect all events.
             mPanDetector.onTouchEvent(ev)
             mScaleDetector.onTouchEvent(ev)
+            mTapDetector.onTouchEvent(ev)
         }
         else if (mode == Mode.PAINTING) {
 
@@ -107,7 +117,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 unitPoint?.apply {
-                    Log.i("Unit Tap", "Tapped on unit $unitPoint")
+                    // Log.i("Unit Tap", "Tapped on unit $unitPoint")
 
                     if (undo) {
                         // undo
@@ -183,6 +193,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             // Log.i("Drag distance", "x=$distanceX, y=$distanceY")
             interactiveCanvas.translateBy(distanceX, distanceY)
 
+            lastPanOrScaleTime = System.currentTimeMillis()
+
+            gestureListener?.onInteractiveCanvasScale()
+
             return true
         }
     }
@@ -207,11 +221,36 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             interactiveCanvas.updateDeviceViewport(context, true)
             interactiveCanvas.drawCallbackListener?.notifyRedraw()
 
+            lastPanOrScaleTime = System.currentTimeMillis()
+
+            gestureListener?.onInteractiveCanvasScale()
+
             return true
         }
     }
 
     private val mScaleDetector = ScaleGestureDetector(context, scaleListener)
+
+    // pixel tap
+    private val mTapListener = object : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onSingleTapUp(e: MotionEvent?): Boolean {
+            e?.apply {
+                if (System.currentTimeMillis() - lastPanOrScaleTime > 500) {
+                    val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
+
+                    if (unitPoint != null) {
+                        interactiveCanvas.lastSelectedUnitPoint = unitPoint
+                        pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
+                    }
+                }
+            }
+
+            return true
+        }
+    }
+
+    private val mTapDetector = GestureDetector(context, mTapListener)
 
     override fun notifyScaleCancelled() {
         mScaleFactor = oldScaleFactor

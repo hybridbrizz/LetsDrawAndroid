@@ -48,6 +48,14 @@ class SessionSettings {
 
     var promptToExit = false
 
+    var timeSync = 0L
+    set(value) {
+        field = value
+        nextPaintTime = System.currentTimeMillis() + value * 1000
+    }
+
+    var nextPaintTime = 0L
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }

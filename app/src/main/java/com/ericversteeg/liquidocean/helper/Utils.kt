@@ -14,12 +14,15 @@ class Utils {
         val baseUrlApi = "https://192.168.200.69:5000"
         val baseUrlSocket = "https://192.168.200.69:5010"
 
-        fun dpToPx(context: Context, dp: Int): Int {
-            return TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dp.toFloat(),
-                context.resources.displayMetrics
-            ).toInt()
+        fun dpToPx(context: Context?, dp: Int): Int {
+            context?.apply {
+                return TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    dp.toFloat(),
+                    context.resources.displayMetrics
+                ).toInt()
+            }
+            return 0
         }
 
         fun isColorDark(color: Int): Boolean {

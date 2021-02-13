@@ -7,9 +7,9 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
-import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintSelectionListener
+import com.ericversteeg.liquidocean.model.SessionSettings
 
 class PaintColorIndicator : View {
 

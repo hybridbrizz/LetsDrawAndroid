@@ -3,9 +3,11 @@ package com.ericversteeg.liquidocean.view
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.listener.PaintActionListener
+import com.ericversteeg.liquidocean.listener.PaintBarActionListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import java.util.*
@@ -25,6 +27,10 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     var world = true
 
     var flashingError = false
+
+    var firstClickTime = 0L
+
+    var actionListener: PaintBarActionListener? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -61,6 +67,25 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
+    }
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event?.action == MotionEvent.ACTION_DOWN) {
+            /* if (firstClickTime == 0L) {
+                firstClickTime = System.currentTimeMillis()
+            }
+            else {
+                if (System.currentTimeMillis() - firstClickTime < 500L) {
+                    actionListener?.onPaintBarDoubleTapped()
+                }
+
+                firstClickTime = 0L
+            } */
+
+            actionListener?.onPaintBarDoubleTapped()
+        }
+
+        return super.onTouchEvent(event)
     }
 
     override fun onDraw(canvas: Canvas?) {

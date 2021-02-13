@@ -3,10 +3,7 @@ package com.ericversteeg.liquidocean.fragment
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.*
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +12,7 @@ import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -27,13 +25,16 @@ import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import okhttp3.internal.Util
+import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
+import java.lang.IllegalStateException
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener, SocketStatusCallback {
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener, InteractiveCanvasGestureListener {
 
     var scaleFactor = 1f
 
@@ -48,6 +49,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var singlePlayBackgroundType: ActionButtonView.Type? = null
 
     var interactiveCanvasFragmentListener: InteractiveCanvasFragmentListener? = null
+
+    var paintEventTimer: Timer? = null
+
+    val firstInfoTapFixYOffset = 0
+    var firstInfoTap = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,6 +80,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             SessionSettings.instance.saveLastPaintColor(this, world)
         }
+
+        paintEventTimer?.cancel()
     }
 
     override fun onResume() {
@@ -94,6 +102,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     }
                 }
             }, 0, 1000 * 60)
+
+            getPaintTimerInfo()
         }
     }
 
@@ -148,6 +158,117 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             .show()
     }
 
+    private fun getPaintTimerInfo() {
+        val requestQueue = Volley.newRequestQueue(context)
+        context?.apply {
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                Utils.baseUrlApi + "/api/v1/paint/time/sync",
+                null,
+                { response ->
+                    (context as Activity).runOnUiThread {
+                        SessionSettings.instance.timeSync = response.getInt("s").toLong()
+                        setupPaintEventTimer()
+                    }
+                },
+                { error ->
+                    (context as Activity).runOnUiThread {
+
+                    }
+                })
+
+            requestQueue.add(request)
+        }
+    }
+
+    private fun setupPaintEventTimer() {
+        paintEventTimer = Timer()
+        paintEventTimer?.schedule(object: TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
+                        SessionSettings.instance.nextPaintTime = SessionSettings.instance.nextPaintTime + 300 * 1000
+                    }
+
+                    var timeUntil = SessionSettings.instance.nextPaintTime
+
+                    var m = (timeUntil - System.currentTimeMillis()) / 1000 / 60
+                    var s = ((timeUntil - System.currentTimeMillis()) / 1000) % 60
+
+                    if (m == 0L) {
+                        try {
+                            paint_time_info.text = "${s}s"
+                        }
+                        catch (ex: IllegalStateException) {
+                            
+                        }
+                    }
+                    else {
+                        try {
+                            paint_time_info.text = "${m}m ${s}s"
+                        }
+                        catch (ex: IllegalStateException) {
+
+                        }
+                    }
+                }
+            }
+        }, 0, 1000)
+    }
+
+    // pixel history listener
+    override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
+        fragmentManager?.apply {
+            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(surface_view.interactiveCanvas.lastSelectedUnitPoint), object: PixelHistoryCallback {
+                override fun onHistoryJsonResponse(historyJson: JSONArray) {
+                    // set bottom-left of view to screenPoint
+
+                    val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                    val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(context, 10)).toFloat()
+
+                    pixel_history_fragment_container.x = dX
+                    pixel_history_fragment_container.y = dY
+
+                    if (firstInfoTap) {
+                        pixel_history_fragment_container.y -= Utils.dpToPx(context, firstInfoTapFixYOffset)
+                        firstInfoTap = false
+                    }
+
+                    view?.apply {
+                        if (pixel_history_fragment_container.x < 0) {
+                            pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                        }
+                        else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width) {
+                            pixel_history_fragment_container.x = width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(context, 20).toFloat()
+                        }
+
+                        if (pixel_history_fragment_container.y < 0) {
+                            pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                        }
+                        else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height) {
+                            pixel_history_fragment_container.y = height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(context, 20).toFloat()
+                        }
+
+                        val fragment = PixelHistoryFragment()
+                        fragment.pixelHistoryJson = historyJson
+
+                        beginTransaction().replace(R.id.pixel_history_fragment_container, fragment).commit()
+
+                        pixel_history_fragment_container.visibility = View.VISIBLE
+                    }
+                }
+            })
+        }
+    }
+
+    override fun onInteractiveCanvasPan() {
+        pixel_history_fragment_container.visibility = View.GONE
+    }
+
+    override fun onInteractiveCanvasScale() {
+        pixel_history_fragment_container.visibility = View.GONE
+    }
+
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -182,6 +303,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         }
 
+        surface_view.pixelHistoryListener = this
+        surface_view.gestureListener = this
+
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.socketStatusCallback = this
         surface_view.paintActionListener = paint_qty_bar
@@ -193,6 +317,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         context?.apply {
             paint_panel.setBackgroundDrawable(resources.getDrawable(SessionSettings.instance.panelBackgroundResId))
         }
+
+        pixel_history_fragment_container.x = 0F
+        pixel_history_fragment_container.y = 0F
+
+        paint_qty_bar.actionListener = this
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
@@ -511,8 +640,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 gridLinePaintAlt.color = surface_view.interactiveCanvas.getGridLineColor()
             }
 
-
-
             val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
             val unitsTall = canvas.height / surface_view.interactiveCanvas.ppu
 
@@ -692,5 +819,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     override fun onNewRecentColors(colors: Array<Int>) {
         setupRecentColors(colors)
+    }
+
+    override fun onPaintBarDoubleTapped() {
+        if (paint_time_info.visibility == View.VISIBLE) {
+            paint_time_info.visibility = View.INVISIBLE
+        }
+        else {
+            paint_time_info.visibility = View.VISIBLE
+        }
     }
 }

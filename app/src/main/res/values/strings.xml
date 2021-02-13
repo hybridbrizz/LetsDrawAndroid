@@ -21,4 +21,5 @@
     <string name="option_prompt_to_exit_title">Prompt Back</string>
 
     <string name="alert_message_exit_canvas">Are you sure you would like to go back?</string>
+    <string name="no_pixel_history">No data.</string>
 </resources>

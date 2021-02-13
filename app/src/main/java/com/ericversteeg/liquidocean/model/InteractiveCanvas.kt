@@ -10,7 +10,11 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import io.socket.client.Socket
@@ -52,6 +56,8 @@ class InteractiveCanvas(var context: Context) {
     val minScaleFactor = 0.15F
 
     val startScaleFactor = 0.5f
+
+    var lastSelectedUnitPoint = Point(0, 0)
 
     var world = false
     set(value) {
@@ -373,18 +379,23 @@ class InteractiveCanvas(var context: Context) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
             if (restorePoint == null && (SessionSettings.instance.dropsAmt > 0 || !world)) {
-                // paint
-                restorePoints.add(
-                    RestorePoint(
-                        unitPoint,
-                        arr[unitPoint.y][unitPoint.x],
-                        SessionSettings.instance.paintColor
-                    )
-                )
-                arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+                val unitColor = arr[unitPoint.y][unitPoint.x]
 
-                if (world) {
-                    SessionSettings.instance.dropsAmt -= 1
+                if (SessionSettings.instance.paintColor != unitColor) {
+                    Log.i("Interactive Canvas", "Paint!")
+                    // paint
+                    restorePoints.add(
+                        RestorePoint(
+                            unitPoint,
+                            arr[unitPoint.y][unitPoint.x],
+                            SessionSettings.instance.paintColor
+                        )
+                    )
+                    arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+
+                    if (world) {
+                        SessionSettings.instance.dropsAmt -= 1
+                    }
                 }
             }
         }
@@ -584,6 +595,31 @@ class InteractiveCanvas(var context: Context) {
         }
 
         ed.apply()
+    }
+
+    fun getPixelHistory(pixelId: Int, callback: PixelHistoryCallback?) {
+        val requestQueue = Volley.newRequestQueue(context)
+        val request = JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
+            null,
+            { response ->
+                (context as Activity).runOnUiThread {
+                    callback?.onHistoryJsonResponse(response.getJSONArray("data"))
+                }
+            },
+            { error ->
+                (context as Activity).runOnUiThread {
+
+                }
+            })
+
+        requestQueue.add(request)
+
+    }
+
+    fun pixelIdForUnitPoint(unitPoint: Point): Int {
+        return (unitPoint.y * cols + unitPoint.x) + 1
     }
 
     class RestorePoint(var point: Point, var color: Int, var newColor: Int)
