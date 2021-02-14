@@ -1,6 +1,7 @@
 package com.ericversteeg.liquidocean.view
 
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
 import android.util.AttributeSet
@@ -20,7 +21,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
     enum class Mode {
         EXPLORING,
         PAINTING,
-        PAINT_SELECTION
+        PAINT_SELECTION,
+        EXPORTING
     }
 
     private var mode = Mode.EXPLORING
@@ -146,6 +148,15 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                 }
             }
         }
+        else if (mode == Mode.EXPORTING) {
+            if (ev.action == MotionEvent.ACTION_DOWN) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                if (unitPoint != null) {
+                    interactiveCanvas.exportSelection(unitPoint)
+                }
+            }
+        }
 
         return true
     }
@@ -191,7 +202,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         ): Boolean {
 
             // Log.i("Drag distance", "x=$distanceX, y=$distanceY")
-            interactiveCanvas.translateBy(distanceX, distanceY)
+            interactiveCanvas.translateBy(context, distanceX, distanceY)
 
             lastPanOrScaleTime = System.currentTimeMillis()
 
@@ -255,5 +266,17 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
     override fun notifyScaleCancelled() {
         mScaleFactor = oldScaleFactor
         interactiveCanvas.ppu = oldPpu
+    }
+
+    fun startExport() {
+        mode = Mode.EXPORTING
+    }
+
+    fun endExport() {
+        mode = Mode.EXPLORING
+    }
+
+    fun isExporting(): Boolean {
+        return mode == Mode.EXPORTING
     }
 }

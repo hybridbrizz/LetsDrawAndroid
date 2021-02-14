@@ -46,6 +46,7 @@ class InteractiveCanvas(var context: Context) {
     var scaleCallbackListener: InteractiveCanvasScaleCallback? = null
     var paintSelectionListener: PaintSelectionListener? = null
     var recentColorsListener: RecentColorsListener? = null
+    var artExportListener: ArtExportListener? = null
 
     var recentColorsList: MutableList<Int> = ArrayList()
     val maxRecents = 8
@@ -379,34 +380,38 @@ class InteractiveCanvas(var context: Context) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
             if (restorePoint == null && (SessionSettings.instance.dropsAmt > 0 || !world)) {
-                val unitColor = arr[unitPoint.y][unitPoint.x]
+                if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
+                    val unitColor = arr[unitPoint.y][unitPoint.x]
 
-                if (SessionSettings.instance.paintColor != unitColor) {
-                    Log.i("Interactive Canvas", "Paint!")
-                    // paint
-                    restorePoints.add(
-                        RestorePoint(
-                            unitPoint,
-                            arr[unitPoint.y][unitPoint.x],
-                            SessionSettings.instance.paintColor
+                    if (SessionSettings.instance.paintColor != unitColor) {
+                        Log.i("Interactive Canvas", "Paint!")
+                        // paint
+                        restorePoints.add(
+                            RestorePoint(
+                                unitPoint,
+                                arr[unitPoint.y][unitPoint.x],
+                                SessionSettings.instance.paintColor
+                            )
                         )
-                    )
-                    arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+                        arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
 
-                    if (world) {
-                        SessionSettings.instance.dropsAmt -= 1
+                        if (world) {
+                            SessionSettings.instance.dropsAmt -= 1
+                        }
                     }
                 }
             }
         }
         else if (mode == 1) {
             if (restorePoint != null) {
-                // undo
-                restorePoints.remove(restorePoint)
-                arr[unitPoint.y][unitPoint.x] = restorePoint.color
+                if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
+                    // undo
+                    restorePoints.remove(restorePoint)
+                    arr[unitPoint.y][unitPoint.x] = restorePoint.color
 
-                if (world) {
-                    SessionSettings.instance.dropsAmt += 1
+                    if (world) {
+                        SessionSettings.instance.dropsAmt += 1
+                    }
                 }
             }
         }
@@ -491,6 +496,16 @@ class InteractiveCanvas(var context: Context) {
         return null
     }
 
+    fun unitInRestorePoints(unitPoint: Point, list: List<RestorePoint>): RestorePoint? {
+        for(restorePoint: RestorePoint in list) {
+            if (restorePoint.point.x == unitPoint.x && restorePoint.point.y == unitPoint.y) {
+                return restorePoint
+            }
+        }
+
+        return null
+    }
+
     fun updateDeviceViewport(
         context: Context,
         canvasCenterX: Float,
@@ -541,28 +556,34 @@ class InteractiveCanvas(var context: Context) {
         return RectF(0F, 0F, 0F, 0F)
     }
 
-    fun translateBy(x: Float, y: Float) {
+    fun translateBy(context: Context, x: Float, y: Float) {
         deviceViewport?.apply {
+            var margin = Utils.dpToPx(context, 200) / ppu
+
             var dX = x / ppu
             var dY = y / ppu
 
-            if (left + dX < 0) {
-                val diff = left
+            val leftBound = -margin
+            if (left + dX < leftBound) {
+                val diff = left - leftBound
                 dX = diff
             }
 
-            if (right + dX > cols) {
-                val diff = cols - right
+            val rightBound = cols + margin
+            if (right + dX > rightBound) {
+                val diff = rightBound - right
                 dX = diff
             }
 
-            if (top + dY < 0) {
-                val diff = top
+            val topBound = -margin
+            if (top + dY < topBound) {
+                val diff = top - topBound
                 dY = diff
             }
 
-            if (bottom + dY > rows) {
-                val diff = rows - bottom
+            val bottomBound = rows + margin
+            if (bottom + dY > bottomBound) {
+                val diff = bottomBound - bottom
                 dY = diff
             }
 
@@ -620,6 +641,52 @@ class InteractiveCanvas(var context: Context) {
 
     fun pixelIdForUnitPoint(unitPoint: Point): Int {
         return (unitPoint.y * cols + unitPoint.x) + 1
+    }
+
+    fun exportSelection(onePointWithin: Point) {
+        if (arr[onePointWithin.y][onePointWithin.x] != Color.parseColor("#FF333333") &&
+            arr[onePointWithin.y][onePointWithin.x] != Color.parseColor("#FF666666")) {
+            artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
+        }
+    }
+
+    private fun getPixelsInForm(unitPoint: Point): List<RestorePoint> {
+        val pixels: MutableList<RestorePoint> = ArrayList()
+
+        stepPixelsInForm(unitPoint.x, unitPoint.y, pixels)
+
+        return pixels
+    }
+
+    private fun stepPixelsInForm(x: Int, y: Int, pixelsOut: MutableList<RestorePoint>) {
+        // a background color
+        // or already in list
+        // TODO: represent background pixels as more than just color
+        if (arr[y][x] == Color.parseColor("#FF333333") ||
+            arr[y][x] == Color.parseColor("#FF666666") ||
+                unitInRestorePoints(Point(x, y), pixelsOut) != null) {
+            return
+        }
+        else {
+            pixelsOut.add(RestorePoint(Point(x, y), arr[y][x], arr[y][x]))
+        }
+
+        // left
+        stepPixelsInForm(x - 1, y, pixelsOut)
+        // top
+        stepPixelsInForm(x, y - 1, pixelsOut)
+        // right
+        stepPixelsInForm(x + 1, y, pixelsOut)
+        // bottom
+        stepPixelsInForm(x, y + 1, pixelsOut)
+        // top-left
+        stepPixelsInForm(x - 1, y - 1, pixelsOut)
+        // top-right
+        stepPixelsInForm(x + 1, y - 1, pixelsOut)
+        // bottom-left
+        stepPixelsInForm(x - 1, y + 1, pixelsOut)
+        // bottom-right
+        stepPixelsInForm(x + 1, y + 1, pixelsOut)
     }
 
     class RestorePoint(var point: Point, var color: Int, var newColor: Int)

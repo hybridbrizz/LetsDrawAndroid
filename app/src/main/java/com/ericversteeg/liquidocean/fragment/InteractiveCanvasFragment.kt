@@ -10,7 +10,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -20,10 +22,12 @@ import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
+import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import okhttp3.internal.Util
 import org.json.JSONArray
@@ -34,7 +38,9 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener, RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener, InteractiveCanvasGestureListener {
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
+    RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
+    InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener {
 
     var scaleFactor = 1f
 
@@ -105,6 +111,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             getPaintTimerInfo()
         }
+
+        surface_view.interactiveCanvas.drawCallbackListener = this
     }
 
     private fun sendApiStatusCheck() {
@@ -269,6 +277,44 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         pixel_history_fragment_container.visibility = View.GONE
     }
 
+    override fun onArtExported(pixelPositions: List<InteractiveCanvas.RestorePoint>) {
+        showExportBorder(false)
+
+        val fragment = ArtExportFragment()
+        fragment.art = pixelPositions
+        fragment.listener = this
+
+        fragmentManager?.apply {
+            // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+
+            beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
+
+            export_fragment_container.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onArtExportBack() {
+        fragmentManager?.popBackStack()
+
+        export_fragment_container.visibility = View.GONE
+        surface_view.endExport()
+
+        export_action.touchState = ActionButtonView.TouchState.INACTIVE
+    }
+
+    private fun showExportBorder(show: Boolean) {
+        if (show) {
+            context?.apply {
+                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
+                drawable.setStroke(Utils.dpToPx(this, 2), ActionButtonView.lightYellowSemiPaint.color) // set stroke width and stroke color
+            }
+            export_border_view.visibility = View.VISIBLE
+        }
+        else {
+            export_border_view.visibility = View.GONE
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -308,6 +354,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.socketStatusCallback = this
+        surface_view.interactiveCanvas.artExportListener = this
         surface_view.paintActionListener = paint_qty_bar
 
         paint_qty_bar.world = world
@@ -342,6 +389,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         recent_colors.type = ActionButtonView.Type.RECENT_COLORS
         recent_colors_button.actionBtnView = recent_colors
+
+        export_action.type = ActionButtonView.Type.EXPORT
+        export_button.actionBtnView = export_action
 
         setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
 
@@ -534,12 +584,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // back button
         back_button.setOnClickListener {
-            if (SessionSettings.instance.promptToExit) {
-                showExitPrompt()
+            if (surface_view.isExporting()) {
+                export_fragment_container.visibility = View.INVISIBLE
+                surface_view.endExport()
+
+                showExportBorder(false)
+                export_action.touchState = ActionButtonView.TouchState.INACTIVE
+
+                // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
             else {
-                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+                if (SessionSettings.instance.promptToExit) {
+                    showExitPrompt()
+                }
+                else {
+                    interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+                }
             }
+        }
+
+        // export button
+        export_button.setOnClickListener {
+            surface_view.startExport()
+            export_action.touchState = ActionButtonView.TouchState.ACTIVE
+
+            showExportBorder(true)
         }
 
         context?.apply {

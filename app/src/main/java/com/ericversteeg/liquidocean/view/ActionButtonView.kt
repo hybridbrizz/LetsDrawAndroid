@@ -24,6 +24,7 @@ class ActionButtonView: View {
         val redPaint = Paint()
         val yellowPaint = Paint()
         val lightYellowPaint = Paint()
+        val lightYellowSemiPaint = Paint()
         val lightRedPaint = Paint()
         val blackPaint = Paint()
         val thirdGray = Paint()
@@ -50,6 +51,7 @@ class ActionButtonView: View {
     enum class Type {
         NONE,
         BACK,
+        BACK_SOLID,
         PAINT_CLOSE,
         YES,
         NO,
@@ -62,6 +64,9 @@ class ActionButtonView: View {
         EXIT,
         SINGLE,
         WORLD,
+        EXPORT,
+        EXPORT_SOLID,
+        SAVE,
         BACKGROUND_BLACK,
         BACKGROUND_WHITE,
         BACKGROUND_PHOTOSHOP,
@@ -146,6 +151,7 @@ class ActionButtonView: View {
         lightGreenPaint.color = Color.parseColor("#62AD6C")
         lightAltGreenPaint.color = Color.parseColor("#B0FFC5")
         lightYellowPaint.color = Color.parseColor("#FAE38D")
+        lightYellowSemiPaint.color = Color.parseColor("#99FAE38D")
         lightRedPaint.color = Color.parseColor("#FB7E87")
 
         blackPaint.color = Color.parseColor("#FF000000")
@@ -174,6 +180,9 @@ class ActionButtonView: View {
             else if (type == Type.BACK) {
                 drawBackAction(touchState == TouchState.ACTIVE, canvas)
             }
+            else if (type == Type.BACK_SOLID) {
+                drawBackSolidAction(touchState == TouchState.ACTIVE, canvas)
+            }
             else if (type == Type.YES) {
                 drawYesAction(touchState == TouchState.ACTIVE, colorMode == ColorMode.COLOR, canvas)
             }
@@ -188,6 +197,15 @@ class ActionButtonView: View {
             }
             else if (type == Type.RECENT_COLOR) {
                 drawRecentColorAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.EXPORT) {
+                drawExportAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.EXPORT_SOLID) {
+                drawExportSoldAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.SAVE) {
+                drawSaveAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.PLAY) {
                 drawPlayAction(touchState == TouchState.ACTIVE, canvas)
@@ -268,6 +286,42 @@ class ActionButtonView: View {
         cols = 7
 
         var paint = semiLightPaint
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        if (light) {
+            paint = lightYellowPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(1, 1, paint, canvas)
+
+            // row 3
+            drawPixel(6, 2, paint, canvas)
+            drawPixel(5, 2, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+            drawPixel(3, 2, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+            drawPixel(0, 2, paint, canvas)
+
+            // row 4
+            drawPixel(1, 3, paint, canvas)
+
+            // row 5
+            drawPixel(2, 4, paint, canvas)
+        }
+    }
+
+    private fun drawBackSolidAction(light: Boolean, canvas: Canvas) {
+        rows = 5
+        cols = 7
+
+        var paint = semiPaint
         if (SessionSettings.instance.darkIcons) {
             paint = semiDarkPaint
         }
@@ -490,6 +544,93 @@ class ActionButtonView: View {
             drawPixel(1, 3, paint, canvas)
             drawPixel(2, 3, paint, canvas)
             drawPixel(3, 3, paint, canvas)
+        }
+    }
+
+    private fun drawExportAction(light: Boolean, canvas: Canvas) {
+        rows = 3
+        cols = 3
+
+        var paint = semiLightPaint
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        if (light) {
+            paint = lightYellowSemiPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+
+            // row 3
+            drawPixel(2, 2, paint, canvas)
+        }
+    }
+
+    private fun drawExportSoldAction(light: Boolean, canvas: Canvas) {
+        rows = 3
+        cols = 3
+
+        var paint = semiPaint
+
+        if (light) {
+            paint = lightYellowSemiPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+
+            // row 3
+            drawPixel(2, 2, paint, canvas)
+        }
+    }
+
+    private fun drawSaveAction(light: Boolean, canvas: Canvas) {
+        rows = 5
+        cols = 4
+
+        var paint = semiPaint
+
+        if (light) {
+            paint = lightYellowSemiPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(3, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+            drawPixel(3, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+            drawPixel(3, 3, paint, canvas)
+
+            // row 5
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(1, 4, paint, canvas)
+            drawPixel(2, 4, paint, canvas)
+            drawPixel(3, 4, paint, canvas)
         }
     }
 

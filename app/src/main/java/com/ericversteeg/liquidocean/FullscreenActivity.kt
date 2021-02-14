@@ -1,9 +1,10 @@
 package com.ericversteeg.liquidocean
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.os.StrictMode
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -112,7 +113,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showInteractiveCanvasFragment(world: Boolean, backgroundOption: ActionButtonView.Type? = null) {
+    private fun showInteractiveCanvasFragment(
+        world: Boolean,
+        backgroundOption: ActionButtonView.Type? = null
+    ) {
         val frag = InteractiveCanvasFragment()
         frag.world = world
         frag.interactiveCanvasFragmentListener = this
