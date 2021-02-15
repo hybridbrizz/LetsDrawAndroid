@@ -12,8 +12,11 @@
 
     <string name="stat_paint_accrued">Paint Accrued</string>
 
+    <string name="stat_world_xp">World Level</string>
+
     <string name="client_id">454898966293-ii55sno355a2jvrr0qllcljgfe49u9rj.apps.googleusercontent.com</string>
 
+    <string name="option_change_name_title">Change display name</string>
     <string name="option_paint_panel_texture_title">Paint Panel Background Texture</string>
     <string name="option_canvas_lock_border_title">Canvas Lock Border</string>
     <string name="option_emitters_container_title">Particle Emitters</string>

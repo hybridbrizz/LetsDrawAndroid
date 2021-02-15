@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             xmlns:tools="http://schemas.android.com/tools"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="#0099cc"
-             tools:context=".FullscreenActivity">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="#0099cc"
+        tools:context=".FullscreenActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
          is needed to present your content, e.g. VideoView, SurfaceView,
@@ -36,5 +37,75 @@
 
         </LinearLayout>
     </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/achievement_banner"
+            android:visibility="gone"
+            android:layout_width="450dp"
+            android:layout_height="100dp"
+            android:background="@drawable/achievement_banner_background"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal|top">
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:gravity="center_horizontal">
+
+            <TextView
+                    android:id="@+id/achievement_unlocked"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="28sp"
+                    android:textColor="@android:color/black"
+                    android:text="Achievement Unlocked!" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                <View
+                        android:id="@+id/achievement_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:background="#000"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent" />
+
+                <TextView
+                        android:id="@+id/achievement_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:textColor="#FF333333"
+                        android:layout_marginStart="5dp"
+                        app:layout_constraintLeft_toRightOf="@id/achievement_icon"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                        android:id="@+id/achievement_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:textColor="#FF666666"
+                        android:layout_marginStart="5dp"
+                        app:layout_constraintLeft_toRightOf="@id/achievement_icon"
+                        app:layout_constraintTop_toBottomOf="@id/achievement_name" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

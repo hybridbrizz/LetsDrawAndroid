@@ -97,14 +97,7 @@ class MenuFragment: Fragment() {
 
         single_button.setOnClickListener {
             context?.apply {
-                if (SessionSettings.instance.getSharedPrefs(this).contains("arr_single")) {
-                    menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
-                }
-                else {
-                    showSingleBackgroundOptions()
-
-                    backCount++
-                }
+                menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
             }
         }
 

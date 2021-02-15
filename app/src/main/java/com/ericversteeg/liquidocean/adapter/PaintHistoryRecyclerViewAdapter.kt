@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -15,6 +16,7 @@ import java.util.*
 class PaintHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONArray): RecyclerView.Adapter<PaintHistoryRecyclerViewAdapter.PaintHistoryViewHolder>() {
 
     private var pixelHistoryJson: JSONArray = pixelHistoryJson
+    var selectedItems = BooleanArray(pixelHistoryJson.length())
     var context: Context = context
 
     private var selectedPos = RecyclerView.NO_POSITION
@@ -28,27 +30,77 @@ class PaintHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
     }
 
     override fun onBindViewHolder(holder: PaintHistoryViewHolder, position: Int) {
-        val jsonObj = pixelHistoryJson.getJSONObject(pixelHistoryJson.length() - 1 - position)
-        holder.nameTextView.text = jsonObj.getString("name")
-        holder.colorView.setBackgroundColor(jsonObj.getInt("color"))
+        holder.backgroundView.setOnClickListener {
+            selectedItems[position] = !selectedItems[position]
 
+            setupViewHolder(holder, position)
+        }
+
+        setupViewHolder(holder, position)
+    }
+
+    private fun setupViewHolder(holder: PaintHistoryViewHolder, position: Int) {
+        val jsonObj = pixelHistoryJson.getJSONObject(pixelHistoryJson.length() - 1 - position)
         val timestamp = jsonObj.getInt("timestamp").toLong() * 1000
         val date = Date((timestamp))
-        val dateCal = GregorianCalendar()
-        dateCal.time = date
 
-        val nowCal = GregorianCalendar()
-        nowCal.time = date
-
-        if (dateCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR) && dateCal.get(Calendar.DAY_OF_YEAR) == nowCal.get(Calendar.DAY_OF_YEAR)) {
-            val simpleDateFormat =  SimpleDateFormat("hh:mm a", Locale.ENGLISH)
+        // selected
+        if (selectedItems[position]) {
+            val simpleDateFormat =  SimpleDateFormat("MM-dd-yyyy HH:mm", Locale.ENGLISH)
             val dateStr = simpleDateFormat.format(date).toLowerCase()
-            holder.dateTextView.text = dateStr
+            holder.nameTextView.text = ""
+            holder.dateTextView.text = ""
+            holder.fullDateView.text = dateStr
         }
         else {
-            val simpleDateFormat =  SimpleDateFormat("MM-dd hh:mm a", Locale.ENGLISH)
-            val dateStr = simpleDateFormat.format(date).toLowerCase()
-            holder.dateTextView.text = dateStr
+            holder.nameTextView.text = jsonObj.getString("name") + " (" + jsonObj.getInt("level") + ")"
+            holder.colorView.setBackgroundColor(jsonObj.getInt("color"))
+            holder.fullDateView.text = ""
+
+            val dateCal = GregorianCalendar()
+            dateCal.time = date
+
+            val nowCal = GregorianCalendar()
+            nowCal.time = Date()
+
+            val days = nowCal.get(Calendar.DAY_OF_YEAR) - dateCal.get(Calendar.DAY_OF_YEAR)
+            val sameYear = dateCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
+
+            if (days == 0 && sameYear) {
+                val simpleDateFormat =  SimpleDateFormat("hh:mm a", Locale.ENGLISH)
+                val dateStr = simpleDateFormat.format(date).toLowerCase()
+                holder.dateTextView.text = dateStr
+            }
+            else if (days == 1 && sameYear) {
+                holder.dateTextView.text = "Yesterday"
+            }
+            else if (days in 2..6 && sameYear) {
+                val simpleDateFormat =  SimpleDateFormat("EEEE", Locale.ENGLISH)
+                val dateStr = simpleDateFormat.format(date)
+                holder.dateTextView.text = dateStr
+            }
+            else if (days in 7..13 && sameYear) {
+                holder.dateTextView.text = "Week ago"
+            }
+            else if (days in 14..20 && sameYear) {
+                holder.dateTextView.text = "Two weeks ago"
+            }
+            else if (days in 21..28 && sameYear) {
+                holder.dateTextView.text = "Three weeks ago"
+            }
+            else if (days in 29..31 && sameYear) {
+                holder.dateTextView.text = "Four weeks ago"
+            }
+            else if (sameYear) {
+                val simpleDateFormat =  SimpleDateFormat("M", Locale.ENGLISH)
+                val dateStr = simpleDateFormat.format(date)
+                holder.dateTextView.text = dateStr
+            }
+            else {
+                val simpleDateFormat =  SimpleDateFormat("MM-dd-yy", Locale.ENGLISH)
+                val dateStr = simpleDateFormat.format(date).toLowerCase()
+                holder.dateTextView.text = dateStr
+            }
         }
     }
 
@@ -60,5 +112,7 @@ class PaintHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
         var nameTextView: TextView = v.findViewById(R.id.name_text)
         var colorView: View = v.findViewById(R.id.paint_color)
         var dateTextView: TextView = v.findViewById(R.id.date_text)
+        var backgroundView: ConstraintLayout = v.findViewById(R.id.background_view)
+        var fullDateView: TextView = v.findViewById(R.id.full_date_text)
     }
 }

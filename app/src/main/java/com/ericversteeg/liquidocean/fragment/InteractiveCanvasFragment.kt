@@ -52,7 +52,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var bottomRightParticleSystem: ParticleSystem? = null
 
     var world = false
-    var singlePlayBackgroundType: ActionButtonView.Type? = null
 
     var interactiveCanvasFragmentListener: InteractiveCanvasFragmentListener? = null
 
@@ -60,6 +59,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     val firstInfoTapFixYOffset = 0
     var firstInfoTap = true
+
+    var toolboxOpen = false
+
+    val paint = Paint()
+    val gridLinePaint = Paint()
+    val gridLinePaintAlt = Paint()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -319,13 +324,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // set single play background type, must call before setting interactiveCanvas.world
-        if (!world) {
-            singlePlayBackgroundType?.apply {
-                surface_view.interactiveCanvas.singlePlayBackgroundType = this
-            }
-        }
-
         // must call before darkIcons
         surface_view.interactiveCanvas.world = world
 
@@ -333,6 +331,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
         SessionSettings.instance.paintQtyListeners.add(this)
+
+        if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
+            SessionSettings.instance.darkIcons = true
+
+            invalidateButtons()
+        }
 
         context?.apply {
             if (world) {
@@ -393,6 +397,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         export_action.type = ActionButtonView.Type.EXPORT
         export_button.actionBtnView = export_action
 
+        background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
+        background_button.actionBtnView = background_action
+
+        open_tools_action.type = ActionButtonView.Type.NONE
+        open_tools_button.actionBtnView = open_tools_action
+
         setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
 
         color_picker_view.subscribe(object : ColorObserver {
@@ -416,6 +426,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_panel_button.setOnClickListener {
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
+
+            export_button.visibility = View.INVISIBLE
+            background_button.visibility = View.INVISIBLE
 
             paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
                 paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
@@ -464,7 +477,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_indicator_view.setPaintColor(initalColor)
                 color_picker_frame.visibility = View.GONE
 
-                paint_warning_frame.visibility = View.VISIBLE
+                if (SessionSettings.instance.canvasLockBorder) {
+                    paint_warning_frame.visibility = View.VISIBLE
+                }
 
                 paint_yes.visibility = View.VISIBLE
 
@@ -515,6 +530,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             recent_colors_button.visibility = View.GONE
             recent_colors_container.visibility = View.GONE
 
+            if (toolboxOpen) {
+                export_button.visibility = View.VISIBLE
+                background_button.visibility = View.VISIBLE
+            }
+
             back_button.visibility = View.VISIBLE
 
             stopEmittingParticles()
@@ -525,7 +545,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             if (color_picker_frame.visibility == View.VISIBLE) {
                 color_picker_frame.visibility = View.GONE
 
-                paint_warning_frame.visibility = View.VISIBLE
+                if (SessionSettings.instance.canvasLockBorder) {
+                    paint_warning_frame.visibility = View.VISIBLE
+                }
 
                 paint_yes.visibility = View.VISIBLE
 
@@ -611,6 +633,38 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             showExportBorder(true)
         }
 
+        // background button
+        background_button.setOnClickListener {
+            if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
+                SessionSettings.instance.backgroundColorsIndex = 0
+            }
+            else {
+                SessionSettings.instance.backgroundColorsIndex += 1
+            }
+
+            SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
+
+            invalidateButtons()
+
+            surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        }
+
+        // open tools button
+        open_tools_button.setOnClickListener {
+            if (!toolboxOpen) {
+                export_button.visibility = View.VISIBLE
+                background_button.visibility = View.VISIBLE
+
+                toolboxOpen = true
+            }
+            else {
+                export_button.visibility = View.INVISIBLE
+                background_button.visibility = View.INVISIBLE
+
+                toolboxOpen = false
+            }
+        }
+
         context?.apply {
             // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
         }
@@ -678,7 +732,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
-        val paint = Paint()
         paint.color = Color.parseColor("#FFFFFFFF")
 
         val canvas = holder.lockCanvas()
@@ -696,11 +749,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
         if (surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.gridLineThreshold) {
-            val gridLinePaint = Paint()
+
             gridLinePaint.strokeWidth = 1f
             gridLinePaint.color = Color.WHITE
 
-            val gridLinePaintAlt = Paint()
             gridLinePaintAlt.strokeWidth = 1f
             gridLinePaintAlt.color = Color.WHITE
 
@@ -769,13 +821,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             val startUnitIndexY = floor(top).toInt()
             val endUnitIndexY = ceil(bottom).toInt()
 
-            val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
+            // val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
 
             val rangeX = endUnitIndexX - startUnitIndexX
             val rangeY = endUnitIndexY - startUnitIndexY
 
-            val paint = Paint()
             paint.color = Color.BLACK
+
+            val backgroundColors = interactiveCanvas.getBackgroundColors(SessionSettings.instance.backgroundColorsIndex)
 
             for (x in 0..rangeX) {
                 for (y in 0..rangeY) {
@@ -783,7 +836,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     val unitY = y + startUnitIndexY
 
                     if (unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows) {
-                        paint.color = interactiveCanvas.arr[unitY][unitX]
+                        // background
+                        if (interactiveCanvas.arr[unitY][unitX] == 0) {
+                            if ((unitX + unitY) % 2 == 0) {
+                                paint.color = backgroundColors[0]
+                            }
+                            else {
+                                paint.color = backgroundColors[1]
+                            }
+                        }
+                        else {
+                            paint.color = interactiveCanvas.arr[unitY][unitX]
+                        }
                     }
                     else {
                         paint.color = Color.BLACK
@@ -897,5 +961,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         else {
             paint_time_info.visibility = View.VISIBLE
         }
+    }
+
+    fun invalidateButtons() {
+        back_action.invalidate()
+        paint_panel_action_view.invalidate()
+        export_action.invalidate()
+        background_action.invalidate()
     }
 }

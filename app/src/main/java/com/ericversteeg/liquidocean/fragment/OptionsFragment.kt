@@ -1,22 +1,37 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import android.widget.TextView
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.SignInActivity
 import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.*
+import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
 
@@ -46,6 +61,26 @@ class OptionsFragment: Fragment() {
 
         back_button.setOnClickListener {
             optionsListener?.onOptionsBack()
+        }
+
+        input_name.setText(SessionSettings.instance.displayName)
+
+        input_name.setOnEditorActionListener(object : TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    sendNameCheck(input_name.text.toString().trim())
+
+                    val inputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+
+                    return true
+                }
+                return false
+            }
+        })
+
+        change_name_button.setOnClickListener {
+            updateDisplayName(input_name.text.toString())
         }
 
         sign_in_button.setOnClickListener {
@@ -162,5 +197,80 @@ class OptionsFragment: Fragment() {
 
             optionsListener?.onResetSinglePlay()
         }
+    }
+
+    fun sendNameCheck(name: String) {
+        val requestQueue = Volley.newRequestQueue(context)
+        context?.apply {
+            val uniqueId = SessionSettings.instance.uniqueId
+
+            uniqueId?.apply {
+                val request = JsonObjectRequest(
+                    Request.Method.GET,
+                    Utils.baseUrlApi + "/api/v1/devices/checkname/" + name,
+                    null,
+                    { response ->
+                        activity?.runOnUiThread {
+                            val taken = !response.getBoolean("a")
+                            if (taken) {
+                                input_name.setBackgroundDrawable(
+                                    ResourcesCompat.getDrawable(
+                                        resources,
+                                        R.drawable.input_display_name_red,
+                                        null
+                                    )
+                                )
+                                change_name_button.isEnabled = false
+                            } else {
+                                input_name.setBackgroundDrawable(
+                                    ResourcesCompat.getDrawable(
+                                        resources,
+                                        R.drawable.input_display_name_green,
+                                        null
+                                    )
+                                )
+                                change_name_button.isEnabled = true
+                            }
+                        }
+
+                    },
+                    { error ->
+                        change_name_button.text = "Error"
+                        change_name_button.isEnabled = false
+                        input_name.isEnabled = false
+                    })
+
+                request.tag = "download"
+                requestQueue.add(request)
+            }
+        }
+    }
+
+    private fun updateDisplayName(name: String) {
+        val requestQueue = Volley.newRequestQueue(context)
+
+        val requestParams = HashMap<String, String>()
+
+        requestParams["name"] = name
+
+        val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+        val request = JsonObjectRequest(
+            Request.Method.POST,
+            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
+            paramsJson,
+            { response ->
+                SessionSettings.instance.displayName = response.getString("name")
+                change_name_button.text = "Updated"
+                change_name_button.isEnabled = false
+                input_name.isEnabled = false
+            },
+            { error ->
+                change_name_button.text = "Error"
+                change_name_button.isEnabled = false
+                input_name.isEnabled = false
+            })
+
+        requestQueue.add(request)
     }
 }

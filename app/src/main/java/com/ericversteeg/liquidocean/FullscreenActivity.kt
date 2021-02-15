@@ -17,12 +17,14 @@ import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 import org.json.JSONObject
+import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener, StatsFragmentListener {
+class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener, StatsFragmentListener, AchievementListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -59,6 +61,23 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         showMenuFragment()
 
         TrustAllSSLCertsDebug.trust()
+
+        /*StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork() // or .detectAll() for all detectable problems
+                .penaltyLog()
+                .build()
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder()
+                .detectLeakedSqlLiteObjects()
+                .detectLeakedClosableObjects()
+                .penaltyLog()
+                .penaltyDeath()
+                .build()
+        )*/
 
         // load session settings
         SessionSettings.instance.load(this)
@@ -121,10 +140,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         frag.world = world
         frag.interactiveCanvasFragmentListener = this
 
-        if (backgroundOption != null) {
-            frag.singlePlayBackgroundType = backgroundOption
-        }
-
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
@@ -162,11 +177,19 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                     SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                     SessionSettings.instance.xp = response.getInt("xp")
 
+                    SessionSettings.instance.displayName = response.getString("name")
+
+                    StatTracker.instance.achievementListener = this@FullscreenActivity
+
                     StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
                     StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
-                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
-                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
+
+                    // server-side event sync
+                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
+                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
+                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
+
+                    StatTracker.instance.displayAchievements(this@FullscreenActivity)
                 },
                 { error ->
 
@@ -265,5 +288,38 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
     override fun onStatsBack() {
         showMenuFragment()
+    }
+
+    override fun onDisplayAchievement(
+        info: Map<StatTracker.EventType, Int>,
+        displayInterval: Long
+    ) {
+        val eventType = info.keys.first()
+        val value = info[eventType]
+
+        when (eventType) {
+            StatTracker.EventType.PAINT_RECEIVED -> {
+                achievement_name.text = "Total Paint Accrued"
+            }
+            StatTracker.EventType.PIXEL_OVERWRITE_IN -> {
+                achievement_name.text = "Pixels Overwritten By Others"
+            }
+            StatTracker.EventType.PIXEL_OVERWRITE_OUT -> {
+                achievement_name.text = "Others' Pixels Overwritten By Me"
+            }
+        }
+
+        achievement_desc.text = "Passed the ${value} threshold"
+
+        achievement_banner.visibility = View.VISIBLE
+
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    achievement_banner.visibility = View.GONE
+                }
+            }
+
+        }, 5000)
     }
 }

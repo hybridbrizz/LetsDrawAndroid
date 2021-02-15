@@ -20,6 +20,8 @@ class SessionSettings {
 
     var paintColor = Color.WHITE
 
+    var backgroundColorsIndex = 0
+
     var dropsAmt = 0
     set(value) {
         field = value
@@ -55,6 +57,8 @@ class SessionSettings {
     }
 
     var nextPaintTime = 0L
+
+    var displayName = ""
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -95,6 +99,10 @@ class SessionSettings {
 
         ed.putBoolean("prompt_to_exit", promptToExit)
 
+        ed.putInt("background_colors_index", backgroundColorsIndex)
+
+        ed.putString("display_name", displayName)
+
         ed.apply()
     }
 
@@ -132,6 +140,10 @@ class SessionSettings {
         canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
 
         promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", false)
+
+        backgroundColorsIndex = getSharedPrefs(context).getInt("background_colors_index", 0)
+
+        displayName = getSharedPrefs(context).getString("display_name", "")!!
     }
 
     fun resetCanvasLockBorderColor() {

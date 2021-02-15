@@ -15,8 +15,6 @@ class ArtExportFragment: Fragment() {
 
     lateinit var art: List<InteractiveCanvas.RestorePoint>
 
-    var ppu = 10
-
     var listener: ArtExportFragmentListener? = null
 
     override fun onCreateView(
@@ -31,7 +29,7 @@ class ArtExportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_action_export.type = ActionButtonView.Type.BACK
+        back_action_export.type = ActionButtonView.Type.BACK_SOLID
         back_button_export.actionBtnView = back_action_export
 
         share_action.type = ActionButtonView.Type.EXPORT_SOLID

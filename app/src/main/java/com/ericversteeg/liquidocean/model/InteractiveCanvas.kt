@@ -66,8 +66,6 @@ class InteractiveCanvas(var context: Context) {
         initType()
     }
 
-    lateinit var singlePlayBackgroundType: ActionButtonView.Type
-
     // socket.io websocket for handling real-time pixel updates
     private lateinit var socket: Socket
     var checkEventTimeout = 20000L
@@ -76,6 +74,15 @@ class InteractiveCanvas(var context: Context) {
     var socketStatusCallback: SocketStatusCallback? = null
 
     var receivedPaintRecently = false
+
+    val BACKGROUND_BLACK = 0
+    val BACKGROUND_WHITE = 1
+    val BACKGROUND_GRAY_THIRDS = 2
+    val BACKGROUND_PHOTOSHOP = 3
+    val BACKGROUND_CLASSIC = 4
+    val BACKGROUND_CHESS = 5
+
+    val numBackgrounds = 6
 
     private fun initType() {
         if (world) {
@@ -154,7 +161,7 @@ class InteractiveCanvas(var context: Context) {
                 initPixels(arrJsonStr)
             }
             else {
-                initSinglePlayPixels(singlePlayBackgroundType)
+                initDefault()
             }
 
             val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
@@ -316,13 +323,10 @@ class InteractiveCanvas(var context: Context) {
         drawCallbackListener?.notifyRedraw()
     }
 
-    private fun loadDefault() {
+    private fun initDefault() {
         for (i in 0 until rows - 1) {
             for (j in 0 until cols - 1) {
-                var color = Color.parseColor("#FF333333")
-                if ((i + j) % 2 == 0) {
-                    color = Color.parseColor("#FF666666")
-                }
+                var color = 0
                 arr[j][i] = color
             }
         }
@@ -331,29 +335,13 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun getGridLineColor(): Int {
-        if (world) {
-            return Color.WHITE
-        }
-        else {
-            context.apply {
-                val gridLineColor = SessionSettings.instance.getSharedPrefs(this).getInt(
-                    "grid_line_color",
-                    Int.MAX_VALUE
-                )
-                if (gridLineColor < Int.MAX_VALUE) {
-                    return gridLineColor
-                }
-                else {
-                    when (singlePlayBackgroundType) {
-                        ActionButtonView.Type.BACKGROUND_BLACK -> return Color.WHITE
-                        ActionButtonView.Type.BACKGROUND_WHITE -> return Color.BLACK
-                        ActionButtonView.Type.BACKGROUND_GRAY_THIRDS -> return Color.WHITE
-                        ActionButtonView.Type.BACKGROUND_PHOTOSHOP -> return Color.BLACK
-                        ActionButtonView.Type.BACKGROUND_CLASSIC -> return Color.WHITE
-                        ActionButtonView.Type.BACKGROUND_CHESS -> return Color.WHITE
-                    }
-                }
-            }
+        when (SessionSettings.instance.backgroundColorsIndex) {
+            BACKGROUND_BLACK -> return Color.WHITE
+            BACKGROUND_WHITE -> return Color.BLACK
+            BACKGROUND_GRAY_THIRDS -> return Color.WHITE
+            BACKGROUND_PHOTOSHOP -> return Color.BLACK
+            BACKGROUND_CLASSIC -> return Color.WHITE
+            BACKGROUND_CHESS -> return Color.WHITE
         }
 
         return Color.RED
@@ -603,7 +591,6 @@ class InteractiveCanvas(var context: Context) {
         val ed = SessionSettings.instance.getSharedPrefs(context).edit()
 
         if (world) {
-            ed.putString("arr", jsonArr.toString())
             ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
         }
         else {
@@ -644,27 +631,23 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun exportSelection(onePointWithin: Point) {
-        if (arr[onePointWithin.y][onePointWithin.x] != Color.parseColor("#FF333333") &&
-            arr[onePointWithin.y][onePointWithin.x] != Color.parseColor("#FF666666")) {
-            artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
-        }
+        artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
     }
 
     private fun getPixelsInForm(unitPoint: Point): List<RestorePoint> {
         val pixels: MutableList<RestorePoint> = ArrayList()
 
-        stepPixelsInForm(unitPoint.x, unitPoint.y, pixels)
+        stepPixelsInForm(unitPoint.x, unitPoint.y, pixels, 0)
 
         return pixels
     }
 
-    private fun stepPixelsInForm(x: Int, y: Int, pixelsOut: MutableList<RestorePoint>) {
+    private fun stepPixelsInForm(x: Int, y: Int, pixelsOut: MutableList<RestorePoint>, depth: Int) {
         // a background color
         // or already in list
-        // TODO: represent background pixels as more than just color
-        if (arr[y][x] == Color.parseColor("#FF333333") ||
-            arr[y][x] == Color.parseColor("#FF666666") ||
-                unitInRestorePoints(Point(x, y), pixelsOut) != null) {
+        // or out of bounds
+        if (x < 0 || x > cols - 1 || y < 0 || y > rows - 1 ||
+            arr[y][x] == 0 || unitInRestorePoints(Point(x, y), pixelsOut) != null || depth > 10000) {
             return
         }
         else {
@@ -672,21 +655,34 @@ class InteractiveCanvas(var context: Context) {
         }
 
         // left
-        stepPixelsInForm(x - 1, y, pixelsOut)
+        stepPixelsInForm(x - 1, y, pixelsOut, depth + 1)
         // top
-        stepPixelsInForm(x, y - 1, pixelsOut)
+        stepPixelsInForm(x, y - 1, pixelsOut, depth + 1)
         // right
-        stepPixelsInForm(x + 1, y, pixelsOut)
+        stepPixelsInForm(x + 1, y, pixelsOut, depth + 1)
         // bottom
-        stepPixelsInForm(x, y + 1, pixelsOut)
+        stepPixelsInForm(x, y + 1, pixelsOut, depth + 1)
         // top-left
-        stepPixelsInForm(x - 1, y - 1, pixelsOut)
+        stepPixelsInForm(x - 1, y - 1, pixelsOut, depth + 1)
         // top-right
-        stepPixelsInForm(x + 1, y - 1, pixelsOut)
+        stepPixelsInForm(x + 1, y - 1, pixelsOut, depth + 1)
         // bottom-left
-        stepPixelsInForm(x - 1, y + 1, pixelsOut)
+        stepPixelsInForm(x - 1, y + 1, pixelsOut, depth + 1)
         // bottom-right
-        stepPixelsInForm(x + 1, y + 1, pixelsOut)
+        stepPixelsInForm(x + 1, y + 1, pixelsOut, depth + 1)
+    }
+
+    fun getBackgroundColors(index: Int): List<Int> {
+        when (index) {
+            BACKGROUND_BLACK -> return listOf(0, 0)
+            BACKGROUND_WHITE -> return listOf(Color.WHITE, Color.WHITE)
+            BACKGROUND_GRAY_THIRDS -> return listOf(ActionButtonView.thirdGray.color, ActionButtonView.twoThirdGray.color)
+            BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
+            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.classicGrayLight.color, ActionButtonView.classicGrayDark.color)
+            BACKGROUND_CHESS -> return listOf(ActionButtonView.chessTan.color, ActionButtonView.blackPaint.color)
+        }
+
+        return listOf()
     }
 
     class RestorePoint(var point: Point, var color: Int, var newColor: Int)
