@@ -4,11 +4,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -19,12 +24,14 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Utils
-import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.*
+import kotlin.collections.HashMap
 
 class LoadingScreenFragment : Fragment() {
 
@@ -38,6 +45,20 @@ class LoadingScreenFragment : Fragment() {
 
     var world = false
 
+    var lastDotsStr = ""
+
+    var timer = Timer()
+
+    val gameTips = arrayOf(
+        "You can turn several features on / off in the Options menu.",
+        "All drawings can be exported to a PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
+        "Anything you create on the world canvas is automatically saved and shared with others.",
+        "Like your level, paint, and others stats? Back your account up and sync across multiple devices by signing into Google or Facebook (we do not collect or store any personal information).",
+        "Tap on any pixel on the world canvas to view a history of edits for that position.",
+        "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
+        "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle."
+    )
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -49,6 +70,12 @@ class LoadingScreenFragment : Fragment() {
         return view
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        timer.cancel()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -56,8 +83,10 @@ class LoadingScreenFragment : Fragment() {
 
         updateNumLoaded()
 
-        context?.apply {
+        val rIndex = (Math.random() * gameTips.size).toInt()
+        game_tip_text.text = "Tip: ${gameTips[rIndex]}"
 
+        context?.apply {
             // sync paint qty or register device
             if (SessionSettings.instance.sentUniqueId) {
                 getDeviceInfo()
@@ -67,31 +96,60 @@ class LoadingScreenFragment : Fragment() {
             }
 
             downloadCanvasPixels(this)
+
+            /* view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    // drawWorldCanvas()
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    } else {
+                        view.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    }
+                }
+            }) */
         }
+
+        timer.schedule(object : TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    if (lastDotsStr == "" || lastDotsStr == "." || lastDotsStr == "..") {
+                        lastDotsStr = "$lastDotsStr."
+                    } else {
+                        lastDotsStr = ""
+                    }
+                    dots_title?.text = lastDotsStr
+                }
+            }
+        }, 200, 200)
     }
 
-    private fun initPixels(arrJsonStr: String) {
-        val arr = Array(512) { IntArray(512) }
+    private fun drawWorldCanvas() {
+        val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
+        val bitmap: Bitmap = Bitmap.createBitmap(
+            world_canvas_preview.width,
+            world_canvas_preview.height,
+            conf
+        ) // this creates a MUTABLE bitmap
 
-        val outerArray = JSONArray(arrJsonStr)
+        val canvas = Canvas(bitmap)
+        val unitSize = world_canvas_preview.height.toFloat() / 512
 
-        for (i in 0 until outerArray.length()) {
-            val innerArr = outerArray.getJSONArray(i)
-            for (j in 0 until innerArr.length()) {
-                val color = innerArr.getInt(j)
-                arr[i][j] = color
+        val paint = Paint()
+
+        context?.apply {
+            val arrJsonStr = SessionSettings.instance.getSharedPrefs(this).getString("arr", null)
+            if (arrJsonStr != null) {
+                val outerArray = JSONArray(arrJsonStr)
+                for (i in 0 until outerArray.length()) {
+                    val innerArr = outerArray.getJSONArray(i)
+                    for (j in 0 until innerArr.length()) {
+                        val color = innerArr.getInt(j)
+                        paint.color = color
+                        canvas.drawRect(j * unitSize, i * unitSize, unitSize, unitSize, paint)
+                    }
+                }
             }
-        }
-
-        val jsonArr = JSONArray(arr)
-
-        if (context != null) {
-            val ed = SessionSettings.instance.getSharedPrefs(context!!).edit()
-            ed.putString("arr", jsonArr.toString())
-            ed.apply()
-        }
-        else {
-            Log.i("Loading error", "Error loading pixel data, context was null inside loading fragment.")
         }
     }
 
@@ -100,7 +158,7 @@ class LoadingScreenFragment : Fragment() {
             Method.GET,
             Utils.baseUrlApi + "/api/v1/canvas/pixels",
             Response.Listener { response ->
-                initPixels(response)
+                SessionSettings.instance.arrJsonStr = response
 
                 doneLoadingPixels = true
                 downloadFinished()

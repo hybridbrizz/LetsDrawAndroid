@@ -4,18 +4,21 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.drm.DrmStore
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -25,6 +28,7 @@ import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.SignInActivity
 import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
+import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -110,7 +114,22 @@ class OptionsFragment: Fragment() {
                     R.drawable.marble_2,
                     R.drawable.fall_leaves,
                     R.drawable.water_texture,
-                    R.drawable.space_texture
+                    R.drawable.space_texture,
+                    R.drawable.metal_floor_1,
+                    R.drawable.metal_floor_2,  // TODO: hard to see paint event countdown
+                    R.drawable.foil,
+                    R.drawable.rainbow_foil,   // TODO: hard to see paint event countdown
+                    R.drawable.crystal_1,
+                    R.drawable.crystal_2,      // TODO: hard to see paint event countdown
+                    R.drawable.crystal_3,
+                    R.drawable.crystal_4,
+                    R.drawable.crystal_5,      // TODO: hard to see paint event countdown
+                    R.drawable.crystal_6,
+                    R.drawable.crystal_7,
+                    R.drawable.crystal_8,      // TODO: hard to see paint event countdown
+                    R.drawable.crystal_9,      // TODO: hard to see paint event countdown
+                    R.drawable.crystal_10      // TODO: hard to see paint event countdown + dark icons
+
                 ).toMutableList()
             )
 
@@ -161,6 +180,70 @@ class OptionsFragment: Fragment() {
         option_prompt_to_exit_switch.isChecked = SessionSettings.instance.promptToExit
         option_prompt_to_exit_switch.setOnCheckedChangeListener { _, value ->
             SessionSettings.instance.promptToExit = value
+        }
+
+        // option paint indicator width
+        option_paint_indicator_width_value.text = SessionSettings.instance.colorIndicatorWidth.toInt().toString()
+
+        option_paint_indicator_width_action_minus.type = ActionButtonView.Type.DOT
+        option_paint_indicator_width_action_plus.type = ActionButtonView.Type.DOT
+
+        option_paint_indicator_width_button_minus.actionBtnView = option_paint_indicator_width_action_minus
+        option_paint_indicator_width_button_plus.actionBtnView = option_paint_indicator_width_action_plus
+
+        option_paint_indicator_width_button_minus.setOnClickListener {
+            val value = option_paint_indicator_width_value.text.toString().toInt() - 1
+            option_paint_indicator_width_value.text = value.toString()
+            SessionSettings.instance.colorIndicatorWidth = value.toFloat()
+        }
+
+        option_paint_indicator_width_button_plus.setOnClickListener {
+            val value = option_paint_indicator_width_value.text.toString().toInt() + 1
+            option_paint_indicator_width_value.text = value.toString()
+            SessionSettings.instance.colorIndicatorWidth = value.toFloat()
+        }
+
+        // option paint indicator fill circle
+        option_paint_indicator_fill_circle_switch.isChecked = SessionSettings.instance.colorIndicatorFill
+
+        option_paint_indicator_fill_circle_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.colorIndicatorFill = button.isChecked
+        }
+
+        // option paint indicator outline
+        option_paint_indicator_outline_switch.isChecked = SessionSettings.instance.colorIndicatorOutline
+
+        option_paint_indicator_outline_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.colorIndicatorOutline = button.isChecked
+        }
+
+        setupNumRecentColorsChoices()
+
+        Animator.animateTitleFromTop(title_image)
+
+        Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
+        Animator.animateHorizontalViewEnter(panel_recycler_view, true)
+        Animator.animateHorizontalViewEnter(option_canvas_lock_container, false)
+        Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, true)
+    }
+
+
+    private fun setupNumRecentColorsChoices() {
+        // option num recent colors
+        for (v in option_num_recent_colors_choice_layout.children) {
+            val textView = v as TextView
+
+            textView.setOnClickListener {
+                SessionSettings.instance.numRecentColors = textView.text.toString().toInt()
+                setupNumRecentColorsChoices()
+            }
+
+            if (SessionSettings.instance.numRecentColors.toString() == textView.text) {
+                textView.setTextColor(ActionButtonView.altGreenPaint.color)
+            }
+            else {
+                textView.setTextColor(ActionButtonView.whitePaint.color)
+            }
         }
     }
 

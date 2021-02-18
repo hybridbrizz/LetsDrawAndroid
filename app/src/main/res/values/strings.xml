@@ -24,5 +24,9 @@
     <string name="option_prompt_to_exit_title">Prompt Back</string>
 
     <string name="alert_message_exit_canvas">Are you sure you would like to go back?</string>
-    <string name="no_pixel_history">No data.</string>
+    <string name="no_pixel_history">No data</string>
+    <string name="option_num_recent_color_title">Recent colors</string>
+    <string name="option_paint_indicator_width_title">Palette size</string>
+    <string name="option_paint_indicator_fill_circle">Circle palette</string>
+    <string name="option_paint_indicator_outline_title">Palette outline</string>
 </resources>

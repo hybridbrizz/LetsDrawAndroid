@@ -1,25 +1,34 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.fragment_menu.back_action
 import kotlinx.android.synthetic.main.fragment_menu.back_button
 import kotlinx.android.synthetic.main.fragment_options.*
+import java.util.*
 
 class MenuFragment: Fragment() {
 
     var menuButtonListener: MenuButtonListener? = null
 
     var backCount = 0
+
+    var showcaseTimer = Timer()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,6 +50,7 @@ class MenuFragment: Fragment() {
         back_button.setOnClickListener {
             if (backCount == 1) {
                 resetMenu()
+                animateMenuButtons(0)
             }
             else if (backCount == 2) {
                 resetToPlayMode()
@@ -57,6 +67,12 @@ class MenuFragment: Fragment() {
         exit_button.type = ActionButtonView.Type.EXIT
         single_button.type = ActionButtonView.Type.SINGLE
         world_button.type = ActionButtonView.Type.WORLD
+
+        /*val artShowcase = SessionSettings.instance.artShowcase
+        if (artShowcase != null && artShowcase.size > 0) {
+            art_showcase.showBackground = false
+            art_showcase.art = artShowcase[0]
+        }*/
 
         // backgrounds
         background_option_black.type = ActionButtonView.Type.BACKGROUND_BLACK
@@ -81,6 +97,8 @@ class MenuFragment: Fragment() {
 
             back_button.visibility = View.VISIBLE
             backCount++
+
+            animateMenuButtons(1)
         }
 
         options_button.setOnClickListener {
@@ -118,6 +136,101 @@ class MenuFragment: Fragment() {
                 }
             }
         }
+
+        animateMenuButtons(0)
+    }
+
+    private fun animateMenuButtons(layer: Int, out: Boolean = false) {
+        if (layer == 0) {
+            if (!out) {
+                play_button.x += 500
+                play_button.alpha = 0F
+                play_button.animate().setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+
+                options_button.x += 500
+                options_button.alpha = 0F
+                options_button.animate().setStartDelay(50).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+
+                stats_button.x += 500
+                stats_button.alpha = 0F
+                stats_button.animate().setStartDelay(80).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+
+                exit_button.x += 500
+                stats_button.alpha = 0F
+                exit_button.animate().setStartDelay(100).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+            }
+            else {
+                play_button.animate().setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+                options_button.animate().setStartDelay(50).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+                stats_button.animate().setStartDelay(100).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+                exit_button.animate().setStartDelay(150).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+            }
+        }
+        else if (layer == 1) {
+            if (!out) {
+                single_button.x += 500
+                single_button.animate().setDuration(150).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+
+                world_button.x += 500
+                world_button.animate().setStartDelay(50).setDuration(150).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+            }
+            else {
+                single_button.animate().setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+                world_button.animate().setStartDelay(50).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
+            }
+        }
+    }
+
+    fun getNextArtShowcase(): List<InteractiveCanvas.RestorePoint>? {
+        SessionSettings.instance.artShowcase?.apply {
+            if (SessionSettings.instance.showcaseIndex == size) {
+                SessionSettings.instance.showcaseIndex = 0
+            }
+
+            if (size > 0) {
+                val nextArt = this[SessionSettings.instance.showcaseIndex]
+                SessionSettings.instance.showcaseIndex += 1
+
+                return nextArt
+            }
+        }
+
+        return null
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        showcaseTimer.cancel()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        showcaseTimer.schedule(object: TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    SessionSettings.instance.artShowcase?.apply {
+                        art_showcase.alpha = 0F
+
+                        art_showcase.showBackground = false
+                        art_showcase.art = getNextArtShowcase()
+
+                        art_showcase.animate().alpha(1F).setDuration(2500).withEndAction {
+                            Timer().schedule(object: TimerTask() {
+                                override fun run() {
+                                    activity?.runOnUiThread {
+                                        art_showcase.animate().alpha(0F).setDuration(1500).start()
+                                    }
+                                }
+
+                            }, 3000)
+                        }.start()
+                    }
+                }
+            }
+
+        }, 0, 7000)
     }
 
     private fun showSingleBackgroundOptions() {

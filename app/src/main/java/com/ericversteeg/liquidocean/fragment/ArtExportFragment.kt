@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.listener.ArtExportFragmentListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_art_export.*
 
@@ -42,7 +43,12 @@ class ArtExportFragment: Fragment() {
             listener?.onArtExportBack()
         }
 
+        art_view.showBackground = true
         art_view.art = art
+
+        if (art.isNotEmpty()) {
+            SessionSettings.instance.addToShowcase(art)
+        }
 
         share_button.setOnClickListener {
             context?.apply {

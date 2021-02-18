@@ -10,11 +10,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -29,10 +26,8 @@ import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import okhttp3.internal.Util
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
-import java.lang.IllegalStateException
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -63,6 +58,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var toolboxOpen = false
 
     val paint = Paint()
+    val altPaint = Paint()
     val gridLinePaint = Paint()
     val gridLinePaintAlt = Paint()
 
@@ -104,7 +100,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     context?.apply {
                         var connected = Utils.isNetworkAvailable(this)
                         if (!connected) {
-                            (context as Activity).runOnUiThread {
+                            (context as Activity?)?.runOnUiThread {
                                 showDisconnectedMessage(0)
                             }
                         } else {
@@ -128,12 +124,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 Utils.baseUrlApi + "/api/v1/status",
                 null,
                 { response ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
                         sendSocketStatusCheck()
                     }
                 },
                 { error ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
                         showDisconnectedMessage(1)
                     }
                 })
@@ -196,11 +192,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     private fun setupPaintEventTimer() {
         paintEventTimer = Timer()
-        paintEventTimer?.schedule(object: TimerTask() {
+        paintEventTimer?.schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
                     if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
-                        SessionSettings.instance.nextPaintTime = SessionSettings.instance.nextPaintTime + 300 * 1000
+                        SessionSettings.instance.nextPaintTime =
+                            SessionSettings.instance.nextPaintTime + 300 * 1000
                     }
 
                     var timeUntil = SessionSettings.instance.nextPaintTime
@@ -211,16 +208,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     if (m == 0L) {
                         try {
                             paint_time_info.text = "${s}s"
+                        } catch (ex: IllegalStateException) {
+
                         }
-                        catch (ex: IllegalStateException) {
-                            
-                        }
-                    }
-                    else {
+                    } else {
                         try {
                             paint_time_info.text = "${m}m ${s}s"
-                        }
-                        catch (ex: IllegalStateException) {
+                        } catch (ex: IllegalStateException) {
 
                         }
                     }
@@ -232,40 +226,57 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     // pixel history listener
     override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
         fragmentManager?.apply {
-            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(surface_view.interactiveCanvas.lastSelectedUnitPoint), object: PixelHistoryCallback {
+            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
+                surface_view.interactiveCanvas.lastSelectedUnitPoint
+            ), object : PixelHistoryCallback {
                 override fun onHistoryJsonResponse(historyJson: JSONArray) {
                     // set bottom-left of view to screenPoint
 
                     val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                    val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(context, 10)).toFloat()
+                    val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                        context,
+                        10
+                    )).toFloat()
 
                     pixel_history_fragment_container.x = dX
                     pixel_history_fragment_container.y = dY
 
                     if (firstInfoTap) {
-                        pixel_history_fragment_container.y -= Utils.dpToPx(context, firstInfoTapFixYOffset)
+                        pixel_history_fragment_container.y -= Utils.dpToPx(
+                            context,
+                            firstInfoTapFixYOffset
+                        )
                         firstInfoTap = false
                     }
 
                     view?.apply {
                         if (pixel_history_fragment_container.x < 0) {
                             pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                        }
-                        else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width) {
-                            pixel_history_fragment_container.x = width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(context, 20).toFloat()
+                        } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width) {
+                            pixel_history_fragment_container.x =
+                                width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                    context,
+                                    20
+                                ).toFloat()
                         }
 
                         if (pixel_history_fragment_container.y < 0) {
                             pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                        }
-                        else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height) {
-                            pixel_history_fragment_container.y = height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(context, 20).toFloat()
+                        } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height) {
+                            pixel_history_fragment_container.y =
+                                height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                    context,
+                                    20
+                                ).toFloat()
                         }
 
                         val fragment = PixelHistoryFragment()
                         fragment.pixelHistoryJson = historyJson
 
-                        beginTransaction().replace(R.id.pixel_history_fragment_container, fragment).commit()
+                        beginTransaction().replace(
+                            R.id.pixel_history_fragment_container,
+                            fragment
+                        ).commit()
 
                         pixel_history_fragment_container.visibility = View.VISIBLE
                     }
@@ -311,7 +322,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         if (show) {
             context?.apply {
                 val drawable: GradientDrawable = export_border_view.background as GradientDrawable
-                drawable.setStroke(Utils.dpToPx(this, 2), ActionButtonView.lightYellowSemiPaint.color) // set stroke width and stroke color
+                drawable.setStroke(
+                    Utils.dpToPx(this, 2),
+                    ActionButtonView.lightYellowSemiPaint.color
+                ) // set stroke width and stroke color
             }
             export_border_view.visibility = View.VISIBLE
         }
@@ -391,7 +405,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_color_accept_image.type = ActionButtonView.Type.YES
         paint_color_accept_image.colorMode = ActionButtonView.ColorMode.NONE
 
-        recent_colors.type = ActionButtonView.Type.RECENT_COLORS
+        recent_colors.type = ActionButtonView.Type.DOT
         recent_colors_button.actionBtnView = recent_colors
 
         export_action.type = ActionButtonView.Type.EXPORT
@@ -400,10 +414,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
         background_button.actionBtnView = background_action
 
-        open_tools_action.type = ActionButtonView.Type.NONE
+        open_tools_action.type = ActionButtonView.Type.DOT
         open_tools_button.actionBtnView = open_tools_action
 
         setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+
+        color_picker_view.setEnabledAlpha(false)
 
         color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
@@ -430,6 +446,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             export_button.visibility = View.INVISIBLE
             background_button.visibility = View.INVISIBLE
 
+            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+                pixel_history_fragment_container.visibility = View.GONE
+            }
+
             paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
                 paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
                     AccelerateDecelerateInterpolator()
@@ -445,7 +465,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 if (SessionSettings.instance.canvasLockBorder) {
                     context?.apply {
                         val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
-                        drawable.setStroke(Utils.dpToPx(this, 4), SessionSettings.instance.canvasLockBorderColor) // set stroke width and stroke color
+                        drawable.setStroke(
+                            Utils.dpToPx(this, 4),
+                            SessionSettings.instance.canvasLockBorderColor
+                        ) // set stroke width and stroke color
                     }
 
                     paint_warning_frame.visibility = View.VISIBLE
@@ -709,6 +732,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 if (i < recentColors.size) {
                     v.representingColor = recentColors[recentColors.size - 1 - i]
+                    v.visibility = View.VISIBLE
+                }
+                else {
+                    v.visibility = View.GONE
                 }
 
                 v.setOnClickListener {
@@ -750,11 +777,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
         if (surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.gridLineThreshold) {
 
+            val gridLineColor = surface_view.interactiveCanvas.getGridLineColor()
+
             gridLinePaint.strokeWidth = 1f
-            gridLinePaint.color = Color.WHITE
+            gridLinePaint.color = gridLineColor
 
             gridLinePaintAlt.strokeWidth = 1f
-            gridLinePaintAlt.color = Color.WHITE
+            gridLinePaintAlt.color = gridLineColor
 
             if (!world) {
                 gridLinePaint.color = surface_view.interactiveCanvas.getGridLineColor()
@@ -835,9 +864,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     val unitX = x + startUnitIndexX
                     val unitY = y + startUnitIndexY
 
-                    if (unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows) {
+                    val inGrid = unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows
+
+                    if (inGrid) {
+                        val color = interactiveCanvas.arr[unitY][unitX]
+                        // val alpha = 0xFF and (color shr 24)
+
                         // background
-                        if (interactiveCanvas.arr[unitY][unitX] == 0) {
+                        if (color == 0) {
                             if ((unitX + unitY) % 2 == 0) {
                                 paint.color = backgroundColors[0]
                             }
@@ -858,6 +892,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     )
 
                     canvas.drawRect(rect, paint)
+
+                    // transparency
+                    /* if (inGrid) {
+                        val color = interactiveCanvas.arr[unitY][unitX]
+                        val alpha = 0xFF and (color shr 24)
+
+                        if (color != 0 && alpha < 255) {
+                            altPaint.color = color
+                            canvas.drawRect(rect, altPaint)
+                        }
+                    } */
                 }
             }
         }
@@ -913,7 +958,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
                 dialog?.dismiss()
             }
-            .setNegativeButton(android.R.string.no
+            .setNegativeButton(
+                android.R.string.no
             ) { dialog, _ -> dialog?.dismiss() }
             .show()
     }
@@ -963,10 +1009,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    fun invalidateButtons() {
+    private fun invalidateButtons() {
         back_action.invalidate()
         paint_panel_action_view.invalidate()
         export_action.invalidate()
         background_action.invalidate()
+        recent_colors.invalidate()
+        open_tools_action.invalidate()
     }
 }

@@ -29,6 +29,7 @@
                     android:layout_gravity="center_horizontal" />
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixels_painted_single_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -54,6 +55,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixels_painted_world_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -78,6 +80,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixel_overwrites_in_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -103,6 +106,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixel_overwrites_out_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -128,6 +132,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_paint_accrued_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -153,6 +158,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_world_xp_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"

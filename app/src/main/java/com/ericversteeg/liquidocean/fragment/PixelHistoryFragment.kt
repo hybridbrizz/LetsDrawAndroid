@@ -8,11 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.adapter.PaintHistoryRecyclerViewAdapter
-import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
-import com.ericversteeg.liquidocean.listener.PixelHistoryCallback
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import kotlinx.android.synthetic.main.fragment_options.*
+import com.ericversteeg.liquidocean.adapter.PixelHistoryRecyclerViewAdapter
 import kotlinx.android.synthetic.main.fragment_pixel_history.*
 import org.json.JSONArray
 
@@ -42,7 +38,7 @@ class PixelHistoryFragment: Fragment() {
                     LinearLayoutManager.VERTICAL,
                     false
                 )
-                pixel_history_recycler_view.adapter = PaintHistoryRecyclerViewAdapter(
+                pixel_history_recycler_view.adapter = PixelHistoryRecyclerViewAdapter(
                     this, pixelHistoryJson
                 )
 

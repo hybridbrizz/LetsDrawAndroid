@@ -120,7 +120,7 @@ class SignInFragment: Fragment() {
                         SessionSettings.instance.uniqueId == "####"
                     }
 
-                    requestParams["token_id"] = this.substring(0, 64)
+                    requestParams["token_id"] = this.substring(0, 32)
 
                     val paramsJson = JSONObject(requestParams as Map<String, String>)
 

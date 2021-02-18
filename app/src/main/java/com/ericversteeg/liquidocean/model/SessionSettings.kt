@@ -3,10 +3,17 @@ package com.ericversteeg.liquidocean.model
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.graphics.Point
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.google.gson.JsonArray
+import com.google.gson.JsonElement
+import org.json.JSONArray
+import org.json.JSONObject
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 class SessionSettings {
 
@@ -60,6 +67,19 @@ class SessionSettings {
 
     var displayName = ""
 
+    var artShowcase: MutableList<MutableList<InteractiveCanvas.RestorePoint>>? = null
+    var showcaseIndex = 0
+
+    var numRecentColors = 8
+
+    var arrJsonStr = ""
+
+    var colorIndicatorWidth = 0F
+
+    var colorIndicatorFill = false
+
+    var colorIndicatorOutline = true
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -103,6 +123,16 @@ class SessionSettings {
 
         ed.putString("display_name", displayName)
 
+        ed.putString("art_showcase_json", artShowcaseJsonString())
+
+        ed.putInt("num_recent_colors", numRecentColors)
+
+        ed.putFloat("color_indicator_width", colorIndicatorWidth)
+
+        ed.putBoolean("color_indicator_fill", colorIndicatorFill)
+
+        ed.putBoolean("color_indicator_outline", colorIndicatorOutline)
+
         ed.apply()
     }
 
@@ -144,10 +174,92 @@ class SessionSettings {
         backgroundColorsIndex = getSharedPrefs(context).getInt("background_colors_index", 0)
 
         displayName = getSharedPrefs(context).getString("display_name", "")!!
+
+        artShowcase = loadArtShowcase(getSharedPrefs(context).getString("art_showcase_json", null))
+
+        numRecentColors = getSharedPrefs(context).getInt("num_recent_colors", 8)
+
+        colorIndicatorWidth = getSharedPrefs(context).getFloat("color_indicator_width", Utils.dpToPx(context, 12).toFloat())
+
+        colorIndicatorFill = getSharedPrefs(context).getBoolean("color_indicator_fill", false)
+
+        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", true)
+    }
+
+    private fun artShowcaseJsonString(): String? {
+        artShowcase?.apply {
+            val ret = arrayOfNulls<Array<Map<String, Int>?>>(size)
+
+            for (i in this.indices) {
+                val art = this[i]
+
+                val restorePoints = arrayOfNulls<Map<String, Int>>(art.size)
+                for (j in art.indices) {
+                    val restorePoint = art[j]
+                    val map = HashMap<String, Int>()
+
+                    map["x"] = restorePoint.point.x
+                    map["y"] = restorePoint.point.y
+                    map["color"] = restorePoint.color
+
+                    restorePoints[j] = map
+                }
+
+                ret[i] = restorePoints
+            }
+
+            return JSONArray(ret).toString()
+        }
+
+        return null
+    }
+
+    private fun loadArtShowcase(jsonStr: String?): MutableList<MutableList<InteractiveCanvas.RestorePoint>>? {
+        jsonStr?.apply {
+            if (this == "[null]") return null
+
+            val showcase: MutableList<MutableList<InteractiveCanvas.RestorePoint>> = ArrayList()
+
+            val jsonArray = JSONArray(jsonStr)
+
+            for (i in 0 until jsonArray.length()) {
+                val artJsonArray = jsonArray.getJSONArray(i)
+
+                val art = ArrayList<InteractiveCanvas.RestorePoint>()
+
+                for (j in 0 until artJsonArray.length()) {
+                    val jsonObj = artJsonArray.getJSONObject(j)
+                    art.add(InteractiveCanvas.RestorePoint(Point(jsonObj.getInt("x"), jsonObj.getInt("y")), jsonObj.getInt("color"), jsonObj.getInt("color")))
+                }
+
+                showcase.add(art)
+            }
+
+            return showcase
+        }
+
+        return null
     }
 
     fun resetCanvasLockBorderColor() {
         canvasLockBorderColor = defaultCanvasLockBorderColor
+    }
+
+    fun addToShowcase(art: List<InteractiveCanvas.RestorePoint>) {
+        if (artShowcase == null) {
+            artShowcase = ArrayList()
+        }
+
+        artShowcase?.apply {
+            if (size < 10) {
+                add(art.toMutableList())
+            }
+            else {
+                val rIndex = (Math.random() * size).toInt()
+                removeAt(rIndex)
+                add(rIndex, art.toMutableList())
+            }
+        }
     }
 
     companion object {

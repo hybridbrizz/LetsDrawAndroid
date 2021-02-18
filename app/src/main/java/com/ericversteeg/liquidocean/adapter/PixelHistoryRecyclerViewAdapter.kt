@@ -8,12 +8,11 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.model.SessionSettings
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PaintHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONArray): RecyclerView.Adapter<PaintHistoryRecyclerViewAdapter.PaintHistoryViewHolder>() {
+class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONArray): RecyclerView.Adapter<PixelHistoryRecyclerViewAdapter.PaintHistoryViewHolder>() {
 
     private var pixelHistoryJson: JSONArray = pixelHistoryJson
     var selectedItems = BooleanArray(pixelHistoryJson.length())

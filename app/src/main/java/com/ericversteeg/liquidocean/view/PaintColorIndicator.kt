@@ -58,7 +58,11 @@ class PaintColorIndicator : View {
             it.save()
             val paint = Paint()
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = Utils.dpToPx(context, 12).toFloat()
+            if (SessionSettings.instance.colorIndicatorFill) {
+                paint.style = Paint.Style.FILL_AND_STROKE
+            }
+
+            paint.strokeWidth = SessionSettings.instance.colorIndicatorWidth
             paint.color = SessionSettings.instance.paintColor
 
             val borderPaint = Paint()
@@ -73,21 +77,23 @@ class PaintColorIndicator : View {
 
             }
 
-            // inner border
-            it.drawCircle(
-                width / 2F,
-                height / 2F,
-                (width / 3F) - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                borderPaint
-            )
+            if (SessionSettings.instance.colorIndicatorOutline) {
+                // inner border
+                it.drawCircle(
+                    width / 2F,
+                    height / 2F,
+                    (width / 3F) - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                    borderPaint
+                )
 
-            // outer border
-            it.drawCircle(
-                width / 2F,
-                height / 2F,
-                (width / 3F) + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                borderPaint
-            )
+                // outer border
+                it.drawCircle(
+                    width / 2F,
+                    height / 2F,
+                    (width / 3F) + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                    borderPaint
+                )
+            }
 
             it.restore()
         }

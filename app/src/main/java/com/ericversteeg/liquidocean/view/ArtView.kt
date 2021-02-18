@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Build
@@ -31,6 +32,8 @@ class ArtView: View {
         field = value
         invalidate()
     }
+
+    var showBackground = false
 
     var ppu = 10F
 
@@ -69,7 +72,7 @@ class ArtView: View {
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        drawToCanvas(canvas)
+        drawToCanvas(canvas, showBackground)
     }
 
     private fun drawToCanvas(canvas: Canvas?, drawBackground: Boolean = true) {
@@ -219,7 +222,7 @@ class ArtView: View {
         drawToCanvas(canvas, false)
 
         //Generating a file name
-        val filename = "${System.currentTimeMillis()}.jpg"
+        val filename = "${System.currentTimeMillis()}.png"
 
         //Output stream
         var fos: OutputStream? = null
@@ -234,7 +237,7 @@ class ArtView: View {
 
                     //putting file information in content values
                     put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
-                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
                     put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
                 }
 
@@ -273,7 +276,7 @@ class ArtView: View {
         val bytes = ByteArrayOutputStream()
         bmp.compress(Bitmap.CompressFormat.PNG, 100, bytes)
         val f =
-            File(context.cacheDir.absolutePath + File.separator.toString() + "temporary_file.jpg")
+            File(context.cacheDir.absolutePath + File.separator.toString() + "temporary_file.png")
         try {
             f.createNewFile()
             val fo = FileOutputStream(f)

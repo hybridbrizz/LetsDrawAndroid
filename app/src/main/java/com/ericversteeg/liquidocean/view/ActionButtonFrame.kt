@@ -52,6 +52,9 @@ class ActionButtonFrame: FrameLayout {
             actionBtnView?.touchState = ActionButtonView.TouchState.INACTIVE
             clickListener?.onClick(this)
         }
+        else if (ev.action != MotionEvent.ACTION_MOVE) {
+            actionBtnView?.touchState = ActionButtonView.TouchState.INACTIVE
+        }
 
         return actionBtnView != null
     }

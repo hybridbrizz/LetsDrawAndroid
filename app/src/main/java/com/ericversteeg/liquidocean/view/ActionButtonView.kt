@@ -35,6 +35,7 @@ class ActionButtonView: View {
         val classicGrayDark = Paint()
         val chessTan = Paint()
         val linePaint = Paint()
+        val lightGrayPaint = Paint()
     }
 
     var rows = 0
@@ -69,13 +70,15 @@ class ActionButtonView: View {
         EXPORT,
         EXPORT_SOLID,
         SAVE,
+        DOT,
         CHANGE_BACKGROUND,
         BACKGROUND_BLACK,
         BACKGROUND_WHITE,
         BACKGROUND_PHOTOSHOP,
         BACKGROUND_CLASSIC,
         BACKGROUND_GRAY_THIRDS,
-        BACKGROUND_CHESS
+        BACKGROUND_CHESS,
+        LOGO
     }
 
     enum class TouchState {
@@ -168,6 +171,8 @@ class ActionButtonView: View {
 
         chessTan.color = Color.parseColor("#FFb59870")
 
+        lightGrayPaint.color = Color.parseColor("#FFEEEEEE")
+
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
     }
@@ -214,6 +219,9 @@ class ActionButtonView: View {
             else if (type == Type.CHANGE_BACKGROUND) {
                 drawChangeBackgroundAction(touchState == TouchState.ACTIVE, canvas)
             }
+            else if (type == Type.DOT) {
+                drawDotAction(touchState == TouchState.ACTIVE, canvas)
+            }
             else if (type == Type.PLAY) {
                 drawPlayAction(touchState == TouchState.ACTIVE, canvas)
             }
@@ -238,6 +246,9 @@ class ActionButtonView: View {
             else if (type == Type.BACKGROUND_WHITE || type == Type.BACKGROUND_BLACK || type == Type.BACKGROUND_GRAY_THIRDS ||
                 type == Type.BACKGROUND_PHOTOSHOP || type == Type.BACKGROUND_CLASSIC || type == Type.BACKGROUND_CHESS) {
                 drawBackgroundOptionAction(type, touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.LOGO) {
+                drawLogoAction(touchState == TouchState.ACTIVE, canvas)
             }
 
             restore()
@@ -452,26 +463,36 @@ class ActionButtonView: View {
 
         var primaryPaint = whitePaint
         var accentPaint = altGreenPaint
+
+        var outLinePaint = Paint()
+        outLinePaint.color = blackPaint.color
+        outLinePaint.strokeWidth = 2F
+
         if (light) {
             accentPaint = lightAltGreenPaint
         }
 
         if (SessionSettings.instance.darkIcons) {
             primaryPaint = blackPaint
+            outLinePaint.color = whitePaint.color
         }
 
         canvas.apply {
             // row 1
             drawPixel(3, 0, accentPaint, canvas)
+            drawOutline(3, 0, outLinePaint, canvas)
 
             // row 2
             drawPixel(2, 1, primaryPaint, canvas)
+            drawOutline(2, 1, outLinePaint, canvas)
 
             // row 3
             drawPixel(1, 2, primaryPaint, canvas)
+            drawOutline(1, 2, outLinePaint, canvas)
 
             // row 4
             drawPixel(0, 3, primaryPaint, canvas)
+            drawOutline(0, 3, outLinePaint, canvas)
         }
     }
 
@@ -510,10 +531,16 @@ class ActionButtonView: View {
         rows = 4
         cols = 4
 
-        var paint = semiPaint
+        var paint = whitePaint
+
+        var outlinePaint = blackPaint
+        outlinePaint.strokeWidth = 2F
 
         if (SessionSettings.instance.darkIcons) {
-            paint = semiDarkPaint
+            paint = blackPaint
+
+            outlinePaint = whitePaint
+            outlinePaint.strokeWidth = 2F
         }
 
         if (light) {
@@ -551,6 +578,14 @@ class ActionButtonView: View {
             drawPixel(1, 3, paint, canvas)
             drawPixel(2, 3, paint, canvas)
             drawPixel(3, 3, paint, canvas)
+
+            // outline
+            // val outlineLeft = rectForPixel(1, 1).left
+            // val outlineTop = rectForPixel(1, 1).top
+            // val outlineRight = rectForPixel(2, 2).right
+            // val outlineBottom = rectForPixel(2, 2).bottom
+
+            // drawOutline(RectF(outlineLeft, outlineTop, outlineRight, outlineBottom), outlinePaint, canvas)
         }
     }
 
@@ -558,13 +593,13 @@ class ActionButtonView: View {
         rows = 3
         cols = 3
 
-        var paint = semiLightPaint
+        var paint = semiPaint
         if (SessionSettings.instance.darkIcons) {
-            paint = semiDarkLightPaint
+            paint = semiDarkPaint
         }
 
         if (light) {
-            paint = lightYellowSemiPaint
+            paint = lightYellowPaint
         }
 
         canvas.apply {
@@ -645,10 +680,47 @@ class ActionButtonView: View {
         rows = 4
         cols = 3
 
+        var paint = semiPaint
+
+        if (light) {
+            paint = lightYellowPaint
+        }
+
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(1, 1, paint, canvas)
+            drawPixel(2, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+        }
+    }
+
+    private fun drawDotAction(light: Boolean, canvas: Canvas) {
+        rows = 1
+        cols = 1
+
         var paint = semiLightPaint
 
         if (light) {
-            paint = lightYellowSemiPaint
+            paint = lightYellowPaint
         }
 
         if (SessionSettings.instance.darkIcons) {
@@ -684,7 +756,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 16
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -737,7 +809,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 26
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -818,7 +890,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 20
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -882,7 +954,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 15
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -937,7 +1009,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 22
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1009,7 +1081,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 21
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1078,7 +1150,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 51
 
-        var paint = whitePaint
+        var paint = lightGrayPaint
         if (selected) {
             paint = whitePaint
         }
@@ -1213,6 +1285,62 @@ class ActionButtonView: View {
         }
     }
 
+    private fun drawLogoAction(selected: Boolean, canvas: Canvas) {
+        rows = 11
+        cols = 5
+
+        val greenPaint = Paint()
+        greenPaint.color = Color.parseColor("#5e9a7c")
+
+        val bluePaint = Paint()
+        bluePaint.color = Color.parseColor("#9ac7ca")
+
+        val grayPaint = Paint()
+        grayPaint.color = Color.parseColor("#9ac7ca")
+
+        canvas.apply {
+            // col 0
+            drawPixel(0, 3, greenPaint, canvas)
+            drawPixel(0, 4, greenPaint, canvas)
+            drawPixel(0, 5, greenPaint, canvas)
+            drawPixel(0, 6, greenPaint, canvas)
+            drawPixel(0, 7, greenPaint, canvas)
+
+            // col 1
+            drawPixel(1, 2, greenPaint, canvas)
+            drawPixel(1, 3, bluePaint, canvas)
+            drawPixel(1, 4, bluePaint, canvas)
+            drawPixel(1, 5, bluePaint, canvas)
+            drawPixel(1, 6, bluePaint, canvas)
+            drawPixel(1, 7, bluePaint, canvas)
+            drawPixel(1, 8, bluePaint, canvas)
+
+            // col 2
+            drawPixel(2, 1, greenPaint, canvas)
+            drawPixel(2, 2, bluePaint, canvas)
+            drawPixel(2, 3, grayPaint, canvas)
+            drawPixel(2, 4, grayPaint, canvas)
+            drawPixel(2, 5, grayPaint, canvas)
+            drawPixel(2, 6, grayPaint, canvas)
+            drawPixel(2, 7, grayPaint, canvas)
+            drawPixel(2, 8, grayPaint, canvas)
+            drawPixel(2, 9, grayPaint, canvas)
+
+            // col 3
+            drawPixel(3, 0, greenPaint, canvas)
+            drawPixel(3, 1, bluePaint, canvas)
+            drawPixel(3, 2, bluePaint, canvas)
+            drawPixel(3, 3, grayPaint, canvas)
+            drawPixel(3, 4, whitePaint, canvas)
+            drawPixel(3, 5, whitePaint, canvas)
+            drawPixel(3, 6, whitePaint, canvas)
+            drawPixel(3, 7, whitePaint, canvas)
+            drawPixel(3, 8, whitePaint, canvas)
+            drawPixel(3, 9, whitePaint, canvas)
+            drawPixel(3, 10, whitePaint, canvas)
+        }
+    }
+
     // single player backgrounds
 
     private fun drawBackgroundOptionAction(type: ActionButtonView.Type, selected: Boolean, canvas: Canvas) {
@@ -1279,5 +1407,17 @@ class ActionButtonView: View {
 
     private fun drawPixel(x: Int, y: Int, paint: Paint, canvas: Canvas) {
         canvas.drawRect(rectForPixel(x, y), paint)
+    }
+
+    private fun drawOutline(x: Int, y: Int, paint: Paint, canvas: Canvas) {
+        val rect = rectForPixel(x, y)
+        drawOutline(rect, paint, canvas)
+    }
+
+    private fun drawOutline(rect: RectF, paint: Paint, canvas: Canvas) {
+        canvas.drawLine(rect.left, rect.top, rect.right, rect.top, paint)
+        canvas.drawLine(rect.right, rect.top, rect.right, rect.bottom, paint)
+        canvas.drawLine(rect.left, rect.bottom, rect.right, rect.bottom, paint)
+        canvas.drawLine(rect.left, rect.top, rect.left, rect.bottom, paint)
     }
 }

@@ -72,7 +72,7 @@
                 android:id="@+id/paint_qty_bar"
                 android:layout_width="156dp"
                 android:layout_height="36dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="15dp"
                 android:elevation="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
@@ -184,13 +184,14 @@
             android:layout_width="300dp"
             android:layout_height="match_parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:background="#DD111111">
+            android:background="#99111111">
 
         <top.defaults.colorpicker.ColorPickerView
                 android:id="@+id/color_picker_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:elevation="3dp"
+                android:layout_gravity="center_vertical | center_horizontal"
                 app:enableBrightness="true"
                 app:enableAlpha="true" />
 
@@ -272,6 +273,197 @@
                 app:layout_constraintLeft_toRightOf="@id/recent7"
                 app:layout_constraintTop_toBottomOf="@id/recent4" />
 
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent9"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent5" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent10"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent9"
+                app:layout_constraintTop_toBottomOf="@id/recent6" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent11"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent10"
+                app:layout_constraintTop_toBottomOf="@id/recent7" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent12"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent11"
+                app:layout_constraintTop_toBottomOf="@id/recent8" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent13"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent9" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent14"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent13"
+                app:layout_constraintTop_toBottomOf="@id/recent10" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent15"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent14"
+                app:layout_constraintTop_toBottomOf="@id/recent11" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent16"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent15"
+                app:layout_constraintTop_toBottomOf="@id/recent12" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent17"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent13" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent18"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent17"
+                app:layout_constraintTop_toBottomOf="@id/recent14" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent19"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent18"
+                app:layout_constraintTop_toBottomOf="@id/recent15" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent20"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent19"
+                app:layout_constraintTop_toBottomOf="@id/recent16" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent21"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent17" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent22"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent21"
+                app:layout_constraintTop_toBottomOf="@id/recent18" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent23"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent22"
+                app:layout_constraintTop_toBottomOf="@id/recent19" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent24"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent23"
+                app:layout_constraintTop_toBottomOf="@id/recent20" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent25"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent21" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent26"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent25"
+                app:layout_constraintTop_toBottomOf="@id/recent22" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent27"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent26"
+                app:layout_constraintTop_toBottomOf="@id/recent23" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent28"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent27"
+                app:layout_constraintTop_toBottomOf="@id/recent24" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent29"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/recent25" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent30"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent29"
+                app:layout_constraintTop_toBottomOf="@id/recent26" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent31"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent30"
+                app:layout_constraintTop_toBottomOf="@id/recent27" />
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/recent32"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="10dp"
+                app:layout_constraintLeft_toRightOf="@id/recent31"
+                app:layout_constraintTop_toBottomOf="@id/recent28" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -285,9 +477,9 @@
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
                 android:id="@+id/recent_colors"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_margin="15dp"
+                android:layout_width="11dp"
+                android:layout_height="11dp"
+                android:layout_margin="24dp"
                 android:layout_gravity="start|bottom" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -370,9 +562,9 @@
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
                 android:id="@+id/open_tools_action"
-                android:layout_width="33dp"
-                android:layout_height="44dp"
-                android:layout_margin="10dp"
+                android:layout_width="11dp"
+                android:layout_height="11dp"
+                android:layout_margin="24dp"
                 android:layout_gravity="bottom|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>

@@ -4,14 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.listener.StatsFragmentListener
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_button
+import kotlinx.android.synthetic.main.fragment_options.*
 import kotlinx.android.synthetic.main.fragment_stats.*
 import java.text.NumberFormat
 
@@ -55,5 +58,14 @@ class StatsFragment: Fragment() {
         achievement_progress_text_overwrite_in.text = StatTracker.instance.getAchievementProgressString(StatTracker.EventType.PIXEL_OVERWRITE_IN)
         achievement_progress_text_overwrite_out.text = StatTracker.instance.getAchievementProgressString(StatTracker.EventType.PIXEL_OVERWRITE_OUT)
         achievement_progress_text_paint.text = StatTracker.instance.getAchievementProgressString(StatTracker.EventType.PAINT_RECEIVED)
+
+        Animator.animateTitleFromTop(stats_image)
+
+        Animator.animateHorizontalViewEnter(stat_num_pixels_painted_single_container, true)
+        Animator.animateHorizontalViewEnter(stat_num_pixels_painted_world_container, false)
+        Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_in_container, true)
+        Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_out_container, false)
+        Animator.animateHorizontalViewEnter(stat_paint_accrued_container, true)
+        Animator.animateHorizontalViewEnter(stat_world_xp_container, false)
     }
 }
