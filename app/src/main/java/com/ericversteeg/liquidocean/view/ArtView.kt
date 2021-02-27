@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Point
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -15,22 +15,27 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.FileProvider
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import org.json.JSONObject
 import java.io.*
-import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.min
-import kotlin.math.round
 
 
-class ArtView: View {
+class  ArtView: View {
 
     var art: List<InteractiveCanvas.RestorePoint>? = null
     set(value) {
         field = value
         invalidate()
+    }
+
+    var jsonResId: Int = 0
+    set(value) {
+        field = value
+
+        art = artFromJsonResource(jsonResId)
     }
 
     var showBackground = false
@@ -284,8 +289,44 @@ class ArtView: View {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        share.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, "com.ericversteeg.liquidocean.fileprovider", f))
+        share.putExtra(
+            Intent.EXTRA_STREAM, FileProvider.getUriForFile(
+                context,
+                "com.ericversteeg.liquidocean.fileprovider",
+                f
+            )
+        )
 
         context.startActivity(Intent.createChooser(share, "Share Image"))
+    }
+
+    private fun artFromJsonResource(resId: Int): List<InteractiveCanvas.RestorePoint> {
+        val inSrm = resources.openRawResource(resId)
+        val writer: Writer = StringWriter()
+        val buffer = CharArray(1024)
+        try {
+            val reader: Reader = BufferedReader(InputStreamReader(inSrm, "UTF-8"))
+            var n: Int
+            while (reader.read(buffer).also { n = it } != -1) {
+                writer.write(buffer, 0, n)
+            }
+        } finally {
+            inSrm.close()
+        }
+
+        val jsonString = writer.toString()
+        val pixelJson = JSONObject(jsonString)
+
+        val pixelsArr = pixelJson.getJSONArray("pixels")
+        var mutableList: MutableList<InteractiveCanvas.RestorePoint> = ArrayList()
+        for (i in 0 until pixelsArr.length()) {
+            val jsonObj = pixelsArr.getJSONObject(i)
+            val restorePoint = InteractiveCanvas.RestorePoint(Point(jsonObj.getInt("x"),
+                jsonObj.getInt("y")), jsonObj.getInt("color"), jsonObj.getInt("color"))
+
+            mutableList.add(restorePoint)
+        }
+
+        return mutableList.toList()
     }
 }

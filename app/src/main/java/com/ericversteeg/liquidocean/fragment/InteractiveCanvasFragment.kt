@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -17,6 +18,8 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Animator
+import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
@@ -62,6 +65,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     val gridLinePaint = Paint()
     val gridLinePaintAlt = Paint()
 
+    lateinit var panelThemeConfig: PanelThemeConfig
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -89,6 +94,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         paintEventTimer?.cancel()
+
+        surface_view.interactiveCanvas.socket?.disconnect()
     }
 
     override fun onResume() {
@@ -114,6 +121,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         surface_view.interactiveCanvas.drawCallbackListener = this
+
+        surface_view.interactiveCanvas.socket?.apply {
+            if (!connected()) {
+                connect()
+            }
+        }
     }
 
     private fun sendApiStatusCheck() {
@@ -176,8 +189,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 null,
                 { response ->
                     (context as Activity).runOnUiThread {
-                        SessionSettings.instance.timeSync = response.getInt("s").toLong()
-                        setupPaintEventTimer()
+                        val timeUntil = response.getInt("s").toLong()
+
+                        if (timeUntil < 0) {
+                            paint_time_info.text = "???"
+                        }
+                        else {
+                            SessionSettings.instance.timeSync = timeUntil
+                            setupPaintEventTimer()
+                        }
                     }
                 },
                 { error ->
@@ -197,13 +217,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 activity?.runOnUiThread {
                     if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
                         SessionSettings.instance.nextPaintTime =
-                            SessionSettings.instance.nextPaintTime + 300 * 1000
+                            System.currentTimeMillis() + 300 * 1000
                     }
 
-                    var timeUntil = SessionSettings.instance.nextPaintTime
-
-                    var m = (timeUntil - System.currentTimeMillis()) / 1000 / 60
-                    var s = ((timeUntil - System.currentTimeMillis()) / 1000) % 60
+                    val m = (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
+                    val s = ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
 
                     if (m == 0L) {
                         try {
@@ -367,6 +385,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         }
 
+        panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelBackgroundResId)
+
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
 
@@ -403,7 +423,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         close_paint_panel.type = ActionButtonView.Type.PAINT_CLOSE
 
         paint_color_accept_image.type = ActionButtonView.Type.YES
-        paint_color_accept_image.colorMode = ActionButtonView.ColorMode.NONE
+
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            paint_color_accept_image.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+        else {
+            paint_color_accept_image.colorMode = ActionButtonView.ColorMode.WHITE
+        }
 
         recent_colors.type = ActionButtonView.Type.DOT
         recent_colors_button.actionBtnView = recent_colors
@@ -413,6 +439,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
         background_button.actionBtnView = background_action
+
+        grid_lines_action.type = ActionButtonView.Type.GRID_LINES
+        grid_lines_button.actionBtnView = grid_lines_action
 
         open_tools_action.type = ActionButtonView.Type.DOT
         open_tools_button.actionBtnView = open_tools_action
@@ -434,6 +463,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 } */
             }
         })
+
+        if (panelThemeConfig.inversePaintEventInfo) {
+            paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
+            paint_time_info.setTextColor(ActionButtonView.darkGrayPaint.color)
+        }
 
         paint_panel.setOnClickListener {
 
@@ -556,12 +590,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             if (toolboxOpen) {
                 export_button.visibility = View.VISIBLE
                 background_button.visibility = View.VISIBLE
+                grid_lines_button.visibility = View.VISIBLE
             }
 
             back_button.visibility = View.VISIBLE
 
             stopEmittingParticles()
         }
+
+        paint_qty_bar.panelThemeConfig = panelThemeConfig
+        paint_indicator_view.panelThemeConfig = panelThemeConfig
 
         paint_indicator_view.setOnClickListener {
             // accept selected color
@@ -610,7 +648,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 close_paint_panel.visibility = View.GONE
                 paint_no.visibility = View.VISIBLE
 
-                paint_no.colorMode = ActionButtonView.ColorMode.NONE
+                if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+                    paint_no.colorMode = ActionButtonView.ColorMode.BLACK
+                }
+                else {
+                    paint_no.colorMode = ActionButtonView.ColorMode.WHITE
+                }
 
                 recent_colors_button.visibility = View.GONE
                 recent_colors_container.visibility = View.GONE
@@ -672,17 +715,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
         }
 
+        // grid lines toggle button
+        grid_lines_button.setOnClickListener {
+            SessionSettings.instance.gridLineMode += 1
+
+            if (SessionSettings.instance.gridLineMode > 1) {
+                SessionSettings.instance.gridLineMode = 0
+            }
+
+            surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        }
+
         // open tools button
         open_tools_button.setOnClickListener {
             if (!toolboxOpen) {
                 export_button.visibility = View.VISIBLE
                 background_button.visibility = View.VISIBLE
+                grid_lines_button.visibility = View.VISIBLE
+
+                Animator.animateMenuItems(listOf(export_button, background_button, grid_lines_button),cascade = false, out = false)
 
                 toolboxOpen = true
             }
             else {
-                export_button.visibility = View.INVISIBLE
-                background_button.visibility = View.INVISIBLE
+                Animator.animateMenuItems(listOf(export_button, background_button, grid_lines_button),cascade = false, out = true)
 
                 toolboxOpen = false
             }
@@ -775,7 +831,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
-        if (surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.gridLineThreshold) {
+        val gridLineMode = SessionSettings.instance.gridLineMode
+        if (gridLineMode == InteractiveCanvas.GRID_LINE_MODE_ON && surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.autoCloseGridLineThreshold) {
 
             val gridLineColor = surface_view.interactiveCanvas.getGridLineColor()
 
@@ -1001,11 +1058,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     override fun onPaintBarDoubleTapped() {
-        if (paint_time_info.visibility == View.VISIBLE) {
-            paint_time_info.visibility = View.INVISIBLE
-        }
-        else {
-            paint_time_info.visibility = View.VISIBLE
+        if (world) {
+            if (paint_time_info.visibility == View.VISIBLE) {
+                paint_time_info.visibility = View.INVISIBLE
+                paint_time_info_container.visibility = View.INVISIBLE
+            }
+            else {
+                paint_time_info.visibility = View.VISIBLE
+                paint_time_info_container.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -1014,6 +1075,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_panel_action_view.invalidate()
         export_action.invalidate()
         background_action.invalidate()
+        grid_lines_action.invalidate()
         recent_colors.invalidate()
         open_tools_action.invalidate()
     }

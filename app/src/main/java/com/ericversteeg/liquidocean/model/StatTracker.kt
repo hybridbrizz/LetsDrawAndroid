@@ -184,7 +184,7 @@ class StatTracker {
                 return "$count / ${thresholds.size}"
             }
         }
-        return ""
+        return "${thresholds.size} / ${thresholds.size}"
     }
 
     fun getWorldLevel(): Int {
@@ -205,12 +205,22 @@ class StatTracker {
                         enqueueAchievement(eventType, threshold)
                     }
                 }
+
+                val oldXp = oldVal * 20
+                val newXp = newVal * 20
+
+                for (i in levelThresholds.indices) {
+                    val threshold = levelThresholds[levelThresholds.size - 1 - i]
+                    if (threshold in (oldXp + 1) until newXp + 1) {
+                        enqueueAchievement(eventType, threshold)
+                    }
+                }
             }
             EventType.PIXEL_PAINTED_SINGLE -> {
                 for (i in pixelSingleThresholds.indices) {
                     val threshold = pixelSingleThresholds[pixelSingleThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(EventType.WORLD_XP, threshold)
                     }
                 }
             }

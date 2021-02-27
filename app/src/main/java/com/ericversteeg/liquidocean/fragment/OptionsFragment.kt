@@ -170,6 +170,34 @@ class OptionsFragment: Fragment() {
                 })
         }
 
+        // option grid line color
+        option_grid_line_color_button.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
+        option_grid_line_color_reset_button.setOnClickListener {
+            SessionSettings.instance.canvasGridLineColor = -1
+            option_grid_line_color_button.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
+        }
+
+        // option grid line color
+        option_grid_line_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.canvasGridLineColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(true) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(true)
+                .showValue(true)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.canvasGridLineColor = color
+                    }
+
+                    fun onColor(color: Int, fromUser: Boolean) {}
+                })
+        }
+
         // option emitters
         option_emitters_switch.isChecked = SessionSettings.instance.emittersEnabled
         option_emitters_switch.setOnCheckedChangeListener { _, value ->
@@ -183,7 +211,7 @@ class OptionsFragment: Fragment() {
         }
 
         // option paint indicator width
-        option_paint_indicator_width_value.text = SessionSettings.instance.colorIndicatorWidth.toInt().toString()
+        option_paint_indicator_width_value.text = SessionSettings.instance.colorIndicatorWidth.toString()
 
         option_paint_indicator_width_action_minus.type = ActionButtonView.Type.DOT
         option_paint_indicator_width_action_plus.type = ActionButtonView.Type.DOT
@@ -192,15 +220,19 @@ class OptionsFragment: Fragment() {
         option_paint_indicator_width_button_plus.actionBtnView = option_paint_indicator_width_action_plus
 
         option_paint_indicator_width_button_minus.setOnClickListener {
-            val value = option_paint_indicator_width_value.text.toString().toInt() - 1
+            var value = option_paint_indicator_width_value.text.toString().toInt() - 1
+            if (value == 0) value = 1
+
             option_paint_indicator_width_value.text = value.toString()
-            SessionSettings.instance.colorIndicatorWidth = value.toFloat()
+            SessionSettings.instance.colorIndicatorWidth = value
         }
 
         option_paint_indicator_width_button_plus.setOnClickListener {
-            val value = option_paint_indicator_width_value.text.toString().toInt() + 1
+            var value = option_paint_indicator_width_value.text.toString().toInt() + 1
+            if (value == 6) value = 5
+
             option_paint_indicator_width_value.text = value.toString()
-            SessionSettings.instance.colorIndicatorWidth = value.toFloat()
+            SessionSettings.instance.colorIndicatorWidth = value
         }
 
         // option paint indicator fill circle
@@ -210,11 +242,45 @@ class OptionsFragment: Fragment() {
             SessionSettings.instance.colorIndicatorFill = button.isChecked
         }
 
+        // option paint indicator square
+        option_paint_indicator_square_switch.isChecked = SessionSettings.instance.colorIndicatorSquare
+
+        option_paint_indicator_square_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.colorIndicatorSquare = button.isChecked
+        }
+
         // option paint indicator outline
         option_paint_indicator_outline_switch.isChecked = SessionSettings.instance.colorIndicatorOutline
 
         option_paint_indicator_outline_switch.setOnCheckedChangeListener { button, _ ->
             SessionSettings.instance.colorIndicatorOutline = button.isChecked
+        }
+
+        // option close paint panel button color
+        option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
+        option_close_paint_panel_color_reset_button.setOnClickListener {
+            SessionSettings.instance.closePaintBackButtonColor = ActionButtonView.yellowPaint.color
+            option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
+        }
+
+        option_close_paint_panel_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.closePaintBackButtonColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(true) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(true)
+                .showValue(true)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.closePaintBackButtonColor = color
+                    }
+
+                    fun onColor(color: Int, fromUser: Boolean) {}
+                })
         }
 
         setupNumRecentColorsChoices()

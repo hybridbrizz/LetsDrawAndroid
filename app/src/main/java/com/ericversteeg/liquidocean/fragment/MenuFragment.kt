@@ -1,16 +1,17 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
@@ -21,6 +22,7 @@ import kotlinx.android.synthetic.main.fragment_menu.back_action
 import kotlinx.android.synthetic.main.fragment_menu.back_button
 import kotlinx.android.synthetic.main.fragment_options.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class MenuFragment: Fragment() {
 
@@ -46,6 +48,8 @@ class MenuFragment: Fragment() {
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
+
+        view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
         back_button.setOnClickListener {
             if (backCount == 1) {
@@ -138,46 +142,37 @@ class MenuFragment: Fragment() {
         }
 
         animateMenuButtons(0)
+
+        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val safeViews: MutableList<View> = ArrayList()
+
+                safeViews.add(art_showcase)
+                safeViews.add(menu_button_container)
+
+                Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                } else {
+                    view.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                }
+            }
+        })
     }
 
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {
         if (layer == 0) {
-            if (!out) {
-                play_button.x += 500
-                play_button.alpha = 0F
-                play_button.animate().setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-
-                options_button.x += 500
-                options_button.alpha = 0F
-                options_button.animate().setStartDelay(50).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-
-                stats_button.x += 500
-                stats_button.alpha = 0F
-                stats_button.animate().setStartDelay(80).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-
-                exit_button.x += 500
-                stats_button.alpha = 0F
-                exit_button.animate().setStartDelay(100).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-            }
-            else {
-                play_button.animate().setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-                options_button.animate().setStartDelay(50).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-                stats_button.animate().setStartDelay(100).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-                exit_button.animate().setStartDelay(150).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-            }
+            Animator.animateMenuItems(listOf(play_button, options_button, stats_button, exit_button), cascade = true)
         }
         else if (layer == 1) {
-            if (!out) {
-                single_button.x += 500
-                single_button.animate().setDuration(150).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-
-                world_button.x += 500
-                world_button.animate().setStartDelay(50).setDuration(150).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
-            }
-            else {
-                single_button.animate().setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-                world_button.animate().setStartDelay(50).setDuration(150).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator())
-            }
+            Animator.animateMenuItems(listOf(single_button, world_button), cascade = true)
         }
     }
 
@@ -202,10 +197,13 @@ class MenuFragment: Fragment() {
         super.onPause()
 
         showcaseTimer.cancel()
+        Animator.context = null
     }
 
     override fun onResume() {
         super.onResume()
+
+        Animator.context = context
 
         showcaseTimer.schedule(object: TimerTask() {
             override fun run() {

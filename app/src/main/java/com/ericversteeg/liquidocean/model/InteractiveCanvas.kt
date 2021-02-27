@@ -38,7 +38,8 @@ class InteractiveCanvas(var context: Context) {
     val basePpu = 100
     var ppu = basePpu
 
-    val gridLineThreshold = 50
+    val autoCloseGridLineThreshold = 50
+    val autoFarGridLineThreshold = 25
 
     var deviceViewport: RectF? = null
 
@@ -66,7 +67,7 @@ class InteractiveCanvas(var context: Context) {
     }
 
     // socket.io websocket for handling real-time pixel updates
-    private lateinit var socket: Socket
+    var socket: Socket? = null
     var checkEventTimeout = 20000L
     var checkStatusReceived = false
 
@@ -83,6 +84,11 @@ class InteractiveCanvas(var context: Context) {
 
     val numBackgrounds = 6
 
+    companion object {
+        var GRID_LINE_MODE_ON = 0
+        var GRID_LINE_MODE_OFF = 1
+    }
+
     private fun initType() {
         if (world) {
             val arrJsonStr = SessionSettings.instance.arrJsonStr
@@ -98,9 +104,9 @@ class InteractiveCanvas(var context: Context) {
             try {
                 socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
 
-                socket.connect()
+                socket?.connect()
 
-                socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+                socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
                     Log.i("okay", it.toString())
 
                     //val map = HashMap<String, String>()
@@ -108,15 +114,15 @@ class InteractiveCanvas(var context: Context) {
                     //socket.emit("my_event", gson.toJson(map))
 
                     if (!checkStatusReceived) {
-                        socket.emit("check_event")
+                        socket?.emit("check_event")
                     }
                 })
 
-                socket.on(Socket.EVENT_CONNECT_ERROR) {
+                socket?.on(Socket.EVENT_CONNECT_ERROR) {
                     Log.i("Error", it.toString())
                 }
 
-                socket.on(Socket.EVENT_DISCONNECT) {
+                socket?.on(Socket.EVENT_DISCONNECT) {
                     Log.i("Socket", "Socket disconnected.")
                 }
 
@@ -230,8 +236,8 @@ class InteractiveCanvas(var context: Context) {
         }
     }
 
-    private fun registerForSocketEvents(socket: Socket) {
-        socket.on("pixels_commit") {
+    private fun registerForSocketEvents(socket: Socket?) {
+        socket?.on("pixels_commit") {
             (context as Activity).runOnUiThread(Runnable {
                 val pixelsJsonArr = it[0] as JSONArray
                 for (i in 0 until pixelsJsonArr.length()) {
@@ -250,38 +256,42 @@ class InteractiveCanvas(var context: Context) {
             })
         }
 
-        socket.on("paint_qty") {
+        socket?.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
             SessionSettings.instance.dropsAmt = deviceJsonObject.getInt("paint_qty")
         }
 
-        socket.on("add_paint") {
+        socket?.on("add_paint") {
             SessionSettings.instance.dropsAmt++
         }
 
-        socket.on("add_paint_canvas_setup") {
+        socket?.on("add_paint_canvas_setup") {
             if (!receivedPaintRecently) {
+                receivedPaintRecently = true
+                Log.i("Flag flipped", "flipped")
+
+                Log.i("Drops amt before", SessionSettings.instance.dropsAmt.toString())
                 SessionSettings.instance.dropsAmt += 50
+                Log.i("Drops amt after", SessionSettings.instance.dropsAmt.toString())
                 if (SessionSettings.instance.dropsAmt > 1000) {
                     SessionSettings.instance.dropsAmt = 1000
                 }
-
-                receivedPaintRecently = true
                 Timer().schedule(object: TimerTask() {
                     override fun run() {
+                        Log.i("Flag flipped back", "flipped back")
                         receivedPaintRecently = false
                     }
-                }, 1000 * 10)
+                }, 1000 * 60)
             }
         }
 
-        socket.on("check_success") {
+        socket?.on("check_success") {
             checkStatusReceived = true
         }
     }
 
     fun checkSocketStatus() {
-        socket.emit("check_event")
+        socket?.emit("check_event")
 
         checkStatusReceived = false
         Timer().schedule(object : TimerTask() {
@@ -365,6 +375,10 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun getGridLineColor(): Int {
+        if (SessionSettings.instance.canvasGridLineColor != -1) {
+            return SessionSettings.instance.canvasGridLineColor
+        }
+
         when (SessionSettings.instance.backgroundColorsIndex) {
             BACKGROUND_BLACK -> return Color.WHITE
             BACKGROUND_WHITE -> return Color.BLACK
@@ -460,7 +474,7 @@ class InteractiveCanvas(var context: Context) {
             reqObj.put("uuid", SessionSettings.instance.uniqueId)
             reqObj.put("pixels", jsonArr)
 
-            socket.emit("pixels_event", reqObj)
+            socket?.emit("pixels_event", reqObj)
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,

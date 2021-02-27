@@ -38,6 +38,7 @@ class LoadingScreenFragment : Fragment() {
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
     var doneSendingDeviceId = false
+    var doneLoadingTopContributors = false
 
     var dataLoadingCallback: DataLoadingCallback? = null
 
@@ -97,17 +98,9 @@ class LoadingScreenFragment : Fragment() {
 
             downloadCanvasPixels(this)
 
-            /* view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    // drawWorldCanvas()
+            getTopContributors()
 
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                        view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    } else {
-                        view.viewTreeObserver.removeGlobalOnLayoutListener(this)
-                    }
-                }
-            }) */
+            globe_art.jsonResId = R.raw.globe_json
         }
 
         timer.schedule(object : TimerTask() {
@@ -258,6 +251,66 @@ class LoadingScreenFragment : Fragment() {
         }
     }
 
+    private fun getTopContributors() {
+        context?.apply {
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                Utils.baseUrlApi + "/api/v1/top/contributors",
+                null,
+                { response ->
+                    val topContributors = response.getJSONArray("data")
+
+                    val topContributorNameViews1 = listOf(top_contributor_name_1, top_contributor_name_2,
+                        top_contributor_name_3, top_contributor_name_4, top_contributor_name_5)
+
+                    val topContributorAmtViews1 = listOf(top_contributor_amt_1, top_contributor_amt_2,
+                        top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5)
+
+                    val topContributorNameViews2 = listOf(top_contributor_name_6, top_contributor_name_7,
+                        top_contributor_name_8, top_contributor_name_9, top_contributor_name_10)
+
+                    val topContributorAmtViews2 = listOf(top_contributor_amt_6, top_contributor_amt_7,
+                        top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10)
+
+                    for (i in 0 until topContributors.length()) {
+                        val topContributor = topContributors.getJSONObject(i)
+
+                        val name = topContributor.getString("name")
+                        val amt = topContributor.getString("amt")
+
+                        if (i < 5) {
+                            topContributorNameViews1[i].text = name
+                            topContributorAmtViews1[i].text = amt.toString()
+
+                            topContributorNameViews1[i].alpha = 0F
+                            topContributorAmtViews1[i].alpha = 0F
+
+                            topContributorNameViews1[i].animate().setDuration(500).alphaBy(1F)
+                            topContributorAmtViews1[i].animate().setDuration(500).alphaBy(1F)
+                        }
+                        else if (i < 10) {
+                            topContributorNameViews2[i - 5].text = name
+                            topContributorAmtViews2[i - 5].text = amt.toString()
+
+                            topContributorNameViews2[i - 5].alpha = 0F
+                            topContributorAmtViews2[i - 5].alpha = 0F
+
+                            topContributorNameViews2[i - 5].animate().setDuration(500).alphaBy(1F)
+                            topContributorAmtViews2[i - 5].animate().setDuration(500).alphaBy(1F)
+                        }
+                    }
+
+                    doneLoadingTopContributors = true
+                    downloadFinished()
+                },
+                { error ->
+
+                })
+
+            requestQueue.add(request)
+        }
+    }
+
     private fun showConnectionErrorMessage() {
         (context as Activity).runOnUiThread {
             requestQueue.cancelAll("download")
@@ -298,7 +351,7 @@ class LoadingScreenFragment : Fragment() {
     }
 
     private fun updateNumLoaded() {
-        status_text.text = "Loading ${getNumLoaded()} / 2"
+        status_text.text = "Loading ${getNumLoaded()} / 3"
     }
 
     private fun loadingDone(): Boolean {
@@ -312,6 +365,10 @@ class LoadingScreenFragment : Fragment() {
         }
 
         if (doneLoadingPaintQty) {
+            num++
+        }
+
+        if (doneLoadingTopContributors) {
             num++
         }
 

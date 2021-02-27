@@ -3,7 +3,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:background="#FF333333">
+        android:background="@drawable/gradient_2">
 
     <com.ericversteeg.liquidocean.view.ActionButtonFrame
             android:id="@+id/back_button"
@@ -157,6 +157,53 @@
 
     </LinearLayout>
 
+    <View
+            android:id="@+id/pixel_view_1"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
+    <View
+            android:id="@+id/pixel_view_2"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    <View
+            android:id="@+id/pixel_view_3"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    <View
+            android:id="@+id/pixel_view_4"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    <View
+            android:id="@+id/pixel_view_5"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    <View
+            android:id="@+id/pixel_view_6"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+    <View
+            android:id="@+id/pixel_view_7"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

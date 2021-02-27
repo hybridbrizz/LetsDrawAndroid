@@ -29,4 +29,7 @@
     <string name="option_paint_indicator_width_title">Palette size</string>
     <string name="option_paint_indicator_fill_circle">Circle palette</string>
     <string name="option_paint_indicator_outline_title">Palette outline</string>
+    <string name="option_grid_line_color_title">Canvas grid line color</string>
+    <string name="option_close_paint_panel_color_title">Close paint button color</string>
+    <string name="option_paint_indicator_square">Square palette</string>
 </resources>

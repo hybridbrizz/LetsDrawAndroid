@@ -4,9 +4,11 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Point
+import androidx.collection.ArraySet
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import org.json.JSONArray
@@ -32,8 +34,8 @@ class SessionSettings {
     var dropsAmt = 0
     set(value) {
         field = value
-        for (x in paintQtyListeners.indices) {
-            paintQtyListeners[x]?.paintQtyChanged(field)
+        for (listener in paintQtyListeners) {
+            listener?.paintQtyChanged(field)
         }
     }
 
@@ -41,7 +43,7 @@ class SessionSettings {
 
     val maxPaintAmt = 1000
 
-    var paintQtyListeners: MutableList<PaintQtyListener?> = ArrayList()
+    var paintQtyListeners: MutableSet<PaintQtyListener?> = ArraySet()
 
     var darkIcons = false
 
@@ -74,11 +76,21 @@ class SessionSettings {
 
     var arrJsonStr = ""
 
-    var colorIndicatorWidth = 0F
+    var colorIndicatorWidth = 2
 
     var colorIndicatorFill = false
 
+    var colorIndicatorSquare = false
+
     var colorIndicatorOutline = true
+
+    var gridLineMode = 0
+
+    var canvasGridLineColor = -1
+
+    var closePaintBackButtonColor = ActionButtonView.yellowPaint.color
+
+    var menuBackgroundResId = 0
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -127,11 +139,19 @@ class SessionSettings {
 
         ed.putInt("num_recent_colors", numRecentColors)
 
-        ed.putFloat("color_indicator_width", colorIndicatorWidth)
+        ed.putInt("color_indicator_width", colorIndicatorWidth)
 
         ed.putBoolean("color_indicator_fill", colorIndicatorFill)
 
         ed.putBoolean("color_indicator_outline", colorIndicatorOutline)
+
+        ed.putInt("grid_line_mode", gridLineMode)
+
+        ed.putInt("canvas_grid_line_color", canvasGridLineColor)
+
+        ed.putInt("close_paint_back_button_color", closePaintBackButtonColor)
+
+        ed.putBoolean("color_indicator_square", colorIndicatorSquare)
 
         ed.apply()
     }
@@ -179,11 +199,19 @@ class SessionSettings {
 
         numRecentColors = getSharedPrefs(context).getInt("num_recent_colors", 8)
 
-        colorIndicatorWidth = getSharedPrefs(context).getFloat("color_indicator_width", Utils.dpToPx(context, 12).toFloat())
+        colorIndicatorWidth = getSharedPrefs(context).getInt("color_indicator_width", 3)
 
         colorIndicatorFill = getSharedPrefs(context).getBoolean("color_indicator_fill", false)
 
         colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", true)
+
+        gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
+
+        canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", -1)
+
+        closePaintBackButtonColor = getSharedPrefs(context).getInt("close_paint_back_button_color", ActionButtonView.yellowPaint.color)
+
+        colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", false)
     }
 
     private fun artShowcaseJsonString(): String? {

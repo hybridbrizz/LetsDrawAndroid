@@ -36,6 +36,10 @@ class ActionButtonView: View {
         val chessTan = Paint()
         val linePaint = Paint()
         val lightGrayPaint = Paint()
+        val bluePaint = Paint()
+        var darkGrayPaint = Paint()
+
+        var defaultPaint = Paint()
     }
 
     var rows = 0
@@ -72,6 +76,7 @@ class ActionButtonView: View {
         SAVE,
         DOT,
         CHANGE_BACKGROUND,
+        GRID_LINES,
         BACKGROUND_BLACK,
         BACKGROUND_WHITE,
         BACKGROUND_PHOTOSHOP,
@@ -88,7 +93,8 @@ class ActionButtonView: View {
 
     enum class ColorMode {
         COLOR,
-        NONE
+        WHITE,
+        BLACK
     }
 
     var type = Type.NONE
@@ -104,7 +110,7 @@ class ActionButtonView: View {
             invalidate()
         }
 
-    var colorMode = ColorMode.NONE
+    var colorMode = ColorMode.WHITE
     set(value) {
         field = value
         invalidate()
@@ -171,7 +177,11 @@ class ActionButtonView: View {
 
         chessTan.color = Color.parseColor("#FFb59870")
 
-        lightGrayPaint.color = Color.parseColor("#FFEEEEEE")
+        lightGrayPaint.color = Color.parseColor("#FFDDDDDD")
+
+        bluePaint.color = Color.parseColor("#FF84baff")
+
+        darkGrayPaint.color = Color.parseColor("#FF303030")
 
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
@@ -193,10 +203,10 @@ class ActionButtonView: View {
                 drawBackSolidAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.YES) {
-                drawYesAction(touchState == TouchState.ACTIVE, colorMode == ColorMode.COLOR, canvas)
+                drawYesAction(touchState == TouchState.ACTIVE, colorMode, canvas)
             }
             else if (type == Type.NO) {
-                drawNoAction(touchState == TouchState.ACTIVE,colorMode == ColorMode.COLOR, canvas)
+                drawNoAction(touchState == TouchState.ACTIVE,colorMode, canvas)
             }
             else if (type == Type.PAINT) {
                 drawPaintAction(touchState == TouchState.ACTIVE, canvas)
@@ -218,6 +228,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.CHANGE_BACKGROUND) {
                 drawChangeBackgroundAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.GRID_LINES) {
+                drawGridLinesAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.DOT) {
                 drawDotAction(touchState == TouchState.ACTIVE, canvas)
@@ -274,9 +287,16 @@ class ActionButtonView: View {
         rows = 5
         cols = 7
 
-        var paint = yellowPaint
+        var paint = defaultPaint
+        paint.color = SessionSettings.instance.closePaintBackButtonColor
+
         if (light) {
-            paint = lightYellowPaint
+            if (paint.color != yellowPaint.color) {
+                paint = thirdGray
+            }
+            else {
+                paint = lightYellowPaint
+            }
         }
 
         canvas.apply {
@@ -371,7 +391,7 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawYesAction(light: Boolean, color: Boolean, canvas: Canvas) {
+    private fun drawYesAction(light: Boolean, colorMode: ColorMode, canvas: Canvas) {
         rows = 5
         cols = 7
 
@@ -380,11 +400,11 @@ class ActionButtonView: View {
             paint = lightGreenPaint
         }
 
-        if (!color) {
-            if (SessionSettings.instance.panelBackgroundResId == R.drawable.marble_2) {
+        if (colorMode != ColorMode.COLOR) {
+            if (colorMode == ColorMode.BLACK) {
                 paint = blackPaint
             }
-            else {
+            else if (colorMode == ColorMode.WHITE) {
                 paint = whitePaint
             }
 
@@ -413,7 +433,7 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawNoAction(light: Boolean, color: Boolean, canvas: Canvas) {
+    private fun drawNoAction(light: Boolean, colorMode: ColorMode, canvas: Canvas) {
         rows = 5
         cols = 5
 
@@ -422,11 +442,11 @@ class ActionButtonView: View {
             paint = lightRedPaint
         }
 
-        if (!color) {
-            if (SessionSettings.instance.panelBackgroundResId == R.drawable.marble_2) {
+        if (colorMode != ColorMode.COLOR) {
+            if (colorMode == ColorMode.BLACK) {
                 paint = blackPaint
             }
-            else {
+            else if (colorMode == ColorMode.WHITE) {
                 paint = whitePaint
             }
 
@@ -480,19 +500,19 @@ class ActionButtonView: View {
         canvas.apply {
             // row 1
             drawPixel(3, 0, accentPaint, canvas)
-            drawOutline(3, 0, outLinePaint, canvas)
+            //drawOutline(3, 0, outLinePaint, canvas)
 
             // row 2
             drawPixel(2, 1, primaryPaint, canvas)
-            drawOutline(2, 1, outLinePaint, canvas)
+            //drawOutline(2, 1, outLinePaint, canvas)
 
             // row 3
             drawPixel(1, 2, primaryPaint, canvas)
-            drawOutline(1, 2, outLinePaint, canvas)
+            //drawOutline(1, 2, outLinePaint, canvas)
 
             // row 4
             drawPixel(0, 3, primaryPaint, canvas)
-            drawOutline(0, 3, outLinePaint, canvas)
+            //drawOutline(0, 3, outLinePaint, canvas)
         }
     }
 
@@ -713,6 +733,28 @@ class ActionButtonView: View {
         }
     }
 
+    private fun drawGridLinesAction(light: Boolean, canvas: Canvas) {
+        rows = 1
+        cols = 3
+
+        var paint = semiPaint
+
+        if (light) {
+            paint = lightYellowPaint
+        }
+
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        canvas.apply {
+            // row 2
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+        }
+    }
+
     private fun drawDotAction(light: Boolean, canvas: Canvas) {
         rows = 1
         cols = 1
@@ -728,25 +770,7 @@ class ActionButtonView: View {
         }
 
         canvas.apply {
-            // row 1
             drawPixel(0, 0, paint, canvas)
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-
-            // row 2
-            drawPixel(0, 1, paint, canvas)
-            drawPixel(1, 1, paint, canvas)
-            drawPixel(2, 1, paint, canvas)
-
-            // row 3
-            drawPixel(0, 2, paint, canvas)
-            drawPixel(1, 2, paint, canvas)
-            drawPixel(2, 2, paint, canvas)
-
-            // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
         }
     }
 

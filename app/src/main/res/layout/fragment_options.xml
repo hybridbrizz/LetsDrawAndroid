@@ -24,8 +24,6 @@
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-
-
             <TextView
                     android:id="@+id/option_paint_panel_texture_title"
                     android:layout_width="wrap_content"
@@ -115,7 +113,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_emitters_container"
+                    android:id="@+id/option_grid_line_color_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -124,6 +122,43 @@
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
                     app:layout_constraintTop_toBottomOf="@id/option_canvas_lock_color_container">
+
+                <TextView
+                        android:id="@+id/option_grid_line_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/option_grid_line_color_title"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_grid_line_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_grid_line_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_emitters_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_grid_line_color_container">
 
                 <TextView
                         android:id="@+id/option_option_emitters_container_title"
@@ -177,7 +212,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_paint_indicator_outline_container"
+                    android:id="@+id/option_paint_indicator_square_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -186,6 +221,37 @@
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_fill_circle_container">
+
+                <TextView
+                        android:id="@+id/option_paint_indicator_square_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/option_paint_indicator_square"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/option_paint_indicator_square_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_paint_indicator_outline_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_square_container">
 
                 <TextView
                         android:id="@+id/option_paint_indicator_outline_title"
@@ -264,7 +330,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_prompt_to_exit_container"
+                    android:id="@+id/option_close_paint_panel_color_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -273,6 +339,43 @@
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_width_container">
+
+                <TextView
+                        android:id="@+id/option_close_paint_panel_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/option_close_paint_panel_color_title"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_close_paint_panel_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_close_paint_panel_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_prompt_to_exit_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_close_paint_panel_color_container">
 
                 <TextView
                         android:id="@+id/option_prompt_to_exit_title"

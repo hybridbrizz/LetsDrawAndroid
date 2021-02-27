@@ -143,8 +143,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             if (ev.action == MotionEvent.ACTION_DOWN) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
                 unitPoint?.apply {
-                    SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
-                    interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                    if (!interactiveCanvas.isBackground(unitPoint)) {
+                        SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
+                        interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                    }
                 }
             }
         }
@@ -253,9 +255,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                     if (unitPoint != null) {
                         interactiveCanvas.lastSelectedUnitPoint = unitPoint
 
-                        if (!interactiveCanvas.isBackground(unitPoint)) {
-                            pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
-                        }
+                        pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
                     }
                 }
             }

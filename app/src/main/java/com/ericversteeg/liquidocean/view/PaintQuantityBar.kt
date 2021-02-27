@@ -3,9 +3,11 @@ package com.ericversteeg.liquidocean.view
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.listener.PaintActionListener
 import com.ericversteeg.liquidocean.listener.PaintBarActionListener
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -24,6 +26,10 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     val lightGrayPaint = Paint()
     val linePaint = Paint()
 
+    var darkGrayPaint = Paint()
+    var grayAccentPaint = Paint()
+    var darkLinePaint = Paint()
+
     var world = true
 
     var flashingError = false
@@ -31,6 +37,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     var firstClickTime = 0L
 
     var actionListener: PaintBarActionListener? = null
+
+    lateinit var panelThemeConfig: PanelThemeConfig
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -64,6 +72,12 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         bluePaint.color = Color.parseColor("#84baff")
         brownPaint.color = Color.parseColor("#633d21")
         lightGrayPaint.color = Color.parseColor("#e6ebe6")
+
+        darkGrayPaint.color = Color.parseColor("#2f2f2f")
+        grayAccentPaint.color = Color.parseColor("#484948")
+
+        darkLinePaint.color = darkGrayPaint.color
+        darkLinePaint.strokeWidth = 1F
 
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
@@ -117,23 +131,44 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
     private fun drawPixelBorder(canvas: Canvas) {
         canvas.apply {
-            // top and bottom
-            for (x in 1 until cols - 1) {
-                drawRect(rectForPixel(x, 0), whitePaint)
+            if (panelThemeConfig.darkPaintQtyBar) {
+                // top and bottom
+                for (x in 1 until cols - 1) {
+                    drawRect(rectForPixel(x, 0), darkGrayPaint)
+                }
+
+                for (x in 1 until cols - 1) {
+                    drawRect(rectForPixel(x, 2), darkGrayPaint)
+                }
+
+                // decor
+                drawRect(rectForPixel(6, 0), grayAccentPaint)
+                drawRect(rectForPixel(2, 2), grayAccentPaint)
+                drawRect(rectForPixel(8, 2), grayAccentPaint)
+
+                // ends
+                drawRect(rectForPixel(0, 1), greenPaint)
+                drawRect(rectForPixel(cols - 1, 1), darkGrayPaint)
             }
+            else {
+                // top and bottom
+                for (x in 1 until cols - 1) {
+                    drawRect(rectForPixel(x, 0), whitePaint)
+                }
 
-            for (x in 1 until cols - 1) {
-                drawRect(rectForPixel(x, 2), whitePaint)
+                for (x in 1 until cols - 1) {
+                    drawRect(rectForPixel(x, 2), whitePaint)
+                }
+
+                // decor
+                drawRect(rectForPixel(6, 0), lightGrayPaint)
+                drawRect(rectForPixel(2, 2), lightGrayPaint)
+                drawRect(rectForPixel(8, 2), lightGrayPaint)
+
+                // ends
+                drawRect(rectForPixel(0, 1), greenPaint)
+                drawRect(rectForPixel(cols - 1, 1), whitePaint)
             }
-
-            // decor
-            drawRect(rectForPixel(6, 0), lightGrayPaint)
-            drawRect(rectForPixel(2, 2), lightGrayPaint)
-            drawRect(rectForPixel(8, 2), lightGrayPaint)
-
-            // ends
-            drawRect(rectForPixel(0, 1), greenPaint)
-            drawRect(rectForPixel(cols - 1, 1), whitePaint)
 
             // quantity
             drawQuantity(this)
@@ -144,6 +179,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         val pxWidth = (width / cols)
         val pxHeight = (height / rows)
 
+        Log.i("Drops amount here is", SessionSettings.instance.dropsAmt.toString())
         var relQty = SessionSettings.instance.dropsAmt / SessionSettings.instance.maxPaintAmt.toFloat()
 
         if (!world) {
@@ -161,7 +197,13 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                         drawRect(rectForPixel((cols - 1) - x, 1), bluePaint)
                     }
                     else {
-                        drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.twoThirdGray)
+                        if (panelThemeConfig.darkPaintQtyBar) {
+                            drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.thirdGray)
+                        }
+                        else {
+                            drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.twoThirdGray)
+                        }
+
                     }
                 }
                 else {
@@ -174,7 +216,13 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                 }
 
                 if (x < cols - 2) {
-                    drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), linePaint)
+                    if (panelThemeConfig.darkPaintQtyBar) {
+                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), darkLinePaint)
+                    }
+                    else {
+                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), linePaint)
+                    }
+
                 }
 
                 curProg += qtyPer

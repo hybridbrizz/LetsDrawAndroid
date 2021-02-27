@@ -48,11 +48,17 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     private var mVisible: Boolean = false
     private val mHideRunnable = Runnable { hide() }
 
+    private val backgrounds = intArrayOf(R.drawable.gradient, R.drawable.gradient_2, R.drawable.gradient_3, R.drawable.gradient_4, R.drawable.gradient_5,
+        R.drawable.gradient_6, R.drawable.gradient_7, R.drawable.gradient_8, R.drawable.gradient_9, R.drawable.gradient_10)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_fullscreen)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val rIndex = (Math.random() * backgrounds.size).toInt()
+        SessionSettings.instance.menuBackgroundResId = backgrounds[rIndex]
 
         mVisible = true
 
@@ -92,6 +98,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         else {
             getDeviceInfo()
         }
+
+        ActionButtonView(this)
     }
 
     override fun onPause() {
@@ -305,7 +313,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 achievement_name.text = "Pixels Overwritten By Others"
             }
             StatTracker.EventType.PIXEL_OVERWRITE_OUT -> {
-                achievement_name.text = "Others' Pixels Overwritten By Me"
+                achievement_name.text = "Pixels Overwritten By Me"
             }
         }
 

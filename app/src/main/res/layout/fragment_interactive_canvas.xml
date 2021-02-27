@@ -78,17 +78,31 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-                android:id="@+id/paint_time_info"
+
+        <FrameLayout
+                android:id="@+id/paint_time_info_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:textColor="#FFDBC462"
-                android:layout_margin="10dp"
+                android:visibility="invisible"
+                android:background="@drawable/timer_text_background"
+                android:layout_marginTop="10dp"
                 app:layout_constraintTop_toBottomOf="@id/paint_qty_bar"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
+                app:layout_constraintRight_toRightOf="parent">
+
+            <TextView
+                    android:id="@+id/paint_time_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="invisible"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:textColor="#FFFFFFFF"
+                    android:layout_margin="10dp" />
+
+        </FrameLayout>
 
         <View
                 android:id="@+id/top_left_anchor"
@@ -540,7 +554,7 @@
             android:id="@+id/background_button"
             android:visibility="invisible"
             android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_height="71dp"
             app:layout_constraintTop_toBottomOf="@id/export_button"
             app:layout_constraintRight_toRightOf="parent">
 
@@ -548,6 +562,23 @@
                 android:id="@+id/background_action"
                 android:layout_width="33dp"
                 android:layout_height="44dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="top|end" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/grid_lines_button"
+            android:visibility="invisible"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintTop_toBottomOf="@id/background_button"
+            app:layout_constraintRight_toRightOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/grid_lines_action"
+                android:layout_width="33dp"
+                android:layout_height="11dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="top|end" />
 

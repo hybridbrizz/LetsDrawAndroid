@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -98,9 +99,6 @@ class SignInFragment: Fragment() {
         try {
             googleAccount = completedTask.getResult(ApiException::class.java)
             sendGoogleToken(googleAccount)
-
-            google_sign_in_button.isEnabled = false
-            status_text.text = "Signed in"
         } catch (e: ApiException) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
@@ -120,7 +118,7 @@ class SignInFragment: Fragment() {
                         SessionSettings.instance.uniqueId == "####"
                     }
 
-                    requestParams["token_id"] = this.substring(0, 32)
+                    requestParams["token_id"] = this.substring(0, 16)
 
                     val paramsJson = JSONObject(requestParams as Map<String, String>)
 
@@ -146,9 +144,13 @@ class SignInFragment: Fragment() {
                             }
 
                             SessionSettings.instance.googleAuth = true
+
+                            // update UI
+                            google_sign_in_button.isEnabled = false
+                            status_text.text = "Signed in"
                         },
                         { error ->
-
+                            Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
                         })
 
                     requestQueue.add(request)
