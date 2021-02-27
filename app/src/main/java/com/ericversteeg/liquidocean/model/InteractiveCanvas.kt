@@ -30,10 +30,10 @@ import kotlin.math.floor
 
 
 class InteractiveCanvas(var context: Context) {
-    val rows = 512
-    val cols = 512
+    var rows = 512
+    var cols = 512
 
-    val arr = Array(rows) { IntArray(cols) }
+    lateinit var arr: Array<IntArray>
 
     val basePpu = 100
     var ppu = basePpu
@@ -65,6 +65,7 @@ class InteractiveCanvas(var context: Context) {
         field = value
         initType()
     }
+    var realmId = 0
 
     // socket.io websocket for handling real-time pixel updates
     var socket: Socket? = null
@@ -91,14 +92,27 @@ class InteractiveCanvas(var context: Context) {
 
     private fun initType() {
         if (world) {
-            val arrJsonStr = SessionSettings.instance.arrJsonStr
+            // dev
+            if (realmId == 2) {
+                val arrJsonStr = SessionSettings.instance.arrJsonStr
 
-            if (arrJsonStr == "") {
-                Log.i("Error", "Error displaying canvas, arrJsonStr not set.")
+                if (arrJsonStr == "") {
+                    Log.i("Error", "Error displaying canvas, arrJsonStr not set.")
+                }
+                else {
+                    arr = Array(rows) { IntArray(cols) }
+
+                    initPixels(arrJsonStr)
+                    SessionSettings.instance.arrJsonStr = ""
+                }
             }
-            else {
-                initPixels(arrJsonStr)
-                SessionSettings.instance.arrJsonStr = ""
+            // world
+            else if (realmId == 1) {
+                rows = 1024
+                cols = 1024
+                arr = Array(rows) { IntArray(cols) }
+
+                initChunkPixelsFromMemory()
             }
 
             try {
@@ -244,7 +258,12 @@ class InteractiveCanvas(var context: Context) {
                     val pixelObj = pixelsJsonArr.get(i) as JSONObject
 
                     // update color
-                    val unit1DIndex = pixelObj.getInt("id") - 1
+                    var unit1DIndex = pixelObj.getInt("id") - 1
+
+                    // adjust from the absolute pixel id (on top of dev pixels in table (for now))
+                    if (realmId == 1) {
+                        unit1DIndex -= (512 * 512)
+                    }
 
                     val y = unit1DIndex / cols
                     val x = unit1DIndex % cols
@@ -363,6 +382,29 @@ class InteractiveCanvas(var context: Context) {
         drawCallbackListener?.notifyRedraw()
     }
 
+    private fun initChunkPixelsFromMemory() {
+        for (i in arr.indices) {
+            lateinit var chunk: Array<IntArray>
+
+            if (i < rows / 4) {
+                chunk = SessionSettings.instance.chunk1
+            }
+            else if (i < rows / 2) {
+                chunk = SessionSettings.instance.chunk2
+            }
+            else if (i < rows - (rows / 4)) {
+                chunk = SessionSettings.instance.chunk3
+            }
+            else {
+                chunk = SessionSettings.instance.chunk4
+            }
+
+            for (j in arr[i].indices) {
+                arr[i][j] = chunk[i % 256][j]
+            }
+        }
+    }
+
     private fun initDefault() {
         for (i in 0 until rows - 1) {
             for (j in 0 until cols - 1) {
@@ -462,7 +504,12 @@ class InteractiveCanvas(var context: Context) {
 
             for((index, restorePoint) in restorePoints.withIndex()) {
                 val map = HashMap<String, Int>()
-                map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
+                if (realmId == 2) {
+                    map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
+                }
+                else if (realmId == 1) {
+                    map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1 + (512 * 512)
+                }
                 map["color"] = restorePoint.newColor
 
                 arr[index] = map

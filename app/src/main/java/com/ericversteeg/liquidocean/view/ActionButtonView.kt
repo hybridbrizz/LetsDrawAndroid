@@ -70,6 +70,7 @@ class ActionButtonView: View {
         EXIT,
         SINGLE,
         WORLD,
+        DEV,
         ACHIEVEMENTS,
         EXPORT,
         EXPORT_SOLID,
@@ -255,6 +256,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.WORLD) {
                 drawWorldAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.DEV) {
+                drawDevAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.BACKGROUND_WHITE || type == Type.BACKGROUND_BLACK || type == Type.BACKGROUND_GRAY_THIRDS ||
                 type == Type.BACKGROUND_PHOTOSHOP || type == Type.BACKGROUND_CLASSIC || type == Type.BACKGROUND_CHESS) {
@@ -1167,6 +1171,68 @@ class ActionButtonView: View {
             drawPixel(16, 3, paint, canvas)
             drawPixel(18, 3, paint, canvas)
             drawPixel(19, 3, paint, canvas)
+        }
+    }
+
+    private fun drawDevAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 12
+
+        var paint = lightGrayPaint
+        if (selected) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        canvas.apply {
+            // col 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(0, 3, paint, canvas)
+
+            // col 2
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+
+            // col 3
+            drawPixel(2, 1, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+
+            // col 5
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(4, 1, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+
+            // col 6
+            drawPixel(5, 0, paint, canvas)
+            drawPixel(5, 1, paint, canvas)
+            drawPixel(5, 3, paint, canvas)
+
+            // col 7
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+
+            // col 9
+            drawPixel(8, 0, paint, canvas)
+            drawPixel(8, 1, paint, canvas)
+            drawPixel(8, 2, paint, canvas)
+
+            // col 10
+            drawPixel(9, 3, paint, canvas)
+
+            // col 11
+            drawPixel(10, 2, paint, canvas)
+
+            // col 12
+            drawPixel(11, 0, paint, canvas)
+            drawPixel(11, 1, paint, canvas)
         }
     }
 

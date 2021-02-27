@@ -50,6 +50,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var bottomRightParticleSystem: ParticleSystem? = null
 
     var world = false
+    var realmId = 0
 
     var interactiveCanvasFragmentListener: InteractiveCanvasFragmentListener? = null
 
@@ -357,6 +358,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         super.onViewCreated(view, savedInstanceState)
 
         // must call before darkIcons
+        surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
         SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)

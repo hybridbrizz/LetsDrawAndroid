@@ -38,13 +38,19 @@ class LoadingScreenFragment : Fragment() {
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
     var doneSendingDeviceId = false
+    var doneLoadingChunk1 = false
+    var doneLoadingChunk2 = false
+    var doneLoadingChunk3 = false
+    var doneLoadingChunk4 = false
     var doneLoadingTopContributors = false
 
     var dataLoadingCallback: DataLoadingCallback? = null
 
     private lateinit var requestQueue: RequestQueue
+    private lateinit var dataRequestQueue: RequestQueue
 
     var world = false
+    var realmId = 0
 
     var lastDotsStr = ""
 
@@ -81,8 +87,13 @@ class LoadingScreenFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         requestQueue = Volley.newRequestQueue(context)
+        dataRequestQueue = Volley.newRequestQueue(context)
 
         updateNumLoaded()
+
+        if (realmId == 2) {
+            connecting_title.text = "Connecting to dev server"
+        }
 
         val rIndex = (Math.random() * gameTips.size).toInt()
         game_tip_text.text = "Tip: ${gameTips[rIndex]}"
@@ -96,11 +107,24 @@ class LoadingScreenFragment : Fragment() {
                 sendDeviceId()
             }
 
-            downloadCanvasPixels(this)
+            if (realmId == 2) {
+                downloadCanvasPixels(this)
+            }
+            else if (world) {
+                downloadChunkPixels(this, 1)
+                downloadChunkPixels(this, 2)
+                downloadChunkPixels(this, 3)
+                downloadChunkPixels(this, 4)
+            }
 
             getTopContributors()
 
-            globe_art.jsonResId = R.raw.globe_json
+            if (realmId == 2) {
+                realm_art.jsonResId = R.raw.mc_tool_json
+            }
+            else {
+                realm_art.jsonResId = R.raw.globe_json
+            }
         }
 
         timer.schedule(object : TimerTask() {
@@ -146,10 +170,78 @@ class LoadingScreenFragment : Fragment() {
         }
     }
 
+    private fun downloadChunkPixels(context: Context, chunk: Int) {
+        val jsonObjRequest: StringRequest = object : StringRequest(
+            Method.GET,
+            Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels/${chunk}",
+            Response.Listener { response ->
+                lateinit var arr: Array<IntArray>
+                if (chunk == 1) {
+                    SessionSettings.instance.chunk1 = Array(256) { IntArray(1024) }
+                    arr = SessionSettings.instance.chunk1
+                    doneLoadingChunk1 = true
+                }
+                else if (chunk == 2) {
+                    SessionSettings.instance.chunk2 = Array(256) { IntArray(1024) }
+                    arr = SessionSettings.instance.chunk2
+                    doneLoadingChunk2 = true
+                }
+                else if (chunk == 3) {
+                    SessionSettings.instance.chunk3 = Array(256) { IntArray(1024) }
+                    arr = SessionSettings.instance.chunk3
+                    doneLoadingChunk3 = true
+                }
+                else if (chunk == 4) {
+                    SessionSettings.instance.chunk4 = Array(256) { IntArray(1024) }
+                    arr = SessionSettings.instance.chunk4
+                    doneLoadingChunk4 = true
+                }
+
+                val chunkJsonArr = JSONArray(response)
+                for (i in 0 until chunkJsonArr.length()) {
+                    val chunkInnerJsonArr = chunkJsonArr.getJSONArray(i)
+                    for (j in 0 until chunkInnerJsonArr.length()) {
+                        arr[i][j] = chunkInnerJsonArr.getInt(j)
+                    }
+                }
+
+                downloadFinished()
+            },
+            Response.ErrorListener { error ->
+                showConnectionErrorMessage()
+                error.message?.apply {
+                    Log.i("Error", this)
+                }
+            }) {
+            override fun getBodyContentType(): String {
+                return "application/x-www-form-urlencoded; charset=UTF-8"
+            }
+
+            override fun getParams(): Map<String, String> {
+                val params: MutableMap<String, String> = HashMap()
+                val pixelData = SessionSettings.instance.getSharedPrefs(context).getString(
+                    "arr",
+                    ""
+                )
+
+                pixelData?.apply {
+                    params["arr"] = this
+                }
+
+                return params
+            }
+        }
+
+        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 1, 1.0f)
+
+        jsonObjRequest.tag = "download"
+        dataRequestQueue.add(jsonObjRequest)
+    }
+
     private fun downloadCanvasPixels(context: Context) {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
-            Utils.baseUrlApi + "/api/v1/canvas/pixels",
+            Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels",
             Response.Listener { response ->
                 SessionSettings.instance.arrJsonStr = response
 
@@ -184,7 +276,7 @@ class LoadingScreenFragment : Fragment() {
         jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 1, 1.0f)
 
         jsonObjRequest.tag = "download"
-        requestQueue.add(jsonObjRequest)
+        dataRequestQueue.add(jsonObjRequest)
     }
 
     private fun sendDeviceId() {
@@ -346,30 +438,70 @@ class LoadingScreenFragment : Fragment() {
     private fun downloadFinished() {
         updateNumLoaded()
         if (loadingDone()) {
-            dataLoadingCallback?.onDataLoaded(world)
+            dataLoadingCallback?.onDataLoaded(world, realmId)
         }
     }
 
     private fun updateNumLoaded() {
-        status_text.text = "Loading ${getNumLoaded()} / 3"
+        if (realmId == 2) {
+            status_text.text = "Loading ${getNumLoaded()} / 3"
+        }
+        else if (realmId == 1) {
+            status_text.text = "Loading ${getNumLoaded()} / 6"
+        }
     }
 
     private fun loadingDone(): Boolean {
-        return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingPixels
+        if (realmId == 2) {
+            return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
+                    doneLoadingPixels
+        }
+        else if (world) {
+            return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
+                    doneLoadingChunk1 && doneLoadingChunk2 && doneLoadingChunk3 && doneLoadingChunk4
+        }
+        return false
     }
 
     private fun getNumLoaded(): Int {
         var num = 0
-        if (doneLoadingPixels || doneSendingDeviceId) {
-            num++
-        }
+        if (realmId == 2) {
+            if (doneLoadingPixels) {
+                num++
+            }
 
-        if (doneLoadingPaintQty) {
-            num++
-        }
+            if (doneLoadingPaintQty || doneSendingDeviceId) {
+                num++
+            }
 
-        if (doneLoadingTopContributors) {
-            num++
+            if (doneLoadingTopContributors) {
+                num++
+            }
+        }
+        else if (realmId == 1) {
+            if (doneLoadingChunk1) {
+                num++
+            }
+
+            if (doneLoadingChunk2) {
+                num++
+            }
+
+            if (doneLoadingChunk3) {
+                num++
+            }
+
+            if (doneLoadingChunk4) {
+                num++
+            }
+
+            if (doneLoadingPaintQty || doneSendingDeviceId) {
+                num++
+            }
+
+            if (doneLoadingTopContributors) {
+                num++
+            }
         }
 
         return num

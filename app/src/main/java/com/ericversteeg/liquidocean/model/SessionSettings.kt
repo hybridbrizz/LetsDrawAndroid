@@ -76,6 +76,11 @@ class SessionSettings {
 
     var arrJsonStr = ""
 
+    lateinit var chunk1: Array<IntArray>
+    lateinit var chunk2: Array<IntArray>
+    lateinit var chunk3: Array<IntArray>
+    lateinit var chunk4: Array<IntArray>
+
     var colorIndicatorWidth = 2
 
     var colorIndicatorFill = false

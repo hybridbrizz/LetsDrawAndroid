@@ -73,7 +73,7 @@
             app:layout_constraintBottom_toBottomOf="parent" />
 
     <com.ericversteeg.liquidocean.view.ArtView
-            android:id="@+id/globe_art"
+            android:id="@+id/realm_art"
             android:layout_width="350dp"
             android:layout_height="250dp"
             app:layout_constraintTop_toTopOf="parent"

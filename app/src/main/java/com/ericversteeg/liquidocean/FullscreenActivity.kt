@@ -132,20 +132,23 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showLoadingFragment(world: Boolean) {
+    private fun showLoadingFragment(world: Boolean, realmId: Int) {
         val frag = LoadingScreenFragment()
         frag.dataLoadingCallback = this
         frag.world = world
+        frag.realmId = realmId
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
     private fun showInteractiveCanvasFragment(
         world: Boolean,
+        realmId: Int,
         backgroundOption: ActionButtonView.Type? = null
     ) {
         val frag = InteractiveCanvasFragment()
         frag.world = world
+        frag.realmId = realmId
         frag.interactiveCanvasFragmentListener = this
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
@@ -245,8 +248,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     // data load callback
-    override fun onDataLoaded(world: Boolean) {
-        showInteractiveCanvasFragment(world)
+    override fun onDataLoaded(world: Boolean, realmId: Int) {
+        showInteractiveCanvasFragment(world, realmId)
     }
 
     override fun onConnectionError(type: Int) {
@@ -270,16 +273,19 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 finish()
             }
             MenuFragment.singleMenuIndex -> {
-                showInteractiveCanvasFragment(false, null)
+                showInteractiveCanvasFragment(false, 0, null)
             }
             MenuFragment.worldMenuIndex -> {
-                showLoadingFragment(true)
+                showLoadingFragment(true, 1)
+            }
+            MenuFragment.devMenuIndex -> {
+                showLoadingFragment(true, 2)
             }
         }
     }
 
     override fun onSingleBackgroundOptionSelected(backgroundOption: ActionButtonView.Type) {
-        showInteractiveCanvasFragment(false, backgroundOption)
+        showInteractiveCanvasFragment(false, 0, backgroundOption)
     }
 
     override fun onResetSinglePlay() {

@@ -71,6 +71,7 @@ class MenuFragment: Fragment() {
         exit_button.type = ActionButtonView.Type.EXIT
         single_button.type = ActionButtonView.Type.SINGLE
         world_button.type = ActionButtonView.Type.WORLD
+        dev_button.type = ActionButtonView.Type.DEV
 
         /*val artShowcase = SessionSettings.instance.artShowcase
         if (artShowcase != null && artShowcase.size > 0) {
@@ -96,7 +97,7 @@ class MenuFragment: Fragment() {
 
             single_button.visibility = View.VISIBLE
             world_button.visibility = View.VISIBLE
-            empty_button_1.visibility = View.VISIBLE
+            dev_button.visibility = View.VISIBLE
             empty_button_2.visibility = View.VISIBLE
 
             back_button.visibility = View.VISIBLE
@@ -125,6 +126,10 @@ class MenuFragment: Fragment() {
 
         world_button.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+        }
+
+        dev_button.setOnClickListener {
+            menuButtonListener?.onMenuButtonSelected(devMenuIndex)
         }
 
         menu_button_container.setOnClickListener {
@@ -172,7 +177,7 @@ class MenuFragment: Fragment() {
             Animator.animateMenuItems(listOf(play_button, options_button, stats_button, exit_button), cascade = true)
         }
         else if (layer == 1) {
-            Animator.animateMenuItems(listOf(single_button, world_button), cascade = true)
+            Animator.animateMenuItems(listOf(single_button, world_button, dev_button), cascade = true)
         }
     }
 
@@ -234,7 +239,7 @@ class MenuFragment: Fragment() {
     private fun showSingleBackgroundOptions() {
         single_button.visibility = View.GONE
         world_button.visibility = View.GONE
-        empty_button_1.visibility = View.GONE
+        dev_button.visibility = View.GONE
         empty_button_2.visibility = View.GONE
 
         single_background_options.visibility = View.VISIBLE
@@ -248,7 +253,7 @@ class MenuFragment: Fragment() {
 
         single_button.visibility = View.GONE
         world_button.visibility = View.GONE
-        empty_button_1.visibility = View.GONE
+        dev_button.visibility = View.GONE
         empty_button_2.visibility = View.GONE
 
         single_background_options.visibility = View.GONE
@@ -258,7 +263,7 @@ class MenuFragment: Fragment() {
     private fun resetToPlayMode() {
         single_button.visibility = View.VISIBLE
         world_button.visibility = View.VISIBLE
-        empty_button_1.visibility = View.VISIBLE
+        dev_button.visibility = View.VISIBLE
         empty_button_2.visibility = View.VISIBLE
 
         single_background_options.visibility = View.GONE
@@ -271,5 +276,6 @@ class MenuFragment: Fragment() {
         val exitMenuIndex = 3
         val singleMenuIndex = 4
         val worldMenuIndex = 5
+        val devMenuIndex = 6
     }
 }
