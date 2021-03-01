@@ -24,6 +24,8 @@ class StatTracker {
         WORLD_XP
     }
 
+    var activity: Activity? = null
+
     var achievementListener: AchievementListener? = null
     val achievementDisplayInterval = 8000L
 
@@ -54,7 +56,7 @@ class StatTracker {
         150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000, 550000, 600000,
         650000, 700000, 750000, 800000, 850000, 900000, 950000, 1000000)
 
-    val pixelSingleThresholds = intArrayOf(500, 1000, 2500, 10000)
+    val pixelSingleThresholds = intArrayOf(100, 250, 500, 1000, 1500, 2500, 5000, 10000)
 
     val paintAccruedThresholds = intArrayOf(10000, 50000, 100000, 250000, 500000, 1000000, 5000000)
 
@@ -203,6 +205,7 @@ class StatTracker {
                     val threshold = pixelsWorldThresholds[pixelsWorldThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
                         enqueueAchievement(eventType, threshold)
+                        return
                     }
                 }
 
@@ -212,7 +215,8 @@ class StatTracker {
                 for (i in levelThresholds.indices) {
                     val threshold = levelThresholds[levelThresholds.size - 1 - i]
                     if (threshold in (oldXp + 1) until newXp + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(EventType.WORLD_XP, threshold)
+                        return
                     }
                 }
             }
@@ -220,7 +224,8 @@ class StatTracker {
                 for (i in pixelSingleThresholds.indices) {
                     val threshold = pixelSingleThresholds[pixelSingleThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(EventType.WORLD_XP, threshold)
+                        enqueueAchievement(eventType, threshold)
+                        return
                     }
                 }
             }
@@ -229,6 +234,7 @@ class StatTracker {
                     val threshold = paintAccruedThresholds[paintAccruedThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
                         enqueueAchievement(eventType, threshold)
+                        return
                     }
                 }
             }
@@ -237,6 +243,7 @@ class StatTracker {
                     val threshold = overwritesInThresholds[overwritesInThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
                         enqueueAchievement(eventType, threshold)
+                        return
                     }
                 }
             }
@@ -245,6 +252,7 @@ class StatTracker {
                     val threshold = overwritesOutThresholds[overwritesOutThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
                         enqueueAchievement(eventType, threshold)
+                        return
                     }
                 }
             }
@@ -255,6 +263,13 @@ class StatTracker {
         val map = HashMap<EventType, Int>()
         map[eventType] = threshold
         achievementQueue.add(map)
+
+        if (eventType == EventType.WORLD_XP || eventType == EventType.PIXEL_PAINTED_WORLD ||
+            eventType == EventType.PIXEL_PAINTED_SINGLE) {
+            activity?.apply {
+                displayAchievements(this)
+            }
+        }
     }
 
     fun displayAchievements(activity: Activity) {
@@ -262,16 +277,20 @@ class StatTracker {
         if (achievementQueue.size > 0) {
             val timer = Timer()
 
-            timer.schedule(object: TimerTask() {
+            timer.schedule(object : TimerTask() {
                 override fun run() {
                     activity.runOnUiThread {
-                        val nextAchievement = achievementQueue.removeAt(0)
-
                         if (achievementQueue.size == 0) {
                             timer.cancel()
                         }
+                        else {
+                            val nextAchievement = achievementQueue.removeAt(0)
 
-                        achievementListener?.onDisplayAchievement(nextAchievement, achievementDisplayInterval)
+                            achievementListener?.onDisplayAchievement(
+                                nextAchievement,
+                                achievementDisplayInterval
+                            )
+                        }
                     }
                 }
             }, 0, achievementDisplayInterval)

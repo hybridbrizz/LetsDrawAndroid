@@ -40,7 +40,10 @@ class StatsFragment: Fragment() {
         back_action.type = ActionButtonView.Type.BACK
 
         stats_image.type = ActionButtonView.Type.STATS
+        stats_image.static = true
+
         achievements_image.type = ActionButtonView.Type.ACHIEVEMENTS
+        achievements_image.static = true
 
         back_button.setOnClickListener {
             statsFragmentListener?.onStatsBack()

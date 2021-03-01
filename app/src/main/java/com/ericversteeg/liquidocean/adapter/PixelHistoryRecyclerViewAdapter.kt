@@ -1,6 +1,7 @@
 package com.ericversteeg.liquidocean.adapter
 
 import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,6 +9,7 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.model.SessionSettings
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,12 +49,31 @@ class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
         if (selectedItems[position]) {
             val simpleDateFormat =  SimpleDateFormat("MM-dd-yyyy HH:mm", Locale.ENGLISH)
             val dateStr = simpleDateFormat.format(date).toLowerCase()
-            holder.nameTextView.text = ""
+            holder.nameTextView1.text = ""
+            holder.nameTextView2.text = ""
+            holder.nameTextView3.text = ""
             holder.dateTextView.text = ""
             holder.fullDateView.text = dateStr
         }
         else {
-            holder.nameTextView.text = jsonObj.getString("name") + " (" + jsonObj.getInt("level") + ")"
+            val name = jsonObj.getString("name")
+            holder.nameTextView1.text = name
+            holder.nameTextView2.text = " (${jsonObj.getInt("level")})"
+
+            if (name == SessionSettings.instance.firstContributorName) {
+                //FAD55D
+                holder.nameTextView1.setTextColor(Color.parseColor("#DECB52"))
+            }
+            else if (name == SessionSettings.instance.secondContributorName) {
+                holder.nameTextView1.setTextColor(Color.parseColor("#AFB3B1"))
+            }
+            else if (name == SessionSettings.instance.thirdContributorName) {
+                holder.nameTextView1.setTextColor(Color.parseColor("#BD927B"))
+            }
+            else {
+                holder.nameTextView1.setTextColor(Color.WHITE)
+            }
+
             holder.colorView.setBackgroundColor(jsonObj.getInt("color"))
             holder.fullDateView.text = ""
 
@@ -108,7 +129,9 @@ class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
     }
 
     class PaintHistoryViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        var nameTextView: TextView = v.findViewById(R.id.name_text)
+        var nameTextView1: TextView = v.findViewById(R.id.name_text_1)
+        var nameTextView2: TextView = v.findViewById(R.id.name_text_2)
+        var nameTextView3: TextView = v.findViewById(R.id.name_text_3)
         var colorView: View = v.findViewById(R.id.paint_color)
         var dateTextView: TextView = v.findViewById(R.id.date_text)
         var backgroundView: ConstraintLayout = v.findViewById(R.id.background_view)

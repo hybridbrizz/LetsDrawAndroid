@@ -38,6 +38,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
     var actionListener: PaintBarActionListener? = null
 
+    var static = false
+
     lateinit var panelThemeConfig: PanelThemeConfig
 
     constructor(context: Context) : super(context) {
@@ -67,6 +69,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     }
 
     private fun commonInit() {
+        panelThemeConfig = PanelThemeConfig.defaultLightTheme()
+
         greenPaint.color = Color.parseColor("#42ff7b")
         whitePaint.color = Color.WHITE
         bluePaint.color = Color.parseColor("#84baff")

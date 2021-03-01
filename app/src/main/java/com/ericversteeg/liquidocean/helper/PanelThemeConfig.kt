@@ -28,15 +28,33 @@ class PanelThemeConfig(var darkPaintQtyBar: Boolean, var inversePaintEventInfo: 
                 R.drawable.crystal_8 -> return defaultDarkTheme()
                 R.drawable.crystal_9 -> return defaultDarkTheme()
                 R.drawable.crystal_10 -> return defaultDarkTheme()
+                R.drawable.grass -> return defaultLightTheme()
+                R.drawable.grass_dry -> return defaultDarkTheme()
+                R.drawable.sf_1 -> return defaultLightTheme()
+                R.drawable.sf_3 -> return defaultLightTheme()
+                R.drawable.amb_2 -> return defaultLightTheme()
+                R.drawable.amb_3 -> return defaultDarkTheme()
+                R.drawable.amb_4 -> return defaultLightTheme()
+                R.drawable.amb_5 -> return defaultLightTheme()
+                R.drawable.amb_6 -> return defaultLightTheme()
+                R.drawable.amb_7 -> return defaultLightTheme()
+                R.drawable.amb_8 -> return defaultDarkTheme()
+                R.drawable.amb_9 -> return defaultDarkTheme()
+                R.drawable.amb_10 -> return defaultLightTheme()
+                R.drawable.amb_11 -> return defaultDarkTheme()
+                R.drawable.amb_12 -> return defaultLightTheme()
+                R.drawable.amb_13 -> return defaultDarkTheme()
+                R.drawable.amb_14 -> return defaultLightTheme()
+                R.drawable.amb_15 -> return defaultDarkTheme()
             }
             return defaultLightTheme()
         }
 
-        private fun defaultDarkTheme(): PanelThemeConfig {
+        fun defaultDarkTheme(): PanelThemeConfig {
             return PanelThemeConfig(true, false, Color.BLACK, Color.BLACK)
         }
 
-        private fun defaultLightTheme(): PanelThemeConfig {
+        fun defaultLightTheme(): PanelThemeConfig {
             return PanelThemeConfig(false, true, Color.WHITE, Color.WHITE)
         }
     }

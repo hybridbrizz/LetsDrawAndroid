@@ -73,7 +73,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         mScaleFactor = interactiveCanvas.startScaleFactor
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
 
-        interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
+        //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {

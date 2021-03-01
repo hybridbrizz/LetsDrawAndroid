@@ -202,6 +202,8 @@ class InteractiveCanvas(var context: Context) {
         }
         // single play
         else {
+            arr = Array(rows) { IntArray(cols) }
+
             val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
                 "arr_single",
                 null
@@ -221,30 +223,48 @@ class InteractiveCanvas(var context: Context) {
 
             if (recentColorsJsonStr != null) {
                 val recentColorsArr = JSONArray(recentColorsJsonStr)
-                for (i in 0 until recentColorsArr.length()) {
-                    recentColorsList.add(recentColorsArr.getInt(i))
+                val sizeDiff = SessionSettings.instance.numRecentColors - recentColorsArr.length()
+
+                if (sizeDiff < 0) {
+                    for (i in 0 until SessionSettings.instance.numRecentColors) {
+                        // because the most recent is at the end of the list
+                        recentColorsList.add(recentColorsArr.getInt(-sizeDiff + i))
+                    }
+                }
+                else {
+                    for (i in 0 until recentColorsArr.length()) {
+                        recentColorsList.add(recentColorsArr.getInt(i))
+                    }
+
+                    if (sizeDiff > 0) {
+                        val gridLineColor = getGridLineColor()
+                        for (i in 0 until sizeDiff) {
+                            recentColorsList.add(0, gridLineColor)
+                        }
+                    }
                 }
             }
             else {
-                if (getGridLineColor() == Color.BLACK) {
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.BLACK)
-                    recentColorsList.add(Color.WHITE)
-                }
-                else {
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.WHITE)
-                    recentColorsList.add(Color.BLACK)
+                val gridLineColor = getGridLineColor()
+                for (i in 0 until SessionSettings.instance.numRecentColors) {
+                    // default to size - 1 of the grid line color
+                    if (i < SessionSettings.instance.numRecentColors - 1) {
+                        if (gridLineColor == Color.BLACK) {
+                            recentColorsList.add(Color.BLACK)
+                        }
+                        else {
+                            recentColorsList.add(Color.WHITE)
+                        }
+                    }
+                    // and 1 of the opposite color
+                    else {
+                        if (gridLineColor == Color.BLACK) {
+                            recentColorsList.add(Color.WHITE)
+                        }
+                        else {
+                            recentColorsList.add(Color.BLACK)
+                        }
+                    }
                 }
             }
         }
@@ -723,7 +743,12 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun pixelIdForUnitPoint(unitPoint: Point): Int {
-        return (unitPoint.y * cols + unitPoint.x) + 1
+        if (realmId == 2) {
+            return (unitPoint.y * cols + unitPoint.x) + 1
+        }
+        else {
+            return (unitPoint.y * cols + unitPoint.x) + 1 + (512 * 512)
+        }
     }
 
     fun exportSelection(onePointWithin: Point) {

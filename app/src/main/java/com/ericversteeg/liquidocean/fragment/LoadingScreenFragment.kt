@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.os.Build
 import android.os.Bundle
@@ -27,6 +28,7 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
+import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -60,10 +62,11 @@ class LoadingScreenFragment : Fragment() {
         "You can turn several features on / off in the Options menu.",
         "All drawings can be exported to a PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
         "Anything you create on the world canvas is automatically saved and shared with others.",
-        "Like your level, paint, and others stats? Back your account up and sync across multiple devices by signing into Google or Facebook (we do not collect or store any personal information).",
+        "Like your level, paint, and others stats? Back your account up and sync across multiple devices by signing into Google or Facebook.",
         "Tap on any pixel on the world canvas to view a history of edits for that position.",
         "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
-        "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle."
+        "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
+        "Tap the bottom-left icon while drawing to bring up many recently used colors."
     )
 
     override fun onCreateView(
@@ -371,6 +374,19 @@ class LoadingScreenFragment : Fragment() {
                         val amt = topContributor.getString("amt")
 
                         if (i < 5) {
+                            if (i == 0) {
+                                SessionSettings.instance.firstContributorName = name
+                                topContributorNameViews1[i].setTextColor(ActionButtonView.yellowPaint.color)
+                            }
+                            else if (i == 1) {
+                                SessionSettings.instance.secondContributorName = name
+                                topContributorNameViews1[i].setTextColor(Color.parseColor("#AFB3B1"))
+                            }
+                            else if (i == 2) {
+                                SessionSettings.instance.thirdContributorName = name
+                                topContributorNameViews1[i].setTextColor(Color.parseColor("#BD927B"))
+                            }
+
                             topContributorNameViews1[i].text = name
                             topContributorAmtViews1[i].text = amt.toString()
 

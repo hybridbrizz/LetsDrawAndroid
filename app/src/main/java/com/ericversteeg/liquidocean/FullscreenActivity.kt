@@ -24,7 +24,8 @@ import kotlin.collections.HashMap
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener, InteractiveCanvasFragmentListener, StatsFragmentListener, AchievementListener {
+class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener,
+    InteractiveCanvasFragmentListener, StatsFragmentListener, AchievementListener, HowtoFragmentListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
         // Delayed removal of status and navigation bar
@@ -88,8 +89,14 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         // load session settings
         SessionSettings.instance.load(this)
 
+        if (SessionSettings.instance.artShowcase == null) {
+            SessionSettings.instance.defaultArtShowcase(resources)
+        }
+
         // load stat tracker
         StatTracker.instance.load(this)
+        StatTracker.instance.activity = this
+        StatTracker.instance.achievementListener = this
 
         // after device settings have been loaded
         if (!SessionSettings.instance.sentUniqueId) {
@@ -114,6 +121,14 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         val frag = StatsFragment()
 
         frag.statsFragmentListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showHowtoFragment() {
+        val frag = HowtoFragment()
+
+        frag.listener = this
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
@@ -189,8 +204,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                     SessionSettings.instance.xp = response.getInt("xp")
 
                     SessionSettings.instance.displayName = response.getString("name")
-
-                    StatTracker.instance.achievementListener = this@FullscreenActivity
 
                     StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
                     StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
@@ -269,8 +282,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
             MenuFragment.statsMenuIndex -> {
                 showStatsFragment()
             }
-            MenuFragment.exitMenuIndex -> {
-                finish()
+            MenuFragment.howtoMenuIndex -> {
+                showHowtoFragment()
             }
             MenuFragment.singleMenuIndex -> {
                 showInteractiveCanvasFragment(false, 0, null)
@@ -304,6 +317,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         showMenuFragment()
     }
 
+    override fun onHowtoBack() {
+        showMenuFragment()
+    }
+
     override fun onDisplayAchievement(
         info: Map<StatTracker.EventType, Int>,
         displayInterval: Long
@@ -321,9 +338,23 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
             StatTracker.EventType.PIXEL_OVERWRITE_OUT -> {
                 achievement_name.text = "Pixels Overwritten By Me"
             }
+            StatTracker.EventType.PIXEL_PAINTED_WORLD -> {
+                achievement_name.text = "Pixels Painted World"
+            }
+            StatTracker.EventType.PIXEL_PAINTED_SINGLE -> {
+                achievement_name.text = "Pixels Painted Single"
+            }
+            StatTracker.EventType.WORLD_XP -> {
+                achievement_name.text = "World XP"
+            }
         }
 
-        achievement_desc.text = "Passed the ${value} threshold"
+        if (eventType != StatTracker.EventType.WORLD_XP) {
+            achievement_desc.text = "Passed the ${value} threshold"
+        }
+        else {
+            achievement_desc.text = "Congrats on reaching level ${StatTracker.instance.getWorldLevel()}!"
+        }
 
         achievement_banner.visibility = View.VISIBLE
 

@@ -85,12 +85,12 @@ class SignInFragment: Fragment() {
             googleAccount = GoogleSignIn.getLastSignedInAccount(this)
 
             if (googleAccount != null || SessionSettings.instance.googleAuth) {
-                status_text.text = "Account signed in."
+                status_text.text = "Account synced with Google"
                 google_sign_in_button.isEnabled = false
                 sendGoogleToken(googleAccount)
             }
             else {
-                status_text.text = "Please login:"
+                status_text.text = "Sync account with Google"
             }
         }
     }
@@ -130,6 +130,8 @@ class SignInFragment: Fragment() {
                             SessionSettings.instance.uniqueId = response.getString("uuid")
                             SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                             SessionSettings.instance.xp = response.getInt("xp")
+
+                            SessionSettings.instance.displayName = response.getString("name")
 
                             SessionSettings.instance.sentUniqueId = true
 

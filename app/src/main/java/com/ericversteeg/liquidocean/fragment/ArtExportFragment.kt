@@ -52,6 +52,10 @@ class ArtExportFragment: Fragment() {
         art_view.showBackground = true
         art_view.art = art
 
+        art_view.setOnClickListener {
+
+        }
+
         if (art.isNotEmpty()) {
             SessionSettings.instance.addToShowcase(art)
         }

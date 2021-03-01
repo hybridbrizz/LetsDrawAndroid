@@ -68,7 +68,7 @@ class MenuFragment: Fragment() {
         play_button.type = ActionButtonView.Type.PLAY
         options_button.type = ActionButtonView.Type.OPTIONS
         stats_button.type = ActionButtonView.Type.STATS
-        exit_button.type = ActionButtonView.Type.EXIT
+        howto_button.type = ActionButtonView.Type.HOWTO
         single_button.type = ActionButtonView.Type.SINGLE
         world_button.type = ActionButtonView.Type.WORLD
         dev_button.type = ActionButtonView.Type.DEV
@@ -89,11 +89,12 @@ class MenuFragment: Fragment() {
 
         play_button.setOnClickListener {
             // menuButtonListener?.onMenuButtonSelected(playMenuIndex)
+            play_button.visibility = View.INVISIBLE
 
             play_button.visibility = View.GONE
             options_button.visibility = View.GONE
             stats_button.visibility = View.GONE
-            exit_button.visibility = View.GONE
+            howto_button.visibility = View.GONE
 
             single_button.visibility = View.VISIBLE
             world_button.visibility = View.VISIBLE
@@ -114,8 +115,8 @@ class MenuFragment: Fragment() {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-        exit_button.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(exitMenuIndex)
+        howto_button.setOnClickListener {
+            menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
         }
 
         single_button.setOnClickListener {
@@ -174,7 +175,7 @@ class MenuFragment: Fragment() {
 
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {
         if (layer == 0) {
-            Animator.animateMenuItems(listOf(play_button, options_button, stats_button, exit_button), cascade = true)
+            Animator.animateMenuItems(listOf(play_button, options_button, stats_button, howto_button), cascade = true)
         }
         else if (layer == 1) {
             Animator.animateMenuItems(listOf(single_button, world_button, dev_button), cascade = true)
@@ -210,6 +211,7 @@ class MenuFragment: Fragment() {
 
         Animator.context = context
 
+        showcaseTimer = Timer()
         showcaseTimer.schedule(object: TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
@@ -249,7 +251,7 @@ class MenuFragment: Fragment() {
         play_button.visibility = View.VISIBLE
         options_button.visibility = View.VISIBLE
         stats_button.visibility = View.VISIBLE
-        exit_button.visibility = View.VISIBLE
+        howto_button.visibility = View.VISIBLE
 
         single_button.visibility = View.GONE
         world_button.visibility = View.GONE
@@ -273,7 +275,7 @@ class MenuFragment: Fragment() {
         val playMenuIndex = 0
         val optionsMenuIndex = 1
         val statsMenuIndex = 2
-        val exitMenuIndex = 3
+        val howtoMenuIndex = 3
         val singleMenuIndex = 4
         val worldMenuIndex = 5
         val devMenuIndex = 6

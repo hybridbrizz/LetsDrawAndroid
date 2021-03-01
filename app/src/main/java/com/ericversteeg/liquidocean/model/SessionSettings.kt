@@ -2,6 +2,7 @@ package com.ericversteeg.liquidocean.model
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Point
 import androidx.collection.ArraySet
@@ -9,6 +10,7 @@ import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.view.ArtView
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import org.json.JSONArray
@@ -81,6 +83,10 @@ class SessionSettings {
     lateinit var chunk3: Array<IntArray>
     lateinit var chunk4: Array<IntArray>
 
+    lateinit var firstContributorName: String
+    lateinit var secondContributorName: String
+    lateinit var thirdContributorName: String
+
     var colorIndicatorWidth = 2
 
     var colorIndicatorFill = false
@@ -144,7 +150,7 @@ class SessionSettings {
 
         ed.putInt("num_recent_colors", numRecentColors)
 
-        ed.putInt("color_indicator_width", colorIndicatorWidth)
+        ed.putInt("color_indicator_width_2", colorIndicatorWidth)
 
         ed.putBoolean("color_indicator_fill", colorIndicatorFill)
 
@@ -186,15 +192,15 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.wood_texture_light)
+        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_15)
 
-        emittersEnabled = getSharedPrefs(context).getBoolean("emitters", true)
+        emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 
-        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", true)
+        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", false)
 
         canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
 
-        promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", false)
+        promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", true)
 
         backgroundColorsIndex = getSharedPrefs(context).getInt("background_colors_index", 0)
 
@@ -202,13 +208,13 @@ class SessionSettings {
 
         artShowcase = loadArtShowcase(getSharedPrefs(context).getString("art_showcase_json", null))
 
-        numRecentColors = getSharedPrefs(context).getInt("num_recent_colors", 8)
+        numRecentColors = getSharedPrefs(context).getInt("num_recent_colors", 16)
 
-        colorIndicatorWidth = getSharedPrefs(context).getInt("color_indicator_width", 3)
+        colorIndicatorWidth = getSharedPrefs(context).getInt("color_indicator_width_2", 3)
 
         colorIndicatorFill = getSharedPrefs(context).getBoolean("color_indicator_fill", false)
 
-        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", true)
+        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", false)
 
         gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
 
@@ -216,7 +222,7 @@ class SessionSettings {
 
         closePaintBackButtonColor = getSharedPrefs(context).getInt("close_paint_back_button_color", ActionButtonView.yellowPaint.color)
 
-        colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", false)
+        colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", true)
     }
 
     private fun artShowcaseJsonString(): String? {
@@ -293,6 +299,18 @@ class SessionSettings {
                 add(rIndex, art.toMutableList())
             }
         }
+    }
+
+    fun defaultArtShowcase(resources: Resources) {
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.leaf_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.water_drop_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.doughnut_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.bird_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.rainbow_badge))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.hfs_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.paint_bucket_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fire_badge_json))
+        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fries_json))
     }
 
     companion object {

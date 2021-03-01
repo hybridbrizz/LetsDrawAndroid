@@ -68,6 +68,7 @@ class ActionButtonView: View {
         OPTIONS,
         STATS,
         EXIT,
+        HOWTO,
         SINGLE,
         WORLD,
         DEV,
@@ -116,6 +117,8 @@ class ActionButtonView: View {
         field = value
         invalidate()
     }
+
+    var static = false
 
     var pxWidth = 0
     var pxHeight = 0
@@ -248,6 +251,9 @@ class ActionButtonView: View {
             else if (type == Type.EXIT) {
                 drawExitAction(touchState == TouchState.ACTIVE, canvas)
             }
+            else if (type == Type.HOWTO) {
+                drawHowToAction(touchState == TouchState.ACTIVE, canvas)
+            }
             else if (type == Type.ACHIEVEMENTS) {
                 drawAchievementsAction(touchState == TouchState.ACTIVE, canvas)
             }
@@ -301,6 +307,19 @@ class ActionButtonView: View {
             else {
                 paint = lightYellowPaint
             }
+        }
+
+        if (colorMode != ColorMode.COLOR) {
+            if (colorMode == ColorMode.BLACK) {
+                paint = blackPaint
+            }
+            else if (colorMode == ColorMode.WHITE) {
+                paint = whitePaint
+            }
+
+            val outValue = TypedValue()
+            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+            setBackgroundResource(outValue.resourceId)
         }
 
         canvas.apply {
@@ -492,7 +511,7 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (light) {
+        if (light && !static) {
             accentPaint = lightAltGreenPaint
         }
 
@@ -838,7 +857,7 @@ class ActionButtonView: View {
         cols = 26
 
         var paint = lightGrayPaint
-        if (selected) {
+        if (selected && !static) {
             paint = altGreenPaint
         }
 
@@ -919,7 +938,7 @@ class ActionButtonView: View {
         cols = 20
 
         var paint = lightGrayPaint
-        if (selected) {
+        if (selected && !static) {
             paint = altGreenPaint
         }
 
@@ -1030,6 +1049,80 @@ class ActionButtonView: View {
             drawPixel(9, 3, paint, canvas)
             drawPixel(10, 3, paint, canvas)
             drawPixel(13, 3, paint, canvas)
+        }
+    }
+
+    private fun drawHowToAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 21
+
+        var paint = lightGrayPaint
+        if (selected && !static) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        canvas.apply {
+            // H
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 1, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(2, 1, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+
+            // O
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(4, 1, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+            drawPixel(5, 3, paint, canvas)
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(6, 1, paint, canvas)
+            drawPixel(6, 2, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+
+            // W
+            drawPixel(8, 0, paint, canvas)
+            drawPixel(8, 1, paint, canvas)
+            drawPixel(8, 2, paint, canvas)
+            drawPixel(8, 3, paint, canvas)
+            drawPixel(9, 2, paint, canvas)
+            drawPixel(10, 3, paint, canvas)
+            drawPixel(11, 2, paint, canvas)
+            drawPixel(12, 0, paint, canvas)
+            drawPixel(12, 1, paint, canvas)
+            drawPixel(12, 2, paint, canvas)
+            drawPixel(12, 3, paint, canvas)
+
+            // T
+            drawPixel(14, 0, paint, canvas)
+            drawPixel(15, 0, paint, canvas)
+            drawPixel(15, 1, paint, canvas)
+            drawPixel(15, 2, paint, canvas)
+            drawPixel(15, 3, paint, canvas)
+            drawPixel(16, 0, paint, canvas)
+
+            // O
+            drawPixel(18, 0, paint, canvas)
+            drawPixel(18, 1, paint, canvas)
+            drawPixel(18, 2, paint, canvas)
+            drawPixel(18, 3, paint, canvas)
+            drawPixel(19, 0, paint, canvas)
+            drawPixel(19, 3, paint, canvas)
+            drawPixel(20, 0, paint, canvas)
+            drawPixel(20, 1, paint, canvas)
+            drawPixel(20, 2, paint, canvas)
+            drawPixel(20, 3, paint, canvas)
         }
     }
 
@@ -1241,7 +1334,7 @@ class ActionButtonView: View {
         cols = 51
 
         var paint = lightGrayPaint
-        if (selected) {
+        if (selected && !static) {
             paint = whitePaint
         }
 

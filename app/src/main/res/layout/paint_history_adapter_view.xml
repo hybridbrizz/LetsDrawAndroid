@@ -14,7 +14,7 @@
             app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
-            android:id="@+id/name_text"
+            android:id="@+id/name_text_1"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:textSize="24sp"
@@ -24,6 +24,28 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@id/paint_color" />
+
+    <TextView
+            android:id="@+id/name_text_2"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/name_text_1" />
+
+    <TextView
+            android:id="@+id/name_text_3"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/name_text_2" />
 
     <TextView
             android:id="@+id/date_text"

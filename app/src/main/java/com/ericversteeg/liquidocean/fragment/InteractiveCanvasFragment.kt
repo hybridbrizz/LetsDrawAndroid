@@ -325,6 +325,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
 
             export_fragment_container.visibility = View.VISIBLE
+            export_fragment_container.setOnClickListener {
+
+            }
         }
     }
 
@@ -385,6 +388,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     surface_view.interactiveCanvas.getGridLineColor()
                 )
             }
+
+            surface_view.interactiveCanvas.updateDeviceViewport(this,
+                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F)
         }
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelBackgroundResId)
@@ -465,6 +471,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 } */
             }
         })
+
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            close_paint_panel.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+        else {
+            close_paint_panel.colorMode = ActionButtonView.ColorMode.WHITE
+        }
 
         if (panelThemeConfig.inversePaintEventInfo) {
             paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)

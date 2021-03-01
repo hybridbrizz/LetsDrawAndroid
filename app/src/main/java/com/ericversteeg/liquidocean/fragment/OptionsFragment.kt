@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.drm.DrmStore
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -59,6 +60,7 @@ class OptionsFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         title_image.type = ActionButtonView.Type.OPTIONS
+        title_image.static = true
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
@@ -128,8 +130,26 @@ class OptionsFragment: Fragment() {
                     R.drawable.crystal_7,
                     R.drawable.crystal_8,      // TODO: hard to see paint event countdown
                     R.drawable.crystal_9,      // TODO: hard to see paint event countdown
-                    R.drawable.crystal_10      // TODO: hard to see paint event countdown + dark icons
-
+                    R.drawable.crystal_10,      // TODO: hard to see paint event countdown + dark icons
+                    R.drawable.grass,
+                    R.drawable.grass_dry,
+                    R.drawable.sf_1,
+                    R.drawable.sf_2,
+                    R.drawable.sf_3,
+                    R.drawable.amb_2,
+                    R.drawable.amb_3,
+                    R.drawable.amb_4,
+                    R.drawable.amb_5,
+                    R.drawable.amb_6,
+                    R.drawable.amb_7,
+                    R.drawable.amb_8,
+                    R.drawable.amb_9,
+                    R.drawable.amb_10,
+                    R.drawable.amb_11,
+                    R.drawable.amb_12,
+                    R.drawable.amb_13,
+                    R.drawable.amb_14,
+                    R.drawable.amb_15
                 ).toMutableList()
             )
 
@@ -199,6 +219,8 @@ class OptionsFragment: Fragment() {
         }
 
         // option emitters
+        option_emitters_container.visibility = View.GONE
+
         option_emitters_switch.isChecked = SessionSettings.instance.emittersEnabled
         option_emitters_switch.setOnCheckedChangeListener { _, value ->
             SessionSettings.instance.emittersEnabled = value
@@ -240,6 +262,9 @@ class OptionsFragment: Fragment() {
 
         option_paint_indicator_fill_circle_switch.setOnCheckedChangeListener { button, _ ->
             SessionSettings.instance.colorIndicatorFill = button.isChecked
+            if (button.isChecked && SessionSettings.instance.colorIndicatorSquare) {
+                option_paint_indicator_square_switch.isChecked = false
+            }
         }
 
         // option paint indicator square
@@ -247,6 +272,9 @@ class OptionsFragment: Fragment() {
 
         option_paint_indicator_square_switch.setOnCheckedChangeListener { button, _ ->
             SessionSettings.instance.colorIndicatorSquare = button.isChecked
+            if (button.isChecked && SessionSettings.instance.colorIndicatorFill) {
+                option_paint_indicator_fill_circle_switch.isChecked = false
+            }
         }
 
         // option paint indicator outline
@@ -257,6 +285,8 @@ class OptionsFragment: Fragment() {
         }
 
         // option close paint panel button color
+        option_close_paint_panel_color_container.visibility = View.GONE
+
         option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
         option_close_paint_panel_color_reset_button.setOnClickListener {
             SessionSettings.instance.closePaintBackButtonColor = ActionButtonView.yellowPaint.color
@@ -293,6 +323,11 @@ class OptionsFragment: Fragment() {
         Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, true)
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        input_name.setText(SessionSettings.instance.displayName)
+    }
 
     private fun setupNumRecentColorsChoices() {
         // option num recent colors
@@ -317,14 +352,14 @@ class OptionsFragment: Fragment() {
         val alert = AlertDialog.Builder(context)
 
         val editText = EditText(activity)
-        alert.setMessage("Please understand that resetting your single play will permanently erase your current single play canvas, to proceed please type PROCEED in all caps.")
+        alert.setMessage("Please understand that resetting your single play will permanently erase your current single play canvas, to proceed please type DELETE in all caps.")
 
         alert.setView(editText)
 
         alert.setPositiveButton(
             "Proceed"
         ) { dialog, _ ->
-            if (editText.text.toString() == "PROCEED") {
+            if (editText.text.toString() == "DELETE") {
                 resetSinglePlay()
                 dialog?.dismiss()
             }
