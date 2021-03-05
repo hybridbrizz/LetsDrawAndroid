@@ -40,57 +40,185 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/play_button"
-                android:layout_width="160dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/play_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/options_button"
-                android:layout_width="260dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/play_button_bottom_layer"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/stats_button"
-                android:layout_width="200dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/play_button"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/howto_button"
-                android:layout_width="210dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/single_button"
-                android:visibility="gone"
-                android:layout_width="220dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/options_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/world_button"
-                android:visibility="gone"
-                android:layout_width="210dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/options_button_bottom_layer"
+                    android:layout_width="260dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/dev_button"
-                android:visibility="gone"
-                android:layout_width="120dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/options_button"
+                    android:layout_width="260dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/empty_button_2"
-                android:visibility="gone"
-                android:layout_width="260dp"
-                android:layout_height="40dp"
-                android:layout_margin="10dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/stats_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/stats_button_bottom_layer"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/stats_button"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/howto_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/howto_button_bottom_layer"
+                    android:layout_width="210dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/howto_button"
+                    android:layout_width="210dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/single_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="gone">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/single_button_bottom_layer"
+                    android:layout_width="220dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/single_button"
+                    android:layout_width="220dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/world_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="gone">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/world_button_bottom_layer"
+                    android:layout_width="210dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/world_button"
+                    android:layout_width="210dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/dev_button_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="gone">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/dev_button_bottom_layer"
+                    android:layout_width="120dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/dev_button"
+                    android:layout_width="120dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/empty_button_2_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:visibility="gone">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/empty_button_2_bottom_layer"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/empty_button_2"
+                    android:layout_width="160dp"
+                    android:layout_height="40dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 

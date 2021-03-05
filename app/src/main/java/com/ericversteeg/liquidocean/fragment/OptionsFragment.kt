@@ -1,23 +1,15 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.drm.DrmStore
-import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -33,7 +25,6 @@ import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.*
 import org.json.JSONObject
@@ -76,7 +67,8 @@ class OptionsFragment: Fragment() {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     sendNameCheck(input_name.text.toString().trim())
 
-                    val inputMethodManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    val inputMethodManager =
+                        context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 
                     return true
@@ -109,48 +101,68 @@ class OptionsFragment: Fragment() {
                 LinearLayoutManager.HORIZONTAL,
                 false
             )
+
+            val panelResIds = intArrayOf(
+                R.drawable.wood_texture_light,
+                R.drawable.wood_texture,
+                R.drawable.marble_2,
+                R.drawable.fall_leaves,
+                R.drawable.water_texture,
+                R.drawable.space_texture,
+                R.drawable.metal_floor_1,
+                R.drawable.metal_floor_2,  // TODO: hard to see paint event countdown
+                R.drawable.foil,
+                R.drawable.rainbow_foil,   // TODO: hard to see paint event countdown
+                R.drawable.crystal_1,
+                R.drawable.crystal_2,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_3,
+                R.drawable.crystal_4,
+                R.drawable.crystal_5,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_6,
+                R.drawable.crystal_7,
+                R.drawable.crystal_8,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_9,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_10,      // TODO: hard to see paint event countdown + dark icons
+                R.drawable.grass,
+                R.drawable.grass_dry,
+                R.drawable.sf_1,
+                R.drawable.sf_3,
+                R.drawable.amb_2,
+                R.drawable.amb_3,
+                R.drawable.amb_4,
+                R.drawable.amb_5,
+                R.drawable.amb_6,
+                R.drawable.amb_7,
+                R.drawable.amb_8,
+                R.drawable.amb_9,
+                R.drawable.amb_10,
+                R.drawable.amb_11,
+                R.drawable.amb_12,
+                R.drawable.amb_13,
+                R.drawable.amb_14,
+                R.drawable.amb_15
+            )
+
+            view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                        view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    } else {
+                        view.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    }
+
+                    (panel_recycler_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        panelResIds.indexOf(
+                            SessionSettings.instance.panelBackgroundResId
+                        ), (view.width * 0.15).toInt()
+                    )
+                }
+            })
+
+
+
             panel_recycler_view.adapter = PanelRecyclerViewAdapter(
-                this, intArrayOf(
-                    R.drawable.wood_texture_light,
-                    R.drawable.wood_texture,
-                    R.drawable.marble_2,
-                    R.drawable.fall_leaves,
-                    R.drawable.water_texture,
-                    R.drawable.space_texture,
-                    R.drawable.metal_floor_1,
-                    R.drawable.metal_floor_2,  // TODO: hard to see paint event countdown
-                    R.drawable.foil,
-                    R.drawable.rainbow_foil,   // TODO: hard to see paint event countdown
-                    R.drawable.crystal_1,
-                    R.drawable.crystal_2,      // TODO: hard to see paint event countdown
-                    R.drawable.crystal_3,
-                    R.drawable.crystal_4,
-                    R.drawable.crystal_5,      // TODO: hard to see paint event countdown
-                    R.drawable.crystal_6,
-                    R.drawable.crystal_7,
-                    R.drawable.crystal_8,      // TODO: hard to see paint event countdown
-                    R.drawable.crystal_9,      // TODO: hard to see paint event countdown
-                    R.drawable.crystal_10,      // TODO: hard to see paint event countdown + dark icons
-                    R.drawable.grass,
-                    R.drawable.grass_dry,
-                    R.drawable.sf_1,
-                    R.drawable.sf_2,
-                    R.drawable.sf_3,
-                    R.drawable.amb_2,
-                    R.drawable.amb_3,
-                    R.drawable.amb_4,
-                    R.drawable.amb_5,
-                    R.drawable.amb_6,
-                    R.drawable.amb_7,
-                    R.drawable.amb_8,
-                    R.drawable.amb_9,
-                    R.drawable.amb_10,
-                    R.drawable.amb_11,
-                    R.drawable.amb_12,
-                    R.drawable.amb_13,
-                    R.drawable.amb_14,
-                    R.drawable.amb_15
-                ).toMutableList()
+                this, panelResIds.toMutableList()
             )
 
             (panel_recycler_view.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -311,6 +323,13 @@ class OptionsFragment: Fragment() {
 
                     fun onColor(color: Int, fromUser: Boolean) {}
                 })
+        }
+
+        // option show paint bar
+        option_show_paint_bar_switch.isChecked = SessionSettings.instance.showPaintBar
+
+        option_show_paint_bar_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.showPaintBar = button.isChecked
         }
 
         setupNumRecentColorsChoices()

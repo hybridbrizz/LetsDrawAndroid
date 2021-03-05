@@ -36,7 +36,7 @@ class ArtExportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_action_export.type = ActionButtonView.Type.BACK_SOLID
+        back_action_export.type = ActionButtonView.Type.BACK
         back_button_export.actionBtnView = back_action_export
 
         share_action.type = ActionButtonView.Type.EXPORT_SOLID

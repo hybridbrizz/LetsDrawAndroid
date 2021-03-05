@@ -2,15 +2,22 @@ package com.ericversteeg.liquidocean.view
 
 import android.content.Context
 import android.graphics.*
+import android.text.method.Touch
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.listener.ActionButtonViewTouchListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 
 class ActionButtonView: View {
+
+    interface TouchStateListener {
+        fun onTouchStateChanged(touchState: ActionButtonView.TouchState)
+    }
 
     companion object {
         var semiPaint = Paint()
@@ -99,12 +106,22 @@ class ActionButtonView: View {
         BLACK
     }
 
+    // acts as a color layer typically over a white version of the same
+    var topLayer = false
+
     var type = Type.NONE
     var touchState = TouchState.INACTIVE
         set(value) {
             field = value
+
+            touchStateListener?.onTouchStateChanged(value)
+
             invalidate()
         }
+
+    var touchStateListener: TouchStateListener? = null
+
+    var hideOnTouchEnd = false
 
     var representingColor: Int? = null
         set(value) {
@@ -282,13 +299,23 @@ class ActionButtonView: View {
         if (ev.action == MotionEvent.ACTION_DOWN) {
             touchState = TouchState.ACTIVE
 
+            if (topLayer) {
+                alpha = 0F
+                animate().setDuration(100).alphaBy(1F).setInterpolator(AccelerateDecelerateInterpolator())
+            }
         }
         else if(ev.action == MotionEvent.ACTION_UP) {
             touchState = TouchState.INACTIVE
+
+            if (hideOnTouchEnd) {
+                visibility = INVISIBLE
+            }
         }
         else if (ev.action == MotionEvent.ACTION_CANCEL) {
             touchState = TouchState.INACTIVE
         }
+
+        touchStateListener?.onTouchStateChanged(touchState)
 
         return super.onTouchEvent(ev)
     }
@@ -300,15 +327,6 @@ class ActionButtonView: View {
         var paint = defaultPaint
         paint.color = SessionSettings.instance.closePaintBackButtonColor
 
-        if (light) {
-            if (paint.color != yellowPaint.color) {
-                paint = thirdGray
-            }
-            else {
-                paint = lightYellowPaint
-            }
-        }
-
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
                 paint = blackPaint
@@ -316,10 +334,20 @@ class ActionButtonView: View {
             else if (colorMode == ColorMode.WHITE) {
                 paint = whitePaint
             }
+        }
 
-            val outValue = TypedValue()
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
+        if (light) {
+            if (colorMode == ColorMode.COLOR) {
+                paint = lightYellowPaint
+            }
+            else {
+                if (colorMode == ColorMode.BLACK) {
+                    paint = twoThirdGray
+                }
+                else if (colorMode == ColorMode.WHITE) {
+                    paint = thirdGray
+                }
+            }
         }
 
         canvas.apply {
@@ -419,9 +447,6 @@ class ActionButtonView: View {
         cols = 7
 
         var paint = greenPaint
-        if (light) {
-            paint = lightGreenPaint
-        }
 
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
@@ -430,10 +455,20 @@ class ActionButtonView: View {
             else if (colorMode == ColorMode.WHITE) {
                 paint = whitePaint
             }
+        }
 
-            val outValue = TypedValue()
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
+        if (light && !static) {
+            if (colorMode == ColorMode.COLOR) {
+                paint = lightGreenPaint
+            }
+            else {
+                if (colorMode == ColorMode.BLACK) {
+                    paint = twoThirdGray
+                }
+                else if (colorMode == ColorMode.WHITE) {
+                    paint = thirdGray
+                }
+            }
         }
 
         canvas.apply {
@@ -461,9 +496,6 @@ class ActionButtonView: View {
         cols = 5
 
         var paint = redPaint
-        if (light) {
-            paint = lightRedPaint
-        }
 
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
@@ -472,10 +504,20 @@ class ActionButtonView: View {
             else if (colorMode == ColorMode.WHITE) {
                 paint = whitePaint
             }
+        }
 
-            val outValue = TypedValue()
-            context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
-            setBackgroundResource(outValue.resourceId)
+        if (light) {
+            if (colorMode == ColorMode.COLOR) {
+                paint = lightRedPaint
+            }
+            else {
+                if (colorMode == ColorMode.BLACK) {
+                    paint = twoThirdGray
+                }
+                else if (colorMode == ColorMode.WHITE) {
+                    paint = thirdGray
+                }
+            }
         }
 
         canvas.apply {

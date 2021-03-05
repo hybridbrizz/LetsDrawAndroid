@@ -66,12 +66,32 @@ class MenuFragment: Fragment() {
         back_button.visibility = View.GONE
 
         play_button.type = ActionButtonView.Type.PLAY
+        play_button.topLayer = true
+        play_button_bottom_layer.type = ActionButtonView.Type.PLAY
+
         options_button.type = ActionButtonView.Type.OPTIONS
+        options_button.topLayer = true
+        options_button_bottom_layer.type = ActionButtonView.Type.OPTIONS
+
         stats_button.type = ActionButtonView.Type.STATS
+        stats_button.topLayer = true
+        stats_button_bottom_layer.type = ActionButtonView.Type.STATS
+
         howto_button.type = ActionButtonView.Type.HOWTO
+        howto_button.topLayer = true
+        howto_button_bottom_layer.type = ActionButtonView.Type.HOWTO
+
         single_button.type = ActionButtonView.Type.SINGLE
+        single_button.topLayer = true
+        single_button_bottom_layer.type = ActionButtonView.Type.SINGLE
+
         world_button.type = ActionButtonView.Type.WORLD
+        world_button.topLayer = true
+        world_button_bottom_layer.type = ActionButtonView.Type.WORLD
+
         dev_button.type = ActionButtonView.Type.DEV
+        dev_button.topLayer = true
+        dev_button_bottom_layer.type = ActionButtonView.Type.DEV
 
         /*val artShowcase = SessionSettings.instance.artShowcase
         if (artShowcase != null && artShowcase.size > 0) {
@@ -89,17 +109,21 @@ class MenuFragment: Fragment() {
 
         play_button.setOnClickListener {
             // menuButtonListener?.onMenuButtonSelected(playMenuIndex)
-            play_button.visibility = View.INVISIBLE
+            play_button_container.visibility = View.GONE
 
-            play_button.visibility = View.GONE
-            options_button.visibility = View.GONE
-            stats_button.visibility = View.GONE
-            howto_button.visibility = View.GONE
+            options_button_container.visibility = View.GONE
 
-            single_button.visibility = View.VISIBLE
-            world_button.visibility = View.VISIBLE
-            dev_button.visibility = View.VISIBLE
-            empty_button_2.visibility = View.VISIBLE
+            stats_button_container.visibility = View.GONE
+
+            howto_button_container.visibility = View.GONE
+
+            single_button_container.visibility = View.VISIBLE
+
+            world_button_container.visibility = View.VISIBLE
+
+            dev_button_container.visibility = View.VISIBLE
+
+            empty_button_2_container.visibility = View.VISIBLE
 
             back_button.visibility = View.VISIBLE
             backCount++
@@ -171,14 +195,19 @@ class MenuFragment: Fragment() {
                 }
             }
         })
+
+        //view.alpha = 0F
+        //view.animate().alphaBy(1F).setDuration(500)
     }
 
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {
         if (layer == 0) {
-            Animator.animateMenuItems(listOf(play_button, options_button, stats_button, howto_button), cascade = true)
+            Animator.animateMenuItems(listOf(listOf(play_button_bottom_layer, play_button), listOf(options_button_bottom_layer, options_button),
+                listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true)
         }
         else if (layer == 1) {
-            Animator.animateMenuItems(listOf(single_button, world_button, dev_button), cascade = true)
+            Animator.animateMenuItems(listOf(listOf(single_button_bottom_layer, single_button), listOf(world_button_bottom_layer, world_button),
+                listOf(dev_button_bottom_layer, dev_button)), cascade = true)
         }
     }
 
@@ -238,37 +267,39 @@ class MenuFragment: Fragment() {
         }, 0, 7000)
     }
 
-    private fun showSingleBackgroundOptions() {
-        single_button.visibility = View.GONE
-        world_button.visibility = View.GONE
-        dev_button.visibility = View.GONE
-        empty_button_2.visibility = View.GONE
-
-        single_background_options.visibility = View.VISIBLE
-    }
-
     private fun resetMenu() {
-        play_button.visibility = View.VISIBLE
-        options_button.visibility = View.VISIBLE
-        stats_button.visibility = View.VISIBLE
-        howto_button.visibility = View.VISIBLE
+        play_button_container.visibility = View.VISIBLE
 
-        single_button.visibility = View.GONE
-        world_button.visibility = View.GONE
-        dev_button.visibility = View.GONE
-        empty_button_2.visibility = View.GONE
+        options_button_container.visibility = View.VISIBLE
+
+        stats_button_container.visibility = View.VISIBLE
+
+        howto_button_container.visibility = View.VISIBLE
+
+        single_button_container.visibility = View.GONE
+
+        world_button_container.visibility = View.GONE
+
+        dev_button_container.visibility = View.GONE
+
+        empty_button_2_container.visibility = View.GONE
 
         single_background_options.visibility = View.GONE
         back_button.visibility = View.GONE
     }
 
     private fun resetToPlayMode() {
-        single_button.visibility = View.VISIBLE
-        world_button.visibility = View.VISIBLE
-        dev_button.visibility = View.VISIBLE
-        empty_button_2.visibility = View.VISIBLE
+        single_button_container.visibility = View.VISIBLE
+
+        world_button_container.visibility = View.VISIBLE
+
+        dev_button_container.visibility = View.VISIBLE
+
+        empty_button_2_container.visibility = View.VISIBLE
 
         single_background_options.visibility = View.GONE
+
+        back_button.visibility = View.VISIBLE
     }
 
     companion object {

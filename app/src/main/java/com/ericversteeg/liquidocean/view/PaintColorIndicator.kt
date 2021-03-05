@@ -9,14 +9,24 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.ActionButtonViewTouchListener
 import com.ericversteeg.liquidocean.listener.PaintSelectionListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 
-class PaintColorIndicator : View {
+class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
 
     var paintSelectionListeners: MutableList<PaintSelectionListener> = ArrayList()
 
     lateinit var panelThemeConfig: PanelThemeConfig
+
+    var topLayer = false
+    set(value) {
+        field = value
+
+        alpha = 0F
+    }
+
+    var activeState = false
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -59,77 +69,127 @@ class PaintColorIndicator : View {
 
         canvas?.let {
             it.save()
-            val paint = Paint()
-            paint.style = Paint.Style.STROKE
-            if (SessionSettings.instance.colorIndicatorFill || SessionSettings.instance.colorIndicatorSquare) {
-                paint.style = Paint.Style.FILL_AND_STROKE
-            }
 
-            paint.strokeWidth = ringSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth).toFloat()
-            paint.color = SessionSettings.instance.paintColor
+            if (topLayer) {
+                if (SessionSettings.instance.colorIndicatorOutline) {
+                    var paint = Paint()
+                    paint.strokeWidth = 1F
 
-            val borderPaint = Paint()
-            borderPaint.style = Paint.Style.STROKE
-            borderPaint.strokeWidth = 1F
+                    val borderPaint = Paint()
+                    borderPaint.style = Paint.Style.STROKE
+                    borderPaint.strokeWidth = 1F
 
-            borderPaint.color = panelThemeConfig.paintColorIndicatorLineColor
+                    if (panelThemeConfig.paintColorIndicatorLineColor == ActionButtonView.blackPaint.color) {
+                        borderPaint.color = ActionButtonView.twoThirdGray.color
+                    }
+                    else if (panelThemeConfig.paintColorIndicatorLineColor == ActionButtonView.whitePaint.color) {
+                        borderPaint.color = ActionButtonView.thirdGray.color
+                    }
 
-            if (SessionSettings.instance.colorIndicatorSquare) {
-                val w = squareSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
-                it.drawRect((width / 2 - w / 2).toFloat(), (height / 2 - w / 2).toFloat(),
-                    (width / 2 + w / 2).toFloat(), (height / 2 + w / 2).toFloat(), paint)
+                    var radius = (width / 3F)
 
-                paint.strokeWidth = 1F
-            }
-            else if (SessionSettings.instance.colorIndicatorFill) {
-                // circle
-                val w = circleSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
-                it.drawCircle(width / 2F, height / 2F, w.toFloat(), paint)
+                    val w = SessionSettings.instance.colorIndicatorWidth
+                    if (!SessionSettings.instance.colorIndicatorFill && !SessionSettings.instance.colorIndicatorSquare && w > 3) {
 
-                paint.strokeWidth = 1F
+                        if (w == 4) {
+                            radius = width * 0.38F
+                        }
+                        else if (w == 5) {
+                            radius = width * 0.43F
+                        }
+                    }
+
+                    // inner border
+                    it.drawCircle(
+                        width / 2F,
+                        height / 2F,
+                        radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                        borderPaint
+                    )
+
+                    // outer border
+                    it.drawCircle(
+                        width / 2F,
+                        height / 2F,
+                        radius + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                        borderPaint
+                    )
+                }
             }
             else {
-                var radius = (width / 3F)
-
-                val w = SessionSettings.instance.colorIndicatorWidth
-                if (w == 4) {
-                    radius = width * 0.38F
-                }
-                else if (w == 5) {
-                    radius = width * 0.43F
+                val paint = Paint()
+                paint.style = Paint.Style.STROKE
+                if (SessionSettings.instance.colorIndicatorFill || SessionSettings.instance.colorIndicatorSquare) {
+                    paint.style = Paint.Style.FILL_AND_STROKE
                 }
 
-                it.drawCircle(width / 2F, height / 2F, radius, paint)
-            }
+                paint.strokeWidth = ringSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth).toFloat()
+                paint.color = SessionSettings.instance.paintColor
 
-            if (SessionSettings.instance.colorIndicatorOutline) {
-                var radius = (width / 3F)
+                val borderPaint = Paint()
+                borderPaint.style = Paint.Style.STROKE
+                borderPaint.strokeWidth = 1F
 
-                val w = SessionSettings.instance.colorIndicatorWidth
-                if (!SessionSettings.instance.colorIndicatorFill && !SessionSettings.instance.colorIndicatorSquare && w > 3) {
+                borderPaint.color = panelThemeConfig.paintColorIndicatorLineColor
 
+                if (SessionSettings.instance.colorIndicatorSquare) {
+                    val w = squareSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
+                    it.drawRect((width / 2 - w / 2).toFloat(), (height / 2 - w / 2).toFloat(),
+                        (width / 2 + w / 2).toFloat(), (height / 2 + w / 2).toFloat(), paint)
+
+                    paint.strokeWidth = 1F
+                }
+                else if (SessionSettings.instance.colorIndicatorFill) {
+                    // circle
+                    val w = circleSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
+                    it.drawCircle(width / 2F, height / 2F, w.toFloat(), paint)
+
+                    paint.strokeWidth = 1F
+                }
+                else {
+                    var radius = (width / 3F)
+
+                    val w = SessionSettings.instance.colorIndicatorWidth
                     if (w == 4) {
                         radius = width * 0.38F
                     }
                     else if (w == 5) {
                         radius = width * 0.43F
                     }
-                }
-                // inner border
-                it.drawCircle(
-                    width / 2F,
-                    height / 2F,
-                    radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                    borderPaint
-                )
 
-                // outer border
-                it.drawCircle(
-                    width / 2F,
-                    height / 2F,
-                    radius + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                    borderPaint
-                )
+                    it.drawCircle(width / 2F, height / 2F, radius, paint)
+                }
+
+                if (SessionSettings.instance.colorIndicatorOutline) {
+                    var radius = (width / 3F)
+
+                    val w = SessionSettings.instance.colorIndicatorWidth
+                    if (!SessionSettings.instance.colorIndicatorFill && !SessionSettings.instance.colorIndicatorSquare && w > 3) {
+
+                        if (w == 4) {
+                            radius = width * 0.38F
+                        }
+                        else if (w == 5) {
+                            radius = width * 0.43F
+                        }
+                    }
+
+                    // inner border
+                    it.drawCircle(
+                        width / 2F,
+                        height / 2F,
+                        radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                        borderPaint
+                    )
+
+                    // outer border
+                    it.drawCircle(
+                        width / 2F,
+                        height / 2F,
+                        radius + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                        borderPaint
+                    )
+                }
             }
 
             it.restore()
@@ -172,6 +232,22 @@ class PaintColorIndicator : View {
             4 -> (width * 0.9).toInt()
             5 -> width
             else -> (width * 0.4).toInt()
+        }
+    }
+
+    override fun onTouchStateChanged(touchState: ActionButtonView.TouchState) {
+        if (touchState == ActionButtonView.TouchState.ACTIVE) {
+            activeState = true
+            alpha = 0F
+            animate().alphaBy(1F).setDuration(100).withEndAction {
+                if (!activeState) {
+                    alpha = 0F
+                }
+            }
+        }
+        else if (touchState == ActionButtonView.TouchState.INACTIVE) {
+            activeState = false
+            alpha = 0F
         }
     }
 }

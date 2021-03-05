@@ -255,7 +255,9 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                     if (unitPoint != null) {
                         interactiveCanvas.lastSelectedUnitPoint = unitPoint
 
-                        pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
+                        if (interactiveCanvas.world) {
+                            pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
+                        }
                     }
                 }
             }

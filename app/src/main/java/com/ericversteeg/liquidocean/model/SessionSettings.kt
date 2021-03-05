@@ -83,9 +83,9 @@ class SessionSettings {
     lateinit var chunk3: Array<IntArray>
     lateinit var chunk4: Array<IntArray>
 
-    lateinit var firstContributorName: String
-    lateinit var secondContributorName: String
-    lateinit var thirdContributorName: String
+    var firstContributorName = ""
+    var secondContributorName = ""
+    var thirdContributorName = ""
 
     var colorIndicatorWidth = 2
 
@@ -102,6 +102,8 @@ class SessionSettings {
     var closePaintBackButtonColor = ActionButtonView.yellowPaint.color
 
     var menuBackgroundResId = 0
+
+    var showPaintBar = true
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -164,6 +166,8 @@ class SessionSettings {
 
         ed.putBoolean("color_indicator_square", colorIndicatorSquare)
 
+        ed.putBoolean("show_paint_bar", showPaintBar)
+
         ed.apply()
     }
 
@@ -223,6 +227,8 @@ class SessionSettings {
         closePaintBackButtonColor = getSharedPrefs(context).getInt("close_paint_back_button_color", ActionButtonView.yellowPaint.color)
 
         colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", true)
+
+        showPaintBar = getSharedPrefs(context).getBoolean("show_paint_bar", true)
     }
 
     private fun artShowcaseJsonString(): String? {
