@@ -36,6 +36,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="left"
+            android:layout_marginRight="40dp"
+            android:background="@drawable/menu_button_border"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -44,7 +46,9 @@
                 android:id="@+id/play_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
                     android:id="@+id/play_button_bottom_layer"
@@ -66,7 +70,9 @@
                 android:id="@+id/options_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
                     android:id="@+id/options_button_bottom_layer"
@@ -88,7 +94,9 @@
                 android:id="@+id/stats_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
                     android:id="@+id/stats_button_bottom_layer"
@@ -110,7 +118,7 @@
                 android:id="@+id/howto_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_margin="20dp">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
                     android:id="@+id/howto_button_bottom_layer"
@@ -132,7 +140,9 @@
                 android:id="@+id/single_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:visibility="gone">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
@@ -155,7 +165,9 @@
                 android:id="@+id/world_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:visibility="gone">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
@@ -178,7 +190,9 @@
                 android:id="@+id/dev_button_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:visibility="gone">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView
@@ -201,7 +215,7 @@
                 android:id="@+id/empty_button_2_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_margin="20dp"
                 android:visibility="gone">
 
             <com.ericversteeg.liquidocean.view.ActionButtonView

@@ -36,6 +36,7 @@ class ActionButtonView: View {
         val lightRedPaint = Paint()
         val blackPaint = Paint()
         val thirdGray = Paint()
+        var semiThirdGray = Paint()
         val twoThirdGray = Paint()
         val photoshopGray = Paint()
         val classicGrayLight = Paint()
@@ -203,6 +204,7 @@ class ActionButtonView: View {
         bluePaint.color = Color.parseColor("#FF84baff")
 
         darkGrayPaint.color = Color.parseColor("#FF303030")
+        semiThirdGray.color = Color.parseColor("#FF333333")
 
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
@@ -845,7 +847,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 16
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -898,7 +900,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 26
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected && !static) {
             paint = altGreenPaint
         }
@@ -909,69 +911,73 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // row 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(5, 0, paint, canvas)
-            drawPixel(8, 0, paint, canvas)
-            drawPixel(9, 0, paint, canvas)
-            drawPixel(10, 0, paint, canvas)
-            drawPixel(12, 0, paint, canvas)
-            drawPixel(14, 0, paint, canvas)
-            drawPixel(15, 0, paint, canvas)
-            drawPixel(16, 0, paint, canvas)
-            drawPixel(18, 0, paint, canvas)
-            drawPixel(21, 0, paint, canvas)
-            drawPixel(23, 0, paint, canvas)
-            drawPixel(24, 0, paint, canvas)
-            drawPixel(25, 0, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(5, 0, colorPaint, canvas)
+            drawPixel(8, 0, colorPaint, canvas)
+            drawPixel(9, 0, colorPaint, canvas)
+            drawPixel(10, 0, colorPaint, canvas)
+            drawPixel(12, 0, colorPaint, canvas)
+            drawPixel(14, 0, colorPaint, canvas)
+            drawPixel(15, 0, colorPaint, canvas)
+            drawPixel(16, 0, colorPaint, canvas)
+            drawPixel(18, 0, colorPaint, canvas)
+            drawPixel(21, 0, colorPaint, canvas)
+            drawPixel(23, 0, colorPaint, canvas)
+            drawPixel(24, 0, colorPaint, canvas)
+            drawPixel(25, 0, colorPaint, canvas)
 
             // row 2
-            drawPixel(0, 1, paint, canvas)
-            drawPixel(2, 1, paint, canvas)
-            drawPixel(4, 1, paint, canvas)
-            drawPixel(6, 1, paint, canvas)
-            drawPixel(9, 1, paint, canvas)
-            drawPixel(12, 1, paint, canvas)
-            drawPixel(14, 1, paint, canvas)
-            drawPixel(16, 1, paint, canvas)
-            drawPixel(18, 1, paint, canvas)
-            drawPixel(19, 1, paint, canvas)
-            drawPixel(21, 1, paint, canvas)
-            drawPixel(24, 1, paint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
+            drawPixel(2, 1, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(9, 1, colorPaint, canvas)
+            drawPixel(12, 1, colorPaint, canvas)
+            drawPixel(14, 1, colorPaint, canvas)
+            drawPixel(16, 1, colorPaint, canvas)
+            drawPixel(18, 1, colorPaint, canvas)
+            drawPixel(19, 1, colorPaint, canvas)
+            drawPixel(21, 1, colorPaint, canvas)
+            drawPixel(24, 1, colorPaint, canvas)
 
             // row 3
-            drawPixel(0, 2, paint, canvas)
-            drawPixel(2, 2, paint, canvas)
-            drawPixel(4, 2, paint, canvas)
-            drawPixel(5, 2, paint, canvas)
-            drawPixel(9, 2, paint, canvas)
-            drawPixel(12, 2, paint, canvas)
-            drawPixel(14, 2, paint, canvas)
-            drawPixel(16, 2, paint, canvas)
-            drawPixel(18, 2, paint, canvas)
-            drawPixel(20, 2, paint, canvas)
-            drawPixel(21, 2, paint, canvas)
-            drawPixel(25, 2, paint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(5, 2, colorPaint, canvas)
+            drawPixel(9, 2, colorPaint, canvas)
+            drawPixel(12, 2, colorPaint, canvas)
+            drawPixel(14, 2, colorPaint, canvas)
+            drawPixel(16, 2, colorPaint, canvas)
+            drawPixel(18, 2, colorPaint, canvas)
+            drawPixel(20, 2, colorPaint, canvas)
+            drawPixel(21, 2, colorPaint, canvas)
+            drawPixel(25, 2, colorPaint, canvas)
 
             // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
-            drawPixel(4, 3, paint, canvas)
-            drawPixel(9, 3, paint, canvas)
-            drawPixel(12, 3, paint, canvas)
-            drawPixel(14, 3, paint, canvas)
-            drawPixel(15, 3, paint, canvas)
-            drawPixel(16, 3, paint, canvas)
-            drawPixel(18, 3, paint, canvas)
-            drawPixel(21, 3, paint, canvas)
-            drawPixel(23, 3, paint, canvas)
-            drawPixel(24, 3, paint, canvas)
-            drawPixel(25, 3, paint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+            drawPixel(9, 3, colorPaint, canvas)
+            drawPixel(12, 3, colorPaint, canvas)
+            drawPixel(14, 3, colorPaint, canvas)
+            drawPixel(15, 3, colorPaint, canvas)
+            drawPixel(16, 3, colorPaint, canvas)
+            drawPixel(18, 3, colorPaint, canvas)
+            drawPixel(21, 3, colorPaint, canvas)
+            drawPixel(23, 3, colorPaint, canvas)
+            drawPixel(24, 3, colorPaint, canvas)
+            drawPixel(25, 3, colorPaint, canvas)
         }
     }
 
@@ -979,7 +985,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 20
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected && !static) {
             paint = altGreenPaint
         }
@@ -990,51 +996,55 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // row 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(5, 0, paint, canvas)
-            drawPixel(6, 0, paint, canvas)
-            drawPixel(10, 0, paint, canvas)
-            drawPixel(13, 0, paint, canvas)
-            drawPixel(14, 0, paint, canvas)
-            drawPixel(15, 0, paint, canvas)
-            drawPixel(17, 0, paint, canvas)
-            drawPixel(18, 0, paint, canvas)
-            drawPixel(19, 0, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(5, 0, colorPaint, canvas)
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(10, 0, colorPaint, canvas)
+            drawPixel(13, 0, colorPaint, canvas)
+            drawPixel(14, 0, colorPaint, canvas)
+            drawPixel(15, 0, colorPaint, canvas)
+            drawPixel(17, 0, colorPaint, canvas)
+            drawPixel(18, 0, colorPaint, canvas)
+            drawPixel(19, 0, colorPaint, canvas)
 
 
             // row 2
-            drawPixel(1, 1, paint, canvas)
-            drawPixel(5, 1, paint, canvas)
-            drawPixel(9, 1, paint, canvas)
-            drawPixel(11, 1, paint, canvas)
-            drawPixel(14, 1, paint, canvas)
-            drawPixel(18, 1, paint, canvas)
+            drawPixel(1, 1, colorPaint, canvas)
+            drawPixel(5, 1, colorPaint, canvas)
+            drawPixel(9, 1, colorPaint, canvas)
+            drawPixel(11, 1, colorPaint, canvas)
+            drawPixel(14, 1, colorPaint, canvas)
+            drawPixel(18, 1, colorPaint, canvas)
 
             // row 3
-            drawPixel(2, 2, paint, canvas)
-            drawPixel(5, 2, paint, canvas)
-            drawPixel(8, 2, paint, canvas)
-            drawPixel(10, 2, paint, canvas)
-            drawPixel(11, 2, paint, canvas)
-            drawPixel(14, 2, paint, canvas)
-            drawPixel(19, 2, paint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(5, 2, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(10, 2, colorPaint, canvas)
+            drawPixel(11, 2, colorPaint, canvas)
+            drawPixel(14, 2, colorPaint, canvas)
+            drawPixel(19, 2, colorPaint, canvas)
 
             // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
-            drawPixel(5, 3, paint, canvas)
-            drawPixel(8, 3, paint, canvas)
-            drawPixel(11, 3, paint, canvas)
-            drawPixel(14, 3, paint, canvas)
-            drawPixel(17, 3, paint, canvas)
-            drawPixel(18, 3, paint, canvas)
-            drawPixel(19, 3, paint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+            drawPixel(5, 3, colorPaint, canvas)
+            drawPixel(8, 3, colorPaint, canvas)
+            drawPixel(11, 3, colorPaint, canvas)
+            drawPixel(14, 3, colorPaint, canvas)
+            drawPixel(17, 3, colorPaint, canvas)
+            drawPixel(18, 3, colorPaint, canvas)
+            drawPixel(19, 3, colorPaint, canvas)
 
         }
     }
@@ -1043,7 +1053,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 15
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1098,7 +1108,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 21
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected && !static) {
             paint = altGreenPaint
         }
@@ -1109,62 +1119,66 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // H
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(0, 1, paint, canvas)
-            drawPixel(0, 2, paint, canvas)
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 1, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-            drawPixel(2, 1, paint, canvas)
-            drawPixel(2, 2, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 1, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(2, 1, colorPaint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
 
             // O
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(4, 1, paint, canvas)
-            drawPixel(4, 2, paint, canvas)
-            drawPixel(4, 3, paint, canvas)
-            drawPixel(5, 0, paint, canvas)
-            drawPixel(5, 3, paint, canvas)
-            drawPixel(6, 0, paint, canvas)
-            drawPixel(6, 1, paint, canvas)
-            drawPixel(6, 2, paint, canvas)
-            drawPixel(6, 3, paint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+            drawPixel(5, 0, colorPaint, canvas)
+            drawPixel(5, 3, colorPaint, canvas)
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(6, 2, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
 
             // W
-            drawPixel(8, 0, paint, canvas)
-            drawPixel(8, 1, paint, canvas)
-            drawPixel(8, 2, paint, canvas)
-            drawPixel(8, 3, paint, canvas)
-            drawPixel(9, 2, paint, canvas)
-            drawPixel(10, 3, paint, canvas)
-            drawPixel(11, 2, paint, canvas)
-            drawPixel(12, 0, paint, canvas)
-            drawPixel(12, 1, paint, canvas)
-            drawPixel(12, 2, paint, canvas)
-            drawPixel(12, 3, paint, canvas)
+            drawPixel(8, 0, colorPaint, canvas)
+            drawPixel(8, 1, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(8, 3, colorPaint, canvas)
+            drawPixel(9, 2, colorPaint, canvas)
+            drawPixel(10, 3, colorPaint, canvas)
+            drawPixel(11, 2, colorPaint, canvas)
+            drawPixel(12, 0, colorPaint, canvas)
+            drawPixel(12, 1, colorPaint, canvas)
+            drawPixel(12, 2, colorPaint, canvas)
+            drawPixel(12, 3, colorPaint, canvas)
 
             // T
-            drawPixel(14, 0, paint, canvas)
-            drawPixel(15, 0, paint, canvas)
-            drawPixel(15, 1, paint, canvas)
-            drawPixel(15, 2, paint, canvas)
-            drawPixel(15, 3, paint, canvas)
-            drawPixel(16, 0, paint, canvas)
+            drawPixel(14, 0, colorPaint, canvas)
+            drawPixel(15, 0, colorPaint, canvas)
+            drawPixel(15, 1, colorPaint, canvas)
+            drawPixel(15, 2, colorPaint, canvas)
+            drawPixel(15, 3, colorPaint, canvas)
+            drawPixel(16, 0, colorPaint, canvas)
 
             // O
-            drawPixel(18, 0, paint, canvas)
-            drawPixel(18, 1, paint, canvas)
-            drawPixel(18, 2, paint, canvas)
-            drawPixel(18, 3, paint, canvas)
-            drawPixel(19, 0, paint, canvas)
-            drawPixel(19, 3, paint, canvas)
-            drawPixel(20, 0, paint, canvas)
-            drawPixel(20, 1, paint, canvas)
-            drawPixel(20, 2, paint, canvas)
-            drawPixel(20, 3, paint, canvas)
+            drawPixel(18, 0, colorPaint, canvas)
+            drawPixel(18, 1, colorPaint, canvas)
+            drawPixel(18, 2, colorPaint, canvas)
+            drawPixel(18, 3, colorPaint, canvas)
+            drawPixel(19, 0, colorPaint, canvas)
+            drawPixel(19, 3, colorPaint, canvas)
+            drawPixel(20, 0, colorPaint, canvas)
+            drawPixel(20, 1, colorPaint, canvas)
+            drawPixel(20, 2, colorPaint, canvas)
+            drawPixel(20, 3, colorPaint, canvas)
         }
     }
 
@@ -1172,7 +1186,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 22
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1183,60 +1197,64 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // row 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(6, 0, paint, canvas)
-            drawPixel(9, 0, paint, canvas)
-            drawPixel(11, 0, paint, canvas)
-            drawPixel(12, 0, paint, canvas)
-            drawPixel(13, 0, paint, canvas)
-            drawPixel(15, 0, paint, canvas)
-            drawPixel(19, 0, paint, canvas)
-            drawPixel(20, 0, paint, canvas)
-            drawPixel(21, 0, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(9, 0, colorPaint, canvas)
+            drawPixel(11, 0, colorPaint, canvas)
+            drawPixel(12, 0, colorPaint, canvas)
+            drawPixel(13, 0, colorPaint, canvas)
+            drawPixel(15, 0, colorPaint, canvas)
+            drawPixel(19, 0, colorPaint, canvas)
+            drawPixel(20, 0, colorPaint, canvas)
+            drawPixel(21, 0, colorPaint, canvas)
 
             // row 2
-            drawPixel(1, 1, paint, canvas)
-            drawPixel(4, 1, paint, canvas)
-            drawPixel(6, 1, paint, canvas)
-            drawPixel(7, 1, paint, canvas)
-            drawPixel(9, 1, paint, canvas)
-            drawPixel(11, 1, paint, canvas)
-            drawPixel(15, 1, paint, canvas)
-            drawPixel(19, 1, paint, canvas)
-            drawPixel(20, 1, paint, canvas)
+            drawPixel(1, 1, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(7, 1, colorPaint, canvas)
+            drawPixel(9, 1, colorPaint, canvas)
+            drawPixel(11, 1, colorPaint, canvas)
+            drawPixel(15, 1, colorPaint, canvas)
+            drawPixel(19, 1, colorPaint, canvas)
+            drawPixel(20, 1, colorPaint, canvas)
 
             // row 3
-            drawPixel(2, 2, paint, canvas)
-            drawPixel(4, 2, paint, canvas)
-            drawPixel(6, 2, paint, canvas)
-            drawPixel(8, 2, paint, canvas)
-            drawPixel(9, 2, paint, canvas)
-            drawPixel(11, 2, paint, canvas)
-            drawPixel(13, 2, paint, canvas)
-            drawPixel(15, 2, paint, canvas)
-            drawPixel(19, 2, paint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(6, 2, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(9, 2, colorPaint, canvas)
+            drawPixel(11, 2, colorPaint, canvas)
+            drawPixel(13, 2, colorPaint, canvas)
+            drawPixel(15, 2, colorPaint, canvas)
+            drawPixel(19, 2, colorPaint, canvas)
 
             // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
-            drawPixel(4, 3, paint, canvas)
-            drawPixel(6, 3, paint, canvas)
-            drawPixel(9, 3, paint, canvas)
-            drawPixel(11, 3, paint, canvas)
-            drawPixel(12, 3, paint, canvas)
-            drawPixel(13, 3, paint, canvas)
-            drawPixel(15, 3, paint, canvas)
-            drawPixel(16, 3, paint, canvas)
-            drawPixel(17, 3, paint, canvas)
-            drawPixel(19, 3, paint, canvas)
-            drawPixel(20, 3, paint, canvas)
-            drawPixel(21, 3, paint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
+            drawPixel(9, 3, colorPaint, canvas)
+            drawPixel(11, 3, colorPaint, canvas)
+            drawPixel(12, 3, colorPaint, canvas)
+            drawPixel(13, 3, colorPaint, canvas)
+            drawPixel(15, 3, colorPaint, canvas)
+            drawPixel(16, 3, colorPaint, canvas)
+            drawPixel(17, 3, colorPaint, canvas)
+            drawPixel(19, 3, colorPaint, canvas)
+            drawPixel(20, 3, colorPaint, canvas)
+            drawPixel(21, 3, colorPaint, canvas)
         }
     }
 
@@ -1244,7 +1262,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 21
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1255,57 +1273,61 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // row 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(6, 0, paint, canvas)
-            drawPixel(7, 0, paint, canvas)
-            drawPixel(8, 0, paint, canvas)
-            drawPixel(10, 0, paint, canvas)
-            drawPixel(11, 0, paint, canvas)
-            drawPixel(14, 0, paint, canvas)
-            drawPixel(18, 0, paint, canvas)
-            drawPixel(19, 0, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(7, 0, colorPaint, canvas)
+            drawPixel(8, 0, colorPaint, canvas)
+            drawPixel(10, 0, colorPaint, canvas)
+            drawPixel(11, 0, colorPaint, canvas)
+            drawPixel(14, 0, colorPaint, canvas)
+            drawPixel(18, 0, colorPaint, canvas)
+            drawPixel(19, 0, colorPaint, canvas)
 
             // row 2
-            drawPixel(0, 1, paint, canvas)
-            drawPixel(4, 1, paint, canvas)
-            drawPixel(6, 1, paint, canvas)
-            drawPixel(8, 1, paint, canvas)
-            drawPixel(10, 1, paint, canvas)
-            drawPixel(12, 1, paint, canvas)
-            drawPixel(14, 1, paint, canvas)
-            drawPixel(18, 1, paint, canvas)
-            drawPixel(20, 1, paint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(8, 1, colorPaint, canvas)
+            drawPixel(10, 1, colorPaint, canvas)
+            drawPixel(12, 1, colorPaint, canvas)
+            drawPixel(14, 1, colorPaint, canvas)
+            drawPixel(18, 1, colorPaint, canvas)
+            drawPixel(20, 1, colorPaint, canvas)
 
             // row 3
-            drawPixel(0, 2, paint, canvas)
-            drawPixel(1, 2, paint, canvas)
-            drawPixel(3, 2, paint, canvas)
-            drawPixel(4, 2, paint, canvas)
-            drawPixel(6, 2, paint, canvas)
-            drawPixel(8, 2, paint, canvas)
-            drawPixel(10, 2, paint, canvas)
-            drawPixel(11, 2, paint, canvas)
-            drawPixel(14, 2, paint, canvas)
-            drawPixel(18, 2, paint, canvas)
-            drawPixel(20, 2, paint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
+            drawPixel(1, 2, colorPaint, canvas)
+            drawPixel(3, 2, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(6, 2, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(10, 2, colorPaint, canvas)
+            drawPixel(11, 2, colorPaint, canvas)
+            drawPixel(14, 2, colorPaint, canvas)
+            drawPixel(18, 2, colorPaint, canvas)
+            drawPixel(20, 2, colorPaint, canvas)
 
             // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
-            drawPixel(4, 3, paint, canvas)
-            drawPixel(6, 3, paint, canvas)
-            drawPixel(7, 3, paint, canvas)
-            drawPixel(8, 3, paint, canvas)
-            drawPixel(10, 3, paint, canvas)
-            drawPixel(12, 3, paint, canvas)
-            drawPixel(14, 3, paint, canvas)
-            drawPixel(15, 3, paint, canvas)
-            drawPixel(16, 3, paint, canvas)
-            drawPixel(18, 3, paint, canvas)
-            drawPixel(19, 3, paint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
+            drawPixel(7, 3, colorPaint, canvas)
+            drawPixel(8, 3, colorPaint, canvas)
+            drawPixel(10, 3, colorPaint, canvas)
+            drawPixel(12, 3, colorPaint, canvas)
+            drawPixel(14, 3, colorPaint, canvas)
+            drawPixel(15, 3, colorPaint, canvas)
+            drawPixel(16, 3, colorPaint, canvas)
+            drawPixel(18, 3, colorPaint, canvas)
+            drawPixel(19, 3, colorPaint, canvas)
         }
     }
 
@@ -1313,7 +1335,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 12
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected) {
             paint = altGreenPaint
         }
@@ -1324,50 +1346,54 @@ class ActionButtonView: View {
             colorPaint.color = this
         }
 
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
         canvas.apply {
             // col 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(0, 1, paint, canvas)
-            drawPixel(0, 2, paint, canvas)
-            drawPixel(0, 3, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
 
             // col 2
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
 
             // col 3
-            drawPixel(2, 1, paint, canvas)
-            drawPixel(2, 2, paint, canvas)
+            drawPixel(2, 1, colorPaint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
 
             // col 5
-            drawPixel(4, 0, paint, canvas)
-            drawPixel(4, 1, paint, canvas)
-            drawPixel(4, 2, paint, canvas)
-            drawPixel(4, 3, paint, canvas)
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
 
             // col 6
-            drawPixel(5, 0, paint, canvas)
-            drawPixel(5, 1, paint, canvas)
-            drawPixel(5, 3, paint, canvas)
+            drawPixel(5, 0, colorPaint, canvas)
+            drawPixel(5, 1, colorPaint, canvas)
+            drawPixel(5, 3, colorPaint, canvas)
 
             // col 7
-            drawPixel(6, 0, paint, canvas)
-            drawPixel(6, 3, paint, canvas)
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
 
             // col 9
-            drawPixel(8, 0, paint, canvas)
-            drawPixel(8, 1, paint, canvas)
-            drawPixel(8, 2, paint, canvas)
+            drawPixel(8, 0, colorPaint, canvas)
+            drawPixel(8, 1, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
 
             // col 10
-            drawPixel(9, 3, paint, canvas)
+            drawPixel(9, 3, colorPaint, canvas)
 
             // col 11
-            drawPixel(10, 2, paint, canvas)
+            drawPixel(10, 2, colorPaint, canvas)
 
             // col 12
-            drawPixel(11, 0, paint, canvas)
-            drawPixel(11, 1, paint, canvas)
+            drawPixel(11, 0, colorPaint, canvas)
+            drawPixel(11, 1, colorPaint, canvas)
         }
     }
 

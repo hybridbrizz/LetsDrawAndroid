@@ -30,6 +30,9 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     var grayAccentPaint = Paint()
     var darkLinePaint = Paint()
 
+    var thirdGraySemiPaint = Paint()
+    var twoThirdGraySemiPaint = Paint()
+
     var world = true
 
     var flashingError = false
@@ -79,6 +82,9 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
         darkGrayPaint.color = Color.parseColor("#2f2f2f")
         grayAccentPaint.color = Color.parseColor("#484948")
+
+        thirdGraySemiPaint.color = Color.parseColor("#99AAAAAA")
+        twoThirdGraySemiPaint.color = Color.parseColor("#99555555")
 
         darkLinePaint.color = darkGrayPaint.color
         darkLinePaint.strokeWidth = 1F
@@ -221,10 +227,10 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
                 if (x < cols - 2) {
                     if (panelThemeConfig.darkPaintQtyBar) {
-                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), darkLinePaint)
+                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), twoThirdGraySemiPaint)
                     }
                     else {
-                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), linePaint)
+                        drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), thirdGraySemiPaint)
                     }
 
                 }

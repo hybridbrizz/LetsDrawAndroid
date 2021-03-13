@@ -38,10 +38,11 @@ class HowtoFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK
+        back_action.type = ActionButtonView.Type.BACK_SOLID
 
         howto_image.type = ActionButtonView.Type.HOWTO
         howto_image.static = true
+        howto_image.representingColor = ActionButtonView.whitePaint.color
 
         paint_action.type = ActionButtonView.Type.PAINT
         paint_action.static = true

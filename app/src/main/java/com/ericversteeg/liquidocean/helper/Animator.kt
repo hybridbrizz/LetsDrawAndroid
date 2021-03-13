@@ -12,6 +12,12 @@ class Animator {
     companion object {
         var context: Context? = null
 
+        fun fadeInView(view: View) {
+            view.alpha = 0F
+            view.visibility = View.VISIBLE
+            view.animate().setDuration(1000).setInterpolator(AccelerateDecelerateInterpolator()).alphaBy(1F)
+        }
+
         fun animateHorizontalViewEnter(view: View, left: Boolean) {
             var offset = 2000
             if (!left) {

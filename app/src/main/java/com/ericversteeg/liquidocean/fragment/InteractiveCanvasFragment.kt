@@ -238,8 +238,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                         }
                     }
-
-
                 }
             }
         }, 0, 1000)
@@ -410,7 +408,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         color_picker_view.setSelectorColor(Color.WHITE)
 
-        if (!SessionSettings.instance.showPaintBar) {
+        if (!SessionSettings.instance.showPaintBar || !world) {
             paint_qty_bar.visibility = View.GONE
         }
 
@@ -724,6 +722,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
 
             startParticleEmitters()
+        }
+
+        // to stop click-through to the canvas behind
+        color_picker_frame.setOnClickListener {
+            
         }
 
         // recent colors

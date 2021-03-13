@@ -33,7 +33,7 @@
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
                     android:layout_marginTop="20dp"
-                    android:layout_marginLeft="20dp"
+                    android:layout_marginLeft="30dp"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/title_image" />
 

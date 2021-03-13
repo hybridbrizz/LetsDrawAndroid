@@ -24,6 +24,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -66,7 +67,7 @@ class LoadingScreenFragment : Fragment() {
         "Tap on any pixel on the world canvas to view a history of edits for that position.",
         "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
         "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
-        "Tap the bottom-left icon while drawing to bring up many recently used colors."
+        "Tap the bottom-left of the screen while drawing to bring up many recently used colors."
     )
 
     override fun onCreateView(
@@ -100,6 +101,15 @@ class LoadingScreenFragment : Fragment() {
 
         val rIndex = (Math.random() * gameTips.size).toInt()
         game_tip_text.text = "Tip: ${gameTips[rIndex]}"
+
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    Animator.fadeInView(game_tip_text)
+                }
+            }
+
+        }, 3000)
 
         context?.apply {
             // sync paint qty or register device

@@ -73,11 +73,15 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
             if (topLayer) {
                 if (SessionSettings.instance.colorIndicatorOutline) {
                     var paint = Paint()
-                    paint.strokeWidth = 1F
+                    paint.strokeWidth = 2F
+
+                    if (!SessionSettings.instance.colorIndicatorSquare && !SessionSettings.instance.colorIndicatorFill) {
+                        paint.strokeWidth = ringSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth).toFloat()
+                    }
 
                     val borderPaint = Paint()
                     borderPaint.style = Paint.Style.STROKE
-                    borderPaint.strokeWidth = 1F
+                    borderPaint.strokeWidth = 2F
 
                     if (panelThemeConfig.paintColorIndicatorLineColor == ActionButtonView.blackPaint.color) {
                         borderPaint.color = ActionButtonView.twoThirdGray.color
@@ -99,13 +103,15 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                         }
                     }
 
-                    // inner border
-                    it.drawCircle(
-                        width / 2F,
-                        height / 2F,
-                        radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                        borderPaint
-                    )
+                    if (paint.strokeWidth > 2) {
+                        // inner border
+                        it.drawCircle(
+                            width / 2F,
+                            height / 2F,
+                            radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                            borderPaint
+                        )
+                    }
 
                     // outer border
                     it.drawCircle(
@@ -128,23 +134,45 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
 
                 val borderPaint = Paint()
                 borderPaint.style = Paint.Style.STROKE
-                borderPaint.strokeWidth = 1F
+                borderPaint.strokeWidth = 2F
 
                 borderPaint.color = panelThemeConfig.paintColorIndicatorLineColor
 
                 if (SessionSettings.instance.colorIndicatorSquare) {
-                    val w = squareSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
-                    it.drawRect((width / 2 - w / 2).toFloat(), (height / 2 - w / 2).toFloat(),
-                        (width / 2 + w / 2).toFloat(), (height / 2 + w / 2).toFloat(), paint)
+                    paint.strokeWidth = 2F
 
-                    paint.strokeWidth = 1F
+                    var padding = 0
+
+                    if (paint.color == 0) {
+                        paint.strokeWidth = 10F
+
+                        paint.color = borderPaint.color
+                        paint.style = Paint.Style.STROKE
+
+                        padding = (paint.strokeWidth / 2).toInt()
+                    }
+
+                    val w = squareSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
+                    it.drawRect((width / 2 - w / 2).toFloat() + padding, (height / 2 - w / 2).toFloat() + padding,
+                        (width / 2 + w / 2).toFloat() - padding, (height / 2 + w / 2).toFloat() - padding, paint)
                 }
                 else if (SessionSettings.instance.colorIndicatorFill) {
+                    paint.strokeWidth = 2F
+
+                    var padding = 0
+
+                    if (paint.color == 0) {
+                        paint.strokeWidth = 10F
+
+                        paint.color = borderPaint.color
+                        paint.style = Paint.Style.STROKE
+
+                        padding = (paint.strokeWidth / 2).toInt()
+                    }
+
                     // circle
                     val w = circleSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
-                    it.drawCircle(width / 2F, height / 2F, w.toFloat(), paint)
-
-                    paint.strokeWidth = 1F
+                    it.drawCircle(width / 2F, height / 2F, w.toFloat() - padding, paint)
                 }
                 else {
                     var radius = (width / 3F)
@@ -174,13 +202,15 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                         }
                     }
 
-                    // inner border
-                    it.drawCircle(
-                        width / 2F,
-                        height / 2F,
-                        radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                        borderPaint
-                    )
+                    if (paint.strokeWidth > 10) {
+                        // inner border
+                        it.drawCircle(
+                            width / 2F,
+                            height / 2F,
+                            radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
+                            borderPaint
+                        )
+                    }
 
                     // outer border
                     it.drawCircle(

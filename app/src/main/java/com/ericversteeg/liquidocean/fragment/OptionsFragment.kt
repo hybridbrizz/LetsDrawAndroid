@@ -52,9 +52,10 @@ class OptionsFragment: Fragment() {
 
         title_image.type = ActionButtonView.Type.OPTIONS
         title_image.static = true
+        title_image.representingColor = ActionButtonView.whitePaint.color
 
         back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK
+        back_action.type = ActionButtonView.Type.BACK_SOLID
 
         back_button.setOnClickListener {
             optionsListener?.onOptionsBack()
@@ -121,10 +122,8 @@ class OptionsFragment: Fragment() {
                 R.drawable.crystal_6,
                 R.drawable.crystal_7,
                 R.drawable.crystal_8,      // TODO: hard to see paint event countdown
-                R.drawable.crystal_9,      // TODO: hard to see paint event countdown
                 R.drawable.crystal_10,      // TODO: hard to see paint event countdown + dark icons
                 R.drawable.grass,
-                R.drawable.grass_dry,
                 R.drawable.sf_1,
                 R.drawable.sf_3,
                 R.drawable.amb_2,

@@ -37,10 +37,11 @@ class StatsFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK
+        back_action.type = ActionButtonView.Type.BACK_SOLID
 
         stats_image.type = ActionButtonView.Type.STATS
         stats_image.static = true
+        stats_image.representingColor = ActionButtonView.whitePaint.color
 
         achievements_image.type = ActionButtonView.Type.ACHIEVEMENTS
         achievements_image.static = true
