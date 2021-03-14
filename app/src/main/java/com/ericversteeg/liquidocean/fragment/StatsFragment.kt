@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.listener.StatsFragmentListener
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
@@ -63,13 +64,15 @@ class StatsFragment: Fragment() {
         achievement_progress_text_overwrite_out.text = StatTracker.instance.getAchievementProgressString(StatTracker.EventType.PIXEL_OVERWRITE_OUT)
         achievement_progress_text_paint.text = StatTracker.instance.getAchievementProgressString(StatTracker.EventType.PAINT_RECEIVED)
 
-        Animator.animateTitleFromTop(stats_image)
+        if (!SessionSettings.instance.tablet) {
+            Animator.animateTitleFromTop(stats_image)
 
-        Animator.animateHorizontalViewEnter(stat_num_pixels_painted_single_container, true)
-        Animator.animateHorizontalViewEnter(stat_num_pixels_painted_world_container, false)
-        Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_in_container, true)
-        Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_out_container, false)
-        Animator.animateHorizontalViewEnter(stat_paint_accrued_container, true)
-        Animator.animateHorizontalViewEnter(stat_world_xp_container, false)
+            Animator.animateHorizontalViewEnter(stat_num_pixels_painted_single_container, true)
+            Animator.animateHorizontalViewEnter(stat_num_pixels_painted_world_container, false)
+            Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_in_container, true)
+            Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_out_container, false)
+            Animator.animateHorizontalViewEnter(stat_paint_accrued_container, true)
+            Animator.animateHorizontalViewEnter(stat_world_xp_container, false)
+        }
     }
 }

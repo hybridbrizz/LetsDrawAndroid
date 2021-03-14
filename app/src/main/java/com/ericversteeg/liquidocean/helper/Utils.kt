@@ -7,9 +7,16 @@ import android.net.NetworkCapabilities
 import android.net.NetworkInfo
 import android.os.Build
 import android.util.TypedValue
+import android.view.View
+import android.view.ViewTreeObserver
+import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
 
 class Utils {
+    interface ViewLayoutListener {
+        fun onViewLayout(view: View)
+    }
+
     companion object {
         val baseUrlApi = "https://192.168.200.69:5000"
         val baseUrlSocket = "https://192.168.200.69:5010"
@@ -51,6 +58,15 @@ class Utils {
                 val nwInfo = connectivityManager.activeNetworkInfo ?: return false
                 return nwInfo.isConnected
             }
+        }
+
+        fun setViewLayoutListener(view: View, completion: ViewLayoutListener) {
+            view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    completion.onViewLayout(view)
+                    view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            })
         }
     }
 }

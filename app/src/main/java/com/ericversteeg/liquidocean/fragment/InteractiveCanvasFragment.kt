@@ -4,16 +4,19 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.core.view.children
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -195,8 +198,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                         if (timeUntil < 0) {
                             paint_time_info.text = "???"
-                        }
-                        else {
+                        } else {
                             SessionSettings.instance.timeSync = timeUntil
                             setupPaintEventTimer()
                         }
@@ -222,8 +224,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                             System.currentTimeMillis() + 300 * 1000
                     }
 
-                    val m = (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
-                    val s = ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
+                    val m =
+                        (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
+                    val s =
+                        ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
 
                     if (m == 0L) {
                         try {
@@ -390,8 +394,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 )
             }
 
-            surface_view.interactiveCanvas.updateDeviceViewport(this,
-                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F)
+            surface_view.interactiveCanvas.updateDeviceViewport(
+                this,
+                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
+            )
         }
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelBackgroundResId)
@@ -410,10 +416,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         if (!SessionSettings.instance.showPaintBar || !world) {
             paint_qty_bar.visibility = View.GONE
-        }
-
-        context?.apply {
-            paint_panel.setBackgroundDrawable(resources.getDrawable(SessionSettings.instance.panelBackgroundResId))
         }
 
         pixel_history_fragment_container.x = 0F
@@ -798,12 +800,24 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 background_button.visibility = View.VISIBLE
                 grid_lines_button.visibility = View.VISIBLE
 
-                Animator.animateMenuItems(listOf(listOf(export_button), listOf(background_button), listOf(grid_lines_button)),cascade = false, out = false)
+                Animator.animateMenuItems(
+                    listOf(
+                        listOf(export_button), listOf(background_button), listOf(
+                            grid_lines_button
+                        )
+                    ), cascade = false, out = false
+                )
 
                 toolboxOpen = true
             }
             else {
-                Animator.animateMenuItems(listOf(listOf(export_button), listOf(background_button), listOf(grid_lines_button)),cascade = false, out = true)
+                Animator.animateMenuItems(
+                    listOf(
+                        listOf(export_button), listOf(background_button), listOf(
+                            grid_lines_button
+                        )
+                    ), cascade = false, out = true
+                )
 
                 toolboxOpen = false
             }
@@ -843,6 +857,85 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 return true
             }
         }
+
+        Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                if (SessionSettings.instance.tablet) {
+                    // color picker frame width
+                    var layoutParams = ConstraintLayout.LayoutParams(
+                        (view.width * 0.35).toInt(),
+                        ConstraintLayout.LayoutParams.MATCH_PARENT
+                    )
+
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+
+                    color_picker_frame.layoutParams = layoutParams
+
+                    // paint panel width
+                    layoutParams = ConstraintLayout.LayoutParams(
+                        ((250 / 1000F) * view.height).toInt(),
+                        ConstraintLayout.LayoutParams.MATCH_PARENT
+                    )
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                    paint_panel.layoutParams = layoutParams
+
+                    // paint indicator size
+                    val frameWidth = ((250 / 1000F) * view.height).toInt()
+                    val indicatorMargin = (frameWidth * 0.15).toInt()
+                    val indicatorWidth = frameWidth - indicatorMargin
+
+                    layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                    paint_indicator_view_bottom_layer.layoutParams = layoutParams
+                    paint_indicator_view.layoutParams = layoutParams
+
+                    // paint quantity bar size
+                    layoutParams = ConstraintLayout.LayoutParams(
+                        (paint_qty_bar.width * 1.25).toInt(),
+                        (paint_qty_bar.height * 1.25).toInt()
+                    )
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                    layoutParams.topMargin = Utils.dpToPx(context, 15)
+
+                    paint_qty_bar.layoutParams = layoutParams
+                }
+
+                context?.apply {
+                    val backgroundDrawable = resources.getDrawable(SessionSettings.instance.panelBackgroundResId) as BitmapDrawable
+
+                    if (SessionSettings.instance.tablet) {
+                        val scale = view.height / backgroundDrawable.bitmap.height.toFloat()
+
+                        val newWidth = (backgroundDrawable.bitmap.width * scale).toInt()
+                        val newHeight = (backgroundDrawable.bitmap.height * scale).toInt()
+                        val newBitmap = Bitmap.createScaledBitmap(backgroundDrawable.bitmap, newWidth,
+                            newHeight, false)
+                        val scaledBitmapDrawable = BitmapDrawable(resources, newBitmap)
+
+                        var layerDrawable: LayerDrawable = ContextCompat.getDrawable(
+                            this,
+                            R.drawable.panel_texture_background
+                        ) as LayerDrawable
+
+                        scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.LEFT
+                        layerDrawable.addLayer(scaledBitmapDrawable)
+
+                        paint_panel.setBackgroundDrawable(layerDrawable)
+                    }
+                    else {
+                        paint_panel.setBackgroundDrawable(backgroundDrawable)
+                    }
+                }
+            }
+        })
     }
 
     private fun setupRecentColors(recentColors: Array<Int>?) {

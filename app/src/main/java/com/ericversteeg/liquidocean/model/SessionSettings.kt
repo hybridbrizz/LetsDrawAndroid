@@ -105,6 +105,10 @@ class SessionSettings {
 
     var showPaintBar = true
 
+    var paintBarColor = 0
+
+    var tablet = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -168,6 +172,8 @@ class SessionSettings {
 
         ed.putBoolean("show_paint_bar", showPaintBar)
 
+        ed.putInt("paint_bar_color", paintBarColor)
+
         ed.apply()
     }
 
@@ -229,6 +235,8 @@ class SessionSettings {
         colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", true)
 
         showPaintBar = getSharedPrefs(context).getBoolean("show_paint_bar", true)
+
+        paintBarColor = getSharedPrefs(context).getInt("paint_bar_color", Color.parseColor("#FFAAAAAA"))
     }
 
     private fun artShowcaseJsonString(): String? {

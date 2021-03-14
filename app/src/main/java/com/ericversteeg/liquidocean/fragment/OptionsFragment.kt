@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.fragment
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.*
@@ -331,14 +332,44 @@ class OptionsFragment: Fragment() {
             SessionSettings.instance.showPaintBar = button.isChecked
         }
 
+        // option paint bar color
+        option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
+        option_paint_bar_color_reset_button.setOnClickListener {
+            SessionSettings.instance.paintBarColor = Color.parseColor("#FFAAAAAA")
+            option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
+        }
+
+        // option grid line color
+        option_paint_bar_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.paintBarColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(true) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(true)
+                .showValue(true)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.paintBarColor = color
+                    }
+
+                    fun onColor(color: Int, fromUser: Boolean) {}
+                })
+        }
+
         setupNumRecentColorsChoices()
 
-        Animator.animateTitleFromTop(title_image)
+        if (!SessionSettings.instance.tablet) {
+            Animator.animateTitleFromTop(title_image)
 
-        Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
-        Animator.animateHorizontalViewEnter(panel_recycler_view, true)
-        Animator.animateHorizontalViewEnter(option_canvas_lock_container, false)
-        Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, true)
+            Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
+            Animator.animateHorizontalViewEnter(panel_recycler_view, true)
+            Animator.animateHorizontalViewEnter(option_canvas_lock_container, false)
+            Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, true)
+        }
     }
 
     override fun onResume() {

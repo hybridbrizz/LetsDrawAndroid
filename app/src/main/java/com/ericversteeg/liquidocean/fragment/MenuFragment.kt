@@ -12,6 +12,7 @@ import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
@@ -175,24 +176,25 @@ class MenuFragment: Fragment() {
 
         view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
+                if (view.height > Utils.dpToPx(context, 500)) {
+                    SessionSettings.instance.tablet = true
+                }
+
                 val safeViews: MutableList<View> = ArrayList()
 
-                safeViews.add(art_showcase)
-                safeViews.add(menu_button_container)
+                if (art_showcase != null) {
+                    safeViews.add(art_showcase)
+                    safeViews.add(menu_button_container)
 
-                Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
-                Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    view.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                } else {
-                    view.viewTreeObserver.removeGlobalOnLayoutListener(this)
+                    Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
                 }
+                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
             }
         })
 
@@ -245,21 +247,23 @@ class MenuFragment: Fragment() {
             override fun run() {
                 activity?.runOnUiThread {
                     SessionSettings.instance.artShowcase?.apply {
-                        art_showcase.alpha = 0F
+                        if (art_showcase != null) {
+                            art_showcase.alpha = 0F
 
-                        art_showcase.showBackground = false
-                        art_showcase.art = getNextArtShowcase()
+                            art_showcase.showBackground = false
+                            art_showcase.art = getNextArtShowcase()
 
-                        art_showcase.animate().alpha(1F).setDuration(2500).withEndAction {
-                            Timer().schedule(object: TimerTask() {
-                                override fun run() {
-                                    activity?.runOnUiThread {
-                                        art_showcase.animate().alpha(0F).setDuration(1500).start()
+                            art_showcase.animate().alpha(1F).setDuration(2500).withEndAction {
+                                Timer().schedule(object: TimerTask() {
+                                    override fun run() {
+                                        activity?.runOnUiThread {
+                                            art_showcase.animate().alpha(0F).setDuration(1500).start()
+                                        }
                                     }
-                                }
 
-                            }, 3000)
-                        }.start()
+                                }, 3000)
+                            }.start()
+                        }
                     }
                 }
             }

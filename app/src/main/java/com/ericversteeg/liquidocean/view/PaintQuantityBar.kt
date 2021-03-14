@@ -26,6 +26,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
     val lightGrayPaint = Paint()
     val linePaint = Paint()
 
+    var paintBarPaint = Paint()
+
     var darkGrayPaint = Paint()
     var grayAccentPaint = Paint()
     var darkLinePaint = Paint()
@@ -85,6 +87,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
         thirdGraySemiPaint.color = Color.parseColor("#99AAAAAA")
         twoThirdGraySemiPaint.color = Color.parseColor("#99555555")
+
+        paintBarPaint.color = SessionSettings.instance.paintBarColor
 
         darkLinePaint.color = darkGrayPaint.color
         darkLinePaint.strokeWidth = 1F
@@ -204,7 +208,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
             for (x in 1 until cols - 1) {
                 if (relQty > curProg) {
                     if (world) {
-                        drawRect(rectForPixel((cols - 1) - x, 1), bluePaint)
+                        drawRect(rectForPixel((cols - 1) - x, 1), paintBarPaint)
                     }
                     else {
                         if (panelThemeConfig.darkPaintQtyBar) {
@@ -221,7 +225,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                         drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.redPaint)
                     }
                     else {
-                        drawRect(rectForPixel((cols - 1) - x, 1), brownPaint)
+                        drawRect(rectForPixel((cols - 1) - x, 1), ActionButtonView.blackPaint)
                     }
                 }
 

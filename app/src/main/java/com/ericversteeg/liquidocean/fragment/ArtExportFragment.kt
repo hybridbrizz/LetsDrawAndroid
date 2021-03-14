@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -73,6 +75,21 @@ class ArtExportFragment: Fragment() {
         }
 
         sendArtPixels()
+
+        Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                if (SessionSettings.instance.tablet) {
+                    val layoutParams = ConstraintLayout.LayoutParams(view.width - save_button.height * 2, view.height - save_button.height * 2)
+
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                    art_view.layoutParams = layoutParams
+                }
+            }
+        })
     }
 
     private fun sendArtPixels() {

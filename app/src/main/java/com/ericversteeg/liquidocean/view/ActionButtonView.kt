@@ -1401,7 +1401,7 @@ class ActionButtonView: View {
         rows = 4
         cols = 51
 
-        var paint = lightGrayPaint
+        var paint = whitePaint
         if (selected && !static) {
             paint = whitePaint
         }

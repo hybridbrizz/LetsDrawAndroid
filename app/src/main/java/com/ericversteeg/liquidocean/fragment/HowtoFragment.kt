@@ -8,7 +8,9 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.StatsFragmentListener
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_howto.*
@@ -53,9 +55,11 @@ class HowtoFragment: Fragment() {
             listener?.onStatsBack()
         }
 
-        Animator.animateTitleFromTop(howto_image)
+        if (!SessionSettings.instance.tablet) {
+            Animator.animateTitleFromTop(howto_image)
 
-        Animator.animateHorizontalViewEnter(step1_text, true)
-        Animator.animateHorizontalViewEnter(static_image_1, true)
+            Animator.animateHorizontalViewEnter(step1_text, true)
+            Animator.animateHorizontalViewEnter(static_image_1, true)
+        }
     }
 }

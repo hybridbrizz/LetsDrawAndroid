@@ -8,13 +8,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -63,7 +63,7 @@ class LoadingScreenFragment : Fragment() {
         "You can turn several features on / off in the Options menu.",
         "All drawings can be exported to a PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
         "Anything you create on the world canvas is automatically saved and shared with others.",
-        "Like your level, paint, and others stats? Back your account up and sync across multiple devices by signing into Google or Facebook.",
+        "Like your level, paint, and others stats? Back your account up and sync across multiple devices with Google.",
         "Tap on any pixel on the world canvas to view a history of edits for that position.",
         "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
         "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
@@ -102,7 +102,7 @@ class LoadingScreenFragment : Fragment() {
         val rIndex = (Math.random() * gameTips.size).toInt()
         game_tip_text.text = "Tip: ${gameTips[rIndex]}"
 
-        Timer().schedule(object: TimerTask() {
+        Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
                     Animator.fadeInView(game_tip_text)
@@ -152,6 +152,32 @@ class LoadingScreenFragment : Fragment() {
                 }
             }
         }, 200, 200)
+
+        Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                if (SessionSettings.instance.tablet) {
+                    // contributors 1
+                    var layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_1.width, top_contributors_container_1.height)
+                    layoutParams.rightToLeft = realm_art.id
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+
+                    layoutParams.setMargins(Utils.dpToPx(context, 20), 0, Utils.dpToPx(context, 40), 0)
+
+                    top_contributors_container_1.layoutParams = layoutParams
+
+                    // contributors 2
+                    layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_2.width, top_contributors_container_2.height)
+                    layoutParams.leftToRight = realm_art.id
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+
+                    layoutParams.setMargins(Utils.dpToPx(context, 40), 0, Utils.dpToPx(context, 20), 0)
+
+                    top_contributors_container_2.layoutParams = layoutParams
+                }
+            }
+        })
     }
 
     private fun drawWorldCanvas() {
@@ -193,18 +219,15 @@ class LoadingScreenFragment : Fragment() {
                     SessionSettings.instance.chunk1 = Array(256) { IntArray(1024) }
                     arr = SessionSettings.instance.chunk1
                     doneLoadingChunk1 = true
-                }
-                else if (chunk == 2) {
+                } else if (chunk == 2) {
                     SessionSettings.instance.chunk2 = Array(256) { IntArray(1024) }
                     arr = SessionSettings.instance.chunk2
                     doneLoadingChunk2 = true
-                }
-                else if (chunk == 3) {
+                } else if (chunk == 3) {
                     SessionSettings.instance.chunk3 = Array(256) { IntArray(1024) }
                     arr = SessionSettings.instance.chunk3
                     doneLoadingChunk3 = true
-                }
-                else if (chunk == 4) {
+                } else if (chunk == 4) {
                     SessionSettings.instance.chunk4 = Array(256) { IntArray(1024) }
                     arr = SessionSettings.instance.chunk4
                     doneLoadingChunk4 = true
@@ -226,8 +249,11 @@ class LoadingScreenFragment : Fragment() {
                     Log.i("Error", this)
                 }
             }) {
-            override fun getBodyContentType(): String {
-                return "application/x-www-form-urlencoded; charset=UTF-8"
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                return headers
             }
 
             override fun getParams(): Map<String, String> {
@@ -245,7 +271,7 @@ class LoadingScreenFragment : Fragment() {
             }
         }
 
-        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 1, 1.0f)
+        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 2, 1.0f)
 
         jsonObjRequest.tag = "download"
         dataRequestQueue.add(jsonObjRequest)
@@ -267,26 +293,15 @@ class LoadingScreenFragment : Fragment() {
                     Log.i("Error", this)
                 }
             }) {
-            override fun getBodyContentType(): String {
-                return "application/x-www-form-urlencoded; charset=UTF-8"
-            }
 
-            override fun getParams(): Map<String, String> {
-                val params: MutableMap<String, String> = HashMap()
-                val pixelData = SessionSettings.instance.getSharedPrefs(context).getString(
-                    "arr",
-                    ""
-                )
-
-                pixelData?.apply {
-                    params["arr"] = this
-                }
-
-                return params
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                return headers
             }
         }
 
-        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 1, 1.0f)
+        jsonObjRequest.retryPolicy = DefaultRetryPolicy(60000, 1, 1.0f)
 
         jsonObjRequest.tag = "download"
         dataRequestQueue.add(jsonObjRequest)
@@ -365,17 +380,25 @@ class LoadingScreenFragment : Fragment() {
                 { response ->
                     val topContributors = response.getJSONArray("data")
 
-                    val topContributorNameViews1 = listOf(top_contributor_name_1, top_contributor_name_2,
-                        top_contributor_name_3, top_contributor_name_4, top_contributor_name_5)
+                    val topContributorNameViews1 = listOf(
+                        top_contributor_name_1, top_contributor_name_2,
+                        top_contributor_name_3, top_contributor_name_4, top_contributor_name_5
+                    )
 
-                    val topContributorAmtViews1 = listOf(top_contributor_amt_1, top_contributor_amt_2,
-                        top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5)
+                    val topContributorAmtViews1 = listOf(
+                        top_contributor_amt_1, top_contributor_amt_2,
+                        top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5
+                    )
 
-                    val topContributorNameViews2 = listOf(top_contributor_name_6, top_contributor_name_7,
-                        top_contributor_name_8, top_contributor_name_9, top_contributor_name_10)
+                    val topContributorNameViews2 = listOf(
+                        top_contributor_name_6, top_contributor_name_7,
+                        top_contributor_name_8, top_contributor_name_9, top_contributor_name_10
+                    )
 
-                    val topContributorAmtViews2 = listOf(top_contributor_amt_6, top_contributor_amt_7,
-                        top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10)
+                    val topContributorAmtViews2 = listOf(
+                        top_contributor_amt_6, top_contributor_amt_7,
+                        top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10
+                    )
 
                     for (i in 0 until topContributors.length()) {
                         val topContributor = topContributors.getJSONObject(i)
@@ -387,12 +410,10 @@ class LoadingScreenFragment : Fragment() {
                             if (i == 0) {
                                 SessionSettings.instance.firstContributorName = name
                                 topContributorNameViews1[i].setTextColor(ActionButtonView.yellowPaint.color)
-                            }
-                            else if (i == 1) {
+                            } else if (i == 1) {
                                 SessionSettings.instance.secondContributorName = name
                                 topContributorNameViews1[i].setTextColor(Color.parseColor("#AFB3B1"))
-                            }
-                            else if (i == 2) {
+                            } else if (i == 2) {
                                 SessionSettings.instance.thirdContributorName = name
                                 topContributorNameViews1[i].setTextColor(Color.parseColor("#BD927B"))
                             }
@@ -405,8 +426,7 @@ class LoadingScreenFragment : Fragment() {
 
                             topContributorNameViews1[i].animate().setDuration(500).alphaBy(1F)
                             topContributorAmtViews1[i].animate().setDuration(500).alphaBy(1F)
-                        }
-                        else if (i < 10) {
+                        } else if (i < 10) {
                             topContributorNameViews2[i - 5].text = name
                             topContributorAmtViews2[i - 5].text = amt.toString()
 
