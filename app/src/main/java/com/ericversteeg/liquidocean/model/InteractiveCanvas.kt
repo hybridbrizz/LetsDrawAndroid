@@ -9,6 +9,7 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -17,8 +18,11 @@ import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
+import io.socket.engineio.client.transports.Polling
+import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URISyntaxException
@@ -68,11 +72,6 @@ class InteractiveCanvas(var context: Context) {
     var realmId = 0
 
     // socket.io websocket for handling real-time pixel updates
-    var socket: Socket? = null
-    var checkEventTimeout = 20000L
-    var checkStatusReceived = false
-
-    var socketStatusCallback: SocketStatusCallback? = null
 
     var receivedPaintRecently = false
 
@@ -84,6 +83,9 @@ class InteractiveCanvas(var context: Context) {
     val BACKGROUND_CHESS = 5
 
     val numBackgrounds = 6
+
+    var numConnect = 0
+    lateinit var connectingTimer: Timer
 
     companion object {
         var GRID_LINE_MODE_ON = 0
@@ -116,33 +118,12 @@ class InteractiveCanvas(var context: Context) {
             }
 
             try {
-                socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
-
-                socket?.connect()
-
-                socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
-                    Log.i("okay", it.toString())
-
-                    //val map = HashMap<String, String>()
-                    //map["data"] = "connected to the SocketServer android..."
-                    //socket.emit("my_event", gson.toJson(map))
-
-                    if (!checkStatusReceived) {
-                        socket?.emit("check_event")
-                    }
-                })
-
-                socket?.on(Socket.EVENT_CONNECT_ERROR) {
-                    Log.i("Error", it.toString())
-                }
-
-                socket?.on(Socket.EVENT_DISCONNECT) {
-                    Log.i("Socket", "Socket disconnected.")
-                }
 
                 // socket.emit("my_event", "test")
 
-                registerForSocketEvents(socket)
+                registerForSocketEvents(InteractiveCanvasSocket.instance.socket)
+
+                // showConnectingAttempts()
 
             } catch (e: URISyntaxException) {
 
@@ -198,6 +179,14 @@ class InteractiveCanvas(var context: Context) {
                         }
                     }
                 }
+            }
+
+            // short term pixels
+            for (shortTermPixel in SessionSettings.instance.shortTermPixels) {
+                val x = shortTermPixel.restorePoint.point.x
+                val y = shortTermPixel.restorePoint.point.y
+
+                arr[y][x] = shortTermPixel.restorePoint.color
             }
         }
         // single play
@@ -273,6 +262,8 @@ class InteractiveCanvas(var context: Context) {
     private fun registerForSocketEvents(socket: Socket?) {
         socket?.on("pixels_commit") {
             (context as Activity).runOnUiThread(Runnable {
+                val shortTermPixels: MutableList<ShortTermPixel> = ArrayList()
+
                 val pixelsJsonArr = it[0] as JSONArray
                 for (i in 0 until pixelsJsonArr.length()) {
                     val pixelObj = pixelsJsonArr.get(i) as JSONObject
@@ -288,8 +279,16 @@ class InteractiveCanvas(var context: Context) {
                     val y = unit1DIndex / cols
                     val x = unit1DIndex % cols
 
-                    arr[y][x] = pixelObj.getInt("color")
+                    val color = pixelObj.getInt("color")
+
+                    if (x < cols && y < cols && x > -1 && y > -1) {
+                        arr[y][x] = color
+
+                        shortTermPixels.add(ShortTermPixel(RestorePoint(Point(x, y), color, color)))
+                    }
                 }
+
+                SessionSettings.instance.addShortTermPixels(shortTermPixels)
 
                 drawCallbackListener?.notifyRedraw()
             })
@@ -323,24 +322,23 @@ class InteractiveCanvas(var context: Context) {
                 }, 1000 * 60)
             }
         }
-
-        socket?.on("check_success") {
-            checkStatusReceived = true
-        }
     }
 
-    fun checkSocketStatus() {
-        socket?.emit("check_event")
-
-        checkStatusReceived = false
-        Timer().schedule(object : TimerTask() {
+    /*fun showConnectingAttempts() {
+        connectingTimer = Timer()
+        connectingTimer.schedule(object: TimerTask() {
             override fun run() {
-                if (!checkStatusReceived) {
-                    socketStatusCallback?.onSocketStatusError()
+                (context as Activity).runOnUiThread {
+                    numConnect += 1
+                    Toast.makeText(context, "Connecting to socket $numConnect", Toast.LENGTH_SHORT).show()
+
+                    if (socket != null && socket!!.connected()) {
+                        connectingTimer.cancel()
+                    }
                 }
             }
-        }, checkEventTimeout)
-    }
+        }, 0, 5000)
+    }*/
 
     private fun initSinglePlayPixels(type: ActionButtonView.Type) {
         var paint1 = ActionButtonView.redPaint
@@ -541,7 +539,7 @@ class InteractiveCanvas(var context: Context) {
             reqObj.put("uuid", SessionSettings.instance.uniqueId)
             reqObj.put("pixels", jsonArr)
 
-            socket?.emit("pixels_event", reqObj)
+            InteractiveCanvasSocket.instance.socket.emit("pixels_event", reqObj)
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,
@@ -751,6 +749,18 @@ class InteractiveCanvas(var context: Context) {
         }
     }
 
+    fun exportSelection(startUnit: Point, endUnit: Point) {
+        val pixelsOut: MutableList<RestorePoint> = ArrayList()
+
+        for (x in startUnit.x..endUnit.x) {
+            for (y in startUnit.y..endUnit.y) {
+                pixelsOut.add(RestorePoint(Point(x, y), arr[y][x], arr[y][x]))
+            }
+        }
+
+        artExportListener?.onArtExported(pixelsOut)
+    }
+
     fun exportSelection(onePointWithin: Point) {
         artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
     }
@@ -807,4 +817,11 @@ class InteractiveCanvas(var context: Context) {
     }
 
     class RestorePoint(var point: Point, var color: Int, var newColor: Int)
+
+    class ShortTermPixel(var restorePoint: RestorePoint) {
+        var time = 0L
+        init {
+            time = System.currentTimeMillis()
+        }
+    }
 }

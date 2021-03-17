@@ -92,20 +92,30 @@ class Animator {
 
         }
 
-        fun animateMenuItems(views: List<List<View>>, cascade: Boolean, out: Boolean = false) {
+        fun animateMenuItems(views: List<List<View>>, cascade: Boolean, out: Boolean, inverse: Boolean) {
             val delays = intArrayOf(0, 50, 80, 100)
             if (!out) {
                 var i = 0
                 for (viewLayers in views) {
                     for (layer in viewLayers) {
-                        layer.x += 500
-                        layer.alpha = 0F
-
-                        if (cascade) {
-                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+                        if (inverse) {
+                            layer.x -= 500
                         }
                         else {
-                            layer.animate().setDuration(150).alphaBy(1F).translationXBy(-500F).setInterpolator(AccelerateDecelerateInterpolator())
+                            layer.x += 500
+                        }
+                        layer.alpha = 0F
+
+                        var tX = -500F
+                        if (inverse) {
+                            tX *= -1
+                        }
+
+                        if (cascade) {
+                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator())
+                        }
+                        else {
+                            layer.animate().setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator())
                         }
                     }
                     i++
@@ -115,16 +125,30 @@ class Animator {
                 var i = 0
                 for (viewLayers in views) {
                     for (layer in viewLayers) {
+                        var tX = 500F
+                        if (inverse) {
+                            tX *= -1
+                        }
                         if (cascade) {
-                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(-1F).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
-                                layer.x -= 500
+                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(-1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
+                                if (inverse) {
+                                    layer.x += 500
+                                }
+                                else {
+                                    layer.x -= 500
+                                }
 
                                 layer.visibility = View.INVISIBLE
                             }
                         }
                         else {
-                            layer.animate().setDuration(150).alphaBy(-1F).translationXBy(500F).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
-                                layer.x -= 500
+                            layer.animate().setDuration(150).alphaBy(-1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
+                                if (inverse) {
+                                    layer.x += 500
+                                }
+                                else {
+                                    layer.x -= 500
+                                }
 
                                 layer.visibility = View.INVISIBLE
                             }

@@ -122,7 +122,10 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         canvas?.apply {
             save()
 
-            drawPixelBorder(this)
+            //drawPixelBorder(this)
+
+            // quantity
+            drawQuantity(this)
 
             /*drawRect(rectForPixel(0, 1), greenPaint)
             drawRect(rectForPixel(1, 1), brownPaint)
@@ -156,12 +159,12 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                 }
 
                 // decor
-                drawRect(rectForPixel(6, 0), grayAccentPaint)
-                drawRect(rectForPixel(2, 2), grayAccentPaint)
-                drawRect(rectForPixel(8, 2), grayAccentPaint)
+                //drawRect(rectForPixel(6, 0), grayAccentPaint)
+                //drawRect(rectForPixel(2, 2), grayAccentPaint)
+                //drawRect(rectForPixel(8, 2), grayAccentPaint)
 
                 // ends
-                drawRect(rectForPixel(0, 1), greenPaint)
+                drawRect(rectForPixel(0, 1), darkGrayPaint)
                 drawRect(rectForPixel(cols - 1, 1), darkGrayPaint)
             }
             else {
@@ -175,17 +178,14 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                 }
 
                 // decor
-                drawRect(rectForPixel(6, 0), lightGrayPaint)
-                drawRect(rectForPixel(2, 2), lightGrayPaint)
-                drawRect(rectForPixel(8, 2), lightGrayPaint)
+                //drawRect(rectForPixel(6, 0), lightGrayPaint)
+                //drawRect(rectForPixel(2, 2), lightGrayPaint)
+                //drawRect(rectForPixel(8, 2), lightGrayPaint)
 
                 // ends
-                drawRect(rectForPixel(0, 1), greenPaint)
+                drawRect(rectForPixel(0, 1), whitePaint)
                 drawRect(rectForPixel(cols - 1, 1), whitePaint)
             }
-
-            // quantity
-            drawQuantity(this)
         }
     }
 
@@ -229,7 +229,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                     }
                 }
 
-                if (x < cols - 2) {
+                // lines
+                /*if (x < cols - 2) {
                     if (panelThemeConfig.darkPaintQtyBar) {
                         drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), twoThirdGraySemiPaint)
                     }
@@ -237,7 +238,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                         drawLine(((cols - 1 - x) * pxWidth).toFloat(), pxHeight.toFloat(), ((cols - 1 - x) * pxWidth).toFloat(), (pxHeight * 2).toFloat(), thirdGraySemiPaint)
                     }
 
-                }
+                }*/
 
                 curProg += qtyPer
             }

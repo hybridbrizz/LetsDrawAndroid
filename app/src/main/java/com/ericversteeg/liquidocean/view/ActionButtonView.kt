@@ -81,6 +81,8 @@ class ActionButtonView: View {
         WORLD,
         DEV,
         ACHIEVEMENTS,
+        LEFTY,
+        RIGHTY,
         EXPORT,
         EXPORT_SOLID,
         SAVE,
@@ -275,6 +277,12 @@ class ActionButtonView: View {
             }
             else if (type == Type.ACHIEVEMENTS) {
                 drawAchievementsAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.LEFTY) {
+                drawLeftyAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.RIGHTY) {
+                drawRightyAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.SINGLE) {
                 drawSingleAction(touchState == TouchState.ACTIVE, canvas)
@@ -1533,6 +1541,151 @@ class ActionButtonView: View {
             drawPixel(50, 0, paint, canvas)
             drawPixel(50, 2, paint, canvas)
             drawPixel(50, 3, paint, canvas)
+        }
+    }
+
+    private fun drawLeftyAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 19
+
+        var paint = whitePaint
+        if (selected && !static) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
+        canvas.apply {
+            // L
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+
+            // E
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(4, 1, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+            drawPixel(5, 1, paint, canvas)
+            drawPixel(5, 3, paint, canvas)
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+
+            // F
+            drawPixel(8, 0, paint, canvas)
+            drawPixel(8, 1, paint, canvas)
+            drawPixel(8, 2, paint, canvas)
+            drawPixel(8, 3, paint, canvas)
+            drawPixel(9, 0, paint, canvas)
+            drawPixel(9, 1, paint, canvas)
+            drawPixel(10, 0, paint, canvas)
+
+            // T
+            drawPixel(12, 0, paint, canvas)
+            drawPixel(13, 0, paint, canvas)
+            drawPixel(13, 1, paint, canvas)
+            drawPixel(13, 2, paint, canvas)
+            drawPixel(13, 3, paint, canvas)
+            drawPixel(14, 0, paint, canvas)
+
+            // Y
+            drawPixel(16, 0, paint, canvas)
+            drawPixel(16, 1, paint, canvas)
+            drawPixel(17, 1, paint, canvas)
+            drawPixel(17, 2, paint, canvas)
+            drawPixel(17, 3, paint, canvas)
+            drawPixel(18, 0, paint, canvas)
+            drawPixel(18, 1, paint, canvas)
+        }
+    }
+
+    private fun drawRightyAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 22
+
+        var paint = whitePaint
+        if (selected && !static) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
+        canvas.apply {
+            // R
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(1, 2, paint, canvas)
+            drawPixel(2, 1, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+
+            // I
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(4, 1, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+
+            // G
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(6, 1, paint, canvas)
+            drawPixel(6, 2, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+            drawPixel(7, 0, paint, canvas)
+            drawPixel(7, 3, paint, canvas)
+            drawPixel(8, 0, paint, canvas)
+            drawPixel(8, 2, paint, canvas)
+            drawPixel(8, 3, paint, canvas)
+
+            // H
+            drawPixel(10, 0, paint, canvas)
+            drawPixel(10, 1, paint, canvas)
+            drawPixel(10, 2, paint, canvas)
+            drawPixel(10, 3, paint, canvas)
+            drawPixel(11, 1, paint, canvas)
+            drawPixel(12, 1, paint, canvas)
+            drawPixel(13, 0, paint, canvas)
+            drawPixel(13, 1, paint, canvas)
+            drawPixel(13, 2, paint, canvas)
+            drawPixel(13, 3, paint, canvas)
+
+            // T
+            drawPixel(15, 0, paint, canvas)
+            drawPixel(16, 0, paint, canvas)
+            drawPixel(16, 1, paint, canvas)
+            drawPixel(16, 2, paint, canvas)
+            drawPixel(16, 3, paint, canvas)
+            drawPixel(17, 0, paint, canvas)
+
+            // Y
+            drawPixel(19, 0, paint, canvas)
+            drawPixel(19, 1, paint, canvas)
+            drawPixel(20, 1, paint, canvas)
+            drawPixel(20, 2, paint, canvas)
+            drawPixel(20, 3, paint, canvas)
+            drawPixel(21, 0, paint, canvas)
+            drawPixel(21, 1, paint, canvas)
         }
     }
 

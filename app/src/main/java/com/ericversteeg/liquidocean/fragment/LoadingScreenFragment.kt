@@ -27,6 +27,9 @@ import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
+import com.ericversteeg.liquidocean.listener.SocketConnectCallback
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -36,7 +39,7 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
-class LoadingScreenFragment : Fragment() {
+class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
@@ -46,6 +49,8 @@ class LoadingScreenFragment : Fragment() {
     var doneLoadingChunk3 = false
     var doneLoadingChunk4 = false
     var doneLoadingTopContributors = false
+
+    var doneConnectingSocket = false
 
     var dataLoadingCallback: DataLoadingCallback? = null
 
@@ -63,7 +68,7 @@ class LoadingScreenFragment : Fragment() {
         "You can turn several features on / off in the Options menu.",
         "All drawings can be exported to a PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
         "Anything you create on the world canvas is automatically saved and shared with others.",
-        "Like your level, paint, and others stats? Back your account up and sync across multiple devices with Google.",
+        "Like your level, paint, and other stats? Back your account up and sync across multiple devices with Google.",
         "Tap on any pixel on the world canvas to view a history of edits for that position.",
         "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
         "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
@@ -105,7 +110,9 @@ class LoadingScreenFragment : Fragment() {
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
-                    Animator.fadeInView(game_tip_text)
+                    if (game_tip_text != null) {
+                        Animator.fadeInView(game_tip_text)
+                    }
                 }
             }
 
@@ -131,6 +138,11 @@ class LoadingScreenFragment : Fragment() {
             }
 
             getTopContributors()
+
+            InteractiveCanvasSocket.instance.startSocket()
+            InteractiveCanvasSocket.instance.socketConnectCallback = this@LoadingScreenFragment
+
+            SessionSettings.instance.updateShortTermPixels()
 
             if (realmId == 2) {
                 realm_art.jsonResId = R.raw.mc_tool_json
@@ -461,6 +473,10 @@ class LoadingScreenFragment : Fragment() {
                     errorType = 1
                     message = "No network connectivity"
                 }
+                else if (!doneConnectingSocket) {
+                    errorType = 2
+                    message = "Socket connection error"
+                }
             }
 
             AlertDialog.Builder(context)
@@ -490,21 +506,22 @@ class LoadingScreenFragment : Fragment() {
 
     private fun updateNumLoaded() {
         if (realmId == 2) {
-            status_text.text = "Loading ${getNumLoaded()} / 3"
+            status_text.text = "Loading ${getNumLoaded()} / 4"
         }
         else if (realmId == 1) {
-            status_text.text = "Loading ${getNumLoaded()} / 6"
+            status_text.text = "Loading ${getNumLoaded()} / 7"
         }
     }
 
     private fun loadingDone(): Boolean {
         if (realmId == 2) {
             return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
-                    doneLoadingPixels
+                    doneLoadingPixels && doneConnectingSocket
         }
         else if (world) {
             return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
-                    doneLoadingChunk1 && doneLoadingChunk2 && doneLoadingChunk3 && doneLoadingChunk4
+                    doneLoadingChunk1 && doneLoadingChunk2 && doneLoadingChunk3 && doneLoadingChunk4 &&
+                    doneConnectingSocket
         }
         return false
     }
@@ -521,6 +538,10 @@ class LoadingScreenFragment : Fragment() {
             }
 
             if (doneLoadingTopContributors) {
+                num++
+            }
+
+            if (doneConnectingSocket) {
                 num++
             }
         }
@@ -548,8 +569,21 @@ class LoadingScreenFragment : Fragment() {
             if (doneLoadingTopContributors) {
                 num++
             }
+
+            if (doneConnectingSocket) {
+                num++
+            }
         }
 
         return num
+    }
+
+    override fun onSocketConnect() {
+        doneConnectingSocket = true
+        InteractiveCanvasSocket.instance.socketConnectCallback = null
+    }
+
+    override fun onSocketConnectError() {
+        showConnectionErrorMessage()
     }
 }

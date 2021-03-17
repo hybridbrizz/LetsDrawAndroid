@@ -12,6 +12,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -27,8 +29,11 @@ import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.view.PaintQuantityBar
+import com.ericversteeg.liquidocean.view.PaintQuantityCircle
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
@@ -42,7 +47,7 @@ import kotlin.math.floor
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
-    InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener {
+    InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener {
 
     var scaleFactor = 1f
 
@@ -72,6 +77,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     lateinit var panelThemeConfig: PanelThemeConfig
 
+    var paintTextMode = 2
+
+    val paintTextModeTime = 0
+    val paintTextModeAmt = 1
+    var paintTextModeHide = 2
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -100,7 +111,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         paintEventTimer?.cancel()
 
-        surface_view.interactiveCanvas.socket?.disconnect()
+        if (world) {
+            InteractiveCanvasSocket.instance.socket.disconnect()
+        }
     }
 
     override fun onResume() {
@@ -120,16 +133,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         }
                     }
                 }
-            }, 0, 1000 * 60)
+            }, 1000 * 60, 1000 * 60)
 
             getPaintTimerInfo()
         }
 
         surface_view.interactiveCanvas.drawCallbackListener = this
 
-        surface_view.interactiveCanvas.socket?.apply {
-            if (!connected()) {
-                connect()
+        if (world) {
+            InteractiveCanvasSocket.instance.socket.apply {
+                if (!connected()) {
+                    connect()
+                }
             }
         }
     }
@@ -157,7 +172,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     private fun sendSocketStatusCheck() {
-        surface_view.interactiveCanvas.checkSocketStatus()
+        InteractiveCanvasSocket.instance.checkSocketStatus()
     }
 
     // socket check callback
@@ -371,7 +386,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)
 
-        SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
         SessionSettings.instance.paintQtyListeners.add(this)
 
         if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
@@ -404,24 +418,44 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
+        surface_view.objectSelectionListener = this
 
         surface_view.interactiveCanvas.recentColorsListener = this
-        surface_view.interactiveCanvas.socketStatusCallback = this
         surface_view.interactiveCanvas.artExportListener = this
-        surface_view.paintActionListener = paint_qty_bar
 
-        paint_qty_bar.world = world
+        if (SessionSettings.instance.showPaintBar) {
+            surface_view.paintActionListener = paint_qty_bar
+            SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
 
-        color_picker_view.setSelectorColor(Color.WHITE)
+            paint_qty_circle.visibility = View.GONE
+        }
+        else if (SessionSettings.instance.showPaintCircle) {
+            surface_view.paintActionListener = paint_qty_circle
+            SessionSettings.instance.paintQtyListeners.add(paint_qty_circle)
 
-        if (!SessionSettings.instance.showPaintBar || !world) {
             paint_qty_bar.visibility = View.GONE
         }
+        else {
+            paint_qty_bar.visibility = View.GONE
+            paint_qty_circle.visibility = View.GONE
+        }
+
+        if (!world) {
+            paint_qty_bar.visibility = View.GONE
+            paint_qty_circle.visibility = View.GONE
+        }
+
+        InteractiveCanvasSocket.instance.socketStatusCallback = this
+
+        // paint_qty_bar.world = world
+
+        color_picker_view.setSelectorColor(Color.WHITE)
 
         pixel_history_fragment_container.x = 0F
         pixel_history_fragment_container.y = 0F
 
         paint_qty_bar.actionListener = this
+        paint_qty_circle.actionListener = this
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
@@ -522,7 +556,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         if (panelThemeConfig.inversePaintEventInfo) {
             paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
             paint_time_info.setTextColor(ActionButtonView.darkGrayPaint.color)
+            paint_amt_info.setTextColor(ActionButtonView.darkGrayPaint.color)
         }
+
+        paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
 
         paint_panel.setOnClickListener {
 
@@ -535,11 +572,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             export_button.visibility = View.INVISIBLE
             background_button.visibility = View.INVISIBLE
 
+            open_tools_button.visibility = View.INVISIBLE
+
             if (pixel_history_fragment_container.visibility == View.VISIBLE) {
                 pixel_history_fragment_container.visibility = View.GONE
             }
 
-            paint_panel.animate().translationX(paint_panel.width.toFloat() * 0.99F).setDuration(0).withEndAction {
+            var startLoc = paint_panel.width.toFloat() * 0.99F
+            if (SessionSettings.instance.rightHanded) {
+                startLoc = -startLoc
+            }
+
+            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
                 paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
                     AccelerateDecelerateInterpolator()
                 ).withEndAction {
@@ -567,6 +611,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }.start()
 
             surface_view.startPainting()
+
+            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+                pixel_history_fragment_container.visibility = View.GONE
+            }
 
             recent_colors_button.visibility = View.VISIBLE
             recent_colors_container.visibility = View.GONE
@@ -654,10 +702,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             back_button.visibility = View.VISIBLE
 
+            open_tools_button.visibility = View.VISIBLE
+
             stopEmittingParticles()
         }
 
         paint_qty_bar.panelThemeConfig = panelThemeConfig
+        paint_qty_circle.panelThemeConfig = panelThemeConfig
         paint_indicator_view.panelThemeConfig = panelThemeConfig
 
         paint_indicator_view.setOnClickListener {
@@ -805,7 +856,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         listOf(export_button), listOf(background_button), listOf(
                             grid_lines_button
                         )
-                    ), cascade = false, out = false
+                    ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded
                 )
 
                 toolboxOpen = true
@@ -816,7 +867,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         listOf(export_button), listOf(background_button), listOf(
                             grid_lines_button
                         )
-                    ), cascade = false, out = true
+                    ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded
                 )
 
                 toolboxOpen = false
@@ -860,6 +911,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
+                // tablet
                 if (SessionSettings.instance.tablet) {
                     // color picker frame width
                     var layoutParams = ConstraintLayout.LayoutParams(
@@ -894,20 +946,52 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     paint_indicator_view_bottom_layer.layoutParams = layoutParams
                     paint_indicator_view.layoutParams = layoutParams
 
-                    // paint quantity bar size
-                    layoutParams = ConstraintLayout.LayoutParams(
-                        (paint_qty_bar.width * 1.25).toInt(),
-                        (paint_qty_bar.height * 1.25).toInt()
-                    )
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+                    if (SessionSettings.instance.showPaintBar) {
+                        // paint quantity bar size
+                        layoutParams = ConstraintLayout.LayoutParams(
+                            (paint_qty_bar.width * 1.25).toInt(),
+                            (paint_qty_bar.height * 1.25).toInt()
+                        )
+                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                        layoutParams.topMargin = Utils.dpToPx(context, 15)
+
+                        paint_qty_bar.layoutParams = layoutParams
+                    }
+                    else if (SessionSettings.instance.showPaintCircle) {
+                        // paint quantity circle size
+                        layoutParams = ConstraintLayout.LayoutParams(
+                            (paint_qty_circle.width * 1.25).toInt(),
+                            (paint_qty_circle.height * 1.25).toInt()
+                        )
+                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
+
+                        layoutParams.topMargin = Utils.dpToPx(context, 15)
+
+                        paint_qty_circle.layoutParams = layoutParams
+                    }
+                }
+
+                // paint text info placement
+                if (SessionSettings.instance.showPaintBar) {
+                    val layoutParams = ConstraintLayout.LayoutParams(paint_time_info_container.width, paint_time_info_container.height)
+                    layoutParams.topToBottom = paint_qty_bar.id
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
-                    layoutParams.topMargin = Utils.dpToPx(context, 15)
+                    layoutParams.topMargin = Utils.dpToPx(context, 0)
 
-                    paint_qty_bar.layoutParams = layoutParams
+                    paint_time_info_container.layoutParams = layoutParams
+                }
+                else if (SessionSettings.instance.showPaintCircle) {
+                    paint_time_info_container.setBackgroundColor(Color.TRANSPARENT)
                 }
 
+                // background texture scaling
                 context?.apply {
                     val backgroundDrawable = resources.getDrawable(SessionSettings.instance.panelBackgroundResId) as BitmapDrawable
 
@@ -933,6 +1017,95 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     else {
                         paint_panel.setBackgroundDrawable(backgroundDrawable)
                     }
+                }
+
+                // right-handed
+                if (SessionSettings.instance.rightHanded) {
+                    // paint panel
+                    var layoutParams = paint_panel.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams.rightToRight = -1
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+
+                    paint_panel.layoutParams = layoutParams
+
+                    paint_panel.invalidate()
+
+                    // canvas lock border
+                    layoutParams = paint_warning_frame.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.leftToLeft = -1
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    layoutParams.rightToLeft = -1
+                    layoutParams.leftToRight = paint_panel.id
+                    paint_warning_frame.layoutParams = layoutParams
+
+                    // close paint panel button
+                    close_paint_panel_bottom_layer.rotation = 180F
+                    close_paint_panel.rotation = 180F
+
+                    // color picker
+                    layoutParams = color_picker_frame.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.leftToLeft = -1
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    color_picker_frame.layoutParams = layoutParams
+
+                    // paint meter bar
+                    paint_qty_bar.rotation = 180F
+
+                    // toolbox
+                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.rightToRight = -1
+                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                    open_tools_button.layoutParams = layoutParams
+
+                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
+                    layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
+                    open_tools_action.layoutParams = layoutParams3
+
+                    // toolbox buttons
+                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button)
+
+                    for (button in toolboxButtons) {
+                        layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
+                        layoutParams.rightToRight = -1
+                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                        button.layoutParams = layoutParams
+                    }
+
+                    // recent colors
+                    layoutParams = recent_colors_button.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.leftToLeft = -1
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    recent_colors_button.layoutParams = layoutParams
+
+                    layoutParams3 = recent_colors.layoutParams as FrameLayout.LayoutParams
+                    layoutParams3.gravity = Gravity.RIGHT or Gravity.BOTTOM
+                    recent_colors.layoutParams = layoutParams3
+
+                    // recent colors container
+                    layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.leftToLeft = -1
+                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    recent_colors_container.layoutParams = layoutParams
+
+                    //open_tools_button.layoutParams = layoutParams
+
+                    // paint yes
+                    /*var layoutParams2 = paint_yes_container.layoutParams as LinearLayout.LayoutParams
+                    layoutParams2.rightMargin = 0
+                    paint_yes_container.layoutParams = layoutParams2
+
+                    // paint no
+                    layoutParams2 = paint_no_container.layoutParams as LinearLayout.LayoutParams
+                    layoutParams2.rightMargin = Utils.dpToPx(context, 30)
+                    paint_no_container.layoutParams = layoutParams2
+
+                    paint_action_button_container.removeViewAt(0)
+                    paint_action_button_container.addView(paint_yes_container)*/
                 }
             }
         })
@@ -1208,7 +1381,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     // paint qty listener
     override fun paintQtyChanged(qty: Int) {
-        drops_amt_text.text = qty.toString()
+        //drops_amt_text.text = qty.toString()
+        activity?.runOnUiThread {
+            paint_amt_info.text = qty.toString()
+        }
     }
 
     override fun onNewRecentColors(colors: Array<Int>) {
@@ -1217,13 +1393,27 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     override fun onPaintBarDoubleTapped() {
         if (world) {
-            if (paint_time_info.visibility == View.VISIBLE) {
-                paint_time_info.visibility = View.INVISIBLE
-                paint_time_info_container.visibility = View.INVISIBLE
+            paintTextMode += 1
+            if (paintTextMode == 3) {
+                paintTextMode = 0
             }
-            else {
+
+            if (paintTextMode == paintTextModeTime) {
                 paint_time_info.visibility = View.VISIBLE
                 paint_time_info_container.visibility = View.VISIBLE
+
+                paint_amt_info.visibility = View.INVISIBLE
+            }
+            else if (paintTextMode == paintTextModeAmt) {
+                paint_amt_info.visibility = View.VISIBLE
+                paint_time_info_container.visibility = View.VISIBLE
+
+                paint_time_info.visibility = View.INVISIBLE
+            }
+            else if (paintTextMode == paintTextModeHide) {
+                paint_time_info.visibility = View.INVISIBLE
+                paint_time_info_container.visibility = View.INVISIBLE
+                paint_amt_info.visibility = View.INVISIBLE
             }
         }
     }
@@ -1236,5 +1426,25 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         grid_lines_action.invalidate()
         recent_colors.invalidate()
         open_tools_action.invalidate()
+    }
+
+    override fun onObjectSelectionBoundsChanged(startPoint: PointF, endPoint: PointF) {
+        object_selection_view.visibility = View.VISIBLE
+
+        if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
+            object_selection_view.setBackgroundResource(R.drawable.object_selection_background_darkgray)
+        }
+        else {
+            object_selection_view.setBackgroundResource(R.drawable.object_selection_background_white)
+        }
+
+        object_selection_view.layoutParams = ConstraintLayout.LayoutParams((endPoint.x - startPoint.x).toInt(), (endPoint.y - startPoint.y).toInt())
+
+        object_selection_view.x = startPoint.x
+        object_selection_view.y = startPoint.y
+    }
+
+    override fun onObjectSelectionEnded() {
+        object_selection_view.visibility = View.GONE
     }
 }

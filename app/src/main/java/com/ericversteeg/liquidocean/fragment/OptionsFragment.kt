@@ -330,6 +330,21 @@ class OptionsFragment: Fragment() {
 
         option_show_paint_bar_switch.setOnCheckedChangeListener { button, _ ->
             SessionSettings.instance.showPaintBar = button.isChecked
+            if (button.isChecked && option_show_paint_circle_switch.isChecked) {
+                option_show_paint_circle_switch.isChecked = false
+                SessionSettings.instance.showPaintCircle = false
+            }
+        }
+
+        // option show paint circle
+        option_show_paint_circle_switch.isChecked = SessionSettings.instance.showPaintCircle
+
+        option_show_paint_circle_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.showPaintCircle = button.isChecked
+            if (button.isChecked && option_show_paint_bar_switch.isChecked) {
+                option_show_paint_bar_switch.isChecked = false
+                SessionSettings.instance.showPaintBar = false
+            }
         }
 
         // option paint bar color
@@ -358,6 +373,13 @@ class OptionsFragment: Fragment() {
 
                     fun onColor(color: Int, fromUser: Boolean) {}
                 })
+        }
+
+        // option right handed
+        option_right_handed_switch.isChecked = SessionSettings.instance.rightHanded
+
+        option_right_handed_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.rightHanded = button.isChecked
         }
 
         setupNumRecentColorsChoices()

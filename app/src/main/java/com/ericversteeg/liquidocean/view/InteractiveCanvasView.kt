@@ -3,18 +3,19 @@ package com.ericversteeg.liquidocean.view
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.PointF
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasGestureListener
+import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.listener.InteractiveCanvasScaleCallback
-import com.ericversteeg.liquidocean.listener.PaintActionListener
-import com.ericversteeg.liquidocean.listener.PixelHistoryListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import org.json.JSONArray
+import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
@@ -39,6 +40,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
     var pixelHistoryListener: PixelHistoryListener? = null
     var gestureListener: InteractiveCanvasGestureListener? = null
+
+    var objectSelectionListener: ObjectSelectionListener? = null
+
+    lateinit var objectSelectionStartUnit: Point
+    lateinit var objectSelectionStartPoint: PointF
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -74,6 +80,43 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
 
         //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
+
+        /*Timer().schedule(object: TimerTask() {
+            override fun run() {
+                val rT = (Math.random() * 20 + 1).toInt()
+                Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        simulateDraw()
+                    }
+                }, 1000L * rT)
+            }
+
+        }, 3000)*/
+    }
+
+    fun simulateDraw() {
+        val rSmallAmt = (Math.random() * 20 + 2).toInt()
+        val rBigAmt = (Math.random() * 100 + 50).toInt()
+
+        startPainting()
+
+        val r = (Math.random() * 10).toInt()
+        if (r < 2) {
+            for (i in 0 until rBigAmt) {
+                val rX = (Math.random() * interactiveCanvas.cols).toInt()
+                val rY = (Math.random() * interactiveCanvas.rows).toInt()
+                interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+            }
+        }
+        else {
+            for (i in 0 until rSmallAmt) {
+                val rX = (Math.random() * interactiveCanvas.cols).toInt()
+                val rY = (Math.random() * interactiveCanvas.rows).toInt()
+                interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+            }
+        }
+
+        endPainting(true)
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -153,7 +196,44 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 if (unitPoint != null) {
-                    interactiveCanvas.exportSelection(unitPoint)
+                    objectSelectionStartUnit = unitPoint
+                    objectSelectionStartPoint = PointF(ev.x, ev.y)
+                }
+            }
+            else if (ev.action == MotionEvent.ACTION_UP) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                if (unitPoint != null) {
+                    if (unitPoint.x == objectSelectionStartUnit.x && unitPoint.y == objectSelectionStartUnit.y) {
+                        val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                        if (unitPoint != null) {
+                            interactiveCanvas.exportSelection(unitPoint)
+                        }
+                    }
+                    else {
+                        val minX = min(unitPoint.x, objectSelectionStartUnit.x)
+                        val minY = min(unitPoint.y, objectSelectionStartUnit.y)
+
+                        val maxX = max(unitPoint.x, objectSelectionStartUnit.x)
+                        val maxY = max(unitPoint.y, objectSelectionStartUnit.y)
+
+                        interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                    }
+                    objectSelectionListener?.onObjectSelectionEnded()
+                }
+            }
+            else if (ev.action == MotionEvent.ACTION_MOVE) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                if (unitPoint != null) {
+                    val minX = min(ev.x, objectSelectionStartPoint.x)
+                    val minY = min(ev.y, objectSelectionStartPoint.y)
+
+                    val maxX = max(ev.x, objectSelectionStartPoint.x)
+                    val maxY = max(ev.y, objectSelectionStartPoint.y)
+
+                    objectSelectionListener?.onObjectSelectionBoundsChanged(PointF(minX, minY), PointF(maxX, maxY))
                 }
             }
         }

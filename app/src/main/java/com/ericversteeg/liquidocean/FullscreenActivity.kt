@@ -67,7 +67,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         showMenuFragment()
 
-        TrustAllSSLCertsDebug.trust()
+        //TrustAllSSLCertsDebug.trust()
 
         /*StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
@@ -271,7 +271,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
     // menu buttons
 
-    override fun onMenuButtonSelected(index: Int) {
+    override fun onMenuButtonSelected(index: Int, route: Int) {
         when (index) {
             MenuFragment.playMenuIndex -> {
 
@@ -293,6 +293,34 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
             }
             MenuFragment.devMenuIndex -> {
                 showLoadingFragment(true, 2)
+            }
+            MenuFragment.leftyMenuIndex -> {
+                SessionSettings.instance.rightHanded = false
+                SessionSettings.instance.selectedHand = true
+
+                if (route == MenuFragment.singleMenuIndex) {
+                    showInteractiveCanvasFragment(false, 0, null)
+                }
+                else if (route == MenuFragment.worldMenuIndex) {
+                    showLoadingFragment(true, 1)
+                }
+                else if (route == MenuFragment.devMenuIndex) {
+                    showLoadingFragment(true, 2)
+                }
+            }
+            MenuFragment.rightyMenuIndex -> {
+                SessionSettings.instance.rightHanded = true
+                SessionSettings.instance.selectedHand = true
+
+                if (route == MenuFragment.singleMenuIndex) {
+                    showInteractiveCanvasFragment(false, 0, null)
+                }
+                else if (route == MenuFragment.worldMenuIndex) {
+                    showLoadingFragment(true, 1)
+                }
+                else if (route == MenuFragment.devMenuIndex) {
+                    showLoadingFragment(true, 2)
+                }
             }
         }
     }

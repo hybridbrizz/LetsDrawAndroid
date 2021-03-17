@@ -33,6 +33,8 @@ class MenuFragment: Fragment() {
 
     var showcaseTimer = Timer()
 
+    var route = -1
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -59,6 +61,7 @@ class MenuFragment: Fragment() {
             }
             else if (backCount == 2) {
                 resetToPlayMode()
+                animateMenuButtons(1)
             }
 
             backCount--
@@ -93,6 +96,14 @@ class MenuFragment: Fragment() {
         dev_button.type = ActionButtonView.Type.DEV
         dev_button.topLayer = true
         dev_button_bottom_layer.type = ActionButtonView.Type.DEV
+
+        lefty_button.type = ActionButtonView.Type.LEFTY
+        lefty_button.topLayer = true
+        lefty_button_bottom_layer.type = ActionButtonView.Type.LEFTY
+
+        righty_button.type = ActionButtonView.Type.RIGHTY
+        righty_button.topLayer = true
+        righty_button_bottom_layer.type = ActionButtonView.Type.RIGHTY
 
         /*val artShowcase = SessionSettings.instance.artShowcase
         if (artShowcase != null && artShowcase.size > 0) {
@@ -145,17 +156,74 @@ class MenuFragment: Fragment() {
         }
 
         single_button.setOnClickListener {
-            context?.apply {
+            if (!SessionSettings.instance.selectedHand) {
+                single_button_container.visibility = View.GONE
+                world_button_container.visibility = View.GONE
+                dev_button_container.visibility = View.GONE
+
+                lefty_button_container.visibility = View.VISIBLE
+                righty_button_container.visibility = View.VISIBLE
+
+                empty_button_1_container.visibility = View.VISIBLE
+
+                route = singleMenuIndex
+
+                backCount++
+                animateMenuButtons(2)
+            }
+            else {
                 menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
             }
         }
 
         world_button.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+            if (!SessionSettings.instance.selectedHand) {
+                single_button_container.visibility = View.GONE
+                world_button_container.visibility = View.GONE
+                dev_button_container.visibility = View.GONE
+
+                lefty_button_container.visibility = View.VISIBLE
+                righty_button_container.visibility = View.VISIBLE
+
+                empty_button_1_container.visibility = View.VISIBLE
+
+                route = worldMenuIndex
+
+                backCount++
+                animateMenuButtons(2)
+            }
+            else {
+                menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+            }
         }
 
         dev_button.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(devMenuIndex)
+            if (!SessionSettings.instance.selectedHand) {
+                single_button_container.visibility = View.GONE
+                world_button_container.visibility = View.GONE
+                dev_button_container.visibility = View.GONE
+
+                lefty_button_container.visibility = View.VISIBLE
+                righty_button_container.visibility = View.VISIBLE
+
+                empty_button_1_container.visibility = View.VISIBLE
+
+                route = devMenuIndex
+
+                backCount++
+                animateMenuButtons(2)
+            }
+            else {
+                menuButtonListener?.onMenuButtonSelected(devMenuIndex)
+            }
+        }
+
+        lefty_button.setOnClickListener {
+            menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, route)
+        }
+
+        righty_button.setOnClickListener {
+            menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, route)
         }
 
         menu_button_container.setOnClickListener {
@@ -205,11 +273,15 @@ class MenuFragment: Fragment() {
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {
         if (layer == 0) {
             Animator.animateMenuItems(listOf(listOf(play_button_bottom_layer, play_button), listOf(options_button_bottom_layer, options_button),
-                listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true)
+                listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true, out = false, inverse = false)
         }
         else if (layer == 1) {
             Animator.animateMenuItems(listOf(listOf(single_button_bottom_layer, single_button), listOf(world_button_bottom_layer, world_button),
-                listOf(dev_button_bottom_layer, dev_button)), cascade = true)
+                listOf(dev_button_bottom_layer, dev_button)), cascade = true, out = false, inverse = false)
+        }
+        else if (layer == 2) {
+            Animator.animateMenuItems(listOf(listOf(lefty_button_bottom_layer, lefty_button), listOf(righty_button_bottom_layer, righty_button)),
+                cascade = true, out = false, inverse = false)
         }
     }
 
@@ -286,6 +358,10 @@ class MenuFragment: Fragment() {
 
         dev_button_container.visibility = View.GONE
 
+        lefty_button_container.visibility = View.GONE
+
+        righty_button_container.visibility = View.GONE
+
         empty_button_2_container.visibility = View.GONE
 
         single_background_options.visibility = View.GONE
@@ -301,7 +377,13 @@ class MenuFragment: Fragment() {
 
         empty_button_2_container.visibility = View.VISIBLE
 
+        lefty_button_container.visibility = View.GONE
+
+        righty_button_container.visibility = View.GONE
+
         single_background_options.visibility = View.GONE
+
+        empty_button_1_container.visibility = View.GONE
 
         back_button.visibility = View.VISIBLE
     }
@@ -314,5 +396,7 @@ class MenuFragment: Fragment() {
         val singleMenuIndex = 4
         val worldMenuIndex = 5
         val devMenuIndex = 6
+        val leftyMenuIndex = 7
+        val rightyMenuIndex = 8
     }
 }

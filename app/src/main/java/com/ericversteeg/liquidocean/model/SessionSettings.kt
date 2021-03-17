@@ -103,11 +103,17 @@ class SessionSettings {
 
     var menuBackgroundResId = 0
 
-    var showPaintBar = true
+    var showPaintBar = false
+    var showPaintCircle = true
 
     var paintBarColor = 0
 
     var tablet = false
+
+    var shortTermPixels: MutableList<InteractiveCanvas.ShortTermPixel> = ArrayList()
+
+    var rightHanded = false
+    var selectedHand = false
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -172,7 +178,13 @@ class SessionSettings {
 
         ed.putBoolean("show_paint_bar", showPaintBar)
 
+        ed.putBoolean("show_paint_circle", showPaintCircle)
+
         ed.putInt("paint_bar_color", paintBarColor)
+
+        ed.putBoolean("right_handed", rightHanded)
+
+        ed.putBoolean("selected_hand", selectedHand)
 
         ed.apply()
     }
@@ -236,7 +248,28 @@ class SessionSettings {
 
         showPaintBar = getSharedPrefs(context).getBoolean("show_paint_bar", true)
 
+        showPaintCircle = getSharedPrefs(context).getBoolean("show_paint_circle", false)
+
         paintBarColor = getSharedPrefs(context).getInt("paint_bar_color", Color.parseColor("#FFAAAAAA"))
+
+        rightHanded = getSharedPrefs(context).getBoolean("right_handed", false)
+
+        selectedHand = getSharedPrefs(context).getBoolean("selected_hand", false)
+    }
+
+    fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
+        shortTermPixels.addAll(pixels)
+    }
+
+    fun updateShortTermPixels() {
+        var removeList: MutableList<InteractiveCanvas.ShortTermPixel> = ArrayList()
+        for (shortTermPixel in shortTermPixels) {
+            if ((System.currentTimeMillis() - shortTermPixel.time) > (1000 * 60 * 2)) {
+                removeList.add(shortTermPixel)
+            }
+        }
+
+        shortTermPixels.removeAll(removeList)
     }
 
     private fun artShowcaseJsonString(): String? {

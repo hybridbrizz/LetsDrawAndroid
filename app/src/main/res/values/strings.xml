@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LiquidOcean</string>
+    <string name="app_name">Let\'s Draw 2021</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -35,6 +35,8 @@
     <string name="step1">It\'s easy to get started. If you are in Single Play, open the paint panel and select a color. Tap and drag anywhere to draw. If you are playing World Play you will have to wait a small amount of time
     for the next Paint Event. A paint event occurs every 5 minutes and when it happens everyone gets some paint to use on the World Canvas. If you would like to know when the next paint batch is going to arrive, tap on the paint bar for a countdown.</string>
     <string name="step2">If you are new to pixel art or drawing, remember that with enough practice anyone can learn to do anything. It\'s fun! Start off easy and work your way up, however slowly, to slightly more complex subjects over time.</string>
-    <string name="option_show_paint_bar_title">Show paint meter</string>
+    <string name="option_show_paint_bar_title">Show paint meter bar</string>
     <string name="option_paint_bar_color_title">Paint meter color</string>
+    <string name="option_show_paint_circle_title">Show paint meter circle</string>
+    <string name="option_right_handed_title">Right-handed</string>
 </resources>

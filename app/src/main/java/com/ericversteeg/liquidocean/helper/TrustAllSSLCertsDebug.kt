@@ -2,6 +2,7 @@ package com.ericversteeg.liquidocean.helper
 
 import io.socket.client.IO
 import io.socket.client.Socket
+import io.socket.engineio.client.transports.WebSocket
 import okhttp3.OkHttpClient
 import java.net.URISyntaxException
 import java.security.KeyManagementException
@@ -67,6 +68,9 @@ object TrustAllSSLCertsDebug {
             val opts = IO.Options()
             opts.callFactory = okHttpClient
             opts.webSocketFactory = okHttpClient
+
+            opts.reconnectionAttempts = 3
+            opts.transports = arrayOf(WebSocket.NAME)
 
             return IO.socket(socketUrl, opts)
 
