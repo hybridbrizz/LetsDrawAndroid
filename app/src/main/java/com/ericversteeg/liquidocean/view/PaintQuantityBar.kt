@@ -205,7 +205,11 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         var curProg = 0F
 
         canvas.apply {
-            for (x in 1 until cols - 1) {
+            drawRect(0F, height * 0.333F, width.toFloat(), height * 0.667F, ActionButtonView.blackPaint)
+
+            drawRect((1 - relQty) * width, height * 0.333F, width.toFloat(), height * 0.667F, paintBarPaint)
+
+            /*for (x in 1 until cols - 1) {
                 if (relQty > curProg) {
                     if (world) {
                         drawRect(rectForPixel((cols - 1) - x, 1), paintBarPaint)
@@ -241,7 +245,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
                 }*/
 
                 curProg += qtyPer
-            }
+            }*/
         }
     }
 

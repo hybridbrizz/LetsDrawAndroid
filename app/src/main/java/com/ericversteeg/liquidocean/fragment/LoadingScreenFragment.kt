@@ -267,20 +267,6 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                 headers["Content-Type"] = "application/json; charset=utf-8"
                 return headers
             }
-
-            override fun getParams(): Map<String, String> {
-                val params: MutableMap<String, String> = HashMap()
-                val pixelData = SessionSettings.instance.getSharedPrefs(context).getString(
-                    "arr",
-                    ""
-                )
-
-                pixelData?.apply {
-                    params["arr"] = this
-                }
-
-                return params
-            }
         }
 
         jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 2, 1.0f)

@@ -752,8 +752,74 @@ class InteractiveCanvas(var context: Context) {
     fun exportSelection(startUnit: Point, endUnit: Point) {
         val pixelsOut: MutableList<RestorePoint> = ArrayList()
 
+        var numLeadingCols = 0
+        var numTrailingCols = 0
+
+        var numLeadingRows = 0
+        var numTrailingRows = 0
+
+        var before = true
         for (x in startUnit.x..endUnit.x) {
+            var clear = true
             for (y in startUnit.y..endUnit.y) {
+                if (arr[y][x] != 0) {
+                    clear = false
+                    before = false
+                }
+            }
+
+            if (clear && before) {
+                numLeadingCols += 1
+            }
+        }
+
+        before = true
+        for (x in endUnit.x downTo startUnit.x) {
+            var clear = true
+            for (y in startUnit.y..endUnit.y) {
+                if (arr[y][x] != 0) {
+                    clear = false
+                    before = false
+                }
+            }
+
+            if (clear && before) {
+                numTrailingCols += 1
+            }
+        }
+
+        before = true
+        for (y in startUnit.y..endUnit.y) {
+            var clear = true
+            for (x in startUnit.x..endUnit.x) {
+                if (arr[y][x] != 0) {
+                    clear = false
+                    before = false
+                }
+            }
+
+            if (clear && before) {
+                numLeadingRows += 1
+            }
+        }
+
+        before = true
+        for (y in endUnit.y downTo startUnit.y) {
+            var clear = true
+            for (x in startUnit.x..endUnit.x) {
+                if (arr[y][x] != 0) {
+                    clear = false
+                    before = false
+                }
+            }
+
+            if (clear && before) {
+                numTrailingRows += 1
+            }
+        }
+
+        for (x in (startUnit.x + numLeadingCols)..(endUnit.x - numTrailingCols)) {
+            for (y in (startUnit.y + numLeadingRows)..(endUnit.y - numTrailingRows)) {
                 pixelsOut.add(RestorePoint(Point(x, y), arr[y][x], arr[y][x]))
             }
         }

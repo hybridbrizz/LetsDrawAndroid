@@ -1,11 +1,15 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
@@ -20,10 +24,13 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_button
 import kotlinx.android.synthetic.main.fragment_options.*
 import kotlinx.android.synthetic.main.fragment_stats.*
 import java.text.NumberFormat
+import java.util.*
 
 class HowtoFragment: Fragment() {
 
     var listener: StatsFragmentListener? = null
+
+    lateinit var paintEventTimer: Timer
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,5 +68,78 @@ class HowtoFragment: Fragment() {
             Animator.animateHorizontalViewEnter(step1_text, true)
             Animator.animateHorizontalViewEnter(static_image_1, true)
         }
+
+        getPaintTimerInfo()
+
+        paint_qty_bar_howto.setOnClickListener {
+            if (paint_time_info_howto_container.visibility == View.INVISIBLE) {
+                paint_time_info_howto_container.visibility = View.VISIBLE
+            }
+            else {
+                paint_time_info_howto_container.visibility = View.INVISIBLE
+            }
+        }
+    }
+
+    private fun getPaintTimerInfo() {
+        val requestQueue = Volley.newRequestQueue(context)
+        context?.apply {
+            val request = JsonObjectRequest(
+                Request.Method.GET,
+                Utils.baseUrlApi + "/api/v1/paint/time/sync",
+                null,
+                { response ->
+                    (context as Activity).runOnUiThread {
+                        val timeUntil = response.getInt("s").toLong()
+
+                        if (timeUntil < 0) {
+                            paint_time_info_howto.text = "???"
+                        } else {
+                            SessionSettings.instance.timeSync = timeUntil
+                            setupPaintEventTimer()
+                        }
+                    }
+                },
+                { error ->
+                    (context as Activity).runOnUiThread {
+
+                    }
+                })
+
+            requestQueue.add(request)
+        }
+    }
+
+    private fun setupPaintEventTimer() {
+        paintEventTimer = Timer()
+        paintEventTimer.schedule(object : TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
+                        SessionSettings.instance.nextPaintTime =
+                            System.currentTimeMillis() + 300 * 1000
+                    }
+
+                    val m =
+                        (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
+                    val s =
+                        ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
+
+                    if (m == 0L) {
+                        try {
+                            paint_time_info_howto.text = s.toString()
+                        } catch (ex: IllegalStateException) {
+
+                        }
+                    } else {
+                        try {
+                            paint_time_info_howto.text = String.format("%02d:%02d", m, s)
+                        } catch (ex: IllegalStateException) {
+
+                        }
+                    }
+                }
+            }
+        }, 0, 1000)
     }
 }

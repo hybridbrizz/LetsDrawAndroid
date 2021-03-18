@@ -115,6 +115,8 @@ class SessionSettings {
     var rightHanded = false
     var selectedHand = false
 
+    var smallActionButtons = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -186,6 +188,8 @@ class SessionSettings {
 
         ed.putBoolean("selected_hand", selectedHand)
 
+        ed.putBoolean("small_action_buttons", smallActionButtons)
+
         ed.apply()
     }
 
@@ -214,15 +218,15 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_15)
+        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_9)
 
         emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 
-        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", false)
+        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", true)
 
         canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
 
-        promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", true)
+        promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", false)
 
         backgroundColorsIndex = getSharedPrefs(context).getInt("background_colors_index", 0)
 
@@ -236,7 +240,7 @@ class SessionSettings {
 
         colorIndicatorFill = getSharedPrefs(context).getBoolean("color_indicator_fill", false)
 
-        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", false)
+        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", true)
 
         gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
 
@@ -255,6 +259,8 @@ class SessionSettings {
         rightHanded = getSharedPrefs(context).getBoolean("right_handed", false)
 
         selectedHand = getSharedPrefs(context).getBoolean("selected_hand", false)
+
+        smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -353,7 +359,6 @@ class SessionSettings {
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.water_drop_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.doughnut_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.bird_json))
-        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.rainbow_badge))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.hfs_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.paint_bucket_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fire_badge_json))

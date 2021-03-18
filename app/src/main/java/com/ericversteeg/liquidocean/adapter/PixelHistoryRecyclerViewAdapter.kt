@@ -112,7 +112,7 @@ class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
                 holder.dateTextView.text = "Four weeks ago"
             }
             else if (sameYear) {
-                val simpleDateFormat =  SimpleDateFormat("M", Locale.ENGLISH)
+                val simpleDateFormat =  SimpleDateFormat("MMMM", Locale.ENGLISH)
                 val dateStr = simpleDateFormat.format(date)
                 holder.dateTextView.text = dateStr
             }

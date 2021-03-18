@@ -249,7 +249,7 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
             2 -> (width * 0.35).toInt()
             3 -> (width * 0.4).toInt()
             4 -> (width * 0.45).toInt()
-            5 -> (width * 0.5).toInt()
+            5 -> (width * 0.49).toInt()
             else -> (width * 0.2).toInt()
         }
     }

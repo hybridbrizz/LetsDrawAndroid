@@ -68,6 +68,9 @@ public class ColorPickerPopup {
             @Override
             public void onClick(View v) {
                 popupWindow.dismiss();
+                if (observer != null) {
+                    observer.onColorCancel();
+                }
             }
         });
         TextView ok = layout.findViewById(R.id.ok);
@@ -103,6 +106,7 @@ public class ColorPickerPopup {
                 if (showValue) {
                     colorHex.setText(colorHex(color));
                 }
+                observer.onColor(color, fromUser, shouldPropagate);
             }
         });
 
@@ -194,9 +198,8 @@ public class ColorPickerPopup {
     public abstract static class ColorPickerObserver implements ColorObserver {
         public abstract void onColorPicked(int color);
 
-        @Override
-        public final void onColor(int color, boolean fromUser, boolean shouldPropagate) {
+        public abstract void onColor(int color, boolean fromUser, boolean shouldPropagate);
 
-        }
+        public abstract void onColorCancel();
     }
 }

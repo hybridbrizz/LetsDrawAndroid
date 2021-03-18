@@ -74,7 +74,7 @@ class ArtExportFragment: Fragment() {
             }
         }
 
-        sendArtPixels()
+        //sendArtPixels()
 
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {

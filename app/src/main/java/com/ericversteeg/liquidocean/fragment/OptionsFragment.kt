@@ -37,6 +37,10 @@ class OptionsFragment: Fragment() {
 
     var optionsListener: OptionsListener? = null
 
+    var selectingCanvasLockColor = false
+    var selectingGridLineColor = false
+    var selectingPaintMeterColor = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -189,8 +193,8 @@ class OptionsFragment: Fragment() {
                 .enableAlpha(true) // Enable alpha slider or not
                 .okTitle("Choose")
                 .cancelTitle("Cancel")
-                .showIndicator(true)
-                .showValue(true)
+                .showIndicator(false)
+                .showValue(false)
                 .build()
                 .show(it, object : ColorPickerObserver() {
                     override fun onColorPicked(color: Int) {
@@ -198,7 +202,13 @@ class OptionsFragment: Fragment() {
                         SessionSettings.instance.canvasLockBorderColor = color
                     }
 
-                    fun onColor(color: Int, fromUser: Boolean) {}
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        it.setBackgroundColor(SessionSettings.instance.canvasLockBorderColor)
+                    }
                 })
         }
 
@@ -217,8 +227,8 @@ class OptionsFragment: Fragment() {
                 .enableAlpha(true) // Enable alpha slider or not
                 .okTitle("Choose")
                 .cancelTitle("Cancel")
-                .showIndicator(true)
-                .showValue(true)
+                .showIndicator(false)
+                .showValue(false)
                 .build()
                 .show(it, object : ColorPickerObserver() {
                     override fun onColorPicked(color: Int) {
@@ -226,7 +236,13 @@ class OptionsFragment: Fragment() {
                         SessionSettings.instance.canvasGridLineColor = color
                     }
 
-                    fun onColor(color: Int, fromUser: Boolean) {}
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        it.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
+                    }
                 })
         }
 
@@ -312,8 +328,8 @@ class OptionsFragment: Fragment() {
                 .enableAlpha(true) // Enable alpha slider or not
                 .okTitle("Choose")
                 .cancelTitle("Cancel")
-                .showIndicator(true)
-                .showValue(true)
+                .showIndicator(false)
+                .showValue(false)
                 .build()
                 .show(it, object : ColorPickerObserver() {
                     override fun onColorPicked(color: Int) {
@@ -321,7 +337,13 @@ class OptionsFragment: Fragment() {
                         SessionSettings.instance.closePaintBackButtonColor = color
                     }
 
-                    fun onColor(color: Int, fromUser: Boolean) {}
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        it.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
+                    }
                 })
         }
 
@@ -362,8 +384,8 @@ class OptionsFragment: Fragment() {
                 .enableAlpha(true) // Enable alpha slider or not
                 .okTitle("Choose")
                 .cancelTitle("Cancel")
-                .showIndicator(true)
-                .showValue(true)
+                .showIndicator(false)
+                .showValue(false)
                 .build()
                 .show(it, object : ColorPickerObserver() {
                     override fun onColorPicked(color: Int) {
@@ -371,7 +393,13 @@ class OptionsFragment: Fragment() {
                         SessionSettings.instance.paintBarColor = color
                     }
 
-                    fun onColor(color: Int, fromUser: Boolean) {}
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        it.setBackgroundColor(SessionSettings.instance.paintBarColor)
+                    }
                 })
         }
 
@@ -380,6 +408,13 @@ class OptionsFragment: Fragment() {
 
         option_right_handed_switch.setOnCheckedChangeListener { button, _ ->
             SessionSettings.instance.rightHanded = button.isChecked
+        }
+
+        // option small action buttons
+        option_small_action_buttons_switch.isChecked = SessionSettings.instance.smallActionButtons
+
+        option_small_action_buttons_switch.setOnCheckedChangeListener { button, _ ->
+            SessionSettings.instance.smallActionButtons = button.isChecked
         }
 
         setupNumRecentColorsChoices()
