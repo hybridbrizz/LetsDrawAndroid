@@ -40,4 +40,8 @@
     <string name="option_show_paint_circle_title">Show paint meter circle</string>
     <string name="option_right_handed_title">Right-handed</string>
     <string name="option_small_action_buttons_title">Small action buttons</string>
+    <string name="pincode_title">8-digit pincode</string>
+    <string name="pincode_repeat_title">Repeat 8-digit pincode</string>
+    <string name="name_title">Display name</string>
+    <string name="old_pincode_title">Old 8-digit pincode</string>
 </resources>

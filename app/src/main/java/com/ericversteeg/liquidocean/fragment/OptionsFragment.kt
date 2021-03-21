@@ -28,6 +28,9 @@ import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.*
+import kotlinx.android.synthetic.main.fragment_options.back_action
+import kotlinx.android.synthetic.main.fragment_options.back_button
+import kotlinx.android.synthetic.main.fragment_signin.*
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -63,6 +66,10 @@ class OptionsFragment: Fragment() {
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
         back_button.setOnClickListener {
+            context?.apply {
+                SessionSettings.instance.save(this)
+            }
+
             optionsListener?.onOptionsBack()
         }
 
@@ -89,6 +96,19 @@ class OptionsFragment: Fragment() {
 
         sign_in_button.setOnClickListener {
             val intent = Intent(context, SignInActivity::class.java)
+            intent.putExtra("mode", SignInFragment.modeSignIn)
+            startActivity(intent)
+        }
+
+        recovery_pincode_button.setOnClickListener {
+            val intent = Intent(context, SignInActivity::class.java)
+            if (SessionSettings.instance.pincodeSet) {
+                intent.putExtra("mode", SignInFragment.modeChangePincode)
+            }
+            else {
+                intent.putExtra("mode", SignInFragment.modeSetPincode)
+            }
+
             startActivity(intent)
         }
 
@@ -162,8 +182,6 @@ class OptionsFragment: Fragment() {
                     )
                 }
             })
-
-
 
             panel_recycler_view.adapter = PanelRecyclerViewAdapter(
                 this, panelResIds.toMutableList()
@@ -433,6 +451,13 @@ class OptionsFragment: Fragment() {
         super.onResume()
 
         input_name.setText(SessionSettings.instance.displayName)
+
+        if (SessionSettings.instance.pincodeSet) {
+            sign_in_button.text = "Signed in"
+            sign_in_button.isEnabled = false
+
+            recovery_pincode_button.text = "Change access pincode"
+        }
     }
 
     private fun setupNumRecentColorsChoices() {

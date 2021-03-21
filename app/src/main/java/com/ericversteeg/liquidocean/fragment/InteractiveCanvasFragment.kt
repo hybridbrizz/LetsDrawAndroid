@@ -20,7 +20,9 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
+import com.android.volley.RetryPolicy
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
@@ -112,7 +114,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paintEventTimer?.cancel()
 
         if (world) {
-            InteractiveCanvasSocket.instance.socket.disconnect()
+            InteractiveCanvasSocket.instance.socket?.disconnect()
         }
     }
 
@@ -141,7 +143,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         surface_view.interactiveCanvas.drawCallbackListener = this
 
         if (world) {
-            InteractiveCanvasSocket.instance.socket.apply {
+            InteractiveCanvasSocket.instance.socket?.apply {
                 if (!connected()) {
                     connect()
                 }
@@ -167,6 +169,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     }
                 })
 
+            request.retryPolicy = DefaultRetryPolicy(20000, 1, 1.5f)
             requestQueue.add(request)
         }
     }
@@ -208,7 +211,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 Utils.baseUrlApi + "/api/v1/paint/time/sync",
                 null,
                 { response ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
                         val timeUntil = response.getInt("s").toLong()
 
                         if (timeUntil < 0) {
@@ -220,7 +223,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     }
                 },
                 { error ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
 
                     }
                 })

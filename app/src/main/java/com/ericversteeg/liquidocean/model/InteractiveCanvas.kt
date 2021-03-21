@@ -261,27 +261,36 @@ class InteractiveCanvas(var context: Context) {
 
     private fun registerForSocketEvents(socket: Socket?) {
         socket?.on("pixels_commit") {
-            (context as Activity).runOnUiThread(Runnable {
+            (context as Activity?)?.runOnUiThread(Runnable {
                 val shortTermPixels: MutableList<ShortTermPixel> = ArrayList()
 
                 val pixelsJsonArr = it[0] as JSONArray
                 for (i in 0 until pixelsJsonArr.length()) {
                     val pixelObj = pixelsJsonArr.get(i) as JSONObject
 
+                    var sameRealm = false
+
                     // update color
                     var unit1DIndex = pixelObj.getInt("id") - 1
+
+                    if (unit1DIndex < (512 * 512) && realmId == 2) {
+                        sameRealm = true
+                    }
+                    else if (unit1DIndex >= (512 * 512) && realmId == 1) {
+                        sameRealm = true
+                    }
 
                     // adjust from the absolute pixel id (on top of dev pixels in table (for now))
                     if (realmId == 1) {
                         unit1DIndex -= (512 * 512)
                     }
 
-                    val y = unit1DIndex / cols
-                    val x = unit1DIndex % cols
+                    if (sameRealm) {
+                        val y = unit1DIndex / cols
+                        val x = unit1DIndex % cols
 
-                    val color = pixelObj.getInt("color")
+                        val color = pixelObj.getInt("color")
 
-                    if (x < cols && y < cols && x > -1 && y > -1) {
                         arr[y][x] = color
 
                         shortTermPixels.add(ShortTermPixel(RestorePoint(Point(x, y), color, color)))
@@ -539,7 +548,7 @@ class InteractiveCanvas(var context: Context) {
             reqObj.put("uuid", SessionSettings.instance.uniqueId)
             reqObj.put("pixels", jsonArr)
 
-            InteractiveCanvasSocket.instance.socket.emit("pixels_event", reqObj)
+            InteractiveCanvasSocket.instance.socket?.emit("pixels_event", reqObj)
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,
@@ -726,12 +735,12 @@ class InteractiveCanvas(var context: Context) {
             Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
             null,
             { response ->
-                (context as Activity).runOnUiThread {
+                (context as Activity?)?.runOnUiThread {
                     callback?.onHistoryJsonResponse(response.getJSONArray("data"))
                 }
             },
             { error ->
-                (context as Activity).runOnUiThread {
+                (context as Activity?)?.runOnUiThread {
 
                 }
             })

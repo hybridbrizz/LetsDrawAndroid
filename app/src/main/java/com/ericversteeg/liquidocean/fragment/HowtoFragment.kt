@@ -30,7 +30,7 @@ class HowtoFragment: Fragment() {
 
     var listener: StatsFragmentListener? = null
 
-    lateinit var paintEventTimer: Timer
+    var paintEventTimer: Timer? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,6 +81,12 @@ class HowtoFragment: Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        paintEventTimer?.cancel()
+    }
+
     private fun getPaintTimerInfo() {
         val requestQueue = Volley.newRequestQueue(context)
         context?.apply {
@@ -89,7 +95,7 @@ class HowtoFragment: Fragment() {
                 Utils.baseUrlApi + "/api/v1/paint/time/sync",
                 null,
                 { response ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
                         val timeUntil = response.getInt("s").toLong()
 
                         if (timeUntil < 0) {
@@ -101,7 +107,7 @@ class HowtoFragment: Fragment() {
                     }
                 },
                 { error ->
-                    (context as Activity).runOnUiThread {
+                    (context as Activity?)?.runOnUiThread {
 
                     }
                 })
@@ -112,7 +118,7 @@ class HowtoFragment: Fragment() {
 
     private fun setupPaintEventTimer() {
         paintEventTimer = Timer()
-        paintEventTimer.schedule(object : TimerTask() {
+        paintEventTimer?.schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
                     if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {

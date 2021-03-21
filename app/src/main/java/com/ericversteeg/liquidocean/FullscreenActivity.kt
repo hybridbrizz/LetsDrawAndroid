@@ -67,7 +67,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         showMenuFragment()
 
-        //TrustAllSSLCertsDebug.trust()
+        TrustAllSSLCertsDebug.trust()
 
         /*StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()

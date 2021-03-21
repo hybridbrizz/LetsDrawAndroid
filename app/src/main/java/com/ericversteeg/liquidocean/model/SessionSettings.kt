@@ -117,6 +117,8 @@ class SessionSettings {
 
     var smallActionButtons = false
 
+    var pincodeSet = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -190,6 +192,8 @@ class SessionSettings {
 
         ed.putBoolean("small_action_buttons", smallActionButtons)
 
+        ed.putBoolean("pin_code_set", pincodeSet)
+
         ed.apply()
     }
 
@@ -261,6 +265,8 @@ class SessionSettings {
         selectedHand = getSharedPrefs(context).getBoolean("selected_hand", false)
 
         smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
+
+        pincodeSet = getSharedPrefs(context).getBoolean("pin_code_set", false)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

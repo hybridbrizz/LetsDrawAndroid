@@ -69,6 +69,10 @@ class SignInActivity : AppCompatActivity(), SignInListener {
 
         frag.signInListener = this
 
+        if (intent.hasExtra("mode")) {
+            frag.mode = intent.getIntExtra("mode", 0)
+        }
+
         signInFragment = frag
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
@@ -88,12 +92,12 @@ class SignInActivity : AppCompatActivity(), SignInListener {
         finish()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == signInFragment.signInRequestCode) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             signInFragment.handleSignInResult(task)
         }
-    }
+    }*/
 }

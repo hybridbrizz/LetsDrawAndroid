@@ -75,6 +75,8 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         "Tap the bottom-left of the screen while drawing to bring up many recently used colors."
     )
 
+    var showingError = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -88,6 +90,11 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
     override fun onPause() {
         super.onPause()
+
+        InteractiveCanvasSocket.instance.socketConnectCallback = null
+        if (InteractiveCanvasSocket != null && InteractiveCanvasSocket.instance.socket!!.connected()) {
+            InteractiveCanvasSocket.instance.socket?.disconnect()
+        }
 
         timer.cancel()
     }
@@ -447,39 +454,44 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         }
     }
 
-    private fun showConnectionErrorMessage() {
-        (context as Activity).runOnUiThread {
-            requestQueue.cancelAll("download")
+    private fun showConnectionErrorMessage(socket: Boolean = false) {
+        if (!showingError) {
+            showingError = true
+            (context as Activity?)?.runOnUiThread {
+                requestQueue.cancelAll("download")
 
-            var errorType = 0
-            var message = "Oops, could not find world pixel data. Please try again"
+                var errorType = 0
+                var message = "Oops, could not find world pixel data. Please try again"
 
-            context?.apply {
-                if (!Utils.isNetworkAvailable(this)) {
-                    errorType = 1
-                    message = "No network connectivity"
+                context?.apply {
+                    if (!Utils.isNetworkAvailable(this)) {
+                        errorType = 1
+                        message = "No network connectivity"
+                    }
+                    else if (socket) {
+                        errorType = 2
+                        message = "Socket connection error"
+                    }
                 }
-                else if (!doneConnectingSocket) {
-                    errorType = 2
-                    message = "Socket connection error"
-                }
+
+                AlertDialog.Builder(context)
+                    .setMessage(message)
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton(
+                        android.R.string.ok,
+                        object : DialogInterface.OnClickListener {
+                            override fun onClick(dialog: DialogInterface?, id: Int) {
+                                dialog?.dismiss()
+                                dataLoadingCallback?.onConnectionError(errorType)
+                                showingError = false
+                            }
+                        })
+                    .setOnDismissListener {
+                        dataLoadingCallback?.onConnectionError(errorType)
+                        showingError = false
+                    }
+                    .show()
             }
-
-            AlertDialog.Builder(context)
-                .setMessage(message)
-                // The dialog is automatically dismissed when a dialog button is clicked.
-                .setPositiveButton(
-                    android.R.string.ok,
-                    object : DialogInterface.OnClickListener {
-                        override fun onClick(dialog: DialogInterface?, id: Int) {
-                            dialog?.dismiss()
-                            dataLoadingCallback?.onConnectionError(errorType)
-                        }
-                    })
-                .setOnDismissListener {
-                    dataLoadingCallback?.onConnectionError(errorType)
-                }
-                .show()
         }
     }
 
@@ -492,10 +504,10 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
     private fun updateNumLoaded() {
         if (realmId == 2) {
-            status_text.text = "Loading ${getNumLoaded()} / 4"
+            status_text?.text = "Loading ${getNumLoaded()} / 4"
         }
         else if (realmId == 1) {
-            status_text.text = "Loading ${getNumLoaded()} / 7"
+            status_text?.text = "Loading ${getNumLoaded()} / 7"
         }
     }
 
@@ -570,6 +582,6 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     }
 
     override fun onSocketConnectError() {
-        showConnectionErrorMessage()
+        showConnectionErrorMessage(true)
     }
 }

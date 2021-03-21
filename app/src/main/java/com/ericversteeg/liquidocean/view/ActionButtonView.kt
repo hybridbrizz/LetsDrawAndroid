@@ -1603,7 +1603,6 @@ class ActionButtonView: View {
             // Y
             drawPixel(16, 0, paint, canvas)
             drawPixel(16, 1, paint, canvas)
-            drawPixel(17, 1, paint, canvas)
             drawPixel(17, 2, paint, canvas)
             drawPixel(17, 3, paint, canvas)
             drawPixel(18, 0, paint, canvas)
@@ -1613,7 +1612,7 @@ class ActionButtonView: View {
 
     private fun drawRightyAction(selected: Boolean, canvas: Canvas) {
         rows = 4
-        cols = 22
+        cols = 21
 
         var paint = whitePaint
         if (selected && !static) {
@@ -1664,28 +1663,26 @@ class ActionButtonView: View {
             drawPixel(10, 2, paint, canvas)
             drawPixel(10, 3, paint, canvas)
             drawPixel(11, 1, paint, canvas)
+            drawPixel(12, 0, paint, canvas)
             drawPixel(12, 1, paint, canvas)
-            drawPixel(13, 0, paint, canvas)
-            drawPixel(13, 1, paint, canvas)
-            drawPixel(13, 2, paint, canvas)
-            drawPixel(13, 3, paint, canvas)
+            drawPixel(12, 2, paint, canvas)
+            drawPixel(12, 3, paint, canvas)
 
             // T
+            drawPixel(14, 0, paint, canvas)
             drawPixel(15, 0, paint, canvas)
+            drawPixel(15, 1, paint, canvas)
+            drawPixel(15, 2, paint, canvas)
+            drawPixel(15, 3, paint, canvas)
             drawPixel(16, 0, paint, canvas)
-            drawPixel(16, 1, paint, canvas)
-            drawPixel(16, 2, paint, canvas)
-            drawPixel(16, 3, paint, canvas)
-            drawPixel(17, 0, paint, canvas)
 
             // Y
-            drawPixel(19, 0, paint, canvas)
-            drawPixel(19, 1, paint, canvas)
+            drawPixel(18, 0, paint, canvas)
+            drawPixel(18, 1, paint, canvas)
+            drawPixel(19, 2, paint, canvas)
+            drawPixel(19, 3, paint, canvas)
+            drawPixel(20, 0, paint, canvas)
             drawPixel(20, 1, paint, canvas)
-            drawPixel(20, 2, paint, canvas)
-            drawPixel(20, 3, paint, canvas)
-            drawPixel(21, 0, paint, canvas)
-            drawPixel(21, 1, paint, canvas)
         }
     }
 

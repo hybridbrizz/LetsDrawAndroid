@@ -17,7 +17,7 @@ class InteractiveCanvasSocket {
         val instance = InteractiveCanvasSocket()
     }
 
-    lateinit var socket: Socket
+    var socket: Socket? = null
     var checkEventTimeout = 20000L
     var checkStatusReceived = false
 
@@ -25,15 +25,15 @@ class InteractiveCanvasSocket {
     var socketConnectCallback: SocketConnectCallback? = null
 
     fun startSocket() {
-        val opts = IO.Options()
-        opts.transports = arrayOf(WebSocket.NAME)
-        opts.reconnectionAttempts = 3
-        //socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
-        socket = IO.socket(Utils.baseUrlSocket, opts)
+        //val opts = IO.Options()
+        //opts.transports = arrayOf(WebSocket.NAME)
+        //opts.reconnectionAttempts = 3
+        socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
+        //socket = IO.socket(Utils.baseUrlSocket, opts)
 
-        socket.connect()
+        socket?.connect()
 
-        socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
+        socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
             Log.i("okay", it.toString())
 
             //val map = HashMap<String, String>()
@@ -45,23 +45,23 @@ class InteractiveCanvasSocket {
             socketConnectCallback?.onSocketConnect()
         })
 
-        socket.on(Socket.EVENT_CONNECT_ERROR) {
+        socket?.on(Socket.EVENT_CONNECT_ERROR) {
             Log.i("Error", it.toString())
 
             socketConnectCallback?.onSocketConnectError()
         }
 
-        socket.on(Socket.EVENT_DISCONNECT) {
+        socket?.on(Socket.EVENT_DISCONNECT) {
             Log.i("Socket", "Socket disconnected.")
         }
 
-        socket.on("check_success") {
+        socket?.on("check_success") {
             checkStatusReceived = true
         }
     }
 
     fun checkSocketStatus() {
-        socket.emit("check_event")
+        socket?.emit("check_event")
 
         checkStatusReceived = false
         Timer().schedule(object : TimerTask() {
