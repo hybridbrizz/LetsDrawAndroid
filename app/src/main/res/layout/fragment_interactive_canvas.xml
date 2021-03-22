@@ -679,7 +679,7 @@
                 android:layout_height="33dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="top|end"
-                android:background="@drawable/paint_warning_frame_background" />
+                android:background="@drawable/export_background" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
 

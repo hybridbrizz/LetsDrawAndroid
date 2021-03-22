@@ -74,6 +74,8 @@ class ActionButtonView: View {
         RECENT_COLOR,
         PLAY,
         OPTIONS,
+        PINCODE,
+        SIGNIN,
         STATS,
         EXIT,
         HOWTO,
@@ -265,6 +267,12 @@ class ActionButtonView: View {
             }
             else if (type == Type.OPTIONS) {
                 drawOptionsAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.PINCODE) {
+                drawPincodeAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.SIGNIN) {
+                drawSigninAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.STATS) {
                 drawStatsAction(touchState == TouchState.ACTIVE, canvas)
@@ -986,6 +994,175 @@ class ActionButtonView: View {
             drawPixel(23, 3, colorPaint, canvas)
             drawPixel(24, 3, colorPaint, canvas)
             drawPixel(25, 3, colorPaint, canvas)
+        }
+    }
+
+    private fun drawPincodeAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 26
+
+        var paint = whitePaint
+        if (selected && !static) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
+        canvas.apply {
+            // P
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(1, 2, colorPaint, canvas)
+            drawPixel(2, 1, colorPaint, canvas)
+
+            // I
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+
+            // N
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(6, 2, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
+            drawPixel(7, 1, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(9, 0, colorPaint, canvas)
+            drawPixel(9, 1, colorPaint, canvas)
+            drawPixel(9, 2, colorPaint, canvas)
+            drawPixel(9, 3, colorPaint, canvas)
+
+            // C
+            drawPixel(11, 1, colorPaint, canvas)
+            drawPixel(11, 2, colorPaint, canvas)
+            drawPixel(12, 0, colorPaint, canvas)
+            drawPixel(12, 3, colorPaint, canvas)
+            drawPixel(13, 0, colorPaint, canvas)
+            drawPixel(13, 3, colorPaint, canvas)
+
+            // O
+            drawPixel(15, 0, colorPaint, canvas)
+            drawPixel(15, 1, colorPaint, canvas)
+            drawPixel(15, 2, colorPaint, canvas)
+            drawPixel(15, 3, colorPaint, canvas)
+            drawPixel(16, 0, colorPaint, canvas)
+            drawPixel(16, 3, colorPaint, canvas)
+            drawPixel(17, 0, colorPaint, canvas)
+            drawPixel(17, 1, colorPaint, canvas)
+            drawPixel(17, 2, colorPaint, canvas)
+            drawPixel(17, 3, colorPaint, canvas)
+
+            // D
+            drawPixel(19, 0, colorPaint, canvas)
+            drawPixel(19, 1, colorPaint, canvas)
+            drawPixel(19, 2, colorPaint, canvas)
+            drawPixel(19, 3, colorPaint, canvas)
+            drawPixel(20, 0, colorPaint, canvas)
+            drawPixel(20, 3, colorPaint, canvas)
+            drawPixel(21, 1, colorPaint, canvas)
+            drawPixel(21, 2, colorPaint, canvas)
+
+            // E
+            drawPixel(23, 0, colorPaint, canvas)
+            drawPixel(23, 1, colorPaint, canvas)
+            drawPixel(23, 2, colorPaint, canvas)
+            drawPixel(23, 3, colorPaint, canvas)
+            drawPixel(24, 0, colorPaint, canvas)
+            drawPixel(24, 1, colorPaint, canvas)
+            drawPixel(24, 3, colorPaint, canvas)
+            drawPixel(25, 0, colorPaint, canvas)
+            drawPixel(25, 3, colorPaint, canvas)
+        }
+    }
+
+    private fun drawSigninAction(selected: Boolean, canvas: Canvas) {
+        rows = 4
+        cols = 22
+
+        var paint = whitePaint
+        if (selected && !static) {
+            paint = altGreenPaint
+        }
+
+        val colorPaint = Paint()
+
+        representingColor?.apply {
+            colorPaint.color = this
+        }
+
+        if (representingColor == null) {
+            colorPaint.color = paint.color
+        }
+
+        canvas.apply {
+            // S
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(1, 1, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(2, 2, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+
+            // I
+            drawPixel(4, 0, colorPaint, canvas)
+            drawPixel(4, 1, colorPaint, canvas)
+            drawPixel(4, 2, colorPaint, canvas)
+            drawPixel(4, 3, colorPaint, canvas)
+
+            // G
+            drawPixel(6, 0, colorPaint, canvas)
+            drawPixel(6, 1, colorPaint, canvas)
+            drawPixel(6, 2, colorPaint, canvas)
+            drawPixel(6, 3, colorPaint, canvas)
+            drawPixel(7, 0, colorPaint, canvas)
+            drawPixel(7, 3, colorPaint, canvas)
+            drawPixel(8, 0, colorPaint, canvas)
+            drawPixel(8, 2, colorPaint, canvas)
+            drawPixel(8, 3, colorPaint, canvas)
+
+            // N
+            drawPixel(10, 0, colorPaint, canvas)
+            drawPixel(10, 1, colorPaint, canvas)
+            drawPixel(10, 2, colorPaint, canvas)
+            drawPixel(10, 3, colorPaint, canvas)
+            drawPixel(11, 1, colorPaint, canvas)
+            drawPixel(12, 2, colorPaint, canvas)
+            drawPixel(13, 0, colorPaint, canvas)
+            drawPixel(13, 1, colorPaint, canvas)
+            drawPixel(13, 2, colorPaint, canvas)
+            drawPixel(13, 3, colorPaint, canvas)
+
+            // I
+            drawPixel(16, 0, colorPaint, canvas)
+            drawPixel(16, 1, colorPaint, canvas)
+            drawPixel(16, 2, colorPaint, canvas)
+            drawPixel(16, 3, colorPaint, canvas)
+
+            // N
+            drawPixel(18, 0, colorPaint, canvas)
+            drawPixel(18, 1, colorPaint, canvas)
+            drawPixel(18, 2, colorPaint, canvas)
+            drawPixel(18, 3, colorPaint, canvas)
+            drawPixel(19, 1, colorPaint, canvas)
+            drawPixel(20, 2, colorPaint, canvas)
+            drawPixel(21, 0, colorPaint, canvas)
+            drawPixel(21, 1, colorPaint, canvas)
+            drawPixel(21, 2, colorPaint, canvas)
+            drawPixel(21, 3, colorPaint, canvas)
         }
     }
 
