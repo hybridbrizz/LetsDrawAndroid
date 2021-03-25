@@ -59,7 +59,7 @@ class OptionsFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         title_image.type = ActionButtonView.Type.OPTIONS
-        title_image.static = true
+        title_image.isStatic = true
         title_image.representingColor = ActionButtonView.whitePaint.color
 
         back_button.actionBtnView = back_action
@@ -136,21 +136,19 @@ class OptionsFragment: Fragment() {
                 R.drawable.water_texture,
                 R.drawable.space_texture,
                 R.drawable.metal_floor_1,
-                R.drawable.metal_floor_2,  // TODO: hard to see paint event countdown
+                R.drawable.metal_floor_2,
                 R.drawable.foil,
-                R.drawable.rainbow_foil,   // TODO: hard to see paint event countdown
+                R.drawable.rainbow_foil,
                 R.drawable.crystal_1,
-                R.drawable.crystal_2,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_2,
                 R.drawable.crystal_3,
                 R.drawable.crystal_4,
-                R.drawable.crystal_5,      // TODO: hard to see paint event countdown
+                R.drawable.crystal_5,
                 R.drawable.crystal_6,
                 R.drawable.crystal_7,
-                R.drawable.crystal_8,      // TODO: hard to see paint event countdown
-                R.drawable.crystal_10,      // TODO: hard to see paint event countdown + dark icons
+                R.drawable.crystal_8,
+                R.drawable.crystal_10,
                 R.drawable.grass,
-                R.drawable.sf_1,
-                R.drawable.sf_3,
                 R.drawable.amb_2,
                 R.drawable.amb_3,
                 R.drawable.amb_4,

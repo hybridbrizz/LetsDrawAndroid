@@ -140,7 +140,7 @@ class ActionButtonView: View {
         invalidate()
     }
 
-    var static = false
+    var isStatic = false
 
     var pxWidth = 0
     var pxHeight = 0
@@ -475,7 +475,7 @@ class ActionButtonView: View {
             }
         }
 
-        if (light && !static) {
+        if (light && !isStatic) {
             if (colorMode == ColorMode.COLOR) {
                 paint = lightGreenPaint
             }
@@ -571,7 +571,7 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (light && !static) {
+        if (light && !isStatic) {
             accentPaint = lightAltGreenPaint
         }
 
@@ -917,7 +917,7 @@ class ActionButtonView: View {
         cols = 26
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1002,7 +1002,7 @@ class ActionButtonView: View {
         cols = 26
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1092,7 +1092,7 @@ class ActionButtonView: View {
         cols = 22
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1171,7 +1171,7 @@ class ActionButtonView: View {
         cols = 20
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1294,7 +1294,7 @@ class ActionButtonView: View {
         cols = 21
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1587,7 +1587,7 @@ class ActionButtonView: View {
         cols = 51
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = whitePaint
         }
 
@@ -1726,7 +1726,7 @@ class ActionButtonView: View {
         cols = 19
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 
@@ -1792,7 +1792,7 @@ class ActionButtonView: View {
         cols = 21
 
         var paint = whitePaint
-        if (selected && !static) {
+        if (selected && !isStatic) {
             paint = altGreenPaint
         }
 

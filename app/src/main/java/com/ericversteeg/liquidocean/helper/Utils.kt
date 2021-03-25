@@ -18,10 +18,10 @@ class Utils {
     }
 
     companion object {
-        val baseUrlApi = "https://192.168.200.69:5000"
-        //val baseUrlApi = "https://ericversteeg.com:5000"
-        val baseUrlSocket = "https://192.168.200.69:5010"
-        //val baseUrlSocket = "https://ericversteeg.com:5010"
+        //val baseUrlApi = "https://192.168.200.69:5000"
+        val baseUrlApi = "https://ericversteeg.com:5000"
+        //val baseUrlSocket = "https://192.168.200.69:5010"
+        val baseUrlSocket = "https://ericversteeg.com:5010"
 
         fun dpToPx(context: Context?, dp: Int): Int {
             context?.apply {
@@ -32,6 +32,17 @@ class Utils {
                 ).toInt()
             }
             return 0
+        }
+
+        fun dpToPxF(context: Context?, dp: Int): Float {
+            context?.apply {
+                return TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    dp.toFloat(),
+                    context.resources.displayMetrics
+                )
+            }
+            return 0F
         }
 
         fun isColorDark(color: Int): Boolean {

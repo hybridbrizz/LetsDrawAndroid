@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -65,11 +66,22 @@ class SignInFragment: Fragment() {
 
         setModeViews()
 
+        status_text.setTextColor(ActionButtonView.altGreenPaint.color)
+
         if (mode == modeSignIn) {
             status_text.visibility = View.INVISIBLE
+
+            sign_in_title.type = ActionButtonView.Type.SIGNIN
+
+            val layoutParams = sign_in_title.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.width = Utils.dpToPx(context, 165)
+
+            sign_in_title.type = ActionButtonView.Type.SIGNIN
         }
         else if (mode == modeSetPincode) {
             status_text.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
+
+            sign_in_title.type = ActionButtonView.Type.PINCODE
         }
         else if (mode == modeChangePincode) {
             status_text.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
@@ -78,7 +90,15 @@ class SignInFragment: Fragment() {
             pincode_2_title.text = "Repeat new 8-digit pincode"
 
             set_pincode_button.text = "Change Pincode"
+
+            val layoutParams = pincode_title.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.topMargin = Utils.dpToPx(context, 40)
+            pincode_title.layoutParams = layoutParams
+
+            sign_in_title.type = ActionButtonView.Type.PINCODE
         }
+
+        sign_in_title.isStatic = true
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
@@ -392,7 +412,7 @@ class SignInFragment: Fragment() {
                 return
             }
 
-            if (pincode_input.text.toString().length != 8) {
+            if (old_pincode_input.text.toString().length != 8) {
                 status_text.text = "Old pincode length is incorrect"
                 return
             }
@@ -422,10 +442,16 @@ class SignInFragment: Fragment() {
                 Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}/pincode",
                 paramsJson,
                 { response ->
-                    SessionSettings.instance.pincodeSet = true
+                    if (response.has("error")) {
+                        status_text.text = "The pincode you entered is incorrect"
+                    }
+                    else {
+                        SessionSettings.instance.pincodeSet = true
 
-                    // update UI
-                    status_text.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
+                        // update UI
+                        status_text.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
+                    }
+
                 },
                 { error ->
                     Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
@@ -450,20 +476,24 @@ class SignInFragment: Fragment() {
             if (name.length > 20) {
                 status_text.text = "Name length is incorrect"
                 status_text.visibility = View.VISIBLE
+                return
             }
             else if (name.isEmpty()) {
                 status_text.text = "Please enter a display name"
                 status_text.visibility = View.VISIBLE
+                return
             }
 
             if (pincode.isEmpty()) {
                 status_text.text = "Please enter a pincode"
                 status_text.visibility = View.VISIBLE
+                return
             }
 
             if (pincode.length != 8) {
                 status_text.text = "Pincode length is incorrect"
                 status_text.visibility = View.VISIBLE
+                return
             }
 
             requestParams["name"] = name
@@ -501,7 +531,7 @@ class SignInFragment: Fragment() {
                         }
 
                         // update UI
-                        status_text.text = "Successfully signed in."
+                        status_text.text = "Successfully signed in"
                     }
                     status_text.visibility = View.VISIBLE
                 },

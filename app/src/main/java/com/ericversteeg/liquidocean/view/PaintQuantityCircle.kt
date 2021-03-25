@@ -93,7 +93,7 @@ class PaintQuantityCircle : View, PaintQtyListener, PaintActionListener {
                 backgroundPaint.color = ActionButtonView.redPaint.color
             }
             if (panelThemeConfig.darkPaintQtyBar) {
-                backgroundPaint.color = ActionButtonView.darkGrayPaint.color
+                backgroundPaint.color = ActionButtonView.blackPaint.color
             }
             else {
                 backgroundPaint.color = ActionButtonView.whitePaint.color

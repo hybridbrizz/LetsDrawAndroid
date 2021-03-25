@@ -25,11 +25,11 @@ class InteractiveCanvasSocket {
     var socketConnectCallback: SocketConnectCallback? = null
 
     fun startSocket() {
-        //val opts = IO.Options()
-        //opts.transports = arrayOf(WebSocket.NAME)
-        //opts.reconnectionAttempts = 3
-        socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
-        //socket = IO.socket(Utils.baseUrlSocket, opts)
+        val opts = IO.Options()
+        opts.transports = arrayOf(WebSocket.NAME)
+        opts.reconnectionAttempts = 3
+        //socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
+        socket = IO.socket(Utils.baseUrlSocket, opts)
 
         socket?.connect()
 

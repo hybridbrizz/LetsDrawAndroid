@@ -474,7 +474,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_panel_button.actionBtnView = paint_panel_action_view
         paint_panel_action_view.type = ActionButtonView.Type.PAINT
 
-        paint_yes_bottom_layer.static = true
+        paint_yes_bottom_layer.isStatic = true
         paint_yes_bottom_layer.type = ActionButtonView.Type.YES
         paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
@@ -484,7 +484,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         paint_yes.actionBtnView = paint_yes_top_layer
 
-        paint_no_bottom_layer.static = true
+        paint_no_bottom_layer.isStatic = true
         paint_no_bottom_layer.type = ActionButtonView.Type.NO
         paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
@@ -494,7 +494,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         paint_no.actionBtnView = paint_no_top_layer
 
-        close_paint_panel_bottom_layer.static = true
+        close_paint_panel_bottom_layer.isStatic = true
         close_paint_panel_bottom_layer.type = ActionButtonView.Type.PAINT_CLOSE
 
         close_paint_panel_top_layer.type = ActionButtonView.Type.PAINT_CLOSE
@@ -566,7 +566,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
         }
 
-        paint_color_accept_image_bottom_layer.static = true
+        paint_color_accept_image_bottom_layer.isStatic = true
 
         paint_color_accept_image_top_layer.topLayer = true
         paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
@@ -574,8 +574,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         if (panelThemeConfig.inversePaintEventInfo) {
             paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
-            paint_time_info.setTextColor(ActionButtonView.darkGrayPaint.color)
-            paint_amt_info.setTextColor(ActionButtonView.darkGrayPaint.color)
+            paint_time_info.setTextColor(ActionButtonView.blackPaint.color)
+            paint_amt_info.setTextColor(ActionButtonView.blackPaint.color)
         }
 
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()

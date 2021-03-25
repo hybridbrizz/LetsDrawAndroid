@@ -29,7 +29,7 @@
                     android:layout_gravity="center_horizontal" />
 
             <LinearLayout
-                    android:id="@+id/stat_num_pixels_painted_single_container"
+                    android:id="@+id/stat_num_pixels_painted_single_num_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -55,7 +55,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/stat_num_pixels_painted_world_container"
+                    android:id="@+id/stat_num_pixels_painted_world_num_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -80,7 +80,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/stat_num_pixel_overwrites_in_container"
+                    android:id="@+id/stat_num_pixel_overwrites_in_num_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -106,7 +106,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/stat_num_pixel_overwrites_out_container"
+                    android:id="@+id/stat_num_pixel_overwrites_out_num_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -132,7 +132,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/stat_paint_accrued_container"
+                    android:id="@+id/stat_paint_accrued_num_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -193,6 +193,7 @@
                     android:layout_marginBottom="10dp" />
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixels_painted_single_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -218,6 +219,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixels_painted_world_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -243,6 +245,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixel_overwrites_in_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -268,6 +271,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_num_pixel_overwrites_out_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -293,6 +297,7 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/stat_paint_accrued_container"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
@@ -335,5 +340,25 @@
                 android:layout_gravity="start|top" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/achievement_icon_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="#CC000000">
+
+        <FrameLayout
+                android:id="@+id/achievement_icon_container"
+                android:layout_width="445dp"
+                android:layout_height="60dp"
+                android:background="@drawable/achievement_icon_background"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

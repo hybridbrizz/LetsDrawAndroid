@@ -65,7 +65,7 @@ class StatTracker {
 
     val levelThresholds = intArrayOf(5000, 11000, 18000, 28000, 45000, 80000, 115000, 160000, 200000, 245000, 300000, 360000, 435000, 550000, 675000, 820000, 960000, 1120000, 1300000)
 
-    private var achievementQueue = ArrayList<Map<EventType, Int>>()
+    private var achievementQueue = ArrayList<Map<String, Any>>()
 
     fun reportEvent(context: Context, eventType: EventType, amt: Int) {
         val numPixelsPaintedWorldOld = numPixelsPaintedWorld
@@ -171,22 +171,43 @@ class StatTracker {
 
     fun getAchievementProgressString(eventType: EventType): String {
         return when (eventType) {
-            EventType.PIXEL_PAINTED_SINGLE -> thresholdsPassed(numPixelsPaintedSingle, pixelSingleThresholds)
-            EventType.PIXEL_PAINTED_WORLD -> thresholdsPassed(numPixelsPaintedWorld, pixelsWorldThresholds)
-            EventType.PIXEL_OVERWRITE_IN -> thresholdsPassed(numPixelOverwritesIn, overwritesInThresholds)
-            EventType.PIXEL_OVERWRITE_OUT -> thresholdsPassed(numPixelOverwritesOut, overwritesOutThresholds)
-            EventType.PAINT_RECEIVED -> thresholdsPassed(totalPaintAccrued, paintAccruedThresholds)
+            EventType.PIXEL_PAINTED_SINGLE -> thresholdsPassedString(numPixelsPaintedSingle, pixelSingleThresholds)
+            EventType.PIXEL_PAINTED_WORLD -> thresholdsPassedString(numPixelsPaintedWorld, pixelsWorldThresholds)
+            EventType.PIXEL_OVERWRITE_IN -> thresholdsPassedString(numPixelOverwritesIn, overwritesInThresholds)
+            EventType.PIXEL_OVERWRITE_OUT -> thresholdsPassedString(numPixelOverwritesOut, overwritesOutThresholds)
+            EventType.PAINT_RECEIVED -> thresholdsPassedString(totalPaintAccrued, paintAccruedThresholds)
             EventType.WORLD_XP -> getWorldLevel().toString()
         }
     }
 
-    private fun thresholdsPassed(progress: Int, thresholds: IntArray): String {
+    private fun thresholdsPassedString(progress: Int, thresholds: IntArray): String {
         for ((count, threshold) in thresholds.withIndex()) {
             if (threshold > progress) {
                 return "$count / ${thresholds.size}"
             }
         }
         return "${thresholds.size} / ${thresholds.size}"
+    }
+
+    private fun thresholdsPassed(progress: Int, thresholds: IntArray): Int {
+        for ((count, threshold) in thresholds.withIndex()) {
+            if (threshold > progress) {
+                return count
+            }
+        }
+
+        return thresholds.size
+    }
+
+    fun thresholdsPassed(eventType: EventType): Int {
+        return when (eventType) {
+            EventType.PIXEL_PAINTED_SINGLE -> thresholdsPassed(numPixelsPaintedSingle, pixelSingleThresholds)
+            EventType.PIXEL_PAINTED_WORLD -> thresholdsPassed(numPixelsPaintedWorld, pixelsWorldThresholds)
+            EventType.PIXEL_OVERWRITE_IN -> thresholdsPassed(numPixelOverwritesIn, overwritesInThresholds)
+            EventType.PIXEL_OVERWRITE_OUT -> thresholdsPassed(numPixelOverwritesOut, overwritesOutThresholds)
+            EventType.PAINT_RECEIVED -> thresholdsPassed(totalPaintAccrued, paintAccruedThresholds)
+            EventType.WORLD_XP -> 0
+        }
     }
 
     fun getWorldLevel(): Int {
@@ -199,14 +220,18 @@ class StatTracker {
     }
 
     private fun checkAchievements(eventType: EventType, oldVal: Int, newVal: Int) {
+        var thresholdsPassed = 0
+
         when (eventType) {
             EventType.PIXEL_PAINTED_WORLD -> {
+                thresholdsPassed = pixelsWorldThresholds.size
                 for (i in pixelsWorldThresholds.indices) {
                     val threshold = pixelsWorldThresholds[pixelsWorldThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(eventType, threshold, thresholdsPassed)
                         return
                     }
+                    thresholdsPassed -= 1
                 }
 
                 val oldXp = oldVal * 20
@@ -215,53 +240,64 @@ class StatTracker {
                 for (i in levelThresholds.indices) {
                     val threshold = levelThresholds[levelThresholds.size - 1 - i]
                     if (threshold in (oldXp + 1) until newXp + 1) {
-                        enqueueAchievement(EventType.WORLD_XP, threshold)
+                        enqueueAchievement(EventType.WORLD_XP, threshold, thresholdsPassed)
                         return
                     }
                 }
             }
             EventType.PIXEL_PAINTED_SINGLE -> {
+                thresholdsPassed = pixelSingleThresholds.size
                 for (i in pixelSingleThresholds.indices) {
                     val threshold = pixelSingleThresholds[pixelSingleThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(eventType, threshold, thresholdsPassed)
                         return
                     }
+                    thresholdsPassed -= 1
                 }
             }
             EventType.PAINT_RECEIVED -> {
+                thresholdsPassed = paintAccruedThresholds.size
                 for (i in paintAccruedThresholds.indices) {
                     val threshold = paintAccruedThresholds[paintAccruedThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(eventType, threshold, thresholdsPassed)
                         return
                     }
+                    thresholdsPassed -= 1
                 }
             }
             EventType.PIXEL_OVERWRITE_IN -> {
+                thresholdsPassed = overwritesInThresholds.size
                 for (i in overwritesInThresholds.indices) {
                     val threshold = overwritesInThresholds[overwritesInThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(eventType, threshold, thresholdsPassed)
                         return
                     }
+                    thresholdsPassed -= 1
                 }
             }
             EventType.PIXEL_OVERWRITE_OUT -> {
+                thresholdsPassed = overwritesOutThresholds.size
                 for (i in overwritesOutThresholds.indices) {
                     val threshold = overwritesOutThresholds[overwritesOutThresholds.size - 1- i]
                     if (threshold in (oldVal + 1) until newVal + 1) {
-                        enqueueAchievement(eventType, threshold)
+                        enqueueAchievement(eventType, threshold, thresholdsPassed)
                         return
                     }
+                    thresholdsPassed -= 1
                 }
             }
         }
     }
 
-    private fun enqueueAchievement(eventType: EventType, threshold: Int) {
-        val map = HashMap<EventType, Int>()
-        map[eventType] = threshold
+    private fun enqueueAchievement(eventType: EventType, threshold: Int, thresholdsPassed: Int) {
+        val map = HashMap<String, Any>()
+        map["event_type"] = eventType
+        map["threshold"] = threshold
+        map["thresholds_passed"] = thresholdsPassed
+
         achievementQueue.add(map)
 
         if (eventType == EventType.WORLD_XP || eventType == EventType.PIXEL_PAINTED_WORLD ||

@@ -67,7 +67,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         showMenuFragment()
 
-        TrustAllSSLCertsDebug.trust()
+        //TrustAllSSLCertsDebug.trust()
 
         /*StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
@@ -350,11 +350,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     override fun onDisplayAchievement(
-        info: Map<StatTracker.EventType, Int>,
+        info: Map<String, Any>,
         displayInterval: Long
     ) {
-        val eventType = info.keys.first()
-        val value = info[eventType]
+        val eventType = info["event_type"] as StatTracker.EventType
+        val value = info["threshold"] as Int
+        val thresholdsPassed = info["thresholds_passed"] as Int
 
         when (eventType) {
             StatTracker.EventType.PAINT_RECEIVED -> {
@@ -383,6 +384,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         else {
             achievement_desc.text = "Congrats on reaching level ${StatTracker.instance.getWorldLevel()}!"
         }
+
+        achievement_icon.setType(eventType, thresholdsPassed)
 
         achievement_banner.visibility = View.VISIBLE
 

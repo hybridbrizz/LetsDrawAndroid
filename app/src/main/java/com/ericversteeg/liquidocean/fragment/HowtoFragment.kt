@@ -50,11 +50,11 @@ class HowtoFragment: Fragment() {
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
         howto_image.type = ActionButtonView.Type.HOWTO
-        howto_image.static = true
+        howto_image.isStatic = true
         howto_image.representingColor = ActionButtonView.whitePaint.color
 
         paint_action.type = ActionButtonView.Type.PAINT
-        paint_action.static = true
+        paint_action.isStatic = true
 
         static_image_2.jsonResId = R.raw.mushroom_json
 

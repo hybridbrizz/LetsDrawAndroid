@@ -43,7 +43,7 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
     var actionListener: PaintBarActionListener? = null
 
-    var static = false
+    var isStatic = false
 
     lateinit var panelThemeConfig: PanelThemeConfig
 
