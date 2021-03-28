@@ -56,7 +56,7 @@ class HowtoFragment: Fragment() {
         paint_action.type = ActionButtonView.Type.PAINT
         paint_action.isStatic = true
 
-        static_image_2.jsonResId = R.raw.mushroom_json
+        static_image_2.jsonResId = R.raw.hfs_json
 
         back_button.setOnClickListener {
             listener?.onStatsBack()
@@ -89,31 +89,38 @@ class HowtoFragment: Fragment() {
 
     private fun getPaintTimerInfo() {
         val requestQueue = Volley.newRequestQueue(context)
-        context?.apply {
-            val request = JsonObjectRequest(
-                Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/paint/time/sync",
-                null,
-                { response ->
-                    (context as Activity?)?.runOnUiThread {
-                        val timeUntil = response.getInt("s").toLong()
 
-                        if (timeUntil < 0) {
-                            paint_time_info_howto.text = "???"
-                        } else {
-                            SessionSettings.instance.timeSync = timeUntil
-                            setupPaintEventTimer()
-                        }
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/paint/time/sync",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    val timeUntil = response.getInt("s").toLong()
+
+                    if (timeUntil < 0) {
+                        paint_time_info_howto.text = "???"
+                    } else {
+                        SessionSettings.instance.timeSync = timeUntil
+                        setupPaintEventTimer()
                     }
-                },
-                { error ->
-                    (context as Activity?)?.runOnUiThread {
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
 
-                    }
-                })
+                }
+            }) {
 
-            requestQueue.add(request)
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
+
+        requestQueue.add(request)
     }
 
     private fun setupPaintEventTimer() {

@@ -9,6 +9,10 @@ import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.fragment_stats.*
 
 class Animator {
+    interface CompletionHandler {
+        fun onCompletion()
+    }
+
     companion object {
         var context: Context? = null
 
@@ -92,7 +96,7 @@ class Animator {
 
         }
 
-        fun animateMenuItems(views: List<List<View>>, cascade: Boolean, out: Boolean, inverse: Boolean) {
+        fun animateMenuItems(views: List<List<View>>, cascade: Boolean, out: Boolean, inverse: Boolean, completion: CompletionHandler?) {
             val delays = intArrayOf(0, 50, 80, 100)
             if (!out) {
                 var i = 0
@@ -112,10 +116,14 @@ class Animator {
                         }
 
                         if (cascade) {
-                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator())
+                            layer.animate().setStartDelay(delays[i].toLong()).setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
+                                completion?.onCompletion()
+                            }
                         }
                         else {
-                            layer.animate().setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator())
+                            layer.animate().setDuration(150).alphaBy(1F).translationXBy(tX).setInterpolator(AccelerateDecelerateInterpolator()).withEndAction {
+                                completion?.onCompletion()
+                            }
                         }
                     }
                     i++
@@ -139,6 +147,8 @@ class Animator {
                                 }
 
                                 layer.visibility = View.INVISIBLE
+
+                                completion?.onCompletion()
                             }
                         }
                         else {
@@ -151,6 +161,8 @@ class Animator {
                                 }
 
                                 layer.visibility = View.INVISIBLE
+
+                                completion?.onCompletion()
                             }
                         }
                     }

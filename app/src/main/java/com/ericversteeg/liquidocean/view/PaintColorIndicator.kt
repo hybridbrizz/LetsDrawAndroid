@@ -9,7 +9,6 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
-import com.ericversteeg.liquidocean.listener.ActionButtonViewTouchListener
 import com.ericversteeg.liquidocean.listener.PaintSelectionListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 
@@ -76,7 +75,10 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                     paint.strokeWidth = 2F
 
                     if (!SessionSettings.instance.colorIndicatorSquare && !SessionSettings.instance.colorIndicatorFill) {
-                        paint.strokeWidth = ringSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth).toFloat()
+                        paint.strokeWidth = ringSizeFromOption(
+                            context,
+                            SessionSettings.instance.colorIndicatorWidth
+                        ).toFloat()
                     }
 
                     val borderPaint = Paint()
@@ -129,14 +131,27 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                     paint.style = Paint.Style.FILL_AND_STROKE
                 }
 
-                paint.strokeWidth = ringSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth).toFloat()
+                paint.strokeWidth = ringSizeFromOption(
+                    context,
+                    SessionSettings.instance.colorIndicatorWidth
+                ).toFloat()
                 paint.color = SessionSettings.instance.paintColor
+
+                val darkColor = isColorDark(paint.color)
+                val lightColor = isColorLight(paint.color)
 
                 val borderPaint = Paint()
                 borderPaint.style = Paint.Style.STROKE
                 borderPaint.strokeWidth = 2F
 
                 borderPaint.color = panelThemeConfig.paintColorIndicatorLineColor
+
+                /*if (darkColor && panelThemeConfig.paintColorIndicatorLineColor == Color.BLACK) {
+                    borderPaint.color = Color.WHITE
+                }
+                else if (lightColor && panelThemeConfig.paintColorIndicatorLineColor == Color.WHITE) {
+                    borderPaint.color = Color.BLACK
+                }*/
 
                 if (SessionSettings.instance.colorIndicatorSquare) {
                     paint.strokeWidth = 2F
@@ -152,9 +167,17 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                         padding = (paint.strokeWidth / 2).toInt()
                     }
 
-                    val w = squareSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
-                    it.drawRect((width / 2 - w / 2).toFloat() + padding, (height / 2 - w / 2).toFloat() + padding,
-                        (width / 2 + w / 2).toFloat() - padding, (height / 2 + w / 2).toFloat() - padding, paint)
+                    val w = squareSizeFromOption(
+                        context,
+                        SessionSettings.instance.colorIndicatorWidth
+                    )
+                    it.drawRect(
+                        (width / 2 - w / 2).toFloat() + padding,
+                        (height / 2 - w / 2).toFloat() + padding,
+                        (width / 2 + w / 2).toFloat() - padding,
+                        (height / 2 + w / 2).toFloat() - padding,
+                        paint
+                    )
                 }
                 else if (SessionSettings.instance.colorIndicatorFill) {
                     paint.strokeWidth = 2F
@@ -171,7 +194,10 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                     }
 
                     // circle
-                    val w = circleSizeFromOption(context, SessionSettings.instance.colorIndicatorWidth)
+                    val w = circleSizeFromOption(
+                        context,
+                        SessionSettings.instance.colorIndicatorWidth
+                    )
                     it.drawCircle(width / 2F, height / 2F, w.toFloat() - padding, paint)
                 }
                 else {
@@ -185,7 +211,18 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                         radius = width * 0.43F
                     }
 
-                    it.drawCircle(width / 2F, height / 2F, radius, paint)
+                    var padding = 0
+
+                    if (paint.color == 0) {
+                        paint.strokeWidth = 10F
+
+                        paint.color = borderPaint.color
+                        paint.style = Paint.Style.STROKE
+
+                        padding = (paint.strokeWidth / 2).toInt()
+                    }
+
+                    it.drawCircle(width / 2F, height / 2F, radius - padding, paint)
                 }
 
                 if (SessionSettings.instance.colorIndicatorOutline) {
@@ -279,5 +316,17 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
             activeState = false
             alpha = 0F
         }
+    }
+
+    fun isColorDark(color: Int): Boolean {
+        val darkness =
+            1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+        return (darkness > 0.85)
+    }
+
+    fun isColorLight(color: Int): Boolean {
+        val darkness =
+            1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+        return (darkness < 0.15)
     }
 }

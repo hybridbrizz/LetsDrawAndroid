@@ -32,7 +32,7 @@
     <string name="option_grid_line_color_title">Canvas grid line color</string>
     <string name="option_close_paint_panel_color_title">Close paint button color</string>
     <string name="option_paint_indicator_square">Square palette</string>
-    <string name="step1">It\'s easy to get started. If you are in Single Play, open the paint panel and select a color. Tap and drag anywhere to draw. If you are playing World Play you will have to wait a small amount of time
+    <string name="step1">It\'s easy to get started. If you are in Single Play, open the paint drawer and select a color. Tap and drag anywhere to draw. If you are playing World Play you will have to wait a small amount of time
     for the next Paint Event. A paint event occurs every 5 minutes and when it happens everyone gets some paint to use on the World Canvas. If you would like to know when the next paint batch is going to arrive, tap on the paint bar for a countdown.</string>
     <string name="step2">If you are new to pixel art or drawing, remember that with enough practice anyone can learn to do anything. It\'s fun! Start off easy and work your way up, however slowly, to slightly more complex subjects over time.</string>
     <string name="option_show_paint_bar_title">Show paint meter bar</string>
@@ -44,4 +44,6 @@
     <string name="pincode_repeat_title">Repeat 8-digit pincode</string>
     <string name="name_title">Display name</string>
     <string name="old_pincode_title">Old 8-digit pincode</string>
+    <string name="credits">Credits</string>
+    <string name="deviant_art"><u>Deviant Art</u></string>
 </resources>

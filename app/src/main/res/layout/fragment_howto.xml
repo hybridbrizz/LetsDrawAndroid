@@ -112,7 +112,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="150dp"
-                    android:layout_marginBottom="150dp">
+                    android:layout_marginBottom="150dp"
+                    android:visibility="gone">
 
                 <com.ericversteeg.liquidocean.view.ArtView
                         android:id="@+id/static_image_2"

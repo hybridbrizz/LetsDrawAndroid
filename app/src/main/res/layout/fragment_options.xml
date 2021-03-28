@@ -37,6 +37,20 @@
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/title_image" />
 
+            <TextView
+                    android:id="@+id/credits_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:visibility="gone"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/white"
+                    android:text="@string/credits"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="10dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/title_image" />
+
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/panel_recycler_view"
                     android:layout_width="match_parent"
@@ -749,6 +763,113 @@
                     app:layout_constraintTop_toBottomOf="@id/change_name_container" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+    <ScrollView
+            android:id="@+id/credits_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient_dark_gray"
+            android:visibility="gone">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="@string/deviant_art"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginBottom="30dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="FrostBo"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Dori-Stock"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="tmm-textures"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="FantasyStock"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="silver-"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="AStoKo"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="jaqx-textures"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Project-GimpBC"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Sirius-sdz"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_margin="5dp" />
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Thank you!"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginBottom="25dp" />
+
+        </LinearLayout>
 
     </ScrollView>
 

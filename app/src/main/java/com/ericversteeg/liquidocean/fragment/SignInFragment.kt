@@ -346,202 +346,220 @@ class SignInFragment: Fragment() {
     private fun setPincode() {
         set_pincode_button.isEnabled = false
 
-        context?.apply {
-            val requestQueue = Volley.newRequestQueue(this)
+        val requestQueue = Volley.newRequestQueue(context)
 
-            val requestParams = HashMap<String, String>()
+        val requestParams = HashMap<String, String>()
 
-            if (SessionSettings.instance.displayName == "") {
-                status_text.text = "You must first set a display name in Options"
-                return
-            }
-
-            if (pincode_input.text.toString().isEmpty()) {
-                set_pincode_button.isEnabled = true
-                return
-            }
-
-            if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
-                status_text.text = "Pincodes don't match"
-                return
-            }
-
-            if (pincode_input.text.toString().length != 8) {
-                status_text.text = "Pincode length is incorrect"
-                return
-            }
-
-            requestParams["pincode"] = pincode_input.text.toString()
-
-            val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-            val request = JsonObjectRequest(
-                Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
-                paramsJson,
-                { response ->
-                    SessionSettings.instance.pincodeSet = true
-
-                    // update UI
-                    status_text.text = "Pincode set. Go to Options -> Sign-in to access your account from any device."
-                },
-                { error ->
-                    Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                    set_pincode_button.isEnabled = true
-                })
-
-            requestQueue.add(request)
+        if (SessionSettings.instance.displayName == "") {
+            status_text.text = "You must first set a display name in Options"
+            return
         }
+
+        if (pincode_input.text.toString().isEmpty()) {
+            set_pincode_button.isEnabled = true
+            return
+        }
+
+        if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
+            status_text.text = "Pincodes don't match"
+            return
+        }
+
+        if (pincode_input.text.toString().length != 8) {
+            status_text.text = "Pincode length is incorrect"
+            return
+        }
+
+        requestParams["pincode"] = pincode_input.text.toString()
+
+        val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+        val request = object: JsonObjectRequest(
+            Request.Method.POST,
+            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
+            paramsJson,
+            { response ->
+                SessionSettings.instance.pincodeSet = true
+
+                // update UI
+                status_text.text = "Pincode set. Go to Options -> Sign-in to access your account from any device."
+            },
+            { error ->
+                Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
+                set_pincode_button.isEnabled = true
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
+
+        requestQueue.add(request)
     }
 
     private fun changePincode() {
         set_pincode_button.isEnabled = false
 
-        context?.apply {
-            val requestQueue = Volley.newRequestQueue(this)
+        val requestQueue = Volley.newRequestQueue(context)
 
-            val requestParams = HashMap<String, String>()
+        val requestParams = HashMap<String, String>()
 
-            if (SessionSettings.instance.displayName == "") {
-                status_text.text = "You must first set a display name in Options"
-                return
-            }
-
-            if (old_pincode_input.text.toString().isEmpty()) {
-                set_pincode_button.isEnabled = true
-                return
-            }
-
-            if (old_pincode_input.text.toString().length != 8) {
-                status_text.text = "Old pincode length is incorrect"
-                return
-            }
-
-            if (pincode_input.text.toString().isEmpty()) {
-                set_pincode_button.isEnabled = true
-                return
-            }
-
-            if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
-                status_text.text = "Pincodes don't match"
-                return
-            }
-
-            if (pincode_input.text.toString().length != 8) {
-                status_text.text = "Pincode length is incorrect"
-                return
-            }
-
-            requestParams["old_pincode"] = old_pincode_input.text.toString()
-            requestParams["pincode"] = pincode_input.text.toString()
-
-            val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-            val request = JsonObjectRequest(
-                Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}/pincode",
-                paramsJson,
-                { response ->
-                    if (response.has("error")) {
-                        status_text.text = "The pincode you entered is incorrect"
-                    }
-                    else {
-                        SessionSettings.instance.pincodeSet = true
-
-                        // update UI
-                        status_text.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
-                    }
-
-                },
-                { error ->
-                    Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                    set_pincode_button.isEnabled = true
-                })
-
-            requestQueue.add(request)
+        if (SessionSettings.instance.displayName == "") {
+            status_text.text = "You must first set a display name in Options"
+            return
         }
+
+        if (old_pincode_input.text.toString().isEmpty()) {
+            set_pincode_button.isEnabled = true
+            return
+        }
+
+        if (old_pincode_input.text.toString().length != 8) {
+            status_text.text = "Old pincode length is incorrect"
+            return
+        }
+
+        if (pincode_input.text.toString().isEmpty()) {
+            set_pincode_button.isEnabled = true
+            return
+        }
+
+        if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
+            status_text.text = "Pincodes don't match"
+            return
+        }
+
+        if (pincode_input.text.toString().length != 8) {
+            status_text.text = "Pincode length is incorrect"
+            return
+        }
+
+        requestParams["old_pincode"] = old_pincode_input.text.toString()
+        requestParams["pincode"] = pincode_input.text.toString()
+
+        val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+        val request = object: JsonObjectRequest(
+            Request.Method.POST,
+            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}/pincode",
+            paramsJson,
+            { response ->
+                if (response.has("error")) {
+                    status_text.text = "The pincode you entered is incorrect"
+                }
+                else {
+                    SessionSettings.instance.pincodeSet = true
+
+                    // update UI
+                    status_text.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
+                }
+
+            },
+            { error ->
+                Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
+                set_pincode_button.isEnabled = true
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
+
+        requestQueue.add(request)
     }
 
     private fun signIn() {
         sign_in_button_2.isEnabled = false
 
-        context?.apply {
-            val requestQueue = Volley.newRequestQueue(this)
+        val requestQueue = Volley.newRequestQueue(context)
 
-            val requestParams = HashMap<String, String>()
+        val requestParams = HashMap<String, String>()
 
-            var name = name_input.text.toString()
-            var pincode = pincode_input_sign_in.text.toString()
+        var name = name_input.text.toString()
+        var pincode = pincode_input_sign_in.text.toString()
 
-            if (name.length > 20) {
-                status_text.text = "Name length is incorrect"
-                status_text.visibility = View.VISIBLE
-                return
-            }
-            else if (name.isEmpty()) {
-                status_text.text = "Please enter a display name"
-                status_text.visibility = View.VISIBLE
-                return
-            }
-
-            if (pincode.isEmpty()) {
-                status_text.text = "Please enter a pincode"
-                status_text.visibility = View.VISIBLE
-                return
-            }
-
-            if (pincode.length != 8) {
-                status_text.text = "Pincode length is incorrect"
-                status_text.visibility = View.VISIBLE
-                return
-            }
-
-            requestParams["name"] = name
-            requestParams["pincode"] = pincode
-
-            val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-            val request = JsonObjectRequest(
-                Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/pincode/auth",
-                paramsJson,
-                { response ->
-                    if (response.has("error")) {
-                        status_text.text = "Display name or password is incorrect"
-                    }
-                    else {
-                        SessionSettings.instance.pincodeSet = true
-
-                        SessionSettings.instance.uniqueId = response.getString("uuid")
-                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        SessionSettings.instance.xp = response.getInt("xp")
-
-                        SessionSettings.instance.displayName = response.getString("name")
-
-                        SessionSettings.instance.sentUniqueId = true
-
-                        StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                        StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-                        StatTracker.instance.totalPaintAccrued = response.getInt("tp")
-                        StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
-                        StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
-
-                        context?.apply {
-                            StatTracker.instance.save(this)
-                        }
-
-                        // update UI
-                        status_text.text = "Successfully signed in"
-                    }
-                    status_text.visibility = View.VISIBLE
-                },
-                { error ->
-                    Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                    sign_in_button_2.isEnabled = true
-                })
-
-            requestQueue.add(request)
+        if (name.length > 20) {
+            status_text.text = "Name length is incorrect"
+            status_text.visibility = View.VISIBLE
+            return
         }
+        else if (name.isEmpty()) {
+            status_text.text = "Please enter a display name"
+            status_text.visibility = View.VISIBLE
+            return
+        }
+
+        if (pincode.isEmpty()) {
+            status_text.text = "Please enter a pincode"
+            status_text.visibility = View.VISIBLE
+            return
+        }
+
+        if (pincode.length != 8) {
+            status_text.text = "Pincode length is incorrect"
+            status_text.visibility = View.VISIBLE
+            return
+        }
+
+        requestParams["name"] = name
+        requestParams["pincode"] = pincode
+
+        val paramsJson = JSONObject(requestParams as Map<String, String>)
+
+        val request = object: JsonObjectRequest(
+            Request.Method.POST,
+            Utils.baseUrlApi + "/api/v1/devices/pincode/auth",
+            paramsJson,
+            { response ->
+                if (response.has("error")) {
+                    status_text.text = "Display name or password is incorrect"
+                }
+                else {
+                    SessionSettings.instance.pincodeSet = true
+
+                    SessionSettings.instance.uniqueId = response.getString("uuid")
+                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                    SessionSettings.instance.xp = response.getInt("xp")
+
+                    SessionSettings.instance.displayName = response.getString("name")
+
+                    SessionSettings.instance.sentUniqueId = true
+
+                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
+                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
+                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
+
+                    context?.apply {
+                        StatTracker.instance.save(this)
+                    }
+
+                    // update UI
+                    status_text.text = "Successfully signed in"
+                }
+                status_text.visibility = View.VISIBLE
+            },
+            { error ->
+                Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
+                sign_in_button_2.isEnabled = true
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
+
+        requestQueue.add(request)
     }
 
     /*private fun sendGoogleToken(googleAccount: GoogleSignInAccount?) {

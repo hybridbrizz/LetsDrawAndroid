@@ -56,7 +56,12 @@ class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
             holder.fullDateView.text = dateStr
         }
         else {
-            val name = jsonObj.getString("name")
+            var name = jsonObj.getString("name")
+
+            if (name.length > 10) {
+                name = "${name.substring(0 until 7)}..."
+            }
+
             holder.nameTextView1.text = name
             holder.nameTextView2.text = " (${jsonObj.getInt("level")})"
 

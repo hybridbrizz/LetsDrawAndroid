@@ -119,6 +119,8 @@ class SessionSettings {
 
     var pincodeSet = false
 
+    var firstLaunch = true
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -194,6 +196,8 @@ class SessionSettings {
 
         ed.putBoolean("pin_code_set", pincodeSet)
 
+        ed.putBoolean("first_launch", firstLaunch)
+
         ed.apply()
     }
 
@@ -222,11 +226,11 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_9)
+        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.metal_floor_1)
 
         emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 
-        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", true)
+        canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", false)
 
         canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
 
@@ -240,11 +244,11 @@ class SessionSettings {
 
         numRecentColors = getSharedPrefs(context).getInt("num_recent_colors", 16)
 
-        colorIndicatorWidth = getSharedPrefs(context).getInt("color_indicator_width_2", 3)
+        colorIndicatorWidth = getSharedPrefs(context).getInt("color_indicator_width_2", 4)
 
         colorIndicatorFill = getSharedPrefs(context).getBoolean("color_indicator_fill", false)
 
-        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", true)
+        colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", false)
 
         gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
 
@@ -267,6 +271,8 @@ class SessionSettings {
         smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
 
         pincodeSet = getSharedPrefs(context).getBoolean("pin_code_set", false)
+
+        firstLaunch = getSharedPrefs(context).getBoolean("first_launch", true)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

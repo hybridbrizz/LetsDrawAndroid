@@ -66,11 +66,16 @@ class OptionsFragment: Fragment() {
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
         back_button.setOnClickListener {
-            context?.apply {
-                SessionSettings.instance.save(this)
+            if (credits_container.visibility == View.VISIBLE) {
+                credits_container.visibility = View.GONE
             }
+            else {
+                context?.apply {
+                    SessionSettings.instance.save(this)
+                }
 
-            optionsListener?.onOptionsBack()
+                optionsListener?.onOptionsBack()
+            }
         }
 
         input_name.setText(SessionSettings.instance.displayName)
@@ -78,7 +83,20 @@ class OptionsFragment: Fragment() {
         input_name.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    sendNameCheck(input_name.text.toString().trim())
+                    val input = input_name.text.toString().trim()
+                    if (input.length > 20) {
+                        input_name.setBackgroundDrawable(
+                            ResourcesCompat.getDrawable(
+                                resources,
+                                R.drawable.input_display_name_red,
+                                null
+                            )
+                        )
+                        change_name_button.isEnabled = false
+                    }
+                    else {
+                        sendNameCheck(input_name.text.toString().trim())
+                    }
 
                     val inputMethodManager =
                         context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -129,31 +147,29 @@ class OptionsFragment: Fragment() {
             )
 
             val panelResIds = intArrayOf(
-                R.drawable.wood_texture_light,
-                R.drawable.wood_texture,
-                R.drawable.marble_2,
-                R.drawable.fall_leaves,
-                R.drawable.water_texture,
-                R.drawable.space_texture,
                 R.drawable.metal_floor_1,
                 R.drawable.metal_floor_2,
                 R.drawable.foil,
                 R.drawable.rainbow_foil,
+                R.drawable.wood_texture_light,
+                R.drawable.fall_leaves,
+                R.drawable.grass,
+                R.drawable.amb_6,
+                R.drawable.water_texture,
+                R.drawable.space_texture,
+                R.drawable.crystal_8,
+                R.drawable.crystal_10,
                 R.drawable.crystal_1,
                 R.drawable.crystal_2,
-                R.drawable.crystal_3,
                 R.drawable.crystal_4,
                 R.drawable.crystal_5,
                 R.drawable.crystal_6,
                 R.drawable.crystal_7,
-                R.drawable.crystal_8,
-                R.drawable.crystal_10,
-                R.drawable.grass,
+                R.drawable.crystal_3,
                 R.drawable.amb_2,
                 R.drawable.amb_3,
                 R.drawable.amb_4,
                 R.drawable.amb_5,
-                R.drawable.amb_6,
                 R.drawable.amb_7,
                 R.drawable.amb_8,
                 R.drawable.amb_9,
@@ -433,6 +449,10 @@ class OptionsFragment: Fragment() {
             SessionSettings.instance.smallActionButtons = button.isChecked
         }
 
+        option_paint_panel_texture_title.setOnClickListener {
+            credits_container.visibility = View.VISIBLE
+        }
+
         setupNumRecentColorsChoices()
 
         if (!SessionSettings.instance.tablet) {
@@ -440,8 +460,9 @@ class OptionsFragment: Fragment() {
 
             Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
             Animator.animateHorizontalViewEnter(panel_recycler_view, true)
-            Animator.animateHorizontalViewEnter(option_canvas_lock_container, false)
-            Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, true)
+            Animator.animateHorizontalViewEnter(option_right_handed, false)
+            Animator.animateHorizontalViewEnter(option_canvas_lock_container, true)
+            Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, false)
         }
     }
 
@@ -513,50 +534,57 @@ class OptionsFragment: Fragment() {
     }
 
     fun sendNameCheck(name: String) {
+        if (name.length > 20) {
+            return
+        }
+
         val requestQueue = Volley.newRequestQueue(context)
-        context?.apply {
-            val uniqueId = SessionSettings.instance.uniqueId
 
-            uniqueId?.apply {
-                val request = JsonObjectRequest(
-                    Request.Method.GET,
-                    Utils.baseUrlApi + "/api/v1/devices/checkname/" + name,
-                    null,
-                    { response ->
-                        activity?.runOnUiThread {
-                            val taken = !response.getBoolean("a")
-                            if (taken) {
-                                input_name.setBackgroundDrawable(
-                                    ResourcesCompat.getDrawable(
-                                        resources,
-                                        R.drawable.input_display_name_red,
-                                        null
-                                    )
-                                )
-                                change_name_button.isEnabled = false
-                            } else {
-                                input_name.setBackgroundDrawable(
-                                    ResourcesCompat.getDrawable(
-                                        resources,
-                                        R.drawable.input_display_name_green,
-                                        null
-                                    )
-                                )
-                                change_name_button.isEnabled = true
-                            }
-                        }
-
-                    },
-                    { error ->
-                        change_name_button.text = "Error"
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/devices/checkname/" + name,
+            null,
+            { response ->
+                activity?.runOnUiThread {
+                    val taken = !response.getBoolean("a")
+                    if (taken) {
+                        input_name.setBackgroundDrawable(
+                            ResourcesCompat.getDrawable(
+                                resources,
+                                R.drawable.input_display_name_red,
+                                null
+                            )
+                        )
                         change_name_button.isEnabled = false
-                        input_name.isEnabled = false
-                    })
+                    } else {
+                        input_name.setBackgroundDrawable(
+                            ResourcesCompat.getDrawable(
+                                resources,
+                                R.drawable.input_display_name_green,
+                                null
+                            )
+                        )
+                        change_name_button.isEnabled = true
+                    }
+                }
 
-                request.tag = "download"
-                requestQueue.add(request)
+            },
+            { error ->
+                change_name_button.text = "Error"
+                change_name_button.isEnabled = false
+                input_name.isEnabled = false
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
             }
         }
+
+        request.tag = "download"
+        requestQueue.add(request)
     }
 
     private fun updateDisplayName(name: String) {
@@ -568,7 +596,7 @@ class OptionsFragment: Fragment() {
 
         val paramsJson = JSONObject(requestParams as Map<String, String>)
 
-        val request = JsonObjectRequest(
+        val request = object: JsonObjectRequest(
             Request.Method.POST,
             Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
             paramsJson,
@@ -582,7 +610,15 @@ class OptionsFragment: Fragment() {
                 change_name_button.text = "Error"
                 change_name_button.isEnabled = false
                 input_name.isEnabled = false
-            })
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
 
         requestQueue.add(request)
     }

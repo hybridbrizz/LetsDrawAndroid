@@ -730,7 +730,7 @@ class InteractiveCanvas(var context: Context) {
 
     fun getPixelHistory(pixelId: Int, callback: PixelHistoryCallback?) {
         val requestQueue = Volley.newRequestQueue(context)
-        val request = JsonObjectRequest(
+        val request = object: JsonObjectRequest(
             Request.Method.GET,
             Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
             null,
@@ -743,7 +743,15 @@ class InteractiveCanvas(var context: Context) {
                 (context as Activity?)?.runOnUiThread {
 
                 }
-            })
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
 
         requestQueue.add(request)
 

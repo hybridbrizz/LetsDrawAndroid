@@ -154,7 +154,7 @@ class StatTracker {
 
             val paramsJson = JSONObject(requestParams as Map<String, Int>)
 
-            val request = JsonObjectRequest(
+            val request = object: JsonObjectRequest(
                 Request.Method.POST,
                 Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
                 paramsJson,
@@ -163,7 +163,15 @@ class StatTracker {
                 },
                 { error ->
                     Log.i("Stat Tracker", "State update failed.")
-                })
+                }) {
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json; charset=utf-8"
+                    headers["key1"] = Utils.key1
+                    return headers
+                }
+            }
 
             requestQueue.add(request)
         }

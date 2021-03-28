@@ -14,13 +14,13 @@ android {
             keyPassword 'java123'
         }
     }
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.ericversteeg.liquidocean"
         minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 1
+        targetSdkVersion 30
+        versionCode 11
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

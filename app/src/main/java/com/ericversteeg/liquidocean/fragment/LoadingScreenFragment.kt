@@ -66,13 +66,13 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
     val gameTips = arrayOf(
         "You can turn several features on / off in the Options menu.",
-        "All drawings can be exported to a PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
+        "All drawings can be exported to PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
         "Anything you create on the world canvas is automatically saved and shared with others.",
-        "Like your level, paint, and other stats? Back your account up and sync across multiple devices with Google.",
+        "Like your level, paint, and other stats? Back your account up and sync across multiple devices with an access pincode.",
         "Tap on any pixel on the world canvas to view a history of edits for that position.",
-        "No violence, racism, profanity, or nudity of any kind is allowed on the world canvas.",
+        "No racism, harassment, or hate speech is allowed on the world canvas.",
         "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
-        "Tap the bottom-left of the screen while drawing to bring up many recently used colors."
+        "Tap the bottom corner of the screen while drawing to bring up many recently used colors."
     )
 
     var showingError = false
@@ -272,6 +272,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
                 return headers
             }
         }
@@ -302,6 +303,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
                 headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
                 return headers
             }
         }
@@ -313,145 +315,168 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     }
 
     private fun sendDeviceId() {
-        context?.apply {
-            val uniqueId = SessionSettings.instance.uniqueId
+        val uniqueId = SessionSettings.instance.uniqueId
 
-            uniqueId?.apply {
-                val requestParams = HashMap<String, String>()
+        val requestParams = HashMap<String, String>()
 
-                requestParams["uuid"] = uniqueId
+        if (uniqueId == null) {
+            return
+        }
 
-                val paramsJson = JSONObject(requestParams as Map<String, String>)
+        requestParams["uuid"] = uniqueId
 
-                val request = JsonObjectRequest(
-                    Request.Method.POST,
-                    Utils.baseUrlApi + "/api/v1/devices/register",
-                    paramsJson,
-                    { response ->
-                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        SessionSettings.instance.sentUniqueId = true
+        val paramsJson = JSONObject(requestParams as Map<String, String>)
 
-                        doneSendingDeviceId = true
-                        downloadFinished()
-                    },
-                    { error ->
-                        showConnectionErrorMessage()
-                    })
+        val request = object : JsonObjectRequest(
+            Request.Method.POST,
+            Utils.baseUrlApi + "/api/v1/devices/register",
+            paramsJson,
+            { response ->
+                SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                SessionSettings.instance.sentUniqueId = true
 
-                request.tag = "download"
-                requestQueue.add(request)
+                doneSendingDeviceId = true
+                downloadFinished()
+            },
+            { error ->
+                showConnectionErrorMessage()
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
             }
         }
+
+        request.tag = "download"
+        requestQueue.add(request)
     }
 
     private fun getDeviceInfo() {
-        context?.apply {
-            val uniqueId = SessionSettings.instance.uniqueId
+        val uniqueId = SessionSettings.instance.uniqueId
 
-            uniqueId?.apply {
-                val request = JsonObjectRequest(
-                    Request.Method.GET,
-                    Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
-                    null,
-                    { response ->
-                        SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                        SessionSettings.instance.xp = response.getInt("xp")
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
+            null,
+            { response ->
+                SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                SessionSettings.instance.xp = response.getInt("xp")
 
-                        StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                        StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-                        StatTracker.instance.totalPaintAccrued = response.getInt("tp")
-                        StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
-                        StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
+                StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                StatTracker.instance.totalPaintAccrued = response.getInt("tp")
+                StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
+                StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
 
-                        doneLoadingPaintQty = true
-                        downloadFinished()
-                    },
-                    { error ->
-                        showConnectionErrorMessage()
-                    })
+                doneLoadingPaintQty = true
+                downloadFinished()
+            },
+            { error ->
+                showConnectionErrorMessage()
+            }) {
 
-                request.tag = "download"
-                requestQueue.add(request)
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
             }
         }
+
+        request.tag = "download"
+        requestQueue.add(request)
     }
 
     private fun getTopContributors() {
-        context?.apply {
-            val request = JsonObjectRequest(
-                Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/top/contributors",
-                null,
-                { response ->
-                    val topContributors = response.getJSONArray("data")
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/top/contributors",
+            null,
+            { response ->
+                val topContributors = response.getJSONArray("data")
 
-                    val topContributorNameViews1 = listOf(
-                        top_contributor_name_1, top_contributor_name_2,
-                        top_contributor_name_3, top_contributor_name_4, top_contributor_name_5
-                    )
+                val topContributorNameViews1 = listOf(
+                    top_contributor_name_1, top_contributor_name_2,
+                    top_contributor_name_3, top_contributor_name_4, top_contributor_name_5
+                )
 
-                    val topContributorAmtViews1 = listOf(
-                        top_contributor_amt_1, top_contributor_amt_2,
-                        top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5
-                    )
+                val topContributorAmtViews1 = listOf(
+                    top_contributor_amt_1, top_contributor_amt_2,
+                    top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5
+                )
 
-                    val topContributorNameViews2 = listOf(
-                        top_contributor_name_6, top_contributor_name_7,
-                        top_contributor_name_8, top_contributor_name_9, top_contributor_name_10
-                    )
+                val topContributorNameViews2 = listOf(
+                    top_contributor_name_6, top_contributor_name_7,
+                    top_contributor_name_8, top_contributor_name_9, top_contributor_name_10
+                )
 
-                    val topContributorAmtViews2 = listOf(
-                        top_contributor_amt_6, top_contributor_amt_7,
-                        top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10
-                    )
+                val topContributorAmtViews2 = listOf(
+                    top_contributor_amt_6, top_contributor_amt_7,
+                    top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10
+                )
 
-                    for (i in 0 until topContributors.length()) {
-                        val topContributor = topContributors.getJSONObject(i)
+                for (i in 0 until topContributors.length()) {
+                    val topContributor = topContributors.getJSONObject(i)
 
-                        val name = topContributor.getString("name")
-                        val amt = topContributor.getString("amt")
+                    var name = topContributor.getString("name")
 
-                        if (i < 5) {
-                            if (i == 0) {
-                                SessionSettings.instance.firstContributorName = name
-                                topContributorNameViews1[i].setTextColor(ActionButtonView.yellowPaint.color)
-                            } else if (i == 1) {
-                                SessionSettings.instance.secondContributorName = name
-                                topContributorNameViews1[i].setTextColor(Color.parseColor("#AFB3B1"))
-                            } else if (i == 2) {
-                                SessionSettings.instance.thirdContributorName = name
-                                topContributorNameViews1[i].setTextColor(Color.parseColor("#BD927B"))
-                            }
-
-                            topContributorNameViews1[i].text = name
-                            topContributorAmtViews1[i].text = amt.toString()
-
-                            topContributorNameViews1[i].alpha = 0F
-                            topContributorAmtViews1[i].alpha = 0F
-
-                            topContributorNameViews1[i].animate().setDuration(500).alphaBy(1F)
-                            topContributorAmtViews1[i].animate().setDuration(500).alphaBy(1F)
-                        } else if (i < 10) {
-                            topContributorNameViews2[i - 5].text = name
-                            topContributorAmtViews2[i - 5].text = amt.toString()
-
-                            topContributorNameViews2[i - 5].alpha = 0F
-                            topContributorAmtViews2[i - 5].alpha = 0F
-
-                            topContributorNameViews2[i - 5].animate().setDuration(500).alphaBy(1F)
-                            topContributorAmtViews2[i - 5].animate().setDuration(500).alphaBy(1F)
-                        }
+                    if (name.length > 10) {
+                        name = "${name.substring(0 until 7)}..."
                     }
 
-                    doneLoadingTopContributors = true
-                    downloadFinished()
-                },
-                { error ->
+                    val amt = topContributor.getString("amt")
 
-                })
+                    if (i < 5) {
+                        if (i == 0) {
+                            SessionSettings.instance.firstContributorName = name
+                            topContributorNameViews1[i].setTextColor(ActionButtonView.yellowPaint.color)
+                        } else if (i == 1) {
+                            SessionSettings.instance.secondContributorName = name
+                            topContributorNameViews1[i].setTextColor(Color.parseColor("#AFB3B1"))
+                        } else if (i == 2) {
+                            SessionSettings.instance.thirdContributorName = name
+                            topContributorNameViews1[i].setTextColor(Color.parseColor("#BD927B"))
+                        }
 
-            requestQueue.add(request)
+                        topContributorNameViews1[i].text = name
+                        topContributorAmtViews1[i].text = amt.toString()
+
+                        topContributorNameViews1[i].alpha = 0F
+                        topContributorAmtViews1[i].alpha = 0F
+
+                        topContributorNameViews1[i].animate().setDuration(500).alphaBy(1F)
+                        topContributorAmtViews1[i].animate().setDuration(500).alphaBy(1F)
+                    } else if (i < 10) {
+                        topContributorNameViews2[i - 5].text = name
+                        topContributorAmtViews2[i - 5].text = amt.toString()
+
+                        topContributorNameViews2[i - 5].alpha = 0F
+                        topContributorAmtViews2[i - 5].alpha = 0F
+
+                        topContributorNameViews2[i - 5].animate().setDuration(500).alphaBy(1F)
+                        topContributorAmtViews2[i - 5].animate().setDuration(500).alphaBy(1F)
+                    }
+                }
+
+                doneLoadingTopContributors = true
+                downloadFinished()
+            },
+            { error ->
+
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
+
+        requestQueue.add(request)
     }
 
     private fun showConnectionErrorMessage(socket: Boolean = false) {

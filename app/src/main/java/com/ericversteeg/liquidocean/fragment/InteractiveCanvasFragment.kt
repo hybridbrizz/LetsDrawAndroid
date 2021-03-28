@@ -45,6 +45,8 @@ import top.defaults.colorpicker.ColorObserver
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.max
+import kotlin.math.min
 
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
@@ -84,6 +86,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     val paintTextModeTime = 0
     val paintTextModeAmt = 1
     var paintTextModeHide = 2
+
+    var animatingTools = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -153,25 +157,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     private fun sendApiStatusCheck() {
         val requestQueue = Volley.newRequestQueue(context)
-        context?.apply {
-            val request = JsonObjectRequest(
-                Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/status",
-                null,
-                { response ->
-                    (context as Activity?)?.runOnUiThread {
-                        sendSocketStatusCheck()
-                    }
-                },
-                { error ->
-                    (context as Activity?)?.runOnUiThread {
-                        showDisconnectedMessage(1)
-                    }
-                })
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/status",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    sendSocketStatusCheck()
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
+                    showDisconnectedMessage(1)
+                }
+            }) {
 
-            request.retryPolicy = DefaultRetryPolicy(20000, 1, 1.5f)
-            requestQueue.add(request)
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
+
+        request.retryPolicy = DefaultRetryPolicy(20000, 1, 1.5f)
+        requestQueue.add(request)
     }
 
     private fun sendSocketStatusCheck() {
@@ -205,31 +215,37 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     private fun getPaintTimerInfo() {
         val requestQueue = Volley.newRequestQueue(context)
-        context?.apply {
-            val request = JsonObjectRequest(
-                Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/paint/time/sync",
-                null,
-                { response ->
-                    (context as Activity?)?.runOnUiThread {
-                        val timeUntil = response.getInt("s").toLong()
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/paint/time/sync",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    val timeUntil = response.getInt("s").toLong()
 
-                        if (timeUntil < 0) {
-                            paint_time_info.text = "???"
-                        } else {
-                            SessionSettings.instance.timeSync = timeUntil
-                            setupPaintEventTimer()
-                        }
+                    if (timeUntil < 0) {
+                        paint_time_info.text = "???"
+                    } else {
+                        SessionSettings.instance.timeSync = timeUntil
+                        setupPaintEventTimer()
                     }
-                },
-                { error ->
-                    (context as Activity?)?.runOnUiThread {
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
 
-                    }
-                })
+                }
+            }) {
 
-            requestQueue.add(request)
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
+
+        requestQueue.add(request)
     }
 
     private fun setupPaintEventTimer() {
@@ -282,53 +298,55 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 override fun onHistoryJsonResponse(historyJson: JSONArray) {
                     // set bottom-left of view to screenPoint
 
-                    val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                    val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
-                        context,
-                        10
-                    )).toFloat()
-
-                    pixel_history_fragment_container.x = dX
-                    pixel_history_fragment_container.y = dY
-
-                    if (firstInfoTap) {
-                        pixel_history_fragment_container.y -= Utils.dpToPx(
+                    pixel_history_fragment_container?.apply {
+                        val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                        val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
                             context,
-                            firstInfoTapFixYOffset
-                        )
-                        firstInfoTap = false
-                    }
+                            10
+                        )).toFloat()
 
-                    view?.apply {
-                        if (pixel_history_fragment_container.x < 0) {
-                            pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                        } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width) {
-                            pixel_history_fragment_container.x =
-                                width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
-                                    context,
-                                    20
-                                ).toFloat()
+                        pixel_history_fragment_container.x = dX
+                        pixel_history_fragment_container.y = dY
+
+                        if (firstInfoTap) {
+                            pixel_history_fragment_container.y -= Utils.dpToPx(
+                                context,
+                                firstInfoTapFixYOffset
+                            )
+                            firstInfoTap = false
                         }
 
-                        if (pixel_history_fragment_container.y < 0) {
-                            pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                        } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height) {
-                            pixel_history_fragment_container.y =
-                                height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
-                                    context,
-                                    20
-                                ).toFloat()
+                        view?.apply {
+                            if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                            } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.x =
+                                    width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                        context,
+                                        20
+                                    ).toFloat()
+                            }
+
+                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                            } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.y =
+                                    height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                        context,
+                                        20
+                                    ).toFloat()
+                            }
+
+                            val fragment = PixelHistoryFragment()
+                            fragment.pixelHistoryJson = historyJson
+
+                            beginTransaction().replace(
+                                R.id.pixel_history_fragment_container,
+                                fragment
+                            ).commit()
+
+                            pixel_history_fragment_container.visibility = View.VISIBLE
                         }
-
-                        val fragment = PixelHistoryFragment()
-                        fragment.pixelHistoryJson = historyJson
-
-                        beginTransaction().replace(
-                            R.id.pixel_history_fragment_container,
-                            fragment
-                        ).commit()
-
-                        pixel_history_fragment_container.visibility = View.VISIBLE
                     }
                 }
             })
@@ -544,6 +562,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
                 paint_indicator_view_bottom_layer.setPaintColor(color)
+
+                /*if (paint_indicator_view.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
+                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                }
+                else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
+                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                }
+                else if (paint_indicator_view.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
+                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                }
+                else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                }*/
 
                 /* if (Utils.isColorDark(color)) {
                     paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white_border))
@@ -865,32 +900,50 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // open tools button
         open_tools_button.setOnClickListener {
-            if (!toolboxOpen) {
-                export_button.visibility = View.VISIBLE
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
+            if (!animatingTools) {
+                animatingTools = true
+                if (!toolboxOpen) {
+                    export_button.visibility = View.VISIBLE
+                    background_button.visibility = View.VISIBLE
+                    grid_lines_button.visibility = View.VISIBLE
 
-                Animator.animateMenuItems(
-                    listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        )
-                    ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded
-                )
+                    Animator.animateMenuItems(
+                        listOf(
+                            listOf(export_button), listOf(background_button), listOf(
+                                grid_lines_button
+                            )
+                        ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
+                        completion = object: Animator.CompletionHandler {
+                            override fun onCompletion() {
+                                animatingTools = false
+                            }
+                        }
+                    )
 
-                toolboxOpen = true
+                    toolboxOpen = true
+                }
+                else {
+                    Animator.animateMenuItems(
+                        listOf(
+                            listOf(export_button), listOf(background_button), listOf(
+                                grid_lines_button
+                            )
+                        ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
+                        completion = object: Animator.CompletionHandler {
+                            override fun onCompletion() {
+                                animatingTools = false
+                            }
+                        }
+                    )
+
+                    toolboxOpen = false
+                }
             }
-            else {
-                Animator.animateMenuItems(
-                    listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        )
-                    ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded
-                )
+        }
 
-                toolboxOpen = false
-            }
+        // recent colors background
+        recent_colors_container.setOnClickListener {
+
         }
 
         context?.apply {
@@ -901,17 +954,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         val holder = surface_view.holder
         holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder?) {
+            override fun surfaceCreated(holder: SurfaceHolder) {
                 if (holder != null) {
                     drawInteractiveCanvas(holder)
                 }
             }
 
-            override fun surfaceDestroyed(p0: SurfaceHolder?) {
+            override fun surfaceDestroyed(p0: SurfaceHolder) {
 
             }
 
-            override fun surfaceChanged(p0: SurfaceHolder?, p1: Int, p2: Int, p3: Int) {
+            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
 
             }
         })
@@ -1028,7 +1081,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                             R.drawable.panel_texture_background
                         ) as LayerDrawable
 
-                        scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.LEFT
+                        if (SessionSettings.instance.rightHanded) {
+                            scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.RIGHT
+                        }
+                        else {
+                            scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.LEFT
+                        }
+
                         layerDrawable.addLayer(scaledBitmapDrawable)
 
                         paint_panel.setBackgroundDrawable(layerDrawable)
@@ -1457,7 +1516,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_time_info_container.visibility = View.VISIBLE
 
                 val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = (paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt()
+                layoutParams.width = max((paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt(), Utils.dpToPx(context, 30))
 
                 paint_time_info_container.layoutParams = layoutParams
 
@@ -1468,7 +1527,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_time_info_container.visibility = View.VISIBLE
 
                 val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = (paint_amt_info.paint.measureText(paint_amt_info.text.toString()) + Utils.dpToPx(context, 20)).toInt()
+                layoutParams.width = max((paint_amt_info.paint.measureText(paint_amt_info.text.toString()) + Utils.dpToPx(context, 20)).toInt(), Utils.dpToPx(context, 30))
 
                 paint_time_info_container.layoutParams = layoutParams
 

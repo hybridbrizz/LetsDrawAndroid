@@ -101,7 +101,7 @@ class ArtExportFragment: Fragment() {
             uniqueId?.apply {
                 val jsonObj = buildUploadRequestJson()
 
-                val request = JsonObjectRequest(
+                val request = object: JsonObjectRequest(
                     Request.Method.POST,
                     Utils.baseUrlApi + "/api/v1/canvas/object/upload",
                     jsonObj,
@@ -110,7 +110,15 @@ class ArtExportFragment: Fragment() {
                     },
                     { error ->
 
-                    })
+                    }) {
+
+                    override fun getHeaders(): MutableMap<String, String> {
+                        val headers = HashMap<String, String>()
+                        headers["Content-Type"] = "application/json; charset=utf-8"
+                        headers["key1"] = Utils.key1
+                        return headers
+                    }
+                }
 
                 request.tag = "download"
                 requestQueue.add(request)

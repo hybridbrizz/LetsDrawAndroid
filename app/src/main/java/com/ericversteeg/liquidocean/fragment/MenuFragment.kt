@@ -35,6 +35,8 @@ class MenuFragment: Fragment() {
 
     var route = -1
 
+    var animatingMenu = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -93,9 +95,9 @@ class MenuFragment: Fragment() {
         world_button.topLayer = true
         world_button_bottom_layer.type = ActionButtonView.Type.WORLD
 
-        dev_button.type = ActionButtonView.Type.DEV
-        dev_button.topLayer = true
-        dev_button_bottom_layer.type = ActionButtonView.Type.DEV
+        //dev_button.type = ActionButtonView.Type.DEV
+        //dev_button.topLayer = true
+        //dev_button_bottom_layer.type = ActionButtonView.Type.DEV
 
         lefty_button.type = ActionButtonView.Type.LEFTY
         lefty_button.topLayer = true
@@ -271,17 +273,41 @@ class MenuFragment: Fragment() {
     }
 
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {
-        if (layer == 0) {
-            Animator.animateMenuItems(listOf(listOf(play_button_bottom_layer, play_button), listOf(options_button_bottom_layer, options_button),
-                listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true, out = false, inverse = false)
-        }
-        else if (layer == 1) {
-            Animator.animateMenuItems(listOf(listOf(single_button_bottom_layer, single_button), listOf(world_button_bottom_layer, world_button),
-                listOf(dev_button_bottom_layer, dev_button)), cascade = true, out = false, inverse = false)
-        }
-        else if (layer == 2) {
-            Animator.animateMenuItems(listOf(listOf(lefty_button_bottom_layer, lefty_button), listOf(righty_button_bottom_layer, righty_button)),
-                cascade = true, out = false, inverse = false)
+        if (!animatingMenu) {
+            animatingMenu = true
+            if (layer == 0) {
+                Animator.animateMenuItems(listOf(listOf(play_button_bottom_layer, play_button), listOf(options_button_bottom_layer, options_button),
+                    listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true, out = false, inverse = false,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingMenu = false
+                        }
+                    }
+                )
+            }
+            else if (layer == 1) {
+                Animator.animateMenuItems(listOf(listOf(single_button_bottom_layer, single_button), listOf(world_button_bottom_layer, world_button),
+                    listOf(dev_button_bottom_layer, dev_button)), cascade = true, out = false, inverse = false,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingMenu = false
+                        }
+                    }
+                )
+            }
+            else if (layer == 2) {
+                Animator.animateMenuItems(listOf(listOf(lefty_button_bottom_layer, lefty_button), listOf(righty_button_bottom_layer, righty_button)),
+                    cascade = true, out = false, inverse = false,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingMenu = false
+                        }
+                    }
+                )
+            }
+            else {
+                animatingMenu = false
+            }
         }
     }
 

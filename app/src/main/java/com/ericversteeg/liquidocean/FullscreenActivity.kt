@@ -58,7 +58,15 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         setContentView(R.layout.activity_fullscreen)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val rIndex = (Math.random() * backgrounds.size).toInt()
+        // load session settings
+        SessionSettings.instance.load(this)
+
+        var rIndex = (Math.random() * backgrounds.size).toInt()
+
+        if (SessionSettings.instance.firstLaunch) {
+            rIndex = 8
+        }
+
         SessionSettings.instance.menuBackgroundResId = backgrounds[rIndex]
 
         mVisible = true
@@ -86,9 +94,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 .build()
         )*/
 
-        // load session settings
-        SessionSettings.instance.load(this)
-
         if (SessionSettings.instance.artShowcase == null) {
             SessionSettings.instance.defaultArtShowcase(resources)
         }
@@ -111,6 +116,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
     override fun onPause() {
         super.onPause()
+
+        if (SessionSettings.instance.firstLaunch) {
+            SessionSettings.instance.firstLaunch = false
+        }
 
         SessionSettings.instance.save(this)
 
@@ -194,33 +203,39 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         val uniqueId = SessionSettings.instance.uniqueId
 
-        uniqueId?.apply {
-            val request = JsonObjectRequest(
-                Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
-                null,
-                { response ->
-                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                    SessionSettings.instance.xp = response.getInt("xp")
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
+            null,
+            { response ->
+                SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                SessionSettings.instance.xp = response.getInt("xp")
 
-                    SessionSettings.instance.displayName = response.getString("name")
+                SessionSettings.instance.displayName = response.getString("name")
 
-                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
+                StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
+                StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
 
-                    // server-side event sync
-                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
-                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
-                    StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
+                // server-side event sync
+                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
+                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
+                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
 
-                    StatTracker.instance.displayAchievements(this@FullscreenActivity)
-                },
-                { error ->
+                StatTracker.instance.displayAchievements(this@FullscreenActivity)
+            },
+            { error ->
 
-                })
+            }) {
 
-            requestQueue.add(request)
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
+
+        requestQueue.add(request)
     }
 
     private fun sendDeviceId() {
@@ -235,7 +250,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
             val paramsJson = JSONObject(requestParams as Map<String, String>)
 
-            val request = JsonObjectRequest(
+            val request = object: JsonObjectRequest(
                 Request.Method.POST,
                 Utils.baseUrlApi + "/api/v1/devices/register",
                 paramsJson,
@@ -253,7 +268,15 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 },
                 { error ->
 
-                })
+                }) {
+
+                override fun getHeaders(): MutableMap<String, String> {
+                    val headers = HashMap<String, String>()
+                    headers["Content-Type"] = "application/json; charset=utf-8"
+                    headers["key1"] = Utils.key1
+                    return headers
+                }
+            }
 
             request.tag = "download"
             requestQueue.add(request)
