@@ -101,7 +101,7 @@ class SignInFragment: Fragment() {
         sign_in_title.isStatic = true
 
         back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK
+        back_action.type = ActionButtonView.Type.BACK_SOLID
 
         back_button.setOnClickListener {
             signInListener?.onSignInBack()

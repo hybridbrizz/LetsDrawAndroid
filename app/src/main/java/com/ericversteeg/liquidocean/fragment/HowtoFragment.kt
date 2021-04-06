@@ -79,6 +79,16 @@ class HowtoFragment: Fragment() {
                 paint_time_info_howto_container.visibility = View.INVISIBLE
             }
         }
+
+        Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                if (step1_text.height < 250) {
+                    val layoutParams = step1_text.layoutParams
+                    layoutParams.height = 250
+                    step1_text.layoutParams = layoutParams
+                }
+            }
+        })
     }
 
     override fun onPause() {

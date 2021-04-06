@@ -1020,7 +1020,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                     if (SessionSettings.instance.showPaintBar) {
                         // paint quantity bar size
-                        layoutParams = ConstraintLayout.LayoutParams(
+                        /*layoutParams = ConstraintLayout.LayoutParams(
                             (paint_qty_bar.width * 1.25).toInt(),
                             (paint_qty_bar.height * 1.25).toInt()
                         )
@@ -1030,7 +1030,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                         layoutParams.topMargin = Utils.dpToPx(context, 15)
 
-                        paint_qty_bar.layoutParams = layoutParams
+                        paint_qty_bar.layoutParams = layoutParams*/
                     }
                     else if (SessionSettings.instance.showPaintCircle) {
                         // paint quantity circle size

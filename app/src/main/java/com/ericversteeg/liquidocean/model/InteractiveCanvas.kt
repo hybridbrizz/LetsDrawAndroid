@@ -567,20 +567,23 @@ class InteractiveCanvas(var context: Context) {
     }
 
     private fun updateRecentColors() {
+        var colorIndex = -1
         for (restorePoint in restorePoints) {
             var contains = false
             for (i in 0 until recentColorsList.size) {
                 if (restorePoint.newColor == recentColorsList[i]) {
-                    recentColorsList.removeAt(i)
-                    recentColorsList.add(restorePoint.newColor)
-
                     contains = true
+                    colorIndex = i
                 }
             }
             if (!contains) {
                 if (recentColorsList.size == SessionSettings.instance.numRecentColors) {
                     recentColorsList.removeAt(0)
                 }
+                recentColorsList.add(restorePoint.newColor)
+            }
+            else {
+                recentColorsList.removeAt(colorIndex)
                 recentColorsList.add(restorePoint.newColor)
             }
         }
