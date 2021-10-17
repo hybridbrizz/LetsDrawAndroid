@@ -7,12 +7,13 @@
         <option name="testRunner" value="GRADLE" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="Embedded JDK" />
+        <option name="gradleHome" value="$USER_HOME$/gradle-7.2-rc-3-all/gradle-7.2-rc-3" />
+        <option name="gradleJvm" value="Android Studio default JDK" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/.." />
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/colorpicker" />
+            <option value="$PROJECT_DIR$/../colorpicker" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

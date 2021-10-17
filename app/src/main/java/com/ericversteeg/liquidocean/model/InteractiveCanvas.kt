@@ -439,8 +439,6 @@ class InteractiveCanvas(var context: Context) {
                 arr[j][i] = color
             }
         }
-
-        arr[rows / 2][cols / 2] = Color.parseColor("#FF00FF00")
     }
 
     fun getGridLineColor(): Int {
