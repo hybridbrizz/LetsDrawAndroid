@@ -316,7 +316,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/color_picker_frame"
             android:visibility="gone"
             android:layout_width="300dp"
@@ -324,16 +324,55 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:background="#99111111">
 
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@id/color_picker_view"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginBottom="10dp">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                    android:id="@+id/default_black_color_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/default_black_color_action"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginEnd="20dp" />
+
+            </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+            <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                    android:id="@+id/default_white_color_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/default_white_color_action"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp" />
+
+            </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+        </LinearLayout>
+
         <top.defaults.colorpicker.ColorPickerView
                 android:id="@+id/color_picker_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:elevation="3dp"
-                android:layout_gravity="center_vertical | center_horizontal"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
                 app:enableBrightness="true"
                 app:enableAlpha="true" />
 
-    </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/recent_colors_container"

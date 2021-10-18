@@ -557,6 +557,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
 
+        // color picker view
+        default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
+        default_black_color_button.actionBtnView = default_black_color_action
+
+        default_black_color_button.setOnClickListener {
+            color_picker_view.setInitialColor(ActionButtonView.blackPaint.color)
+        }
+
+        default_white_color_action.type = ActionButtonView.Type.WHITE_COLOR_DEFAULT
+        default_white_color_button.actionBtnView = default_white_color_action
+
+        default_white_color_button.setOnClickListener {
+            color_picker_view.setInitialColor(ActionButtonView.whitePaint.color)
+        }
+
         color_picker_view.setEnabledAlpha(false)
 
         color_picker_view.subscribe(object : ColorObserver {
@@ -969,7 +984,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         })
 
-        // gesture recognizer
+        // scale gesture recognizer (not used?)
         val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
             override fun onScale(detector: ScaleGestureDetector): Boolean {
                 scaleFactor *= detector.scaleFactor
@@ -981,6 +996,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         }
 
+        // tablet & lefty righty
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 // tablet

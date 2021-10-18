@@ -97,7 +97,9 @@ class ActionButtonView: View {
         BACKGROUND_CLASSIC,
         BACKGROUND_GRAY_THIRDS,
         BACKGROUND_CHESS,
-        LOGO
+        LOGO,
+        WHITE_COLOR_DEFAULT,
+        BLACK_COLOR_DEFAULT
     }
 
     enum class TouchState {
@@ -307,6 +309,14 @@ class ActionButtonView: View {
             }
             else if (type == Type.LOGO) {
                 drawLogoAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.WHITE_COLOR_DEFAULT)
+            {
+                drawWhiteColorDefault(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.BLACK_COLOR_DEFAULT)
+            {
+                drawBlackColorDefault(touchState == TouchState.ACTIVE, canvas)
             }
 
             restore()
@@ -560,24 +570,27 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawPaintAction(light: Boolean, canvas: Canvas) {
+    private fun drawPaintAction(selected: Boolean, canvas: Canvas) {
         rows = 4
         cols = 4
 
-        var primaryPaint = whitePaint
-        var accentPaint = altGreenPaint
+        var primaryPaint = lightGrayPaint
+        var accentPaint = greenPaint
 
         var outLinePaint = Paint()
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (light && !isStatic) {
-            accentPaint = lightAltGreenPaint
+        if (SessionSettings.instance.darkIcons) {
+            primaryPaint = darkGrayPaint
+            outLinePaint.color = whitePaint.color
         }
 
-        if (SessionSettings.instance.darkIcons) {
-            primaryPaint = blackPaint
-            outLinePaint.color = whitePaint.color
+        if (selected && !isStatic && !SessionSettings.instance.darkIcons) {
+            primaryPaint = greenPaint
+        }
+        else if (selected && !isStatic && SessionSettings.instance.darkIcons) {
+            primaryPaint = greenPaint
         }
 
         canvas.apply {
@@ -1976,6 +1989,213 @@ class ActionButtonView: View {
         }
     }
 
+    private fun drawWhiteColorDefault(selected: Boolean, canvas: Canvas) {
+        rows = 8
+        cols = 8
+
+        var paint = lightGrayPaint
+
+        var outlinePaint = darkGrayPaint
+        outlinePaint.strokeWidth = 2F
+
+        if (SessionSettings.instance.darkIcons) {
+            paint = darkGrayPaint
+
+            outlinePaint = lightGrayPaint
+            outlinePaint.strokeWidth = 2F
+        }
+
+        if (selected) {
+            paint = altGreenPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(7, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(1, 1, whitePaint, canvas)
+            drawPixel(2, 1, whitePaint, canvas)
+            drawPixel(3, 1, whitePaint, canvas)
+            drawPixel(4, 1, whitePaint, canvas)
+            drawPixel(5, 1, whitePaint, canvas)
+            drawPixel(6, 1, whitePaint, canvas)
+            drawPixel(7, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, whitePaint, canvas)
+            drawPixel(2, 2, whitePaint, canvas)
+            drawPixel(3, 2, whitePaint, canvas)
+            drawPixel(4, 2, whitePaint, canvas)
+            drawPixel(5, 2, whitePaint, canvas)
+            drawPixel(6, 2, whitePaint, canvas)
+            drawPixel(7, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, whitePaint, canvas)
+            drawPixel(2, 3, whitePaint, canvas)
+            drawPixel(3, 3, whitePaint, canvas)
+            drawPixel(4, 3, whitePaint, canvas)
+            drawPixel(5, 3, whitePaint, canvas)
+            drawPixel(6, 3, whitePaint, canvas)
+            drawPixel(7, 3, paint, canvas)
+
+            // row 5
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(1, 4, whitePaint, canvas)
+            drawPixel(2, 4, whitePaint, canvas)
+            drawPixel(3, 4, whitePaint, canvas)
+            drawPixel(4, 4, whitePaint, canvas)
+            drawPixel(5, 4, whitePaint, canvas)
+            drawPixel(6, 4, whitePaint, canvas)
+            drawPixel(7, 4, paint, canvas)
+
+            // row 6
+            drawPixel(0, 5, paint, canvas)
+            drawPixel(1, 5, whitePaint, canvas)
+            drawPixel(2, 5, whitePaint, canvas)
+            drawPixel(3, 5, whitePaint, canvas)
+            drawPixel(4, 5, whitePaint, canvas)
+            drawPixel(5, 5, whitePaint, canvas)
+            drawPixel(6, 5, whitePaint, canvas)
+            drawPixel(7, 5, paint, canvas)
+
+            // row 7
+            drawPixel(0, 6, paint, canvas)
+            drawPixel(1, 6, whitePaint, canvas)
+            drawPixel(2, 6, whitePaint, canvas)
+            drawPixel(3, 6, whitePaint, canvas)
+            drawPixel(4, 6, whitePaint, canvas)
+            drawPixel(5, 6, whitePaint, canvas)
+            drawPixel(6, 6, whitePaint, canvas)
+            drawPixel(7, 6, paint, canvas)
+
+            // row 8
+            drawPixel(0, 7, paint, canvas)
+            drawPixel(1, 7, paint, canvas)
+            drawPixel(2, 7, paint, canvas)
+            drawPixel(3, 7, paint, canvas)
+            drawPixel(4, 7, paint, canvas)
+            drawPixel(5, 7, paint, canvas)
+            drawPixel(6, 7, paint, canvas)
+            drawPixel(7, 7, paint, canvas)
+        }
+    }
+
+    private fun drawBlackColorDefault(selected: Boolean, canvas: Canvas) {
+        rows = 8
+        cols = 8
+
+        var paint = lightGrayPaint
+
+        var outlinePaint = darkGrayPaint
+        outlinePaint.strokeWidth = 2F
+
+        if (SessionSettings.instance.darkIcons) {
+            paint = darkGrayPaint
+
+            outlinePaint = lightGrayPaint
+            outlinePaint.strokeWidth = 2F
+        }
+
+        if (selected) {
+            paint = altGreenPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+            drawPixel(6, 0, paint, canvas)
+            drawPixel(7, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(1, 1, blackPaint, canvas)
+            drawPixel(2, 1, blackPaint, canvas)
+            drawPixel(3, 1, blackPaint, canvas)
+            drawPixel(4, 1, blackPaint, canvas)
+            drawPixel(5, 1, blackPaint, canvas)
+            drawPixel(6, 1, blackPaint, canvas)
+            drawPixel(7, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, blackPaint, canvas)
+            drawPixel(2, 2, blackPaint, canvas)
+            drawPixel(3, 2, blackPaint, canvas)
+            drawPixel(4, 2, blackPaint, canvas)
+            drawPixel(5, 2, blackPaint, canvas)
+            drawPixel(6, 2, blackPaint, canvas)
+            drawPixel(7, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, blackPaint, canvas)
+            drawPixel(2, 3, blackPaint, canvas)
+            drawPixel(3, 3, blackPaint, canvas)
+            drawPixel(4, 3, blackPaint, canvas)
+            drawPixel(5, 3, blackPaint, canvas)
+            drawPixel(6, 3, blackPaint, canvas)
+            drawPixel(7, 3, paint, canvas)
+
+            // row 5
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(1, 4, blackPaint, canvas)
+            drawPixel(2, 4, blackPaint, canvas)
+            drawPixel(3, 4, blackPaint, canvas)
+            drawPixel(4, 4, blackPaint, canvas)
+            drawPixel(5, 4, blackPaint, canvas)
+            drawPixel(6, 4, blackPaint, canvas)
+            drawPixel(7, 4, paint, canvas)
+
+            // row 6
+            drawPixel(0, 5, paint, canvas)
+            drawPixel(1, 5, blackPaint, canvas)
+            drawPixel(2, 5, blackPaint, canvas)
+            drawPixel(3, 5, blackPaint, canvas)
+            drawPixel(4, 5, blackPaint, canvas)
+            drawPixel(5, 5, blackPaint, canvas)
+            drawPixel(6, 5, blackPaint, canvas)
+            drawPixel(7, 5, paint, canvas)
+
+            // row 7
+            drawPixel(0, 6, paint, canvas)
+            drawPixel(1, 6, blackPaint, canvas)
+            drawPixel(2, 6, blackPaint, canvas)
+            drawPixel(3, 6, blackPaint, canvas)
+            drawPixel(4, 6, blackPaint, canvas)
+            drawPixel(5, 6, blackPaint, canvas)
+            drawPixel(6, 6, blackPaint, canvas)
+            drawPixel(7, 6, paint, canvas)
+
+            // row 8
+            drawPixel(0, 7, paint, canvas)
+            drawPixel(1, 7, paint, canvas)
+            drawPixel(2, 7, paint, canvas)
+            drawPixel(3, 7, paint, canvas)
+            drawPixel(4, 7, paint, canvas)
+            drawPixel(5, 7, paint, canvas)
+            drawPixel(6, 7, paint, canvas)
+            drawPixel(7, 7, paint, canvas)
+        }
+    }
+
+    // draw methods
     private fun rectForPixel(x: Int, y: Int): RectF {
         val top = y * pxHeight
         val left = x * pxWidth

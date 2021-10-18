@@ -133,7 +133,7 @@ class MenuFragment: Fragment() {
 
             single_button_container.visibility = View.VISIBLE
 
-            world_button_container.visibility = View.VISIBLE
+            world_button_container.visibility = View.INVISIBLE
 
             dev_button_container.visibility = View.VISIBLE
 
