@@ -226,7 +226,7 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.metal_floor_1)
+        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_9)
 
         emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 

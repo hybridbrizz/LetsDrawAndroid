@@ -51,6 +51,14 @@ class ArtExportFragment: Fragment() {
             listener?.onArtExportBack()
         }
 
+        actual_size_switch.setOnCheckedChangeListener { _, isChecked ->
+            art_view.actualSize = isChecked
+        }
+
+        actual_size_text.setOnClickListener {
+            actual_size_switch.isChecked = !actual_size_switch.isChecked
+        }
+
         art_view.showBackground = true
         art_view.art = art
 

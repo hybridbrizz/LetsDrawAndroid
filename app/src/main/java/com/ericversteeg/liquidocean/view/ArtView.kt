@@ -22,6 +22,7 @@ import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import org.json.JSONObject
 import java.io.*
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 
 class  ArtView: View {
@@ -39,9 +40,15 @@ class  ArtView: View {
         art = artFromJsonResource(resources, jsonResId)
     }
 
+    var actualSize: Boolean = false
+    set(value) {
+        field = value
+        invalidate()
+    }
+
     var showBackground = false
 
-    var ppu = 10F
+    var displayPpu = 0F
 
     val margin = 2
 
@@ -78,27 +85,47 @@ class  ArtView: View {
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
-        drawToCanvas(canvas, showBackground)
+        drawToCanvas(canvas, drawBackground = showBackground, actualSize = actualSize, export = false)
     }
 
-    private fun drawToCanvas(canvas: Canvas?, drawBackground: Boolean = true) {
+    private fun drawToCanvas(canvas: Canvas?, drawBackground: Boolean, actualSize: Boolean, export: Boolean) {
         canvas?.apply {
             save()
 
+            val gridPpu = 20F
+
             val paint = Paint()
 
-            adjustPpu()
+            if (actualSize && export)
+            {
+                displayPpu = 1F
+            }
+            else if (actualSize)
+            {
+                displayPpu = gridPpu
+            }
+            else
+            {
+                adjustPpu()
+            }
 
             val minX = getMinX()
             val minY = getMinY()
 
-            val offsetX = (width - getArtWidth() * ppu) / 2
-            val offsetY = (height - getArtHeight() * ppu) / 2
+            var offsetX = (width - getArtWidth() * displayPpu) / 2
+            var offsetY = (height - getArtHeight() * displayPpu) / 2
+
+            if (actualSize && !export)
+            {
+                val offGridByX = offsetX % gridPpu
+                val offGridByY = offsetY % gridPpu
+
+                offsetX -= offGridByX
+                offsetY -= offGridByY
+            }
 
             //val adjGridX = abs(round(offsetX / ppu) - offsetX / ppu)
             //val adjGridY = abs(round(offsetY / ppu) - offsetY / ppu)
-
-            val gridPpu = 20F
 
             // draw transparency background
             val widthUnits = width / gridPpu.toInt() + 1
@@ -136,10 +163,10 @@ class  ArtView: View {
                 for (pixelPoint in this) {
                     paint.color = pixelPoint.color
                     canvas.drawRect(
-                        ((pixelPoint.point.x - minX) * ppu) + offsetX,
-                        ((pixelPoint.point.y - minY) * ppu) + offsetY,
-                        ((pixelPoint.point.x - minX + 1) * ppu) + offsetX,
-                        ((pixelPoint.point.y - minY + 1) * ppu) + offsetY, paint
+                        ((pixelPoint.point.x - minX) * displayPpu) + offsetX,
+                        ((pixelPoint.point.y - minY) * displayPpu) + offsetY,
+                        ((pixelPoint.point.x - minX + 1) * displayPpu) + offsetX,
+                        ((pixelPoint.point.y - minY + 1) * displayPpu) + offsetY, paint
                     )
                 }
             }
@@ -215,17 +242,26 @@ class  ArtView: View {
         val fillWidthPpu =  width / artW.toFloat()
         val fillHeightPpu = height / artH.toFloat()
 
-        ppu = min(fillWidthPpu, fillHeightPpu)
+        displayPpu = min(fillWidthPpu, fillHeightPpu)
 
-        ppu *= 0.8F
+        displayPpu *= 0.8F
     }
 
     fun saveArt(context: Context) {
         val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
-        val bitmap: Bitmap = Bitmap.createBitmap(width, height, conf) // this creates a MUTABLE bitmap
+
+        var exportWidth = width
+        var exportHeight = height
+
+        if (actualSize) {
+            exportWidth = getArtWidth()
+            exportHeight = getArtHeight()
+        }
+
+        val bitmap: Bitmap = Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
 
         val canvas = Canvas(bitmap)
-        drawToCanvas(canvas, false)
+        drawToCanvas(canvas, drawBackground = false, actualSize = actualSize, export = true)
 
         //Generating a file name
         val filename = "${System.currentTimeMillis()}.png"
@@ -272,10 +308,19 @@ class  ArtView: View {
 
     fun shareArt(context: Context) {
         val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
-        val bmp: Bitmap = Bitmap.createBitmap(width, height, conf) // this creates a MUTABLE bitmap
+
+        var exportWidth = width
+        var exportHeight = height
+
+        if (actualSize) {
+            exportWidth = getArtWidth()
+            exportHeight = getArtHeight()
+        }
+
+        val bmp: Bitmap = Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
 
         val canvas = Canvas(bmp)
-        drawToCanvas(canvas, false)
+        drawToCanvas(canvas, drawBackground = false, actualSize = actualSize, export = true)
 
         val share = Intent(Intent.ACTION_SEND)
         share.type = "image/png"

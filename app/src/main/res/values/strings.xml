@@ -46,4 +46,5 @@
     <string name="old_pincode_title">Old 8-digit pincode</string>
     <string name="credits">Credits</string>
     <string name="deviant_art"><u>Deviant Art</u></string>
+    <string name="actual_size">Actual Pixel Size</string>
 </resources>

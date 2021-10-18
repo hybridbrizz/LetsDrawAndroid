@@ -146,12 +146,12 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
 
                 borderPaint.color = panelThemeConfig.paintColorIndicatorLineColor
 
-                /*if (darkColor && panelThemeConfig.paintColorIndicatorLineColor == Color.BLACK) {
+                if (darkColor && panelThemeConfig.paintColorIndicatorLineColor == Color.BLACK) {
                     borderPaint.color = Color.WHITE
                 }
                 else if (lightColor && panelThemeConfig.paintColorIndicatorLineColor == Color.WHITE) {
                     borderPaint.color = Color.BLACK
-                }*/
+                }
 
                 if (SessionSettings.instance.colorIndicatorSquare) {
                     paint.strokeWidth = 2F

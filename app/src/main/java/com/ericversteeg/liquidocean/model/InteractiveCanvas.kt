@@ -34,8 +34,8 @@ import kotlin.math.floor
 
 
 class InteractiveCanvas(var context: Context) {
-    var rows = 512
-    var cols = 512
+    var rows = 1024
+    var cols = 1024
 
     lateinit var arr: Array<IntArray>
 

@@ -915,45 +915,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // open tools button
         open_tools_button.setOnClickListener {
-            if (!animatingTools) {
-                animatingTools = true
-                if (!toolboxOpen) {
-                    export_button.visibility = View.VISIBLE
-                    background_button.visibility = View.VISIBLE
-                    grid_lines_button.visibility = View.VISIBLE
-
-                    Animator.animateMenuItems(
-                        listOf(
-                            listOf(export_button), listOf(background_button), listOf(
-                                grid_lines_button
-                            )
-                        ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
-                        completion = object: Animator.CompletionHandler {
-                            override fun onCompletion() {
-                                animatingTools = false
-                            }
-                        }
-                    )
-
-                    toolboxOpen = true
-                }
-                else {
-                    Animator.animateMenuItems(
-                        listOf(
-                            listOf(export_button), listOf(background_button), listOf(
-                                grid_lines_button
-                            )
-                        ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
-                        completion = object: Animator.CompletionHandler {
-                            override fun onCompletion() {
-                                animatingTools = false
-                            }
-                        }
-                    )
-
-                    toolboxOpen = false
-                }
-            }
+            toggleTools()
         }
 
         // recent colors background
@@ -996,6 +958,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
         }
 
+        // open toolbox
+        toggleTools()
+
         // tablet & lefty righty
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
@@ -1010,6 +975,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
 
                     color_picker_frame.layoutParams = layoutParams
+
+                    // default color buttons size
+                    var frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 64), Utils.dpToPx(context, 64))
+                    frameLayoutParams.rightMargin = Utils.dpToPx(context, 20)
+
+                    default_black_color_action.layoutParams = frameLayoutParams
+
+                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 64), Utils.dpToPx(context, 64))
+                    frameLayoutParams.rightMargin = 0
+
+                    default_white_color_action.layoutParams = frameLayoutParams
 
                     // paint panel width
                     layoutParams = ConstraintLayout.LayoutParams(
@@ -1421,6 +1397,48 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         }
                     } */
                 }
+            }
+        }
+    }
+
+    private fun toggleTools() {
+        if (!animatingTools) {
+            animatingTools = true
+            if (!toolboxOpen) {
+                export_button.visibility = View.VISIBLE
+                background_button.visibility = View.VISIBLE
+                grid_lines_button.visibility = View.VISIBLE
+
+                Animator.animateMenuItems(
+                    listOf(
+                        listOf(export_button), listOf(background_button), listOf(
+                            grid_lines_button
+                        )
+                    ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingTools = false
+                        }
+                    }
+                )
+
+                toolboxOpen = true
+            }
+            else {
+                Animator.animateMenuItems(
+                    listOf(
+                        listOf(export_button), listOf(background_button), listOf(
+                            grid_lines_button
+                        )
+                    ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingTools = false
+                        }
+                    }
+                )
+
+                toolboxOpen = false
             }
         }
     }
