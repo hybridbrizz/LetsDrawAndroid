@@ -124,6 +124,14 @@ class SessionSettings {
 
     var palettes: MutableList<Palette> = ArrayList()
 
+    var selectedPaletteIndex = 0
+    set(value) {
+        field = value
+        palette = palettes[selectedPaletteIndex]
+    }
+
+    lateinit var palette: Palette
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -202,6 +210,8 @@ class SessionSettings {
         ed.putBoolean("first_launch", firstLaunch)
 
         ed.putString("palettes", palettesJsonStr())
+
+        ed.putInt("selected_palette_index", selectedPaletteIndex)
 
         ed.apply()
     }
@@ -286,6 +296,11 @@ class SessionSettings {
         firstLaunch = getSharedPrefs(context).getBoolean("first_launch", true)
 
         palettes = palettesFromJsonString(getSharedPrefs(context).getString("palettes", "[]")!!).toMutableList()
+
+        // recent colors palette
+        palettes.add(0, Palette("Recent Colors"))
+
+        selectedPaletteIndex = getSharedPrefs(context).getInt("selected_palette_index", 0)
 
         /*val palette1 = Palette("Palette 1")
         palette1.addColor(-1)

@@ -41,6 +41,7 @@ import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.ericversteeg.liquidocean.view.PaintQuantityBar
 import com.ericversteeg.liquidocean.view.PaintQuantityCircle
+import com.google.android.material.snackbar.Snackbar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
@@ -1103,7 +1104,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 // background texture scaling
                 context?.apply {
-                    val backgroundDrawable = resources.getDrawable(SessionSettings.instance.panelBackgroundResId) as BitmapDrawable
+                    val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelBackgroundResId) as BitmapDrawable
 
                     if (SessionSettings.instance.tablet) {
                         val scale = view.height / backgroundDrawable.bitmap.height.toFloat()
@@ -1732,23 +1733,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         object_selection_view.visibility = View.GONE
     }
 
-    override fun onPaletteSelected(palette: Palette) {
+    override fun onPaletteSelected(palette: Palette, index: Int) {
         palette_name_text.text = palette.name
 
         pixel_history_fragment_container.visibility = View.GONE
     }
 
     override fun onPaletteDeleted(palette: Palette) {
-        showPaletteUndoSnackbar()
+        showPaletteUndoSnackbar(palette)
     }
 
-    fun showPaletteUndoSnackbar() {
-        /*palettesFragment?.apply {
-            val snackbar = Snackbar.make(view!!, "Text here!", Snackbar.LENGTH_LONG)
+    fun showPaletteUndoSnackbar(palette: Palette) {
+        palettesFragment?.apply {
+            val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
             snackbar.setAction("Undo") {
                 undoDelete()
             }
             snackbar.show()
-        }*/
+        }
     }
 }

@@ -102,8 +102,10 @@ class PalettesFragment: Fragment() {
         )
 
         adapter.setOnItemClickListener(object: PalettesRecyclerViewAdapter.OnItemClickListener<Palette> {
-            override fun onItemClicked(item: Palette) {
-                palettesFragmentListener?.onPaletteSelected(item)
+            override fun onItemClicked(item: Palette, index: Int) {
+                SessionSettings.instance.selectedPaletteIndex = index
+
+                palettesFragmentListener?.onPaletteSelected(item, index)
             }
 
             override fun onItemDeleted(item: Palette) {

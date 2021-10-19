@@ -58,7 +58,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         holder.numColorsTextView.text = String.format("%d colors", palette.colors.size)
 
         holder.itemView.setOnClickListener {
-            itemClickListener?.onItemClicked(palette)
+            itemClickListener?.onItemClicked(palette, position - 1)
         }
     }
 
@@ -85,7 +85,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
     }
 
     fun undoDelete() {
-        palettes.add(recentlyDeletedItemPosition!!, recentlyDeletedItem!!)
+        palettes.add(recentlyDeletedItemPosition!! - 1, recentlyDeletedItem!!)
         notifyItemInserted(recentlyDeletedItemPosition!!)
     }
 
@@ -101,7 +101,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
     }
 
     interface OnItemClickListener<T> {
-        fun onItemClicked(item: T)
+        fun onItemClicked(item: T, index: Int)
         fun onItemDeleted(item: T)
     }
 }
