@@ -35,6 +35,7 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
+import com.ericversteeg.liquidocean.model.Palette
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
@@ -56,7 +57,8 @@ import kotlin.math.min
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
-    InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener {
+    InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
+    PalettesFragmentListener {
 
     var scaleFactor = 1f
 
@@ -93,6 +95,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var paintTextModeHide = 2
 
     var animatingTools = false
+
+    var palettesFragment: PalettesFragment? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -358,6 +362,68 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    private fun showPalettesFragmentPopover() {
+        val screenPoint = Point(surface_view.width, 0)
+
+        fragmentManager?.apply {
+            // set bottom-left of view to screenPoint
+
+            pixel_history_fragment_container?.apply {
+                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                    context,
+                    10
+                )).toFloat()
+
+                pixel_history_fragment_container.x = dX
+                pixel_history_fragment_container.y = dY
+
+                if (firstInfoTap) {
+                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                        context,
+                        firstInfoTapFixYOffset
+                    )
+                    firstInfoTap = false
+                }
+
+                view?.apply {
+                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x =
+                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y =
+                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    val fragment = PalettesFragment()
+
+                    palettesFragment = fragment
+
+                    fragment.palettesFragmentListener = this@InteractiveCanvasFragment
+
+                    beginTransaction().replace(
+                        R.id.pixel_history_fragment_container,
+                        fragment
+                    ).commit()
+
+                    pixel_history_fragment_container.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE
     }
@@ -457,6 +523,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.artExportListener = this
+
+        // palette
+        palette_name_text.setOnClickListener {
+            showPalettesFragmentPopover()
+        }
 
         if (SessionSettings.instance.showPaintBar) {
             surface_view.paintActionListener = paint_qty_bar
@@ -1659,5 +1730,25 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     override fun onObjectSelectionEnded() {
         object_selection_view.visibility = View.GONE
+    }
+
+    override fun onPaletteSelected(palette: Palette) {
+        palette_name_text.text = palette.name
+
+        pixel_history_fragment_container.visibility = View.GONE
+    }
+
+    override fun onPaletteDeleted(palette: Palette) {
+        showPaletteUndoSnackbar()
+    }
+
+    fun showPaletteUndoSnackbar() {
+        /*palettesFragment?.apply {
+            val snackbar = Snackbar.make(view!!, "Text here!", Snackbar.LENGTH_LONG)
+            snackbar.setAction("Undo") {
+                undoDelete()
+            }
+            snackbar.show()
+        }*/
     }
 }

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Point
+import android.util.Log
 import androidx.collection.ArraySet
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Utils
@@ -121,6 +122,8 @@ class SessionSettings {
 
     var firstLaunch = true
 
+    var palettes: MutableList<Palette> = ArrayList()
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -198,6 +201,8 @@ class SessionSettings {
 
         ed.putBoolean("first_launch", firstLaunch)
 
+        ed.putString("palettes", palettesJsonStr())
+
         ed.apply()
     }
 
@@ -219,7 +224,8 @@ class SessionSettings {
 
         startTimeMillis = getSharedPrefs(context).getLong("start_time", System.currentTimeMillis())
 
-        uniqueId = getSharedPrefs(context).getString("installation_id", UUID.randomUUID().toString())
+        uniqueId =
+            getSharedPrefs(context).getString("installation_id", UUID.randomUUID().toString())
         sentUniqueId = getSharedPrefs(context).getBoolean("sent_uuid", false)
 
         xp = getSharedPrefs(context).getInt("xp", 0)
@@ -232,7 +238,8 @@ class SessionSettings {
 
         canvasLockBorder = getSharedPrefs(context).getBoolean("lock_border", false)
 
-        canvasLockBorderColor = getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
+        canvasLockBorderColor =
+            getSharedPrefs(context).getInt("lock_border_color", Color.parseColor("#66FF0000"))
 
         promptToExit = getSharedPrefs(context).getBoolean("prompt_to_exit", false)
 
@@ -254,7 +261,10 @@ class SessionSettings {
 
         canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", -1)
 
-        closePaintBackButtonColor = getSharedPrefs(context).getInt("close_paint_back_button_color", ActionButtonView.yellowPaint.color)
+        closePaintBackButtonColor = getSharedPrefs(context).getInt(
+            "close_paint_back_button_color",
+            ActionButtonView.yellowPaint.color
+        )
 
         colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", true)
 
@@ -262,7 +272,8 @@ class SessionSettings {
 
         showPaintCircle = getSharedPrefs(context).getBoolean("show_paint_circle", false)
 
-        paintBarColor = getSharedPrefs(context).getInt("paint_bar_color", Color.parseColor("#FFAAAAAA"))
+        paintBarColor =
+            getSharedPrefs(context).getInt("paint_bar_color", Color.parseColor("#FFAAAAAA"))
 
         rightHanded = getSharedPrefs(context).getBoolean("right_handed", false)
 
@@ -273,6 +284,19 @@ class SessionSettings {
         pincodeSet = getSharedPrefs(context).getBoolean("pin_code_set", false)
 
         firstLaunch = getSharedPrefs(context).getBoolean("first_launch", true)
+
+        palettes = palettesFromJsonString(getSharedPrefs(context).getString("palettes", "[]")!!).toMutableList()
+
+        /*val palette1 = Palette("Palette 1")
+        palette1.addColor(-1)
+
+        palettes.add(palette1)
+
+        val palette2 = Palette("Palette 2")
+        palette2.addColor(0)
+        palette2.addColor(103040)
+
+        palettes.add(palette2)*/
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -375,6 +399,47 @@ class SessionSettings {
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.paint_bucket_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fire_badge_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fries_json))
+    }
+
+    fun addPalette(name: String) {
+        palettes.add(Palette((name)))
+    }
+
+    fun removePalette(pos: Int) {
+        palettes.removeAt(pos)
+    }
+
+    private fun palettesJsonStr(): String {
+        val palettesArray = arrayOfNulls<Map<Any?, Any?>>(palettes.size)
+
+        for (i in palettesArray.indices) {
+            palettesArray[i] = palettes[i].toMap()
+        }
+
+        return JSONArray(palettesArray).toString()
+    }
+
+    private fun palettesFromJsonString(jsonStr: String): List<Palette> {
+        val palettes: MutableList<Palette> = ArrayList()
+
+        val palettesJsonArr = JSONArray(jsonStr)
+        for (i in 0 until palettesJsonArr.length()) {
+            val paletteJsonObj = palettesJsonArr.getJSONObject(i)
+
+            val name = paletteJsonObj.getString("name")
+            val colorsJsonArr = paletteJsonObj.getJSONArray("colors")
+
+            val palette = Palette(name)
+
+            for (j in 0 until colorsJsonArr.length()) {
+                val color = colorsJsonArr.getInt(j)
+                palette.addColor(color)
+            }
+
+            palettes.add(palette)
+        }
+
+        return palettes
     }
 
     companion object {

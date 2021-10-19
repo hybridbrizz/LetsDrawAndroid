@@ -71,9 +71,9 @@ class MenuFragment: Fragment() {
 
         back_button.visibility = View.GONE
 
-        play_button.type = ActionButtonView.Type.PLAY
-        play_button.topLayer = true
-        play_button_bottom_layer.type = ActionButtonView.Type.PLAY
+        draw_button.type = ActionButtonView.Type.DRAW
+        draw_button.topLayer = true
+        draw_button_bottom_layer.type = ActionButtonView.Type.DRAW
 
         options_button.type = ActionButtonView.Type.OPTIONS
         options_button.topLayer = true
@@ -121,8 +121,8 @@ class MenuFragment: Fragment() {
         background_option_classic.type = ActionButtonView.Type.BACKGROUND_CLASSIC
         background_option_chess.type = ActionButtonView.Type.BACKGROUND_CHESS
 
-        play_button.setOnClickListener {
-            // menuButtonListener?.onMenuButtonSelected(playMenuIndex)
+        draw_button.setOnClickListener {
+            /*// menuButtonListener?.onMenuButtonSelected(playMenuIndex)
             play_button_container.visibility = View.GONE
 
             options_button_container.visibility = View.GONE
@@ -142,7 +142,9 @@ class MenuFragment: Fragment() {
             back_button.visibility = View.VISIBLE
             backCount++
 
-            animateMenuButtons(1)
+            animateMenuButtons(1)*/
+
+            menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
         }
 
         options_button.setOnClickListener {
@@ -276,7 +278,7 @@ class MenuFragment: Fragment() {
         if (!animatingMenu) {
             animatingMenu = true
             if (layer == 0) {
-                Animator.animateMenuItems(listOf(listOf(play_button_bottom_layer, play_button), listOf(options_button_bottom_layer, options_button),
+                Animator.animateMenuItems(listOf(listOf(draw_button_bottom_layer, draw_button), listOf(options_button_bottom_layer, options_button),
                     listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -370,7 +372,7 @@ class MenuFragment: Fragment() {
     }
 
     private fun resetMenu() {
-        play_button_container.visibility = View.VISIBLE
+        draw_button_container.visibility = View.VISIBLE
 
         options_button_container.visibility = View.VISIBLE
 

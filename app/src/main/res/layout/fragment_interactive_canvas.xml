@@ -56,6 +56,18 @@
             android:background="@drawable/marble_2">
 
         <TextView
+                android:id="@+id/palette_name_text"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textSize="10pt"
+                android:textStyle="bold"
+                android:text="Recent Colors"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
                 android:id="@+id/drops_amt_text"
                 android:visibility="gone"
                 android:layout_width="match_parent"
