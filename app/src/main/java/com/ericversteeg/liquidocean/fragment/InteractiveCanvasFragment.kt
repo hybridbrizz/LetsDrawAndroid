@@ -9,6 +9,8 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -19,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -34,6 +37,7 @@ import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.ericversteeg.liquidocean.view.PaintQuantityBar
 import com.ericversteeg.liquidocean.view.PaintQuantityCircle
 import com.plattysoft.leonids.ParticleSystem
@@ -42,6 +46,7 @@ import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
+import java.lang.Exception
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -362,7 +367,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     override fun onArtExported(pixelPositions: List<InteractiveCanvas.RestorePoint>) {
-        showExportBorder(false)
+        toggleExportBorder(false)
 
         val fragment = ArtExportFragment()
         fragment.art = pixelPositions
@@ -389,7 +394,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         export_action.touchState = ActionButtonView.TouchState.INACTIVE
     }
 
-    private fun showExportBorder(show: Boolean) {
+    private fun toggleExportBorder(show: Boolean) {
         if (show) {
             context?.apply {
                 val drawable: GradientDrawable = export_border_view.background as GradientDrawable
@@ -402,6 +407,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
         else {
             export_border_view.visibility = View.GONE
+            export_action.touchState = ActionButtonView.TouchState.INACTIVE
         }
     }
 
@@ -540,8 +546,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
-        recent_colors.type = ActionButtonView.Type.DOT
-        recent_colors_button.actionBtnView = recent_colors
+        recent_colors_action.type = ActionButtonView.Type.DOT
+        recent_colors_button.actionBtnView = recent_colors_action
 
         export_action.type = ActionButtonView.Type.EXPORT
         export_button.actionBtnView = export_action
@@ -572,13 +578,35 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             color_picker_view.setInitialColor(ActionButtonView.whitePaint.color)
         }
 
+        val textChangeListener = object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                try {
+                    val color = Color.parseColor("#$s")
+                    color_picker_view.setInitialColor(color)
+                }
+                catch (exception: Exception) {
+
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+
+            }
+        }
+
+        color_hex_string_input.addTextChangedListener(textChangeListener)
+
         color_picker_view.setEnabledAlpha(false)
 
         color_picker_view.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
                 paint_indicator_view_bottom_layer.setPaintColor(color)
 
-                /*if (paint_indicator_view.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
+                if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
                     paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
@@ -586,14 +614,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
-                else if (paint_indicator_view.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
+                else if (PaintColorIndicator.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
                     paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
                     paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                }*/
+                }
 
                 /* if (Utils.isColorDark(color)) {
                     paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white_border))
@@ -602,6 +630,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white))
                     DrawableCompat.setTint(paint_yes.drawable, color)
                 } */
+
+                color_hex_string_input.removeTextChangedListener(textChangeListener)
+
+                val hexColor = java.lang.String.format("%06X", 0xFFFFFF and color)
+                color_hex_string_input.setText(hexColor)
+
+                color_hex_string_input.addTextChangedListener(textChangeListener)
             }
         })
 
@@ -635,60 +670,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         paint_panel_button.setOnClickListener {
-            paint_panel.visibility = View.VISIBLE
-            paint_panel_button.visibility = View.GONE
-
-            export_button.visibility = View.INVISIBLE
-            background_button.visibility = View.INVISIBLE
-
-            open_tools_button.visibility = View.INVISIBLE
-
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
-            }
-
-            var startLoc = paint_panel.width.toFloat() * 0.99F
-            if (SessionSettings.instance.rightHanded) {
-                startLoc = -startLoc
-            }
-
-            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
-                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
-                    AccelerateDecelerateInterpolator()
-                ).withEndAction {
-
-                    startParticleEmitters()
-
-                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
-                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
-
-                }.start()
-
-                if (SessionSettings.instance.canvasLockBorder) {
-                    context?.apply {
-                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
-                        drawable.setStroke(
-                            Utils.dpToPx(this, 4),
-                            SessionSettings.instance.canvasLockBorderColor
-                        ) // set stroke width and stroke color
-                    }
-
-                    paint_warning_frame.visibility = View.VISIBLE
-                    paint_warning_frame.alpha = 0F
-                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
-                }
-            }.start()
-
-            surface_view.startPainting()
-
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
-            }
-
-            recent_colors_button.visibility = View.VISIBLE
-            recent_colors_container.visibility = View.GONE
-
-            back_button.visibility = View.GONE
+            togglePaintPanel(true)
         }
 
         paint_yes.setOnClickListener {
@@ -753,27 +735,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         close_paint_panel.setOnClickListener {
-            surface_view.endPainting(false)
-
-            paint_panel.visibility = View.GONE
-            paint_warning_frame.visibility = View.GONE
-
-            paint_panel_button.visibility = View.VISIBLE
-
-            recent_colors_button.visibility = View.GONE
-            recent_colors_container.visibility = View.GONE
-
-            if (toolboxOpen) {
-                export_button.visibility = View.VISIBLE
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
-            }
-
-            back_button.visibility = View.VISIBLE
-
-            open_tools_button.visibility = View.VISIBLE
-
-            stopEmittingParticles()
+            togglePaintPanel(false)
         }
 
         paint_qty_bar.panelThemeConfig = panelThemeConfig
@@ -853,8 +815,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // recent colors
         recent_colors_button.setOnClickListener {
-            recent_colors_container.visibility = View.VISIBLE
-            recent_colors_button.visibility = View.GONE
+            if (recent_colors_container.visibility != View.VISIBLE) {
+                recent_colors_container.visibility = View.VISIBLE
+                recent_colors_action.visibility = View.INVISIBLE
+
+                if (paint_panel.visibility != View.VISIBLE) {
+                    togglePaintPanel(true)
+                }
+            }
+            else {
+                recent_colors_container.visibility = View.GONE
+                recent_colors_action.visibility = View.VISIBLE
+            }
         }
 
         // back button
@@ -863,8 +835,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 export_fragment_container.visibility = View.INVISIBLE
                 surface_view.endExport()
 
-                showExportBorder(false)
-                export_action.touchState = ActionButtonView.TouchState.INACTIVE
+                toggleExportBorder(false)
 
                 // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
@@ -883,11 +854,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             surface_view.startExport()
             export_action.touchState = ActionButtonView.TouchState.ACTIVE
 
-            showExportBorder(true)
+            toggleExportBorder(true)
         }
 
         // background button
         background_button.setOnClickListener {
+            toggleExportBorder(false)
+
             if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
                 SessionSettings.instance.backgroundColorsIndex = 0
             }
@@ -904,6 +877,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // grid lines toggle button
         grid_lines_button.setOnClickListener {
+            toggleExportBorder(false)
+
             SessionSettings.instance.gridLineMode += 1
 
             if (SessionSettings.instance.gridLineMode > 1) {
@@ -1151,9 +1126,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
                     recent_colors_button.layoutParams = layoutParams
 
-                    layoutParams3 = recent_colors.layoutParams as FrameLayout.LayoutParams
+                    layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
                     layoutParams3.gravity = Gravity.RIGHT or Gravity.BOTTOM
-                    recent_colors.layoutParams = layoutParams3
+                    recent_colors_action.layoutParams = layoutParams3
 
                     // recent colors container
                     layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
@@ -1401,6 +1376,87 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    private fun togglePaintPanel(show: Boolean) {
+        if (show) {
+            paint_panel.visibility = View.VISIBLE
+            paint_panel_button.visibility = View.GONE
+
+            export_button.visibility = View.INVISIBLE
+            background_button.visibility = View.INVISIBLE
+
+            open_tools_button.visibility = View.INVISIBLE
+
+            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+                pixel_history_fragment_container.visibility = View.GONE
+            }
+
+            var startLoc = paint_panel.width.toFloat() * 0.99F
+            if (SessionSettings.instance.rightHanded) {
+                startLoc = -startLoc
+            }
+
+            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
+                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
+                    AccelerateDecelerateInterpolator()
+                ).withEndAction {
+
+                    startParticleEmitters()
+
+                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
+                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
+
+                }.start()
+
+                if (SessionSettings.instance.canvasLockBorder) {
+                    context?.apply {
+                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
+                        drawable.setStroke(
+                            Utils.dpToPx(this, 4),
+                            SessionSettings.instance.canvasLockBorderColor
+                        ) // set stroke width and stroke color
+                    }
+
+                    paint_warning_frame.visibility = View.VISIBLE
+                    paint_warning_frame.alpha = 0F
+                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+                }
+            }.start()
+
+            surface_view.startPainting()
+
+            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+                pixel_history_fragment_container.visibility = View.GONE
+            }
+
+            back_button.visibility = View.GONE
+        }
+        else {
+            surface_view.endPainting(false)
+
+            paint_panel.visibility = View.GONE
+            paint_warning_frame.visibility = View.GONE
+
+            paint_panel_button.visibility = View.VISIBLE
+
+            recent_colors_action.visibility = View.VISIBLE
+            recent_colors_container.visibility = View.GONE
+
+            if (toolboxOpen) {
+                export_button.visibility = View.VISIBLE
+                background_button.visibility = View.VISIBLE
+                grid_lines_button.visibility = View.VISIBLE
+            }
+
+            back_button.visibility = View.VISIBLE
+
+            open_tools_button.visibility = View.VISIBLE
+
+            toggleExportBorder(false)
+
+            stopEmittingParticles()
+        }
+    }
+
     private fun toggleTools() {
         if (!animatingTools) {
             animatingTools = true
@@ -1581,7 +1637,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         export_action.invalidate()
         background_action.invalidate()
         grid_lines_action.invalidate()
-        recent_colors.invalidate()
+        recent_colors_action.invalidate()
         open_tools_action.invalidate()
     }
 

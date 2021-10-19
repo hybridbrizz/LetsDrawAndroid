@@ -51,13 +51,30 @@ class ArtExportFragment: Fragment() {
             listener?.onArtExportBack()
         }
 
-        actual_size_switch.setOnCheckedChangeListener { _, isChecked ->
+        screen_size_switch.setOnCheckedChangeListener { _, isChecked ->
             art_view.actualSize = isChecked
+
+            if (isChecked) {
+                actual_size_text.visibility = View.VISIBLE
+                screen_size_text.visibility = View.INVISIBLE
+            }
+            else {
+                actual_size_text.visibility = View.INVISIBLE
+                screen_size_text.visibility = View.VISIBLE
+            }
         }
 
         actual_size_text.setOnClickListener {
-            actual_size_switch.isChecked = !actual_size_switch.isChecked
+            screen_size_switch.isChecked = !screen_size_switch.isChecked
+            actual_size_text.visibility = View.INVISIBLE
         }
+
+        screen_size_text.setOnClickListener {
+            screen_size_switch.isChecked = !screen_size_switch.isChecked
+            screen_size_text.visibility = View.INVISIBLE
+        }
+
+        actual_size_text.visibility = View.INVISIBLE
 
         art_view.showBackground = true
         art_view.art = art

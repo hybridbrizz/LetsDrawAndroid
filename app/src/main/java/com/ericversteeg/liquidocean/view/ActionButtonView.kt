@@ -571,18 +571,19 @@ class ActionButtonView: View {
     }
 
     private fun drawPaintAction(selected: Boolean, canvas: Canvas) {
-        rows = 4
-        cols = 4
+        rows = 3
+        cols = 3
 
-        var primaryPaint = lightGrayPaint
-        var accentPaint = greenPaint
+        var primaryPaint = semiPaint
+        var accentPaint = semiPaint
 
         var outLinePaint = Paint()
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
         if (SessionSettings.instance.darkIcons) {
-            primaryPaint = darkGrayPaint
+            primaryPaint = semiDarkPaint
+            accentPaint = semiDarkPaint
             outLinePaint.color = whitePaint.color
         }
 
@@ -595,20 +596,16 @@ class ActionButtonView: View {
 
         canvas.apply {
             // row 1
-            drawPixel(3, 0, accentPaint, canvas)
+            drawPixel(2, 0, primaryPaint, canvas)
             //drawOutline(3, 0, outLinePaint, canvas)
 
             // row 2
-            drawPixel(2, 1, primaryPaint, canvas)
+            drawPixel(1, 1, primaryPaint, canvas)
             //drawOutline(2, 1, outLinePaint, canvas)
 
             // row 3
-            drawPixel(1, 2, primaryPaint, canvas)
+            drawPixel(0, 2, primaryPaint, canvas)
             //drawOutline(1, 2, outLinePaint, canvas)
-
-            // row 4
-            drawPixel(0, 3, primaryPaint, canvas)
-            //drawOutline(0, 3, outLinePaint, canvas)
         }
     }
 
@@ -705,7 +702,7 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawExportAction(light: Boolean, canvas: Canvas) {
+    private fun drawExportAction(selected: Boolean, canvas: Canvas) {
         rows = 3
         cols = 3
 
@@ -714,7 +711,7 @@ class ActionButtonView: View {
             paint = semiDarkPaint
         }
 
-        if (light) {
+        if (selected) {
             paint = lightYellowPaint
         }
 
@@ -851,18 +848,17 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawDotAction(light: Boolean, canvas: Canvas) {
+    private fun drawDotAction(selected: Boolean, canvas: Canvas) {
         rows = 1
         cols = 1
 
-        var paint = semiLightPaint
-
-        if (light) {
-            paint = lightYellowPaint
+        var paint = semiPaint
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
         }
 
-        if (SessionSettings.instance.darkIcons) {
-            paint = semiDarkLightPaint
+        if (selected) {
+            paint = lightYellowPaint
         }
 
         canvas.apply {

@@ -34,7 +34,10 @@
     <string name="option_paint_indicator_square">Square palette</string>
     <string name="step1">It\'s easy to get started. If you are in Single Play, open the paint drawer and select a color. Tap and drag anywhere to draw. If you are playing World Play you will have to wait a small amount of time
     for the next Paint Event. A paint event occurs every 5 minutes and when it happens everyone gets some paint to use on the World Canvas. If you would like to know when the next paint batch is going to arrive, tap on the paint bar for a countdown.</string>
-    <string name="step2">If you are new to pixel art or drawing, remember that with enough practice anyone can learn to do anything. It\'s fun! Start off easy and work your way up, however slowly, to slightly more complex subjects over time.</string>
+    <string name="step2">The first tool is the export tool. Tap the icon then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
+    save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
+    <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas background themes.</string>
+    <string name="step4">The third and final tool is the grid line toggle tool. Tap the icon to turn on and off grid lines.</string>
     <string name="option_show_paint_bar_title">Show paint meter bar</string>
     <string name="option_paint_bar_color_title">Paint meter color</string>
     <string name="option_show_paint_circle_title">Show paint meter circle</string>
@@ -46,5 +49,6 @@
     <string name="old_pincode_title">Old 8-digit pincode</string>
     <string name="credits">Credits</string>
     <string name="deviant_art"><u>Deviant Art</u></string>
-    <string name="actual_size">Actual Pixel Size</string>
+    <string name="actual_size">Pixel Size</string>
+    <string name="screen_size">Screen Size</string>
 </resources>

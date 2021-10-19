@@ -56,7 +56,12 @@ class HowtoFragment: Fragment() {
         paint_action.type = ActionButtonView.Type.PAINT
         paint_action.isStatic = true
 
-        static_image_2.jsonResId = R.raw.hfs_json
+        share_action.type = ActionButtonView.Type.EXPORT
+        share_action.isStatic = true
+
+        howto_background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
+
+        howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
 
         back_button.setOnClickListener {
             listener?.onStatsBack()

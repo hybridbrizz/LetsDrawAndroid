@@ -334,22 +334,22 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
             <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="center_horizontal">
+                    android:layout_marginBottom="10dp">
 
                 <com.ericversteeg.liquidocean.view.ActionButtonFrame
                         android:id="@+id/default_black_color_button"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp">
 
                     <com.ericversteeg.liquidocean.view.ActionButtonView
                             android:id="@+id/default_black_color_action"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:layout_marginEnd="20dp" />
+                            android:layout_marginEnd="10dp" />
 
                 </com.ericversteeg.liquidocean.view.ActionButtonFrame>
 
@@ -364,6 +364,21 @@
                             android:layout_height="40dp" />
 
                 </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+                <View
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1" />
+
+                <EditText
+                        android:id="@+id/color_hex_string_input"
+                        android:layout_width="100dp"
+                        android:layout_height="50dp"
+                        android:layout_marginEnd="10dp"
+                        android:textSize="10pt"
+                        android:lines="1"
+                        android:textColor="@android:color/white"
+                        android:inputType="textCapCharacters" />
 
             </LinearLayout>
 
@@ -652,14 +667,13 @@
 
     <com.ericversteeg.liquidocean.view.ActionButtonFrame
             android:id="@+id/recent_colors_button"
-            android:visibility="gone"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/recent_colors"
+                android:id="@+id/recent_colors_action"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
                 android:layout_margin="24dp"
