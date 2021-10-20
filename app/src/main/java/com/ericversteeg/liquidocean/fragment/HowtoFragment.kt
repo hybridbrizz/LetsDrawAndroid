@@ -1,11 +1,13 @@
 package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -18,12 +20,8 @@ import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_howto.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_button
-import kotlinx.android.synthetic.main.fragment_options.*
-import kotlinx.android.synthetic.main.fragment_stats.*
-import java.text.NumberFormat
 import java.util.*
 
 class HowtoFragment: Fragment() {
@@ -63,6 +61,22 @@ class HowtoFragment: Fragment() {
 
         howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
 
+        howto_dot_action_1.type = ActionButtonView.Type.DOT
+        howto_dot_action_2.type = ActionButtonView.Type.DOT
+
+        val colorStrs = arrayOf("#000000", "#222034", "#45283C", "#663931", "#8F563B", "#DF7126", "#D9A066", "#EEC39A",
+                                "#FBF236", "#99E550", "#6ABE30", "#37946E", "#4B692F", "#524B24", "#323C39", "#3F3F74")
+
+        var i = 0
+        for (v in recent_colors_container.children) {
+            (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
+            v.representingColor = Color.parseColor(colorStrs[i])
+            v.semiGloss = true
+            v.isStatic = true
+
+            i++
+        }
+
         back_button.setOnClickListener {
             listener?.onStatsBack()
         }
@@ -71,19 +85,11 @@ class HowtoFragment: Fragment() {
             Animator.animateTitleFromTop(howto_image)
 
             Animator.animateHorizontalViewEnter(step1_text, true)
-            Animator.animateHorizontalViewEnter(static_image_1, true)
+            Animator.animateHorizontalViewEnter(paint_action, true)
+            //Animator.animateHorizontalViewEnter(static_image_1, true)
         }
 
-        getPaintTimerInfo()
-
-        paint_qty_bar_howto.setOnClickListener {
-            if (paint_time_info_howto_container.visibility == View.INVISIBLE) {
-                paint_time_info_howto_container.visibility = View.VISIBLE
-            }
-            else {
-                paint_time_info_howto_container.visibility = View.INVISIBLE
-            }
-        }
+        //getPaintTimerInfo()
 
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
@@ -102,7 +108,7 @@ class HowtoFragment: Fragment() {
         paintEventTimer?.cancel()
     }
 
-    private fun getPaintTimerInfo() {
+    /*private fun getPaintTimerInfo() {
         val requestQueue = Volley.newRequestQueue(context)
 
         val request = object: JsonObjectRequest(
@@ -136,9 +142,9 @@ class HowtoFragment: Fragment() {
         }
 
         requestQueue.add(request)
-    }
+    }*/
 
-    private fun setupPaintEventTimer() {
+    /*private fun setupPaintEventTimer() {
         paintEventTimer = Timer()
         paintEventTimer?.schedule(object : TimerTask() {
             override fun run() {
@@ -169,5 +175,5 @@ class HowtoFragment: Fragment() {
                 }
             }
         }, 0, 1000)
-    }
+    }*/
 }

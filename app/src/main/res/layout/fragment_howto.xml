@@ -35,76 +35,26 @@
 
                 <TextView
                         android:id="@+id/step1_text"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
-                        android:layout_marginLeft="10dp"
-                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="150dp"
                         android:text="@string/step1"
+                        android:gravity="center_vertical"
                         app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintRight_toLeftOf="@id/static_image_1"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                        android:id="@+id/static_image_1"
-                        android:layout_width="200dp"
-                        android:layout_height="0dp"
-                        android:layout_marginLeft="20dp"
-                        app:layout_constraintTop_toTopOf="@id/step1_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step1_text"
-                        app:layout_constraintRight_toRightOf="parent">
-
-                    <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            app:layout_constraintLeft_toLeftOf="parent"
-                            app:layout_constraintRight_toRightOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            android:gravity="center_horizontal">
-
-                        <com.ericversteeg.liquidocean.view.ActionButtonView
-                                android:id="@+id/paint_action"
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
-                                android:layout_marginBottom="50dp" />
-
-                        <com.ericversteeg.liquidocean.view.PaintQuantityBar
-                                android:id="@+id/paint_qty_bar_howto"
-                                android:layout_width="78dp"
-                                android:layout_height="18dp" />
-
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                                android:id="@+id/paint_time_info_howto_container"
-                                android:visibility="invisible"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:background="@drawable/timer_text_background">
-
-                        <TextView
-                                android:id="@+id/paint_time_info_howto"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textStyle="bold"
-                                android:textSize="16sp"
-                                android:layout_marginLeft="10dp"
-                                android:layout_marginRight="10dp"
-                                android:textColor="#FFFFFFFF"
-                                android:layout_margin="10dp"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintBottom_toBottomOf="parent"
-                                app:layout_constraintLeft_toLeftOf="parent"
-                                app:layout_constraintRight_toRightOf="parent" />
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-
-                    </LinearLayout>
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/paint_action"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginEnd="50dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -130,10 +80,10 @@
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
                         android:text="@string/step2"
-                        android:layout_marginLeft="200dp"
+                        android:layout_marginLeft="150dp"
                         android:layout_marginRight="10dp"
                         app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintLeft_toRightOf="@id/share_action"
                         app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -190,11 +140,231 @@
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
                         android:text="@string/step4"
-                        android:layout_marginLeft="200dp"
+                        android:layout_marginStart="200dp"
                         android:layout_marginRight="10dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"
+                    android:layout_marginBottom="150dp">
+
+                <TextView
+                        android:id="@+id/step5_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="#FFDDDDDD"
+                        android:text="@string/step5"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="200dp"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent" />
+
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/howto_dot_action_1"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="50dp"
+                        app:layout_constraintTop_toTopOf="@id/step5_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step5_text"
+                        app:layout_constraintRight_toRightOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"
+                    android:layout_marginBottom="150dp">
+
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/howto_dot_action_2"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="50dp"
+                        app:layout_constraintTop_toTopOf="@id/step6_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step6_text"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                        android:id="@+id/step6_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="#FFDDDDDD"
+                        android:text="@string/step6"
+                        android:layout_marginLeft="200dp"
+                        android:layout_marginRight="10dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"
+                    android:layout_marginBottom="150dp">
+
+                <TextView
+                        android:id="@+id/step7_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="#FFDDDDDD"
+                        android:text="@string/step7"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="200dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/recent_colors_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        app:layout_constraintTop_toTopOf="@id/step7_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step7_text"
+                        app:layout_constraintRight_toRightOf="parent">
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent1"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent2"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintLeft_toRightOf="@id/recent1"/>
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent3"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintLeft_toRightOf="@id/recent2"/>
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent4"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintLeft_toRightOf="@id/recent3"/>
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent5"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/recent1" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent6"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent5"
+                            app:layout_constraintTop_toBottomOf="@id/recent2" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent7"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent6"
+                            app:layout_constraintTop_toBottomOf="@id/recent3" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent8"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent7"
+                            app:layout_constraintTop_toBottomOf="@id/recent4" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent9"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/recent5" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent10"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent9"
+                            app:layout_constraintTop_toBottomOf="@id/recent6" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent11"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent10"
+                            app:layout_constraintTop_toBottomOf="@id/recent7" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent12"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent11"
+                            app:layout_constraintTop_toBottomOf="@id/recent8" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent13"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/recent9" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent14"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent13"
+                            app:layout_constraintTop_toBottomOf="@id/recent10" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent15"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent14"
+                            app:layout_constraintTop_toBottomOf="@id/recent11" />
+
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/recent16"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_margin="10dp"
+                            app:layout_constraintLeft_toRightOf="@id/recent15"
+                            app:layout_constraintTop_toBottomOf="@id/recent12" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

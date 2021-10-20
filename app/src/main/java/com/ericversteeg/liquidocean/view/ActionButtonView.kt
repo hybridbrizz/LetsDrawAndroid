@@ -139,6 +139,12 @@ class ActionButtonView: View {
             invalidate()
         }
 
+    var semiGloss = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     var colorMode = ColorMode.WHITE
     set(value) {
         field = value
@@ -736,7 +742,11 @@ class ActionButtonView: View {
             outlinePaint.strokeWidth = 2F
         }
 
-        if (light) {
+        if (semiGloss) {
+            paint = semiPaint
+        }
+
+        if (light && !isStatic) {
             paint = altGreenPaint
         }
 

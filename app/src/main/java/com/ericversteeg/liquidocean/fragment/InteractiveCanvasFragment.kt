@@ -34,10 +34,7 @@ import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
-import com.ericversteeg.liquidocean.model.Palette
-import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.model.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.ericversteeg.liquidocean.view.PaintQuantityBar
@@ -135,6 +132,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         if (world) {
             InteractiveCanvasSocket.instance.socket?.disconnect()
+        }
+        else {
+            context?.apply {
+                SessionSettings.instance.save(this)
+                StatTracker.instance.save(this)
+            }
         }
     }
 

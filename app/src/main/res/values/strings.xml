@@ -33,13 +33,19 @@
     <string name="option_grid_line_color_title">Canvas grid line color</string>
     <string name="option_close_paint_panel_color_title">Close paint button color</string>
     <string name="option_paint_indicator_square">Square palette</string>
-    <string name="step1">It\'s easy to get started. In draw mode, tap the icon in the upper-right to bring up the paint panel. From here you can choose a color. Then once you have just the right color
-    tap and drag anywhere on the canvas to draw. Drag back over any pixels that you want to remove. Then when you want to commit those pixels, tap the green checkmark or if
-    you want to cancel, tap the red x.</string>
+    <string name="step1">It\'s easy to get started. In draw mode, tap the paint icon to bring up the paint panel. From here you can choose a color.
+        Tap and drag anywhere on the canvas to draw that color. Tap and drag back over any pixels that you want to remove. Finalize
+        by tapping the green checkmark, or to cancel tap the red x.</string>
     <string name="step2">The first tool is the export tool. Tap the icon then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
     save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
-    <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas background themes.</string>
-    <string name="step4">The third and final tool is the grid line toggle tool. Tap the icon to turn on and off grid lines.</string>
+    <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas backgrounds.</string>
+    <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines.</string>
+    <string name="step5">The dot below all the tools is the toolbox toggle. Tap it to show and hide tools.</string>
+    <string name="step6">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide your current color palette.</string>
+    <string name="step7">The default color palette is the Recent Color palette. It is composed of all colors that you have used recently. To add a new color palette
+    tap on \"Recent Color\" in the paint panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
+        tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the paint panel. Tap the + icon to add the
+        color to your palette or tap the - icon to remove the color from your palette.</string>
     <string name="option_show_paint_bar_title">Show paint meter bar</string>
     <string name="option_paint_bar_color_title">Paint meter color</string>
     <string name="option_show_paint_circle_title">Show paint meter circle</string>
