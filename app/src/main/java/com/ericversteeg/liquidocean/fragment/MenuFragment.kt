@@ -144,7 +144,25 @@ class MenuFragment: Fragment() {
 
             animateMenuButtons(1)*/
 
-            menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
+            if (!SessionSettings.instance.selectedHand) {
+                draw_button_container.visibility = View.GONE
+                options_button_container.visibility = View.GONE
+                stats_button_container.visibility = View.GONE
+                howto_button_container.visibility = View.GONE
+
+                lefty_button_container.visibility = View.VISIBLE
+                righty_button_container.visibility = View.VISIBLE
+                empty_button_1_container.visibility = View.VISIBLE
+                empty_button_2_container.visibility = View.VISIBLE
+
+                route = singleMenuIndex
+
+                backCount++
+                animateMenuButtons(2)
+            }
+            else {
+                menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
+            }
         }
 
         options_button.setOnClickListener {
@@ -160,24 +178,7 @@ class MenuFragment: Fragment() {
         }
 
         single_button.setOnClickListener {
-            if (!SessionSettings.instance.selectedHand) {
-                single_button_container.visibility = View.GONE
-                world_button_container.visibility = View.GONE
-                dev_button_container.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
-
-                empty_button_1_container.visibility = View.VISIBLE
-
-                route = singleMenuIndex
-
-                backCount++
-                animateMenuButtons(2)
-            }
-            else {
-                menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
-            }
         }
 
         world_button.setOnClickListener {

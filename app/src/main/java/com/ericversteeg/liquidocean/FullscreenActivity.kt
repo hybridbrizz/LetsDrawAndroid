@@ -122,7 +122,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         }
 
         SessionSettings.instance.save(this)
-
         StatTracker.instance.save(this)
     }
 
