@@ -52,7 +52,42 @@ class SessionSettings {
 
     var xp = 0
 
-    var panelBackgroundResId = R.drawable.wood_texture_light
+    val panelResIds = intArrayOf(
+        R.drawable.metal_floor_1,
+        R.drawable.metal_floor_2,
+        R.drawable.foil,
+        R.drawable.rainbow_foil,
+        R.drawable.wood_texture_light,
+        R.drawable.fall_leaves,
+        R.drawable.grass,
+        R.drawable.amb_6,
+        R.drawable.water_texture,
+        R.drawable.space_texture,
+        R.drawable.crystal_8,
+        R.drawable.crystal_10,
+        R.drawable.crystal_1,
+        R.drawable.crystal_2,
+        R.drawable.crystal_4,
+        R.drawable.crystal_5,
+        R.drawable.crystal_6,
+        R.drawable.crystal_7,
+        R.drawable.crystal_3,
+        R.drawable.amb_2,
+        R.drawable.amb_3,
+        R.drawable.amb_4,
+        R.drawable.amb_5,
+        R.drawable.amb_7,
+        R.drawable.amb_8,
+        R.drawable.amb_9,
+        R.drawable.amb_10,
+        R.drawable.amb_11,
+        R.drawable.amb_12,
+        R.drawable.amb_13,
+        R.drawable.amb_14,
+        R.drawable.amb_15
+    )
+
+    var panelBackgroundResIndex = 0
 
     private val defaultCanvasLockBorderColor = Color.parseColor("#66FF0000")
 
@@ -161,7 +196,7 @@ class SessionSettings {
 
         ed.putBoolean("google_auth", googleAuth)
 
-        ed.putInt("panel_texture_id", panelBackgroundResId)
+        ed.putInt("panel_texture_index", panelBackgroundResIndex)
 
         ed.putBoolean("emitters", emittersEnabled)
 
@@ -242,7 +277,7 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResId = getSharedPrefs(context).getInt("panel_texture_id", R.drawable.amb_9)
+        panelBackgroundResIndex = getSharedPrefs(context).getInt("panel_texture_index", 25)
 
         emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 
@@ -297,10 +332,13 @@ class SessionSettings {
 
         palettes = palettesFromJsonString(getSharedPrefs(context).getString("palettes", "[]")!!).toMutableList()
 
+        //palettes = ArrayList()
+
         // recent colors palette
-        palettes.add(0, Palette("Recent Colors"))
+        palettes.add(0, Palette("Recent Color"))
 
         selectedPaletteIndex = getSharedPrefs(context).getInt("selected_palette_index", 0)
+        //selectedPaletteIndex = 0
 
         /*val palette1 = Palette("Palette 1")
         palette1.addColor(-1)
@@ -425,10 +463,10 @@ class SessionSettings {
     }
 
     private fun palettesJsonStr(): String {
-        val palettesArray = arrayOfNulls<Map<Any?, Any?>>(palettes.size)
+        val palettesArray = arrayOfNulls<Map<Any?, Any?>>(palettes.size - 1)
 
         for (i in palettesArray.indices) {
-            palettesArray[i] = palettes[i].toMap()
+            palettesArray[i] = palettes[i + 1].toMap()
         }
 
         return JSONArray(palettesArray).toString()

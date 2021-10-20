@@ -25,4 +25,8 @@ class Palette(val name: String) {
 
         return map
     }
+
+    companion object {
+        const val maxColors = 32
+    }
 }

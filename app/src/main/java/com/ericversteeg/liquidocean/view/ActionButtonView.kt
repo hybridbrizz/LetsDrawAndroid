@@ -71,6 +71,7 @@ class ActionButtonView: View {
         NO,
         PAINT,
         ADD,
+        REMOVE,
         RECENT_COLORS,
         RECENT_COLOR,
         PLAY,
@@ -244,6 +245,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.ADD) {
                 drawAddAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.REMOVE) {
+                drawRemoveAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.RECENT_COLORS) {
                 drawRecentColorsAction(touchState == TouchState.ACTIVE, canvas)
@@ -654,6 +658,34 @@ class ActionButtonView: View {
 
             // row 5
             drawPixel(2, 4, primaryPaint, canvas)
+        }
+    }
+
+    private fun drawRemoveAction(selected: Boolean, canvas: Canvas) {
+        rows = 1
+        cols = 5
+
+        var primaryPaint = semiPaint
+
+        var outLinePaint = Paint()
+        outLinePaint.color = blackPaint.color
+        outLinePaint.strokeWidth = 2F
+
+        if (SessionSettings.instance.darkIcons) {
+            primaryPaint = semiDarkPaint
+            outLinePaint.color = whitePaint.color
+        }
+
+        if (selected && !isStatic) {
+            primaryPaint = lightYellowPaint
+        }
+
+        canvas.apply {
+            drawPixel(0, 0, primaryPaint, canvas)
+            drawPixel(1, 0, primaryPaint, canvas)
+            drawPixel(2, 0, primaryPaint, canvas)
+            drawPixel(3, 0, primaryPaint, canvas)
+            drawPixel(4, 0, primaryPaint, canvas)
         }
     }
 

@@ -146,41 +146,6 @@ class OptionsFragment: Fragment() {
                 false
             )
 
-            val panelResIds = intArrayOf(
-                R.drawable.metal_floor_1,
-                R.drawable.metal_floor_2,
-                R.drawable.foil,
-                R.drawable.rainbow_foil,
-                R.drawable.wood_texture_light,
-                R.drawable.fall_leaves,
-                R.drawable.grass,
-                R.drawable.amb_6,
-                R.drawable.water_texture,
-                R.drawable.space_texture,
-                R.drawable.crystal_8,
-                R.drawable.crystal_10,
-                R.drawable.crystal_1,
-                R.drawable.crystal_2,
-                R.drawable.crystal_4,
-                R.drawable.crystal_5,
-                R.drawable.crystal_6,
-                R.drawable.crystal_7,
-                R.drawable.crystal_3,
-                R.drawable.amb_2,
-                R.drawable.amb_3,
-                R.drawable.amb_4,
-                R.drawable.amb_5,
-                R.drawable.amb_7,
-                R.drawable.amb_8,
-                R.drawable.amb_9,
-                R.drawable.amb_10,
-                R.drawable.amb_11,
-                R.drawable.amb_12,
-                R.drawable.amb_13,
-                R.drawable.amb_14,
-                R.drawable.amb_15
-            )
-
             view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -190,15 +155,13 @@ class OptionsFragment: Fragment() {
                     }
 
                     (panel_recycler_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                        panelResIds.indexOf(
-                            SessionSettings.instance.panelBackgroundResId
-                        ), (view.width * 0.15).toInt()
+                        SessionSettings.instance.panelBackgroundResIndex, (view.width * 0.15).toInt()
                     )
                 }
             })
 
             panel_recycler_view.adapter = PanelRecyclerViewAdapter(
-                this, panelResIds.toMutableList()
+                this, SessionSettings.instance.panelResIds.toMutableList()
             )
 
             (panel_recycler_view.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false

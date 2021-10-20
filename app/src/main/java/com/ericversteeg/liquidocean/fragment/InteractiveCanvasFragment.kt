@@ -16,6 +16,7 @@ import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -46,6 +47,8 @@ import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import kotlinx.android.synthetic.main.palette_adapter_view.*
+import okhttp3.internal.Util
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
@@ -98,6 +101,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     var animatingTools = false
 
     var palettesFragment: PalettesFragment? = null
+
+    var recentlyRemovedColor = 0
+    var recentlyRemovedColorIndex = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -364,7 +370,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     private fun showPalettesFragmentPopover() {
-        val screenPoint = Point(surface_view.width, 0)
+        var screenPoint = Point(surface_view.width, 0)
+        if (SessionSettings.instance.rightHanded) {
+            screenPoint = Point(0, 0)
+        }
 
         fragmentManager?.apply {
             // set bottom-left of view to screenPoint
@@ -516,7 +525,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             )
         }
 
-        panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelBackgroundResId)
+        panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
@@ -529,6 +538,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         palette_name_text.setOnClickListener {
             showPalettesFragmentPopover()
         }
+
+        palette_name_text.text = SessionSettings.instance.palette.name
+
+        palette_add_color_action.type = ActionButtonView.Type.ADD
+        palette_add_color_button.actionBtnView = palette_add_color_action
+
+        palette_add_color_button.setOnClickListener {
+            if (SessionSettings.instance.palette.colors.size < Palette.maxColors) {
+                SessionSettings.instance.palette.addColor(SessionSettings.instance.paintColor)
+                syncPaletteAndColor()
+            }
+            else {
+                Toast.makeText(context, "${SessionSettings.instance.palette.name} is full", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        palette_remove_color_action.type = ActionButtonView.Type.REMOVE
+        palette_remove_color_button.actionBtnView = palette_remove_color_action
+
+        palette_remove_color_button.setOnClickListener {
+            showPaletteColorRemovePrompt(SessionSettings.instance.paintColor)
+        }
+
+        syncPaletteAndColor()
 
         if (SessionSettings.instance.showPaintBar) {
             surface_view.paintActionListener = paint_qty_bar
@@ -599,10 +632,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         close_paint_panel.actionBtnView = close_paint_panel_top_layer
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            palette_name_text.setTextColor(Color.BLACK)
+
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
+            palette_name_text.setTextColor(Color.WHITE)
+
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -618,6 +655,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
+        // outside paint panel
         recent_colors_action.type = ActionButtonView.Type.DOT
         recent_colors_button.actionBtnView = recent_colors_action
 
@@ -633,7 +671,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         open_tools_action.type = ActionButtonView.Type.DOT
         open_tools_button.actionBtnView = open_tools_action
 
-        setupRecentColors(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        // setup recent colors
+        if (SessionSettings.instance.selectedPaletteIndex == 0) {
+            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        }
 
         // color picker view
         default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
@@ -709,6 +750,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 color_hex_string_input.setText(hexColor)
 
                 color_hex_string_input.addTextChangedListener(textChangeListener)
+
+                // palette color actions
+                syncPaletteAndColor()
             }
         })
 
@@ -738,7 +782,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
 
         paint_panel.setOnClickListener {
-
+            closePaletteFragment()
         }
 
         paint_panel_button.setOnClickListener {
@@ -761,6 +805,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_no.setOnClickListener {
             if (color_picker_frame.visibility == View.VISIBLE) {
                 paint_indicator_view_bottom_layer.setPaintColor(initalColor)
+                syncPaletteAndColor()
+
                 color_picker_frame.visibility = View.GONE
 
                 if (SessionSettings.instance.canvasLockBorder) {
@@ -771,8 +817,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 paint_color_accept.visibility = View.GONE
 
-                recent_colors_button.visibility = View.VISIBLE
-                recent_colors_container.visibility = View.GONE
+                //recent_colors_button.visibility = View.VISIBLE
+                //recent_colors_container.visibility = View.GONE
 
                 surface_view.endPaintSelection()
 
@@ -799,8 +845,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 paint_no_container.visibility = View.GONE
                 close_paint_panel_container.visibility = View.VISIBLE
 
-                recent_colors_button.visibility = View.VISIBLE
-                recent_colors_container.visibility = View.GONE
+                //recent_colors_button.visibility = View.VISIBLE
+                //recent_colors_container.visibility = View.GONE
 
                 surface_view.startPainting()
             }
@@ -808,6 +854,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         close_paint_panel.setOnClickListener {
             togglePaintPanel(false)
+            closePaletteFragment()
         }
 
         paint_qty_bar.panelThemeConfig = panelThemeConfig
@@ -838,8 +885,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     paint_no_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
 
-                recent_colors_button.visibility = View.GONE
-                recent_colors_container.visibility = View.GONE
+                //recent_colors_button.visibility = View.GONE
+                //recent_colors_container.visibility = View.GONE
 
                 surface_view.startPaintSelection()
 
@@ -863,8 +910,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
-            recent_colors_container.visibility = View.GONE
-            recent_colors_button.visibility = View.VISIBLE
+            //recent_colors_container.visibility = View.GONE
+            //recent_colors_button.visibility = View.VISIBLE
 
             if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                 paint_yes_container.visibility = View.GONE
@@ -1008,7 +1055,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         // open toolbox
         toggleTools()
 
-        // tablet & lefty righty
+        // tablet & righty
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 // tablet
@@ -1085,6 +1132,44 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                         paint_qty_circle.layoutParams = layoutParams
                     }
+
+                    //layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
+                    palette_name_text.textSize = 28F
+
+                    /*layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
+                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+                    layoutParams.bottomMargin = Utils.dpToPx(context, 50)
+                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+
+                    palette_name_text.layoutParams = layoutParams*/
+
+                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
+                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+                    layoutParams.topToBottom = palette_name_text.id
+
+                    palette_add_color_button.layoutParams = layoutParams
+
+                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
+                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+                    layoutParams.topToBottom = palette_name_text.id
+
+                    palette_remove_color_button.layoutParams = layoutParams
+
+                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
+                    frameLayoutParams.topMargin = Utils.dpToPx(context, 5)
+                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+
+                    palette_add_color_action.layoutParams = frameLayoutParams
+
+                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 6))
+                    frameLayoutParams.topMargin = Utils.dpToPx(context, 17)
+                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+
+                    palette_remove_color_action.layoutParams = frameLayoutParams
                 }
 
                 // paint text info placement
@@ -1104,7 +1189,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                 // background texture scaling
                 context?.apply {
-                    val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelBackgroundResId) as BitmapDrawable
+                    val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
 
                     if (SessionSettings.instance.tablet) {
                         val scale = view.height / backgroundDrawable.bitmap.height.toFloat()
@@ -1191,13 +1276,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         button.layoutParams = layoutParams
                     }
 
-                    // recent colors
-                    layoutParams = recent_colors_button.layoutParams as ConstraintLayout.LayoutParams
+                    // recent colors button
+                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
 
-                    layoutParams.leftToLeft = -1
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+                    layoutParams.rightToLeft = color_picker_frame.id
+
                     recent_colors_button.layoutParams = layoutParams
 
+                    // recent colors action
                     layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
                     layoutParams3.gravity = Gravity.RIGHT or Gravity.BOTTOM
                     recent_colors_action.layoutParams = layoutParams3
@@ -1205,8 +1292,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     // recent colors container
                     layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
 
-                    layoutParams.leftToLeft = -1
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    layoutParams.leftToRight = -1
+                    layoutParams.rightToLeft = color_picker_frame.id
                     recent_colors_container.layoutParams = layoutParams
 
                     //open_tools_button.layoutParams = layoutParams
@@ -1263,14 +1350,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         })
     }
 
-    private fun setupRecentColors(recentColors: Array<Int>?) {
-        if (recentColors != null) {
+    private fun setupColorPalette(colors: Array<Int>?) {
+        if (colors != null) {
             var i = 0
             for (v in recent_colors_container.children) {
                 (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
 
-                if (i < recentColors.size) {
-                    v.representingColor = recentColors[recentColors.size - 1 - i]
+                if (i < colors.size) {
+                    v.representingColor = colors[colors.size - 1 - i]
                     v.visibility = View.VISIBLE
                 }
                 else {
@@ -1283,11 +1370,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                         notifyPaintColorUpdate(SessionSettings.instance.paintColor)
 
                         recent_colors_container.visibility = View.GONE
-                        recent_colors_button.visibility = View.VISIBLE
+                        recent_colors_action.visibility = View.VISIBLE
                     }
                 }
 
                 i++
+            }
+
+            // fixes issue where with no colors on the color palette the paint panel won't open
+            if (colors.isEmpty()) {
+                recent1.visibility = View.VISIBLE
+                recent1.type = ActionButtonView.Type.NONE
             }
         }
         else {
@@ -1627,6 +1720,28 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             .show()
     }
 
+    private fun showPaletteColorRemovePrompt(color: Int) {
+        AlertDialog.Builder(context)
+            .setMessage(resources.getString(R.string.alert_message_palette_remove_color, SessionSettings.instance.palette.name))
+            .setPositiveButton(
+                android.R.string.yes
+            ) { dialog, _ ->
+                recentlyRemovedColorIndex = SessionSettings.instance.palette.colors.indexOf(color)
+                recentlyRemovedColor = color
+
+                SessionSettings.instance.palette.removeColor(color)
+                syncPaletteAndColor()
+
+                showPaletteColorUndoSnackbar(SessionSettings.instance.palette)
+
+                dialog?.dismiss()
+            }
+            .setNegativeButton(
+                android.R.string.no
+            ) { dialog, _ -> dialog?.dismiss() }
+            .show()
+    }
+
     // interactive canvas drawer callback
     override fun notifyRedraw() {
         drawInteractiveCanvas(surface_view.holder)
@@ -1650,8 +1765,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     override fun notifyCloseRecentColors() {
-        recent_colors_button.visibility = View.VISIBLE
+        recent_colors_action.visibility = View.VISIBLE
         recent_colors_container.visibility = View.GONE
+    }
+
+    override fun notifyClosePaletteFragment() {
+        closePaletteFragment()
+    }
+
+    override fun isPaletteFragmentOpen(): Boolean {
+        return pixel_history_fragment_container.visibility == View.VISIBLE
     }
 
     // paint qty listener
@@ -1663,7 +1786,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     override fun onNewRecentColors(colors: Array<Int>) {
-        setupRecentColors(colors)
+        if (SessionSettings.instance.selectedPaletteIndex == 0) {
+            setupColorPalette(colors)
+        }
     }
 
     override fun onPaintBarDoubleTapped() {
@@ -1737,19 +1862,69 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         palette_name_text.text = palette.name
 
         pixel_history_fragment_container.visibility = View.GONE
+
+        syncPaletteAndColor()
+
+        if (index == 0) {
+            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        }
+        else {
+            setupColorPalette(palette.colors.toTypedArray())
+        }
     }
 
     override fun onPaletteDeleted(palette: Palette) {
         showPaletteUndoSnackbar(palette)
     }
 
-    fun showPaletteUndoSnackbar(palette: Palette) {
+    private fun showPaletteUndoSnackbar(palette: Palette) {
         palettesFragment?.apply {
             val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
             snackbar.setAction("Undo") {
                 undoDelete()
             }
             snackbar.show()
+        }
+    }
+
+    private fun showPaletteColorUndoSnackbar(palette: Palette) {
+        val snackbar = Snackbar.make(view!!, "Removed color from ${palette.name} palette", Snackbar.LENGTH_LONG)
+        snackbar.setAction("Undo") {
+            undoPaletteColorRemove()
+        }
+        snackbar.show()
+    }
+
+    private fun undoPaletteColorRemove() {
+        SessionSettings.instance.palette.colors.add(recentlyRemovedColorIndex, recentlyRemovedColor)
+        syncPaletteAndColor()
+    }
+
+    fun syncPaletteAndColor() {
+        if (SessionSettings.instance.selectedPaletteIndex == 0) {
+            palette_add_color_button.visibility = View.GONE
+            palette_remove_color_button.visibility = View.GONE
+
+            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        }
+        else {
+            if (SessionSettings.instance.palette.colors.contains(SessionSettings.instance.paintColor)) {
+                palette_add_color_button.visibility = View.GONE
+                palette_remove_color_button.visibility = View.VISIBLE
+
+            }
+            else {
+                palette_add_color_button.visibility = View.VISIBLE
+                palette_remove_color_button.visibility = View.GONE
+            }
+
+            setupColorPalette(SessionSettings.instance.palette.colors.toTypedArray())
+        }
+    }
+
+    private fun closePaletteFragment() {
+        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+            pixel_history_fragment_container.visibility = View.GONE
         }
     }
 }

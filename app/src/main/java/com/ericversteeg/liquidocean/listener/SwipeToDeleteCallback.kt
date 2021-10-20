@@ -30,6 +30,18 @@ class SwipeToDeleteCallback(private val adapter: PalettesRecyclerViewAdapter): I
         adapter.deleteItem(position)
     }
 
+    override fun getSwipeDirs(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder
+    ): Int {
+        if (viewHolder.adapterPosition < 2) {
+            return 0
+        }
+        else {
+            return super.getSwipeDirs(recyclerView, viewHolder)
+        }
+    }
+
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,

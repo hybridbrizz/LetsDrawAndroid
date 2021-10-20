@@ -24,6 +24,7 @@
     <string name="option_prompt_to_exit_title">Prompt Back</string>
 
     <string name="alert_message_exit_canvas">Are you sure you would like to go back?</string>
+    <string name="alert_message_palette_remove_color">Remove this color from %s?</string>
     <string name="no_pixel_history">No data</string>
     <string name="option_num_recent_color_title">Recent colors</string>
     <string name="option_paint_indicator_width_title">Palette size</string>
@@ -52,4 +53,5 @@
     <string name="deviant_art"><u>Deviant Art</u></string>
     <string name="actual_size">Pixel Size</string>
     <string name="screen_size">Screen Size</string>
+    <string name="palettes_title">Palettes</string>
 </resources>

@@ -30,7 +30,7 @@ class PanelRecyclerViewAdapter(context: Context, panelResIds: MutableList<Int>):
         holder.image.setImageDrawable(context.resources.getDrawable(resId))
 
         holder.image.setOnClickListener {
-            SessionSettings.instance.panelBackgroundResId = resId
+            SessionSettings.instance.panelBackgroundResIndex = position
             holder.selectedIcon.visibility = View.VISIBLE
 
             notifyItemChanged(selectedPos)
@@ -38,7 +38,7 @@ class PanelRecyclerViewAdapter(context: Context, panelResIds: MutableList<Int>):
             notifyItemChanged(selectedPos)
         }
 
-        if (SessionSettings.instance.panelBackgroundResId == resId) {
+        if (SessionSettings.instance.panelBackgroundResIndex == position) {
             holder.selectedIcon.visibility = View.VISIBLE
             selectedPos = position
         }

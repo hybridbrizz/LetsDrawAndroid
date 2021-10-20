@@ -73,9 +73,15 @@ class PalettesFragment: Fragment() {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     textView?.apply {
                         if (!text.trim().matches(Regex("\\s*"))) {
-                            if (text.trim().matches(Regex("[\\d\\w\\s]*")))
-                            SessionSettings.instance.addPalette(text.toString())
-                            text = ""
+                            if (text.trim().matches(Regex("[\\d\\w\\s]*"))) {
+                                SessionSettings.instance.addPalette(text.toString())
+                                text = ""
+                            }
+                            else {
+                                hideNameInput()
+
+                                return true
+                            }
                         }
                         else {
                             hideNameInput()
@@ -133,7 +139,7 @@ class PalettesFragment: Fragment() {
         }
     }
 
-    fun hideKeyboard() {
+    private fun hideKeyboard() {
         context?.apply {
             val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)

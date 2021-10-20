@@ -128,6 +128,12 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             mTapDetector.onTouchEvent(ev)
         }
         else if (mode == Mode.PAINTING) {
+            interactiveCanvas.drawCallbackListener?.apply {
+                if (isPaletteFragmentOpen()) {
+                    notifyClosePaletteFragment()
+                    return false
+                }
+            }
 
             if(ev.action == MotionEvent.ACTION_DOWN) {
                 interactiveCanvas.drawCallbackListener?.notifyCloseRecentColors()

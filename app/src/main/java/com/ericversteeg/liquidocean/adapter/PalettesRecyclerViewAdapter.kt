@@ -55,7 +55,16 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         val palette = palettes[position - 1]
 
         holder.nameTextView.text = palette.name
-        holder.numColorsTextView.text = String.format("%d colors", palette.colors.size)
+
+        if (palette.name == "Recent Color") {
+            holder.numColorsTextView.text = String.format("%d colors", SessionSettings.instance.numRecentColors)
+        }
+        else if (palette.colors.size == 1) {
+            holder.numColorsTextView.text = String.format("%d color", palette.colors.size)
+        }
+        else {
+            holder.numColorsTextView.text = String.format("%d colors", palette.colors.size)
+        }
 
         holder.itemView.setOnClickListener {
             itemClickListener?.onItemClicked(palette, position - 1)
