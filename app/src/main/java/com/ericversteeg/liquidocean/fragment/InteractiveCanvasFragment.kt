@@ -59,7 +59,7 @@ import kotlin.math.min
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
-    PalettesFragmentListener {
+    PalettesFragmentListener, DrawFrameConfigFragmentListener {
 
     var scaleFactor = 1f
 
@@ -369,6 +369,69 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     }
                 }
             })
+        }
+    }
+
+    override fun showDrawFrameConfigFragmentPopover(screenPoint: Point) {
+        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+            closePopoverFragment()
+            return
+        }
+
+        fragmentManager?.apply {
+            pixel_history_fragment_container?.apply {
+                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                    context,
+                    10
+                )).toFloat()
+
+                pixel_history_fragment_container.x = dX
+                pixel_history_fragment_container.y = dY
+
+                if (firstInfoTap) {
+                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                        context,
+                        firstInfoTapFixYOffset
+                    )
+                    firstInfoTap = false
+                }
+
+                view?.apply {
+                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x =
+                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y =
+                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    val fragment = DrawFrameConfigFragment()
+                    fragment.drawFrameConfigFragmentListener = this@InteractiveCanvasFragment
+
+                    fragment.centerX = surface_view.interactiveCanvas.lastSelectedUnitPoint.x
+                    fragment.centerY = surface_view.interactiveCanvas.lastSelectedUnitPoint.y
+
+                    beginTransaction().replace(
+                        R.id.pixel_history_fragment_container,
+                        fragment
+                    ).commit()
+
+                    pixel_history_fragment_container.visibility = View.VISIBLE
+                }
+            }
         }
     }
 
@@ -785,7 +848,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
 
         paint_panel.setOnClickListener {
-            closePaletteFragment()
+            closePopoverFragment()
         }
 
         paint_panel_button.setOnClickListener {
@@ -857,7 +920,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         close_paint_panel.setOnClickListener {
             togglePaintPanel(false)
-            closePaletteFragment()
+            closePopoverFragment()
         }
 
         paint_qty_bar.panelThemeConfig = panelThemeConfig
@@ -1782,7 +1845,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
     }
 
     override fun notifyClosePaletteFragment() {
-        closePaletteFragment()
+        closePopoverFragment()
     }
 
     override fun isPaletteFragmentOpen(): Boolean {
@@ -1934,9 +1997,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    private fun closePaletteFragment() {
+    private fun closePopoverFragment() {
         if (pixel_history_fragment_container.visibility == View.VISIBLE) {
             pixel_history_fragment_container.visibility = View.GONE
         }
+    }
+
+    // draw frame config listener
+    override fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
+        surface_view.createDrawFrame(centerX, centerY, width, height, color)
+
+        closePopoverFragment()
     }
 }

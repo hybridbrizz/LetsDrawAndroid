@@ -135,6 +135,8 @@ class SessionSettings {
 
     var canvasGridLineColor = -1
 
+    var frameColor = -1
+
     var closePaintBackButtonColor = ActionButtonView.yellowPaint.color
 
     var menuBackgroundResId = 0
@@ -166,6 +168,9 @@ class SessionSettings {
     }
 
     lateinit var palette: Palette
+
+    var lastDrawFrameWidth = 0
+    var lastDrawFrameHeight = 0
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -223,6 +228,8 @@ class SessionSettings {
         ed.putInt("grid_line_mode", gridLineMode)
 
         ed.putInt("canvas_grid_line_color", canvasGridLineColor)
+
+        ed.putInt("frame_color", frameColor)
 
         ed.putInt("close_paint_back_button_color", closePaintBackButtonColor)
 
@@ -305,6 +312,8 @@ class SessionSettings {
         gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
 
         canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", -1)
+
+        frameColor = getSharedPrefs(context).getInt("frame_color", Color.GRAY)
 
         closePaintBackButtonColor = getSharedPrefs(context).getInt(
             "close_paint_back_button_color",

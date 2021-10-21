@@ -479,7 +479,7 @@ class InteractiveCanvas(var context: Context) {
         return arr[unitPoint.y][unitPoint.x] == 0
     }
 
-    fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0) {
+    fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0, redraw: Boolean = true) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
             if (restorePoint == null && (SessionSettings.instance.dropsAmt > 0 || !world)) {
@@ -519,7 +519,9 @@ class InteractiveCanvas(var context: Context) {
             }
         }
 
-        drawCallbackListener?.notifyRedraw()
+        if (redraw) {
+            drawCallbackListener?.notifyRedraw()
+        }
     }
 
     // sends pixel updates to the web server

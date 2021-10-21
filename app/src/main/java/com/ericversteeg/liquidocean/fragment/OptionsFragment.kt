@@ -241,6 +241,40 @@ class OptionsFragment: Fragment() {
                 })
         }
 
+        // option frame color
+        option_frame_color_button.setBackgroundColor(SessionSettings.instance.frameColor)
+        option_frame_color_reset_button.setOnClickListener {
+            SessionSettings.instance.frameColor = Color.GRAY
+            option_frame_color_button.setBackgroundColor(SessionSettings.instance.frameColor)
+        }
+
+        // option frame color
+        option_frame_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.frameColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(true) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(false)
+                .showValue(false)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.frameColor = color
+                    }
+
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        it.setBackgroundColor(SessionSettings.instance.frameColor)
+                    }
+                })
+        }
+
         // option emitters
         option_emitters_container.visibility = View.GONE
 

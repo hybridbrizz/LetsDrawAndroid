@@ -342,6 +342,9 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
                         if (interactiveCanvas.world) {
                             pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
                         }
+                        else {
+                            pixelHistoryListener?.showDrawFrameConfigFragmentPopover(Point(x.toInt(), y.toInt()))
+                        }
                     }
                 }
             }
@@ -367,5 +370,48 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
     fun isExporting(): Boolean {
         return mode == Mode.EXPORTING
+    }
+
+    fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
+        startPainting()
+
+        val oldColor = SessionSettings.instance.paintColor
+        SessionSettings.instance.paintColor = color
+
+        var minX = centerX - width / 2
+        var maxX = centerX + width / 2 + 1
+        var minY = centerY - height / 2
+        var maxY = centerY + height / 2 + 1
+
+        if (width % 2 != 0) {
+            minX = centerX - (width + 1) / 2
+            maxX = centerX + (width + 1) / 2
+        }
+
+        if (height % 2 != 0) {
+            minY = centerY - (height + 1) / 2
+            maxY = centerY + (height + 1) / 2
+        }
+
+        // left
+        for (y in minY..maxY) {
+            interactiveCanvas.paintUnitOrUndo(Point(minX, y), redraw = false)
+        }
+        // right
+        for (y in minY..maxY) {
+            interactiveCanvas.paintUnitOrUndo(Point(maxX, y), redraw = false)
+        }
+        // top
+        for (x in minX..maxX) {
+            interactiveCanvas.paintUnitOrUndo(Point(x, minY), redraw = false)
+        }
+        // bottom
+        for (x in minX..maxX) {
+            interactiveCanvas.paintUnitOrUndo(Point(x, maxY), redraw = false)
+        }
+
+        SessionSettings.instance.paintColor = oldColor
+
+        endPainting(true)
     }
 }
