@@ -86,6 +86,10 @@ class HowtoFragment: Fragment() {
 
             Animator.animateHorizontalViewEnter(step1_text, true)
             Animator.animateHorizontalViewEnter(paint_action, true)
+
+            Animator.animateHorizontalViewEnter(step2_text, false)
+            Animator.animateHorizontalViewEnter(share_action, false)
+
             //Animator.animateHorizontalViewEnter(static_image_1, true)
         }
 

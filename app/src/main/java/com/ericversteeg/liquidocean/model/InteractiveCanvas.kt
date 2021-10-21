@@ -554,10 +554,10 @@ class InteractiveCanvas(var context: Context) {
             )
         }
         else {
-            StatTracker.instance.reportEvent(context,
+            /*StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_SINGLE,
                 restorePoints.size
-            )
+            )*/
         }
 
         updateRecentColors()

@@ -152,8 +152,8 @@ class MenuFragment: Fragment() {
 
                 lefty_button_container.visibility = View.VISIBLE
                 righty_button_container.visibility = View.VISIBLE
-                empty_button_1_container.visibility = View.VISIBLE
-                empty_button_2_container.visibility = View.VISIBLE
+                //empty_button_1_container.visibility = View.VISIBLE
+                //empty_button_2_container.visibility = View.VISIBLE
 
                 route = singleMenuIndex
 
@@ -377,7 +377,7 @@ class MenuFragment: Fragment() {
 
         options_button_container.visibility = View.VISIBLE
 
-        stats_button_container.visibility = View.VISIBLE
+        stats_button_container.visibility = View.GONE
 
         howto_button_container.visibility = View.VISIBLE
 
