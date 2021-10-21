@@ -92,6 +92,7 @@ class ActionButtonView: View {
         EXPORT_SOLID,
         SAVE,
         DOT,
+        FRAME,
         CHANGE_BACKGROUND,
         GRID_LINES,
         BACKGROUND_BLACK,
@@ -278,6 +279,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.DOT) {
                 drawDotAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.FRAME) {
+                drawFrameAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.PLAY) {
                 drawPlayAction(touchState == TouchState.ACTIVE, canvas)
@@ -953,6 +957,46 @@ class ActionButtonView: View {
 
         canvas.apply {
             drawPixel(0, 0, paint, canvas)
+        }
+    }
+
+    private fun drawFrameAction(selected: Boolean, canvas: Canvas) {
+        rows = 6
+        cols = 5
+
+        var paint = semiPaint
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        if (selected) {
+            paint = lightYellowPaint
+        }
+
+        canvas.apply {
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+            drawPixel(4, 0, paint, canvas)
+
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(4, 1, paint, canvas)
+
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(4, 2, paint, canvas)
+
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(4, 4, paint, canvas)
+
+            drawPixel(0, 5, paint, canvas)
+            drawPixel(1, 5, paint, canvas)
+            drawPixel(2, 5, paint, canvas)
+            drawPixel(3, 5, paint, canvas)
+            drawPixel(4, 5, paint, canvas)
         }
     }
 

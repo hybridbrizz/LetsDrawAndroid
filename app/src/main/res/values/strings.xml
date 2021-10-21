@@ -43,10 +43,14 @@
     <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines. Grid lines appear when zoomed into the canvas.</string>
     <string name="step5">The dot below all the tools is the toolbox toggle. Tap it to show and hide tools.</string>
     <string name="step6">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide your current color palette.</string>
-    <string name="step7">The default color palette is the Recent Color palette. It is composed of all colors that you have used recently. To add a new color palette
+    <string name="step7">The default color palette is the Recent Color palette. It is composed of all colors that you have drawn with recently. To add a new color palette
     tap on \"Recent Color\" in the paint panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
         tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the paint panel. Tap the + icon to add the
         color to your palette or tap the - icon to remove the color from your palette.</string>
+    <string name="step8">To create a sizing frame for art with a set size, tap anywhere on the canvas while not drawing. A frame configuration panel will appear. Enter the width
+    and height then tap the Create button to make a frame centered around where you tapped.</string>
+    <string name="step9">To erase pixels, tap anywhere on the canvas that you haven\'t drawn on yet with the color picker open to pick the transparent color off the canvas. Then draw back over the
+        pixels that you want to erase.</string>
     <string name="option_show_paint_bar_title">Show paint meter bar</string>
     <string name="option_paint_bar_color_title">Paint meter color</string>
     <string name="option_show_paint_circle_title">Show paint meter circle</string>
