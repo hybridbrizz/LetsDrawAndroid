@@ -1073,6 +1073,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                     color_picker_frame.layoutParams = layoutParams
 
+                    color_hex_string_input.textSize = 28F
+                    val linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), Utils.dpToPx(context, 50))
+                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
+                    linearLayoutParams.gravity = Gravity.BOTTOM
+
+                    color_hex_string_input.layoutParams = linearLayoutParams
+
                     // default color buttons size
                     var frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 64), Utils.dpToPx(context, 64))
                     frameLayoutParams.rightMargin = Utils.dpToPx(context, 20)
@@ -1215,7 +1222,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                             scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.LEFT
                         }
 
-                        layerDrawable.addLayer(scaledBitmapDrawable)
+                        if (Build.VERSION.SDK_INT >= 23) {
+                            layerDrawable.addLayer(scaledBitmapDrawable)
+                        }
 
                         paint_panel.setBackgroundDrawable(layerDrawable)
                     }

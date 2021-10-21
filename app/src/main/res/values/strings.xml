@@ -39,7 +39,7 @@
     <string name="step2">The first tool is the export tool. Tap the icon then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
     save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
     <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas backgrounds.</string>
-    <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines.</string>
+    <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines. Grid lines appear when zoomed into the canvas.</string>
     <string name="step5">The dot below all the tools is the toolbox toggle. Tap it to show and hide tools.</string>
     <string name="step6">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide your current color palette.</string>
     <string name="step7">The default color palette is the Recent Color palette. It is composed of all colors that you have used recently. To add a new color palette

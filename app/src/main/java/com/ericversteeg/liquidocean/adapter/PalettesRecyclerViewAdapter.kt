@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.adapter
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -11,11 +12,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.Palette
 import com.ericversteeg.liquidocean.model.SessionSettings
+import kotlinx.android.synthetic.main.palette_header_view.view.*
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
 
 class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: MutableList<Palette>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    lateinit var recyclerView: RecyclerView
 
     val headerViewType = 0
     val paletteViewType = 1
@@ -26,6 +30,18 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
 
     var recentlyDeletedItem: Palette? = null
     var recentlyDeletedItemPosition: Int? = null
+
+    var hideTitle = false
+    set(value) {
+        field = value
+        notifyItemChanged(0)
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        super.onAttachedToRecyclerView(recyclerView)
+
+        this.recyclerView = recyclerView
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
@@ -46,8 +62,20 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
             setupViewHolder(holder, position)
         }*/
 
+        if (holder is HeaderViewHolder) {
+            setupHeaderViewHolder(holder)
+        }
         if (holder is PaletteViewHolder) {
             setupPaletteViewHolder(holder, position)
+        }
+    }
+
+    private fun setupHeaderViewHolder(holder: HeaderViewHolder) {
+        if (hideTitle) {
+            holder.titleTextView.visibility = View.INVISIBLE
+        }
+        else {
+            holder.titleTextView.visibility = View.VISIBLE
         }
     }
 
@@ -55,6 +83,12 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         val palette = palettes[position - 1]
 
         holder.nameTextView.text = palette.name
+        if (SessionSettings.instance.palette.name == palette.name) {
+            holder.nameTextView.setTextColor(Color.parseColor("#df7126"))
+        }
+        else {
+            holder.nameTextView.setTextColor(Color.WHITE)
+        }
 
         if (palette.name == "Recent Color") {
             holder.numColorsTextView.text = String.format("%d colors", SessionSettings.instance.numRecentColors)
@@ -69,6 +103,31 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         holder.itemView.setOnClickListener {
             itemClickListener?.onItemClicked(palette, position - 1)
         }
+
+        holder.itemView.setOnTouchListener(object: View.OnTouchListener {
+            override fun onTouch(view: View, event: MotionEvent): Boolean {
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    holder.nameTextView.setTextColor(Color.parseColor("#df7126"))
+
+                    val selectedPaletteViewHolder = selectedPaletteViewHolder()
+                    if (selectedPaletteViewHolder != null) {
+                        if (selectedPaletteViewHolder != holder) {
+                            selectedPaletteViewHolder.nameTextView.setTextColor(Color.WHITE)
+                        }
+                    }
+                }
+                else if (event.action == MotionEvent.ACTION_CANCEL) {
+                    if (SessionSettings.instance.palette.name != palette.name) {
+                        holder.nameTextView.setTextColor(Color.WHITE)
+
+                        val selectedPaletteViewHolder = selectedPaletteViewHolder()
+                        selectedPaletteViewHolder?.nameTextView?.setTextColor(Color.parseColor("#df7126"))
+                    }
+                }
+
+                return false
+            }
+        })
     }
 
     override fun getItemCount(): Int {
@@ -98,7 +157,34 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         notifyItemInserted(recentlyDeletedItemPosition!!)
     }
 
-    class HeaderViewHolder(v: View) : RecyclerView.ViewHolder(v)
+    fun selectedPaletteViewHolder(): PaletteViewHolder? {
+        for (i in 0 until recyclerView.childCount) {
+            val vh = recyclerView.getChildViewHolder(recyclerView.getChildAt(i))
+            if (vh is PaletteViewHolder) {
+                if (vh.layoutPosition == selectedPalettePos()) {
+                    return vh
+                }
+            }
+        }
+
+        return null
+    }
+
+    private fun selectedPalettePos(): Int {
+        val palettes = SessionSettings.instance.palettes
+        for (i in palettes.indices) {
+            val palette = palettes[i]
+            if (SessionSettings.instance.palette.name == palette.name) {
+                return i + 1
+            }
+        }
+
+        return -1
+    }
+
+    class HeaderViewHolder(v: View) : RecyclerView.ViewHolder(v) {
+        var titleTextView: TextView = v.findViewById(R.id.title_text)
+    }
 
     class PaletteViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var nameTextView: TextView = v.findViewById(R.id.palette_name)

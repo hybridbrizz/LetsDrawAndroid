@@ -57,6 +57,7 @@ class PalettesFragment: Fragment() {
         add_button.actionBtnView = add_action
         add_button.setOnClickListener {
             add_button.visibility = View.GONE
+            adapter.hideTitle = true
 
             palettes_recycler_view.scrollTo(0, 0)
 
@@ -74,28 +75,27 @@ class PalettesFragment: Fragment() {
                     textView?.apply {
                         if (!text.trim().matches(Regex("\\s*"))) {
                             if (text.trim().matches(Regex("[\\d\\w\\s]*"))) {
-                                SessionSettings.instance.addPalette(text.toString())
-                                text = ""
-                            }
-                            else {
-                                hideNameInput()
+                                val name = text.trim().toString()
+                                if (paletteWithName(name) == null) {
+                                    SessionSettings.instance.addPalette(name)
+                                    text = ""
 
-                                return true
-                            }
-                        }
-                        else {
-                            hideNameInput()
+                                    hideNameInput()
 
-                            return true
+                                    adapter.notifyItemInserted(SessionSettings.instance.palettes.size)
+
+                                    return true
+                                }
+                            }
                         }
                     }
 
+                    textView?.text = ""
                     hideNameInput()
-
-                    adapter.notifyItemInserted(SessionSettings.instance.palettes.size)
 
                     return true
                 }
+
                 return false
             }
 
@@ -130,6 +130,8 @@ class PalettesFragment: Fragment() {
 
         palette_name_input.visibility = View.GONE
         add_button.visibility = View.VISIBLE
+
+        adapter.hideTitle = false
     }
 
     private fun showKeyboard(editText: EditText) {
@@ -148,5 +150,15 @@ class PalettesFragment: Fragment() {
 
     fun undoDelete() {
         adapter.undoDelete()
+    }
+
+    fun paletteWithName(name: String): Palette? {
+        for (palette in SessionSettings.instance.palettes) {
+            if (palette.name == name) {
+                return palette
+            }
+        }
+
+        return null
     }
 }
