@@ -71,7 +71,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         commonInit()
     }
 
-    var interactiveCanvas = InteractiveCanvas(context)
+    var interactiveCanvas = InteractiveCanvas(context, SessionSettings.instance)
 
     private fun commonInit() {
         interactiveCanvas.scaleCallbackListener = this

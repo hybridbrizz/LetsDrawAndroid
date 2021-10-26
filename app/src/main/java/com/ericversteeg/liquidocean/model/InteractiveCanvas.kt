@@ -33,7 +33,7 @@ import kotlin.collections.set
 import kotlin.math.floor
 
 
-class InteractiveCanvas(var context: Context) {
+class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettings) {
     var rows = 1024
     var cols = 1024
 
@@ -75,13 +75,6 @@ class InteractiveCanvas(var context: Context) {
 
     var receivedPaintRecently = false
 
-    val BACKGROUND_BLACK = 0
-    val BACKGROUND_WHITE = 1
-    val BACKGROUND_GRAY_THIRDS = 2
-    val BACKGROUND_PHOTOSHOP = 3
-    val BACKGROUND_CLASSIC = 4
-    val BACKGROUND_CHESS = 5
-
     val numBackgrounds = 6
 
     var numConnect = 0
@@ -90,13 +83,20 @@ class InteractiveCanvas(var context: Context) {
     companion object {
         var GRID_LINE_MODE_ON = 0
         var GRID_LINE_MODE_OFF = 1
+
+        val BACKGROUND_BLACK = 0
+        val BACKGROUND_WHITE = 1
+        val BACKGROUND_GRAY_THIRDS = 2
+        val BACKGROUND_PHOTOSHOP = 3
+        val BACKGROUND_CLASSIC = 4
+        val BACKGROUND_CHESS = 5
     }
 
     private fun initType() {
         if (world) {
             // dev
             if (realmId == 2) {
-                val arrJsonStr = SessionSettings.instance.arrJsonStr
+                val arrJsonStr = sessionSettings.arrJsonStr
 
                 if (arrJsonStr == "") {
                     Log.i("Error", "Error displaying canvas, arrJsonStr not set.")
@@ -105,7 +105,7 @@ class InteractiveCanvas(var context: Context) {
                     arr = Array(rows) { IntArray(cols) }
 
                     initPixels(arrJsonStr)
-                    SessionSettings.instance.arrJsonStr = ""
+                    sessionSettings.arrJsonStr = ""
                 }
             }
             // world
@@ -129,17 +129,17 @@ class InteractiveCanvas(var context: Context) {
 
             }
 
-            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+            val recentColorsJsonStr = sessionSettings.getSharedPrefs(context).getString(
                 "recent_colors",
                 null
             )
 
             if (recentColorsJsonStr != null) {
                 val recentColorsArr = JSONArray(recentColorsJsonStr)
-                val sizeDiff = SessionSettings.instance.numRecentColors - recentColorsArr.length()
+                val sizeDiff = sessionSettings.numRecentColors - recentColorsArr.length()
 
                 if (sizeDiff < 0) {
-                    for (i in 0 until SessionSettings.instance.numRecentColors) {
+                    for (i in 0 until sessionSettings.numRecentColors) {
                         // because the most recent is at the end of the list
                         recentColorsList.add(recentColorsArr.getInt(-sizeDiff + i))
                     }
@@ -159,9 +159,9 @@ class InteractiveCanvas(var context: Context) {
             }
             else {
                 val gridLineColor = getGridLineColor()
-                for (i in 0 until SessionSettings.instance.numRecentColors) {
+                for (i in 0 until sessionSettings.numRecentColors) {
                     // default to size - 1 of the grid line color
-                    if (i < SessionSettings.instance.numRecentColors - 1) {
+                    if (i < sessionSettings.numRecentColors - 1) {
                         if (gridLineColor == Color.BLACK) {
                             recentColorsList.add(Color.BLACK)
                         }
@@ -182,7 +182,7 @@ class InteractiveCanvas(var context: Context) {
             }
 
             // short term pixels
-            for (shortTermPixel in SessionSettings.instance.shortTermPixels) {
+            for (shortTermPixel in sessionSettings.shortTermPixels) {
                 val x = shortTermPixel.restorePoint.point.x
                 val y = shortTermPixel.restorePoint.point.y
 
@@ -193,7 +193,7 @@ class InteractiveCanvas(var context: Context) {
         else {
             arr = Array(rows) { IntArray(cols) }
 
-            val arrJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+            val arrJsonStr = sessionSettings.getSharedPrefs(context).getString(
                 "arr_single",
                 null
             )
@@ -205,17 +205,17 @@ class InteractiveCanvas(var context: Context) {
                 initDefault()
             }
 
-            val recentColorsJsonStr = SessionSettings.instance.getSharedPrefs(context).getString(
+            val recentColorsJsonStr = sessionSettings.getSharedPrefs(context).getString(
                 "recent_colors_single",
                 null
             )
 
             if (recentColorsJsonStr != null) {
                 val recentColorsArr = JSONArray(recentColorsJsonStr)
-                val sizeDiff = SessionSettings.instance.numRecentColors - recentColorsArr.length()
+                val sizeDiff = sessionSettings.numRecentColors - recentColorsArr.length()
 
                 if (sizeDiff < 0) {
-                    for (i in 0 until SessionSettings.instance.numRecentColors) {
+                    for (i in 0 until sessionSettings.numRecentColors) {
                         // because the most recent is at the end of the list
                         recentColorsList.add(recentColorsArr.getInt(-sizeDiff + i))
                     }
@@ -235,9 +235,9 @@ class InteractiveCanvas(var context: Context) {
             }
             else {
                 val gridLineColor = getGridLineColor()
-                for (i in 0 until SessionSettings.instance.numRecentColors) {
+                for (i in 0 until sessionSettings.numRecentColors) {
                     // default to size - 1 of the grid line color
-                    if (i < SessionSettings.instance.numRecentColors - 1) {
+                    if (i < sessionSettings.numRecentColors - 1) {
                         if (gridLineColor == Color.BLACK) {
                             recentColorsList.add(Color.BLACK)
                         }
@@ -297,7 +297,7 @@ class InteractiveCanvas(var context: Context) {
                     }
                 }
 
-                SessionSettings.instance.addShortTermPixels(shortTermPixels)
+                sessionSettings.addShortTermPixels(shortTermPixels)
 
                 drawCallbackListener?.notifyRedraw()
             })
@@ -305,11 +305,11 @@ class InteractiveCanvas(var context: Context) {
 
         socket?.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
-            SessionSettings.instance.dropsAmt = deviceJsonObject.getInt("paint_qty")
+            sessionSettings.dropsAmt = deviceJsonObject.getInt("paint_qty")
         }
 
         socket?.on("add_paint") {
-            SessionSettings.instance.dropsAmt++
+            sessionSettings.dropsAmt++
         }
 
         socket?.on("add_paint_canvas_setup") {
@@ -317,11 +317,11 @@ class InteractiveCanvas(var context: Context) {
                 receivedPaintRecently = true
                 Log.i("Flag flipped", "flipped")
 
-                Log.i("Drops amt before", SessionSettings.instance.dropsAmt.toString())
-                SessionSettings.instance.dropsAmt += 50
-                Log.i("Drops amt after", SessionSettings.instance.dropsAmt.toString())
-                if (SessionSettings.instance.dropsAmt > 1000) {
-                    SessionSettings.instance.dropsAmt = 1000
+                Log.i("Drops amt before", sessionSettings.dropsAmt.toString())
+                sessionSettings.dropsAmt += 50
+                Log.i("Drops amt after", sessionSettings.dropsAmt.toString())
+                if (sessionSettings.dropsAmt > 1000) {
+                    sessionSettings.dropsAmt = 1000
                 }
                 Timer().schedule(object: TimerTask() {
                     override fun run() {
@@ -414,16 +414,16 @@ class InteractiveCanvas(var context: Context) {
             lateinit var chunk: Array<IntArray>
 
             if (i < rows / 4) {
-                chunk = SessionSettings.instance.chunk1
+                chunk = sessionSettings.chunk1
             }
             else if (i < rows / 2) {
-                chunk = SessionSettings.instance.chunk2
+                chunk = sessionSettings.chunk2
             }
             else if (i < rows - (rows / 4)) {
-                chunk = SessionSettings.instance.chunk3
+                chunk = sessionSettings.chunk3
             }
             else {
-                chunk = SessionSettings.instance.chunk4
+                chunk = sessionSettings.chunk4
             }
 
             for (j in arr[i].indices) {
@@ -442,11 +442,11 @@ class InteractiveCanvas(var context: Context) {
     }
 
     fun getGridLineColor(): Int {
-        if (SessionSettings.instance.canvasGridLineColor != -1) {
-            return SessionSettings.instance.canvasGridLineColor
+        if (sessionSettings.canvasGridLineColor != -1) {
+            return sessionSettings.canvasGridLineColor
         }
 
-        when (SessionSettings.instance.backgroundColorsIndex) {
+        when (sessionSettings.backgroundColorsIndex) {
             BACKGROUND_BLACK -> return Color.WHITE
             BACKGROUND_WHITE -> return Color.BLACK
             BACKGROUND_GRAY_THIRDS -> return Color.WHITE
@@ -469,7 +469,11 @@ class InteractiveCanvas(var context: Context) {
             val absX = absXPx / ppu
             val absY = absYPx / ppu
 
-            return Point(floor(absX).toInt(), floor(absY).toInt())
+            val point = Point()
+            point.x = floor(absX).toInt()
+            point.y = floor(absY).toInt()
+
+            return point
         }
 
         return null
@@ -482,24 +486,24 @@ class InteractiveCanvas(var context: Context) {
     fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0, redraw: Boolean = true) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
-            if (restorePoint == null && (SessionSettings.instance.dropsAmt > 0 || !world)) {
+            if (restorePoint == null && (sessionSettings.dropsAmt > 0 || !world)) {
                 if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
                     val unitColor = arr[unitPoint.y][unitPoint.x]
 
-                    if (SessionSettings.instance.paintColor != unitColor) {
+                    if (sessionSettings.paintColor != unitColor) {
                         Log.i("Interactive Canvas", "Paint!")
                         // paint
                         restorePoints.add(
                             RestorePoint(
                                 unitPoint,
                                 arr[unitPoint.y][unitPoint.x],
-                                SessionSettings.instance.paintColor
+                                sessionSettings.paintColor
                             )
                         )
-                        arr[unitPoint.y][unitPoint.x] = SessionSettings.instance.paintColor
+                        arr[unitPoint.y][unitPoint.x] = sessionSettings.paintColor
 
                         if (world) {
-                            SessionSettings.instance.dropsAmt -= 1
+                            sessionSettings.dropsAmt -= 1
                         }
                     }
                 }
@@ -513,7 +517,7 @@ class InteractiveCanvas(var context: Context) {
                     arr[unitPoint.y][unitPoint.x] = restorePoint.color
 
                     if (world) {
-                        SessionSettings.instance.dropsAmt += 1
+                        sessionSettings.dropsAmt += 1
                     }
                 }
             }
@@ -545,7 +549,7 @@ class InteractiveCanvas(var context: Context) {
             val reqObj = JSONObject()
             val jsonArr = JSONArray(arr)
 
-            reqObj.put("uuid", SessionSettings.instance.uniqueId)
+            reqObj.put("uuid", sessionSettings.uniqueId)
             reqObj.put("pixels", jsonArr)
 
             InteractiveCanvasSocket.instance.socket?.emit("pixels_event", reqObj)
@@ -566,7 +570,7 @@ class InteractiveCanvas(var context: Context) {
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
     }
 
-    private fun updateRecentColors() {
+    fun updateRecentColors() {
         var colorIndex = -1
         for (restorePoint in restorePoints) {
             var contains = false
@@ -577,7 +581,7 @@ class InteractiveCanvas(var context: Context) {
                 }
             }
             if (!contains) {
-                if (recentColorsList.size == SessionSettings.instance.numRecentColors) {
+                if (recentColorsList.size == sessionSettings.numRecentColors) {
                     recentColorsList.removeAt(0)
                 }
                 recentColorsList.add(restorePoint.newColor)
@@ -713,7 +717,7 @@ class InteractiveCanvas(var context: Context) {
     fun saveUnits(context: Context) {
         val jsonArr = JSONArray(arr)
 
-        val ed = SessionSettings.instance.getSharedPrefs(context).edit()
+        val ed = sessionSettings.getSharedPrefs(context).edit()
 
         if (world) {
             ed.putString("arr", jsonArr.toString())

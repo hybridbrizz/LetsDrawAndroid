@@ -8,6 +8,7 @@ import android.graphics.Point
 import android.util.Log
 import androidx.collection.ArraySet
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.annotation.Mockable
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -20,6 +21,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
+@Mockable
 class SessionSettings {
 
     private val spKey = "MyPrefs"
@@ -89,7 +91,7 @@ class SessionSettings {
 
     var panelBackgroundResIndex = 0
 
-    private val defaultCanvasLockBorderColor = Color.parseColor("#66FF0000")
+    private val defaultCanvasLockBorderColor = 0
 
     var emittersEnabled = true
     var canvasLockBorder = true
@@ -137,7 +139,7 @@ class SessionSettings {
 
     var frameColor = -1
 
-    var closePaintBackButtonColor = ActionButtonView.yellowPaint.color
+    var closePaintBackButtonColor = 0
 
     var menuBackgroundResId = 0
 
