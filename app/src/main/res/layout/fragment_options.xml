@@ -233,6 +233,7 @@
 
             <LinearLayout
                     android:id="@+id/option_show_paint_bar_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -264,6 +265,7 @@
 
             <LinearLayout
                     android:id="@+id/option_show_paint_circle_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -295,6 +297,7 @@
 
             <LinearLayout
                     android:id="@+id/option_paint_bar_color_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -725,6 +728,7 @@
 
             <Button
                     android:id="@+id/sign_in_button"
+                    android:visibility="gone"
                     android:text="Sign in"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -736,6 +740,7 @@
 
             <Button
                     android:id="@+id/recovery_pincode_button"
+                    android:visibility="gone"
                     android:text="Set access pincode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -748,15 +753,17 @@
 
             <Button
                     android:id="@+id/reset_single_play"
-                    android:text="Reset Single Play"
+                    android:text="@string/reset_single_play_button_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
                     app:layout_constraintTop_toBottomOf="@id/recovery_pincode_button" />
 
             <LinearLayout
                     android:id="@+id/change_name_container"
+                    android:visibility="gone"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

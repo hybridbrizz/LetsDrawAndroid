@@ -4,10 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.Point
+import android.graphics.*
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -46,6 +43,10 @@ class  ArtView: View {
         invalidate()
     }
 
+    var fillCanvas: Boolean = false
+
+    var blackBackground: Boolean = false
+
     var showBackground = false
 
     var displayPpu = 0F
@@ -82,6 +83,13 @@ class  ArtView: View {
 
     }
 
+    fun show(art: List<InteractiveCanvas.RestorePoint>, fillCanvas: Boolean, showBackground: Boolean, blackBackground: Boolean) {
+        this.fillCanvas = fillCanvas
+        this.showBackground = showBackground
+        this.blackBackground = blackBackground
+        this.art = art
+    }
+
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
 
@@ -106,7 +114,7 @@ class  ArtView: View {
             }
             else
             {
-                adjustPpu()
+                adjustPpu(fillCanvas)
             }
 
             val minX = getMinX()
@@ -133,27 +141,34 @@ class  ArtView: View {
 
             val whitePaint =  ActionButtonView.whitePaint
             val grayPaint = ActionButtonView.photoshopGray
+            val blackPaint = Paint()
+            blackPaint.color = Color.BLACK
 
             if (drawBackground) {
-                for (x in 0 until widthUnits) {
-                    for (y in 0 until heightUnits) {
-                        if ((x + y) % 2 == 0) {
-                            canvas.drawRect(
-                                x * gridPpu,
-                                y * gridPpu,
-                                (x + 1) * gridPpu,
-                                (y + 1) * gridPpu,
-                                whitePaint
-                            )
-                        }
-                        else {
-                            canvas.drawRect(
-                                x * gridPpu,
-                                y * gridPpu,
-                                (x + 1) * gridPpu,
-                                (y + 1) * gridPpu,
-                                grayPaint
-                            )
+                if (blackBackground) {
+                    canvas.drawRect(0F, 0F, canvas.width.toFloat(), canvas.height.toFloat(), blackPaint)
+                }
+                else {
+                    for (x in 0 until widthUnits) {
+                        for (y in 0 until heightUnits) {
+                            if ((x + y) % 2 == 0) {
+                                canvas.drawRect(
+                                    x * gridPpu,
+                                    y * gridPpu,
+                                    (x + 1) * gridPpu,
+                                    (y + 1) * gridPpu,
+                                    whitePaint
+                                )
+                            }
+                            else {
+                                canvas.drawRect(
+                                    x * gridPpu,
+                                    y * gridPpu,
+                                    (x + 1) * gridPpu,
+                                    (y + 1) * gridPpu,
+                                    grayPaint
+                                )
+                            }
                         }
                     }
                 }
@@ -162,6 +177,7 @@ class  ArtView: View {
             art?.apply {
                 for (pixelPoint in this) {
                     paint.color = pixelPoint.color
+
                     canvas.drawRect(
                         ((pixelPoint.point.x - minX) * displayPpu) + offsetX,
                         ((pixelPoint.point.y - minY) * displayPpu) + offsetY,
@@ -235,7 +251,7 @@ class  ArtView: View {
         return getMaxY() - getMinY() + 1
     }
 
-    private fun adjustPpu() {
+    private fun adjustPpu(fill: Boolean = false) {
         val artW = getArtWidth()
         val artH = getArtHeight()
 
@@ -244,7 +260,9 @@ class  ArtView: View {
 
         displayPpu = min(fillWidthPpu, fillHeightPpu)
 
-        displayPpu *= 0.8F
+        if (!fill) {
+            displayPpu *= 0.8F
+        }
     }
 
     fun saveArt(context: Context) {

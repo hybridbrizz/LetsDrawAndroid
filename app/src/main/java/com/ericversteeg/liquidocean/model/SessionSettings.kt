@@ -139,7 +139,7 @@ class SessionSettings {
 
     var frameColor = -1
 
-    var closePaintBackButtonColor = 0
+    var closePaintBackButtonColor = -1
 
     var menuBackgroundResId = 0
 
@@ -319,7 +319,7 @@ class SessionSettings {
 
         closePaintBackButtonColor = getSharedPrefs(context).getInt(
             "close_paint_back_button_color",
-            ActionButtonView.yellowPaint.color
+            -1
         )
 
         colorIndicatorSquare = getSharedPrefs(context).getBoolean("color_indicator_square", true)

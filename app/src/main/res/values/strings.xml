@@ -27,13 +27,13 @@
     <string name="alert_message_palette_remove_color">Remove this color from %s?</string>
     <string name="no_pixel_history">No data</string>
     <string name="option_num_recent_color_title">Recent colors</string>
-    <string name="option_paint_indicator_width_title">Palette size</string>
-    <string name="option_paint_indicator_fill_circle">Circle palette</string>
-    <string name="option_paint_indicator_outline_title">Palette outline</string>
+    <string name="option_paint_indicator_width_title">Draw color indicator size</string>
+    <string name="option_paint_indicator_fill_circle">Circle draw color indicator</string>
+    <string name="option_paint_indicator_outline_title">Draw color indicator outline</string>
     <string name="option_grid_line_color_title">Canvas grid line color</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close draw panel button color</string>
-    <string name="option_paint_indicator_square">Square palette</string>
+    <string name="option_paint_indicator_square">Square draw color indicator</string>
     <string name="step1">It\'s easy to get started. In draw mode, tap the draw icon to bring up the draw panel. From here you can choose a color.
         Tap and drag anywhere on the canvas to draw that color. Tap and drag back over any pixels that you want to remove. Finalize
         by tapping the green checkmark, or to cancel tap the red x.</string>
@@ -70,4 +70,8 @@
     <string name="width_title">Width</string>
     <string name="unit_pixel">px</string>
     <string name="height_title">Height</string>
+    <string name="reset_single_play_button_title">Reset Draw Mode</string>
+    <string name="reset_single_play_alert_message">Please understand that resetting draw mode will permanently erase the
+        contents of your current canvas, to proceed please type ERASE in all caps.</string>
+    <string name="reset_single_play_confirm_string">ERASE</string>
 </resources>

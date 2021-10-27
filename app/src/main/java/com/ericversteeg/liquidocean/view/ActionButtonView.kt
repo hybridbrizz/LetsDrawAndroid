@@ -10,8 +10,10 @@ import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.ActionButtonViewTouchListener
 import com.ericversteeg.liquidocean.model.SessionSettings
+import kotlin.math.min
 
 class ActionButtonView: View {
 
@@ -370,7 +372,7 @@ class ActionButtonView: View {
         return super.onTouchEvent(ev)
     }
 
-    private fun drawPaintCloseAction(light: Boolean, canvas: Canvas) {
+    private fun drawPaintCloseAction(selected: Boolean, canvas: Canvas) {
         rows = 5
         cols = 7
 
@@ -386,9 +388,9 @@ class ActionButtonView: View {
             }
         }
 
-        if (light) {
+        if (selected) {
             if (colorMode == ColorMode.COLOR) {
-                paint = lightYellowPaint
+                paint.color = Utils.brightenColor(paint.color, 0.15F)
             }
             else {
                 if (colorMode == ColorMode.BLACK) {
@@ -610,10 +612,10 @@ class ActionButtonView: View {
         }
 
         if (selected && !isStatic && !SessionSettings.instance.darkIcons) {
-            primaryPaint = greenPaint
+            primaryPaint = lightYellowPaint
         }
         else if (selected && !isStatic && SessionSettings.instance.darkIcons) {
-            primaryPaint = greenPaint
+            primaryPaint = lightYellowPaint
         }
 
         canvas.apply {

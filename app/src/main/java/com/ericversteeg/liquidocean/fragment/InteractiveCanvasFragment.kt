@@ -50,6 +50,7 @@ import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
@@ -697,15 +698,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         close_paint_panel.actionBtnView = close_paint_panel_top_layer
 
-        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            palette_name_text.setTextColor(Color.BLACK)
-
+        if (SessionSettings.instance.closePaintBackButtonColor != -1) {
+            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
+            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
+        }
+        else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
-            palette_name_text.setTextColor(Color.WHITE)
-
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -713,10 +714,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            palette_name_text.setTextColor(Color.BLACK)
+
             paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
+            palette_name_text.setTextColor(Color.WHITE)
+
             paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
         }

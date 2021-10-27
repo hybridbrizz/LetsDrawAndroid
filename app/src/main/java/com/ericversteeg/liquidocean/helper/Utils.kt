@@ -4,13 +4,13 @@ import android.content.Context
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.NetworkInfo
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
+import kotlin.math.min
 
 class Utils {
     interface ViewLayoutListener {
@@ -53,6 +53,18 @@ class Utils {
                     color
                 )) / 255
             return darkness >= 0.85
+        }
+
+        fun brightenColor(color: Int, by: Float): Int {
+            var red = Color.red(color)
+            var green = Color.green(color)
+            var blue = Color.blue(color)
+
+            red = min(255, (red + red * by).toInt())
+            green = min(255, (green + green * by).toInt())
+            blue = min(255, (blue + blue * by).toInt())
+
+            return Color.argb(255, red, green, blue)
         }
 
         fun isNetworkAvailable(context: Context): Boolean {

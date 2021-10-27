@@ -342,11 +342,9 @@ class OptionsFragment: Fragment() {
         }
 
         // option close paint panel button color
-        option_close_paint_panel_color_container.visibility = View.GONE
-
         option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
         option_close_paint_panel_color_reset_button.setOnClickListener {
-            SessionSettings.instance.closePaintBackButtonColor = ActionButtonView.yellowPaint.color
+            SessionSettings.instance.closePaintBackButtonColor = -1
             option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
         }
 
@@ -499,14 +497,14 @@ class OptionsFragment: Fragment() {
         val alert = AlertDialog.Builder(context)
 
         val editText = EditText(activity)
-        alert.setMessage("Please understand that resetting your single play will permanently erase your current single play canvas, to proceed please type DELETE in all caps.")
+        alert.setMessage(getString(R.string.reset_single_play_alert_message))
 
         alert.setView(editText)
 
         alert.setPositiveButton(
             "Proceed"
         ) { dialog, _ ->
-            if (editText.text.toString() == "DELETE") {
+            if (editText.text.toString() == getString(R.string.reset_single_play_confirm_string)) {
                 resetSinglePlay()
                 dialog?.dismiss()
             }
