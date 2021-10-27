@@ -97,6 +97,7 @@ class ActionButtonView: View {
         FRAME,
         CHANGE_BACKGROUND,
         GRID_LINES,
+        CANVAS_SUMMARY,
         BACKGROUND_BLACK,
         BACKGROUND_WHITE,
         BACKGROUND_PHOTOSHOP,
@@ -278,6 +279,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.GRID_LINES) {
                 drawGridLinesAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.CANVAS_SUMMARY) {
+                drawCanvasSummaryAction(touchState == TouchState.ACTIVE, canvas)
             }
             else if (type == Type.DOT) {
                 drawDotAction(touchState == TouchState.ACTIVE, canvas)
@@ -941,6 +945,38 @@ class ActionButtonView: View {
             drawPixel(0, 0, paint, canvas)
             drawPixel(1, 0, paint, canvas)
             drawPixel(2, 0, paint, canvas)
+        }
+    }
+
+    private fun drawCanvasSummaryAction(selected: Boolean, canvas: Canvas) {
+        rows = 3
+        cols = 3
+
+        var paint = semiPaint
+
+        if (selected) {
+            paint = lightYellowPaint
+        }
+
+        if (SessionSettings.instance.darkIcons) {
+            paint = semiDarkPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(0, 0, paint, canvas)
+            drawPixel(1, 0, paint, canvas)
+            drawPixel(2, 0, paint, canvas)
+
+            // row 2
+            drawPixel(0, 1, paint, canvas)
+            drawPixel(1, 1, paint, canvas)
+            drawPixel(2, 1, paint, canvas)
+
+            // row 3
+            drawPixel(0, 2, paint, canvas)
+            drawPixel(1, 2, paint, canvas)
+            drawPixel(2, 2, paint, canvas)
         }
     }
 

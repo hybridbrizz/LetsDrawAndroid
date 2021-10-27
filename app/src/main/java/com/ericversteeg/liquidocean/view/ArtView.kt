@@ -22,7 +22,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 
-class  ArtView: View {
+open class ArtView: View {
 
     var art: List<InteractiveCanvas.RestorePoint>? = null
     set(value) {

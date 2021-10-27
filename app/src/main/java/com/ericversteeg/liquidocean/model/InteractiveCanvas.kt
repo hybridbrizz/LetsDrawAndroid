@@ -61,6 +61,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     val minScaleFactor = 0.15F
 
     val startScaleFactor = 0.5f
+    var lastScaleFactor = startScaleFactor
 
     var lastSelectedUnitPoint = Point(0, 0)
 
@@ -79,6 +80,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var numConnect = 0
     lateinit var connectingTimer: Timer
+
+    var summary: MutableList<RestorePoint> = ArrayList()
 
     companion object {
         var GRID_LINE_MODE_ON = 0
@@ -403,6 +406,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             for (j in 0 until innerArr.length()) {
                 val color = innerArr.getInt(j)
                 arr[i][j] = color
+
+                if (color != 0) {
+                    summary.add(RestorePoint(Point(j, i), color, color))
+                }
             }
         }
 
@@ -564,6 +571,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 StatTracker.EventType.PIXEL_PAINTED_SINGLE,
                 restorePoints.size
             )*/
+
+            for (restorePoint in restorePoints) {
+                summary.add(RestorePoint(restorePoint.point, restorePoint.newColor, restorePoint.newColor))
+            }
         }
 
         updateRecentColors()

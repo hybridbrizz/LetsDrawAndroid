@@ -379,6 +379,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             return
         }
 
+        if (canvas_summary_view.visibility == View.VISIBLE) {
+            canvas_summary_container.visibility = View.INVISIBLE
+        }
+
         fragmentManager?.apply {
             pixel_history_fragment_container?.apply {
                 val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
@@ -503,10 +507,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE
+
+        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        }
     }
 
     override fun onInteractiveCanvasScale() {
         pixel_history_fragment_container.visibility = View.GONE
+
+        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        }
     }
 
     override fun onArtExported(pixelPositions: List<InteractiveCanvas.RestorePoint>) {
@@ -738,6 +750,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         grid_lines_action.type = ActionButtonView.Type.GRID_LINES
         grid_lines_button.actionBtnView = grid_lines_action
+
+        canvas_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
+        canvas_summary_button.actionBtnView = canvas_summary_action
 
         open_tools_action.type = ActionButtonView.Type.DOT
         open_tools_button.actionBtnView = open_tools_action
@@ -1012,6 +1027,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 if (paint_panel.visibility != View.VISIBLE) {
                     togglePaintPanel(true)
                 }
+
+                if (canvas_summary_view.visibility == View.VISIBLE) {
+                    canvas_summary_container.visibility = View.INVISIBLE
+                }
             }
             else {
                 recent_colors_container.visibility = View.GONE
@@ -1062,6 +1081,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             invalidateButtons()
 
+            if (canvas_summary_container.visibility == View.VISIBLE) {
+                canvas_summary_view.invalidate()
+            }
+
             surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
         }
 
@@ -1076,6 +1099,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             }
 
             surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        }
+
+        // canvas summary toggle button
+        canvas_summary_button.setOnClickListener {
+            toggleCanvasSummary()
         }
 
         // open tools button
@@ -1347,7 +1375,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     open_tools_action.layoutParams = layoutParams3
 
                     // toolbox buttons
-                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button)
+                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
 
                     for (button in toolboxButtons) {
                         layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
@@ -1366,7 +1394,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                     // recent colors action
                     layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
-                    layoutParams3.gravity = Gravity.RIGHT or Gravity.BOTTOM
+                    layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
                     recent_colors_action.layoutParams = layoutParams3
 
                     // recent colors container
@@ -1375,6 +1403,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     layoutParams.leftToRight = -1
                     layoutParams.rightToLeft = color_picker_frame.id
                     recent_colors_container.layoutParams = layoutParams
+
+                    layoutParams = canvas_summary_container.layoutParams as ConstraintLayout.LayoutParams
+
+                    layoutParams.startToStart = -1
+                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+                    canvas_summary_container.layoutParams = layoutParams
 
                     //open_tools_button.layoutParams = layoutParams
 
@@ -1635,6 +1669,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 pixel_history_fragment_container.visibility = View.GONE
             }
 
+            if (canvas_summary_view.visibility == View.VISIBLE) {
+                canvas_summary_container.visibility = View.INVISIBLE
+            }
+
             var startLoc = paint_panel.width.toFloat() * 0.99F
             if (SessionSettings.instance.rightHanded) {
                 startLoc = -startLoc
@@ -1709,12 +1747,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 export_button.visibility = View.VISIBLE
                 background_button.visibility = View.VISIBLE
                 grid_lines_button.visibility = View.VISIBLE
+                canvas_summary_button.visibility = View.VISIBLE
 
                 Animator.animateMenuItems(
                     listOf(
                         listOf(export_button), listOf(background_button), listOf(
                             grid_lines_button
-                        )
+                        ), listOf(canvas_summary_button)
                     ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -1730,7 +1769,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     listOf(
                         listOf(export_button), listOf(background_button), listOf(
                             grid_lines_button
-                        )
+                        ), listOf(canvas_summary_button)
                     ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -1914,6 +1953,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         export_action.invalidate()
         background_action.invalidate()
         grid_lines_action.invalidate()
+        canvas_summary_action.invalidate()
         recent_colors_action.invalidate()
         open_tools_action.invalidate()
     }
@@ -2013,5 +2053,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         surface_view.createDrawFrame(centerX, centerY, width, height, color)
 
         closePopoverFragment()
+    }
+
+    private fun toggleCanvasSummary() {
+        if (canvas_summary_container.visibility != View.VISIBLE) {
+            canvas_summary_view.drawBackground = false
+            canvas_summary_view.interactiveCanvas = surface_view.interactiveCanvas
+
+            device_canvas_viewport_view.viewportListener = surface_view
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+
+            canvas_summary_container.visibility = View.VISIBLE
+        }
+        else {
+            canvas_summary_container.visibility = View.INVISIBLE
+        }
     }
 }

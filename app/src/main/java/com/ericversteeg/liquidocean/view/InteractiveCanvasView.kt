@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
+import android.graphics.RectF
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -17,7 +18,7 @@ import java.util.*
 import kotlin.math.max
 import kotlin.math.min
 
-class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
+class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, DeviceCanvasViewportListener {
 
     enum class Mode {
         EXPLORING,
@@ -192,8 +193,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             if (ev.action == MotionEvent.ACTION_DOWN) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
                 unitPoint?.apply {
-                    SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
-                    interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                    if (unitPoint.x in 0 until interactiveCanvas.cols && unitPoint.y in 0 until interactiveCanvas.rows) {
+                        SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
+                        interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                    }
                 }
             }
         }
@@ -292,7 +295,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
 
             lastPanOrScaleTime = System.currentTimeMillis()
 
-            gestureListener?.onInteractiveCanvasScale()
+            gestureListener?.onInteractiveCanvasPan()
 
             return true
         }
@@ -318,6 +321,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
             interactiveCanvas.updateDeviceViewport(context, true)
             interactiveCanvas.drawCallbackListener?.notifyRedraw()
 
+            interactiveCanvas.lastScaleFactor = mScaleFactor
             lastPanOrScaleTime = System.currentTimeMillis()
 
             gestureListener?.onInteractiveCanvasScale()
@@ -413,5 +417,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback {
         SessionSettings.instance.paintColor = oldColor
 
         endPainting(true)
+    }
+
+    override fun onDeviceViewportUpdate(viewport: RectF) {
+        interactiveCanvas.deviceViewport = viewport
+        interactiveCanvas.drawCallbackListener?.notifyRedraw()
     }
 }
