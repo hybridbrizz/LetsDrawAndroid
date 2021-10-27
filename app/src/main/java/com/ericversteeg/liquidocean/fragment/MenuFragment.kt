@@ -1,12 +1,10 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -71,21 +69,9 @@ class MenuFragment: Fragment() {
 
         back_button.visibility = View.GONE
 
-        draw_button.type = ActionButtonView.Type.DRAW
-        draw_button.topLayer = true
-        draw_button_bottom_layer.type = ActionButtonView.Type.DRAW
-
-        options_button.type = ActionButtonView.Type.OPTIONS
-        options_button.topLayer = true
-        options_button_bottom_layer.type = ActionButtonView.Type.OPTIONS
-
         stats_button.type = ActionButtonView.Type.STATS
         stats_button.topLayer = true
         stats_button_bottom_layer.type = ActionButtonView.Type.STATS
-
-        howto_button.type = ActionButtonView.Type.HOWTO
-        howto_button.topLayer = true
-        howto_button_bottom_layer.type = ActionButtonView.Type.HOWTO
 
         single_button.type = ActionButtonView.Type.SINGLE
         single_button.topLayer = true
@@ -121,7 +107,23 @@ class MenuFragment: Fragment() {
         background_option_classic.type = ActionButtonView.Type.BACKGROUND_CLASSIC
         background_option_chess.type = ActionButtonView.Type.BACKGROUND_CHESS
 
-        draw_button.setOnClickListener {
+        val menuTextViews = listOf(draw_menu_text, options_menu_text, how_to_menu_text)
+        for (textView in menuTextViews) {
+            textView.setOnTouchListener(object: View.OnTouchListener {
+                override fun onTouch(view: View?, ev: MotionEvent): Boolean {
+                    if (ev.action == MotionEvent.ACTION_DOWN) {
+                        textView.setTextColor(ActionButtonView.altGreenPaint.color)
+                    }
+                    else if (ev.action == MotionEvent.ACTION_CANCEL) {
+                        textView.setTextColor(Color.parseColor("#DDFFFFFF"))
+                    }
+
+                    return false
+                }
+            })
+        }
+
+        draw_menu_text.setOnClickListener {
             /*// menuButtonListener?.onMenuButtonSelected(playMenuIndex)
             play_button_container.visibility = View.GONE
 
@@ -165,7 +167,7 @@ class MenuFragment: Fragment() {
             }
         }
 
-        options_button.setOnClickListener {
+        options_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(optionsMenuIndex)
         }
 
@@ -173,7 +175,7 @@ class MenuFragment: Fragment() {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-        howto_button.setOnClickListener {
+        how_to_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
         }
 
@@ -279,8 +281,8 @@ class MenuFragment: Fragment() {
         if (!animatingMenu) {
             animatingMenu = true
             if (layer == 0) {
-                Animator.animateMenuItems(listOf(listOf(draw_button_bottom_layer, draw_button), listOf(options_button_bottom_layer, options_button),
-                    listOf(stats_button_bottom_layer, stats_button), listOf(howto_button_bottom_layer, howto_button)), cascade = true, out = false, inverse = false,
+                Animator.animateMenuItems(listOf(listOf(draw_menu_text), listOf(options_menu_text),
+                    listOf(stats_button_bottom_layer, stats_button), listOf(how_to_menu_text)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingMenu = false

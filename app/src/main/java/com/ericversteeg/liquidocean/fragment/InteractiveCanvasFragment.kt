@@ -1547,18 +1547,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 if (y % 2 == 0) {
                     canvas.drawLine(
                         0F,
-                        y * ppu.toFloat() + gridYOffsetPx,
+                        floor(y * ppu.toFloat() + gridYOffsetPx),
                         canvas.width.toFloat(),
-                        y * ppu.toFloat() + gridYOffsetPx,
+                        floor(y * ppu.toFloat() + gridYOffsetPx),
                         gridLinePaint
                     )
                 }
                 else {
                     canvas.drawLine(
                         0F,
-                        y * ppu.toFloat() + gridYOffsetPx,
+                        floor(y * ppu.toFloat() + gridYOffsetPx),
                         canvas.width.toFloat(),
-                        y * ppu.toFloat() + gridYOffsetPx,
+                        floor(y * ppu.toFloat() + gridYOffsetPx),
                         gridLinePaintAlt
                     )
                 }

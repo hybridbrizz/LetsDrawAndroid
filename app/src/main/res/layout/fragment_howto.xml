@@ -6,6 +6,7 @@
         android:background="@drawable/gradient_blue">
 
     <ScrollView
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -20,13 +21,24 @@
                 android:layout_marginTop="5dp"
                 app:layout_constraintTop_toBottomOf="@id/back_button">
 
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/howto_image"
-                    android:layout_width="158dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="15dp"
+            <TextView
+                    android:id="@+id/title_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-13dp"
                     android:layout_marginBottom="10dp"
-                    android:layout_gravity="center_horizontal" />
+                    android:layout_gravity="center_horizontal"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:textSize="50dp"
+                    android:textStyle="bold"
+                    android:textColor="#DDFFFFFF"
+                    android:gravity="center_vertical"
+                    android:text="@string/how_to_menu_title"
+                    android:shadowColor="#7F000000"
+                    android:shadowDx="3"
+                    android:shadowDy="0"
+                    android:shadowRadius="4" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
@@ -65,6 +77,25 @@
                     android:layout_marginTop="150dp"
                     android:layout_marginBottom="150dp">
 
+                <TextView
+                        android:id="@+id/step2_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step2_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step2_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
                 <com.ericversteeg.liquidocean.view.ActionButtonView
                         android:id="@+id/share_action"
                         android:layout_width="50dp"
@@ -94,6 +125,25 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="150dp"
                     android:layout_marginBottom="150dp">
+
+                <TextView
+                        android:id="@+id/step3_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step3_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step3_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
 
                 <TextView
                         android:id="@+id/step3_text"
@@ -135,6 +185,25 @@
                         app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
+                        android:id="@+id/step4_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step4_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step4_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
+                <TextView
                         android:id="@+id/step4_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -155,6 +224,34 @@
                     android:layout_marginTop="150dp"
                     android:layout_marginBottom="150dp">
 
+                <com.ericversteeg.liquidocean.view.ActionButtonView
+                        android:id="@+id/howto_summary_action"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_marginStart="50dp"
+                        app:layout_constraintTop_toTopOf="@id/step5_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step5_text"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                        android:id="@+id/step5_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step5_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step5_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
                 <TextView
                         android:id="@+id/step5_text"
                         android:layout_width="match_parent"
@@ -162,6 +259,46 @@
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
                         android:text="@string/step5"
+                        android:layout_marginStart="200dp"
+                        android:layout_marginRight="10dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"
+                    android:layout_marginBottom="150dp">
+
+                <TextView
+                        android:id="@+id/step6_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step6_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step6_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
+                <TextView
+                        android:id="@+id/step6_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="#FFDDDDDD"
+                        android:text="@string/step6"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="200dp"
                         app:layout_constraintTop_toTopOf="parent"
@@ -173,8 +310,8 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="50dp"
-                        app:layout_constraintTop_toTopOf="@id/step5_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step5_text"
+                        app:layout_constraintTop_toTopOf="@id/step6_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step6_text"
                         app:layout_constraintRight_toRightOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -185,22 +322,41 @@
                     android:layout_marginTop="150dp"
                     android:layout_marginBottom="150dp">
 
+                <TextView
+                        android:id="@+id/step7_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step7_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step7_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
                 <com.ericversteeg.liquidocean.view.ActionButtonView
                         android:id="@+id/howto_dot_action_2"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginStart="50dp"
-                        app:layout_constraintTop_toTopOf="@id/step6_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step6_text"
+                        app:layout_constraintTop_toTopOf="@id/step7_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step7_text"
                         app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
-                        android:id="@+id/step6_text"
+                        android:id="@+id/step7_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
-                        android:text="@string/step6"
+                        android:text="@string/step7"
                         android:layout_marginLeft="200dp"
                         android:layout_marginRight="10dp"
                         app:layout_constraintTop_toTopOf="parent"
@@ -216,12 +372,31 @@
                     android:layout_marginBottom="150dp">
 
                 <TextView
-                        android:id="@+id/step7_text"
+                        android:id="@+id/step8_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step8_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step7_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
+                <TextView
+                        android:id="@+id/step8_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
-                        android:text="@string/step7"
+                        android:text="@string/step8"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="200dp"
                         app:layout_constraintTop_toTopOf="parent"
@@ -233,8 +408,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="20dp"
-                        app:layout_constraintTop_toTopOf="@id/step7_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step7_text"
+                        app:layout_constraintTop_toTopOf="@id/step8_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step8_text"
                         app:layout_constraintRight_toRightOf="parent">
 
                     <com.ericversteeg.liquidocean.view.ActionButtonView
@@ -380,17 +555,36 @@
                         android:layout_width="50dp"
                         android:layout_height="60dp"
                         android:layout_marginStart="50dp"
-                        app:layout_constraintTop_toTopOf="@id/step8_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step8_text"
+                        app:layout_constraintTop_toTopOf="@id/step9_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step9_text"
                         app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
-                        android:id="@+id/step8_text"
+                        android:id="@+id/step9_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step9_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step9_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
+                <TextView
+                        android:id="@+id/step9_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
-                        android:text="@string/step8"
+                        android:text="@string/step9"
                         android:layout_marginLeft="200dp"
                         android:layout_marginRight="10dp"
                         app:layout_constraintTop_toTopOf="parent"
@@ -403,15 +597,34 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="150dp"
-                    android:layout_marginBottom="150dp">
+                    android:layout_marginBottom="70dp">
 
                 <TextView
-                        android:id="@+id/step9_text"
+                        android:id="@+id/step10_title_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="60dp"
+                        android:layout_gravity="center_horizontal"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintBottom_toTopOf="@id/step10_text"
+                        android:textSize="50dp"
+                        android:textStyle="bold"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center"
+                        android:text="@string/howto_step10_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="0"
+                        android:shadowRadius="4" />
+
+                <TextView
+                        android:id="@+id/step10_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="20sp"
                         android:textColor="#FFDDDDDD"
-                        android:text="@string/step9"
+                        android:text="@string/step10"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="200dp"
                         app:layout_constraintTop_toTopOf="parent"
@@ -423,8 +636,8 @@
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="50dp"
-                        app:layout_constraintTop_toTopOf="@id/step9_text"
-                        app:layout_constraintBottom_toBottomOf="@id/step9_text"
+                        app:layout_constraintTop_toTopOf="@id/step10_text"
+                        app:layout_constraintBottom_toBottomOf="@id/step10_text"
                         app:layout_constraintRight_toRightOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

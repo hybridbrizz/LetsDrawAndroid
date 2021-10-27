@@ -14,15 +14,24 @@
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent">
 
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/title_image"
-                    android:layout_width="195dp"
-                    android:layout_height="30dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
+            <TextView
+                    android:id="@+id/options_title_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-13dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="center_horizontal"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:textSize="50dp"
+                    android:textStyle="bold"
+                    android:textColor="#DDFFFFFF"
+                    android:gravity="center"
+                    android:text="@string/options_menu_title"
+                    android:shadowColor="#7F000000"
+                    android:shadowDx="3"
+                    android:shadowDy="0"
+                    android:shadowRadius="4" />
 
             <TextView
                     android:id="@+id/option_paint_panel_texture_title"
@@ -35,7 +44,7 @@
                     android:layout_marginTop="20dp"
                     android:layout_marginLeft="30dp"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/title_image" />
+                    app:layout_constraintTop_toBottomOf="@id/options_title_text" />
 
             <TextView
                     android:id="@+id/credits_text"
@@ -49,7 +58,7 @@
                     android:layout_marginLeft="20dp"
                     android:layout_marginRight="10dp"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/title_image" />
+                    app:layout_constraintTop_toBottomOf="@id/options_title_text" />
 
             <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/panel_recycler_view"

@@ -2,11 +2,13 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
@@ -47,10 +49,6 @@ class HowtoFragment: Fragment() {
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
-        howto_image.type = ActionButtonView.Type.HOWTO
-        howto_image.isStatic = true
-        howto_image.representingColor = ActionButtonView.whitePaint.color
-
         paint_action.type = ActionButtonView.Type.PAINT
         paint_action.isStatic = true
 
@@ -60,6 +58,8 @@ class HowtoFragment: Fragment() {
         howto_background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
 
         howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
+
+        howto_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
 
         howto_dot_action_1.type = ActionButtonView.Type.DOT
         howto_dot_action_2.type = ActionButtonView.Type.DOT
@@ -85,7 +85,7 @@ class HowtoFragment: Fragment() {
         }
 
         if (!SessionSettings.instance.tablet) {
-            Animator.animateTitleFromTop(howto_image)
+            Animator.animateTitleFromTop(title_text)
 
             Animator.animateHorizontalViewEnter(step1_text, true)
             Animator.animateHorizontalViewEnter(paint_action, true)
@@ -107,6 +107,14 @@ class HowtoFragment: Fragment() {
                 }
             }
         })
+
+        /*if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+            scroll_view.setOnScrollChangeListener(object: View.OnScrollChangeListener {
+                override fun onScrollChange(p0: View?, p1: Int, p2: Int, p3: Int, p4: Int) {
+                    scroll_view.scrollY
+                }
+            })
+        }*/
     }
 
     override fun onPause() {

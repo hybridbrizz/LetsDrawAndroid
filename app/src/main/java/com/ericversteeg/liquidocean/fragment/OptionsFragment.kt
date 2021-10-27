@@ -58,10 +58,6 @@ class OptionsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        title_image.type = ActionButtonView.Type.OPTIONS
-        title_image.isStatic = true
-        title_image.representingColor = ActionButtonView.whitePaint.color
-
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
@@ -451,7 +447,7 @@ class OptionsFragment: Fragment() {
         setupNumRecentColorsChoices()
 
         if (!SessionSettings.instance.tablet) {
-            Animator.animateTitleFromTop(title_image)
+            Animator.animateTitleFromTop(options_title_text)
 
             Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
             Animator.animateHorizontalViewEnter(panel_recycler_view, true)
