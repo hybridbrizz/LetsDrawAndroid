@@ -31,6 +31,8 @@
     <string name="option_paint_indicator_fill_circle">Circle draw color indicator</string>
     <string name="option_paint_indicator_outline_title">Draw color indicator outline</string>
     <string name="option_grid_line_color_title">Canvas grid line color</string>
+    <string name="option_canvas_background_primary_color_title">Canvas background primary color</string>
+    <string name="option_canvas_background_secondary_color_title">Canvas background secondary color</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close draw panel button color</string>
     <string name="option_paint_indicator_square">Square draw color indicator</string>
@@ -41,14 +43,14 @@
     save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
     <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas backgrounds.</string>
     <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines. Grid lines appear when zoomed into the canvas.</string>
-    <string name="step5">The fourth and final tool toggles the Canvas Summary window. This shows all the pixels on the canvas.</string>
+    <string name="step5">The fourth and final tool is the Canvas Summary tool. This shows a summary of all the pixels drawn onto the canvas.</string>
     <string name="step6">The dot below all the tools is the toolbox toggle. Tap it to show and hide tools.</string>
-    <string name="step7">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide your current color palette.</string>
+    <string name="step7">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide the color palette.</string>
     <string name="step8">The default color palette is the Recent Color palette. It is composed of all colors that you have drawn with recently. To add a new color palette
     tap on \"Recent Color\" in the draw panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
         tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the draw panel. Tap the + icon to add the
-        color to your palette or tap the - icon to remove the color from your palette.</string>
-    <string name="step9">To create a sizing frame for art with a set size, tap anywhere on the canvas while not drawing. A frame configuration panel will appear. Enter the width
+        color to the palette or tap the - icon to remove the color from the palette.</string>
+    <string name="step9">To create a sizing frame for art, press and hold anywhere on the canvas while not drawing. A frame configuration panel will appear. Enter the width
     and height then tap the Create button to create a frame.</string>
     <string name="step10">To erase pixels, tap anywhere on the canvas where you haven\'t drawn yet with the color picker open to pick the transparent color off the canvas. Then draw back over the
         pixels that you want to erase.</string>
@@ -75,15 +77,17 @@
     <string name="reset_single_play_alert_message">Please understand that resetting draw mode will permanently erase the
         contents of your current canvas, to proceed please type ERASE in all caps.</string>
     <string name="reset_single_play_confirm_string">ERASE</string>
-    <string name="draw_menu_title">Draw</string>
-    <string name="options_menu_title">Options</string>
-    <string name="how_to_menu_title">Howto</string>
+    <string name="draw_menu_title">CANVAS</string>
+    <string name="options_menu_title">OPTIONS</string>
+    <string name="how_to_menu_title">HOWTO</string>
+    <string name="options_title">Options</string>
+    <string name="howto_title">Howto</string>
     <string name="howto_step2_title">Export and Share</string>
     <string name="howto_step3_title">Change Background</string>
     <string name="howto_step4_title">Grid Lines</string>
     <string name="howto_step5_title">Canvas Summary</string>
     <string name="howto_step6_title">Toggle Tools</string>
-    <string name="howto_step7_title">Palette Colors</string>
+    <string name="howto_step7_title">Palette</string>
     <string name="howto_step8_title">Color Palettes</string>
     <string name="howto_step9_title">Frames</string>
     <string name="howto_step10_title">Eraser</string>

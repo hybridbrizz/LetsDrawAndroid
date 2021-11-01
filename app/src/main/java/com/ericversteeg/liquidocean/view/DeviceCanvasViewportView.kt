@@ -150,7 +150,7 @@ class DeviceCanvasViewportView: View {
         invalidate()
     }
 
-    fun moveDeviceViewport(pointInView: PointF) {
+    private fun moveDeviceViewport(pointInView: PointF) {
         interactiveCanvas?.apply {
             this@DeviceCanvasViewportView.deviceViewport?.apply {
                 val dX = pointInView.x - centerX()
@@ -160,6 +160,32 @@ class DeviceCanvasViewportView: View {
                 top += dY
                 right += dX
                 bottom += dY
+
+                var cX = 0F
+                var cY = 0F
+
+                if (left < 0) {
+                    cX = -left
+                }
+                if (top < 0) {
+                    cY = -top
+                }
+                if (right > width) {
+                    cX = -(right - width)
+                }
+                if (bottom > height) {
+                    cY = -(bottom - height)
+                }
+
+                if (cX != 0F) {
+                    left += cX
+                    right += cX
+                }
+
+                if (cY != 0F) {
+                    top += cY
+                    bottom += cY
+                }
 
                 val scaledViewport = RectF()
 

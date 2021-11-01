@@ -65,7 +65,11 @@
                 android:textColor="@android:color/white"
                 android:layout_marginTop="20dp"
                 android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:shadowColor="#7F000000"
+                android:shadowDx="2"
+                android:shadowDy="2"
+                android:shadowRadius="3" />
 
         <com.ericversteeg.liquidocean.view.ActionButtonFrame
                 android:id="@+id/palette_add_color_button"
@@ -361,6 +365,24 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
+
+        <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                android:id="@+id/lock_paint_panel"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                app:layout_constraintBottom_toTopOf="@id/paint_indicator_view"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/lock_paint_panel_action"
+                    android:layout_width="24dp"
+                    android:layout_height="27dp"
+                    android:layout_gravity="bottom|end" />
+
+        </com.ericversteeg.liquidocean.view.ActionButtonFrame>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -751,6 +773,7 @@
             android:layout_width="400dp"
             android:layout_height="240dp"
             android:elevation="10dp"
+            android:background="@android:drawable/dialog_holo_light_frame"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent" />

@@ -210,7 +210,6 @@ class OptionsFragment: Fragment() {
             option_grid_line_color_button.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
         }
 
-        // option grid line color
         option_grid_line_color_button.setOnClickListener {
             ColorPickerPopup.Builder(activity)
                 .initialColor(SessionSettings.instance.canvasGridLineColor) // Set initial color
@@ -233,6 +232,94 @@ class OptionsFragment: Fragment() {
 
                     override fun onColorCancel() {
                         it.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
+                    }
+                })
+        }
+
+        // option canvas background primary color
+        if (SessionSettings.instance.canvasBackgroundPrimaryColor == 0) {
+            option_canvas_background_primary_color_button.setBackgroundColor(Color.WHITE)
+        }
+        else {
+            option_canvas_background_primary_color_button.setBackgroundColor(SessionSettings.instance.canvasBackgroundPrimaryColor)
+        }
+
+        option_canvas_background_primary_color_reset_button.setOnClickListener {
+            SessionSettings.instance.canvasBackgroundSecondaryColor = 0
+            option_canvas_background_primary_color_button.setBackgroundColor(Color.WHITE)
+        }
+
+        option_canvas_background_primary_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.canvasBackgroundPrimaryColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(false) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(false)
+                .showValue(false)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.canvasBackgroundPrimaryColor = color
+                    }
+
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        if (SessionSettings.instance.canvasBackgroundPrimaryColor == 0) {
+                            it.setBackgroundColor(Color.WHITE)
+                        }
+                        else {
+                            it.setBackgroundColor(SessionSettings.instance.canvasBackgroundPrimaryColor)
+                        }
+                    }
+                })
+        }
+
+        // option canvas background secondary color
+        if (SessionSettings.instance.canvasBackgroundSecondaryColor == 0) {
+            option_canvas_background_secondary_color_button.setBackgroundColor(Color.WHITE)
+        }
+        else {
+            option_canvas_background_secondary_color_button.setBackgroundColor(SessionSettings.instance.canvasBackgroundSecondaryColor)
+        }
+
+        option_canvas_background_secondary_color_reset_button.setOnClickListener {
+            SessionSettings.instance.canvasBackgroundSecondaryColor = 0
+            option_canvas_background_secondary_color_button.setBackgroundColor(Color.WHITE)
+        }
+
+        option_canvas_background_secondary_color_button.setOnClickListener {
+            ColorPickerPopup.Builder(activity)
+                .initialColor(SessionSettings.instance.canvasBackgroundSecondaryColor) // Set initial color
+                .enableBrightness(true) // Enable brightness slider or not
+                .enableAlpha(false) // Enable alpha slider or not
+                .okTitle("Choose")
+                .cancelTitle("Cancel")
+                .showIndicator(false)
+                .showValue(false)
+                .build()
+                .show(it, object : ColorPickerObserver() {
+                    override fun onColorPicked(color: Int) {
+                        it.setBackgroundColor(color)
+                        SessionSettings.instance.canvasBackgroundSecondaryColor = color
+                    }
+
+                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                        it.setBackgroundColor(color)
+                    }
+
+                    override fun onColorCancel() {
+                        if (SessionSettings.instance.canvasBackgroundSecondaryColor == 0) {
+                            it.setBackgroundColor(Color.WHITE)
+                        }
+                        else {
+                            it.setBackgroundColor(SessionSettings.instance.canvasBackgroundSecondaryColor)
+                        }
                     }
                 })
         }

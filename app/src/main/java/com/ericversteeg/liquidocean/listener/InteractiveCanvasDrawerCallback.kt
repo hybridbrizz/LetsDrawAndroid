@@ -5,7 +5,7 @@ interface InteractiveCanvasDrawerCallback {
 
     fun notifyPaintColorUpdate(color: Int)
 
-    fun notifyCloseRecentColors()
+    fun notifyPaintActionStarted()
     fun notifyClosePaletteFragment()
 
     fun notifyPaintingStarted()

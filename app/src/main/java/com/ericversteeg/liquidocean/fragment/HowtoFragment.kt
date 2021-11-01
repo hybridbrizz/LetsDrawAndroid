@@ -49,22 +49,24 @@ class HowtoFragment: Fragment() {
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
-        paint_action.type = ActionButtonView.Type.PAINT
         paint_action.isStatic = true
-
-        share_action.type = ActionButtonView.Type.EXPORT
         share_action.isStatic = true
+        howto_background_action.isStatic = true
+        howto_grid_line_action.isStatic = true
+        howto_summary_action.isStatic = true
+        howto_dot_action_1.isStatic = true
+        howto_dot_action_2.isStatic = true
+        howto_dot_action_3.isStatic = true
+        howto_frame_action.isStatic = true
 
+        paint_action.type = ActionButtonView.Type.PAINT
+        share_action.type = ActionButtonView.Type.EXPORT
         howto_background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-
         howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
-
         howto_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-
         howto_dot_action_1.type = ActionButtonView.Type.DOT
         howto_dot_action_2.type = ActionButtonView.Type.DOT
         howto_dot_action_3.type = ActionButtonView.Type.DOT
-
         howto_frame_action.type = ActionButtonView.Type.FRAME
 
         val colorStrs = arrayOf("#000000", "#222034", "#45283C", "#663931", "#8F563B", "#DF7126", "#D9A066", "#EEC39A",

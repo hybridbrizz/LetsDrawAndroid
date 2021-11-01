@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
@@ -44,6 +45,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
 
     var objectSelectionListener: ObjectSelectionListener? = null
 
+    var canvasEdgeTouchListener: CanvasEdgeTouchListener? = null
+
     lateinit var objectSelectionStartUnit: Point
     lateinit var objectSelectionStartPoint: PointF
 
@@ -77,8 +80,12 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
     private fun commonInit() {
         interactiveCanvas.scaleCallbackListener = this
 
-        mScaleFactor = interactiveCanvas.startScaleFactor
-        interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
+        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
+            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
+        }
+
+        scaleFactor = interactiveCanvas.lastScaleFactor
+        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
         //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
 
@@ -129,15 +136,20 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
             mTapDetector.onTouchEvent(ev)
         }
         else if (mode == Mode.PAINTING) {
-            interactiveCanvas.drawCallbackListener?.apply {
-                if (isPaletteFragmentOpen()) {
-                    notifyClosePaletteFragment()
+            if(ev.action == MotionEvent.ACTION_DOWN) {
+                interactiveCanvas.drawCallbackListener?.apply {
+                    if (isPaletteFragmentOpen()) {
+                        notifyClosePaletteFragment()
+                        return false
+                    }
+                }
+
+                interactiveCanvas.drawCallbackListener?.notifyPaintActionStarted()
+
+                if ((ev.x > width - Utils.dpToPx(context, 50) && !SessionSettings.instance.rightHanded) || (ev.x < Utils.dpToPx(context, 50) && SessionSettings.instance.rightHanded)) {
+                    canvasEdgeTouchListener?.onTouchCanvasEdge()
                     return false
                 }
-            }
-
-            if(ev.action == MotionEvent.ACTION_DOWN) {
-                interactiveCanvas.drawCallbackListener?.notifyCloseRecentColors()
 
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
@@ -304,24 +316,24 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
     private val mPanDetector = GestureDetector(context, mGestureListener)
 
     // scaling
-    private var mScaleFactor = 1f
+    var scaleFactor = 1f
 
     private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            oldScaleFactor = mScaleFactor
-            mScaleFactor *= detector.scaleFactor
+            oldScaleFactor = scaleFactor
+            scaleFactor *= detector.scaleFactor
 
             // Don't let the object get too small or too large.
-            mScaleFactor = Math.max(interactiveCanvas.minScaleFactor, Math.min(mScaleFactor, interactiveCanvas.maxScaleFactor))
+            scaleFactor = Math.max(interactiveCanvas.minScaleFactor, Math.min(scaleFactor, interactiveCanvas.maxScaleFactor))
 
             oldPpu = interactiveCanvas.ppu
-            interactiveCanvas.ppu = (interactiveCanvas.basePpu * mScaleFactor).toInt()
+            interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
             interactiveCanvas.updateDeviceViewport(context, true)
             interactiveCanvas.drawCallbackListener?.notifyRedraw()
 
-            interactiveCanvas.lastScaleFactor = mScaleFactor
+            interactiveCanvas.lastScaleFactor = scaleFactor
             lastPanOrScaleTime = System.currentTimeMillis()
 
             gestureListener?.onInteractiveCanvasScale()
@@ -346,21 +358,34 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
                         if (interactiveCanvas.world) {
                             pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
                         }
-                        else {
-                            pixelHistoryListener?.showDrawFrameConfigFragmentPopover(Point(x.toInt(), y.toInt()))
-                        }
                     }
                 }
             }
 
             return true
         }
+
+        override fun onLongPress(e: MotionEvent?) {
+            e?.apply {
+                if (System.currentTimeMillis() - lastPanOrScaleTime > 500) {
+                    val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
+
+                    if (unitPoint != null) {
+                        interactiveCanvas.lastSelectedUnitPoint = unitPoint
+
+                        if (!interactiveCanvas.world) {
+                            pixelHistoryListener?.showDrawFrameConfigFragmentPopover(Point(x.toInt(), y.toInt()))
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private val mTapDetector = GestureDetector(context, mTapListener)
 
     override fun notifyScaleCancelled() {
-        mScaleFactor = oldScaleFactor
+        scaleFactor = oldScaleFactor
         interactiveCanvas.ppu = oldPpu
     }
 

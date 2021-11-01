@@ -9,20 +9,14 @@ import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import io.socket.client.IO
 import io.socket.client.Socket
-import io.socket.emitter.Emitter
-import io.socket.engineio.client.transports.Polling
-import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URISyntaxException
@@ -52,6 +46,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var paintSelectionListener: PaintSelectionListener? = null
     var recentColorsListener: RecentColorsListener? = null
     var artExportListener: ArtExportListener? = null
+    var deviceCanvasViewportResetListener: DeviceCanvasViewportResetListener? = null
 
     var recentColorsList: MutableList<Int> = ArrayList()
 
@@ -76,7 +71,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var receivedPaintRecently = false
 
-    val numBackgrounds = 6
+    val numBackgrounds = 7
 
     var numConnect = 0
     lateinit var connectingTimer: Timer
@@ -93,6 +88,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val BACKGROUND_PHOTOSHOP = 3
         val BACKGROUND_CLASSIC = 4
         val BACKGROUND_CHESS = 5
+        val BACKGROUND_CUSTOM = 6
     }
 
     private fun initType() {
@@ -460,6 +456,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             BACKGROUND_PHOTOSHOP -> return Color.BLACK
             BACKGROUND_CLASSIC -> return Color.WHITE
             BACKGROUND_CHESS -> return Color.WHITE
+            BACKGROUND_CUSTOM -> return Color.WHITE
         }
 
         return Color.RED
@@ -665,6 +662,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         deviceViewport = RectF(left, top, right, bottom)
+
+        val w = right - left
+        val h = bottom - top
+
+        // error! reset the canvas viewport
+        if (w <= 0 || h <= 0 || w <= h) {
+            deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
+        }
     }
 
     fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
@@ -719,6 +724,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             right += dX
             top += dY
             bottom += dY
+
+            val w = right - left
+            val h = bottom - top
+
+            // error! reset the canvas viewport
+            if (w <= 0 || h <= 0 || w <= h) {
+                deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
+            }
         }
 
         drawCallbackListener?.notifyRedraw()
@@ -912,6 +925,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
             BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.classicGrayLight.color, ActionButtonView.classicGrayDark.color)
             BACKGROUND_CHESS -> return listOf(ActionButtonView.chessTan.color, ActionButtonView.blackPaint.color)
+            BACKGROUND_CUSTOM -> return listOf(SessionSettings.instance.canvasBackgroundPrimaryColor,
+                SessionSettings.instance.canvasBackgroundSecondaryColor)
         }
 
         return listOf()

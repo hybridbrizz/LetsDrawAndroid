@@ -104,7 +104,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
             itemClickListener?.onItemClicked(palette, position - 1)
         }
 
-        holder.itemView.setOnTouchListener(object: View.OnTouchListener {
+        /*holder.itemView.setOnTouchListener(object: View.OnTouchListener {
             override fun onTouch(view: View, event: MotionEvent): Boolean {
                 if (event.action == MotionEvent.ACTION_DOWN) {
                     holder.nameTextView.setTextColor(Color.parseColor("#df7126"))
@@ -127,7 +127,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
 
                 return false
             }
-        })
+        })*/
     }
 
     override fun getItemCount(): Int {

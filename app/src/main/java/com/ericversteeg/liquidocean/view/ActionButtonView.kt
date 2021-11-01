@@ -106,7 +106,9 @@ class ActionButtonView: View {
         BACKGROUND_CHESS,
         LOGO,
         WHITE_COLOR_DEFAULT,
-        BLACK_COLOR_DEFAULT
+        BLACK_COLOR_DEFAULT,
+        LOCK_OPEN,
+        LOCK_CLOSE
     }
 
     enum class TouchState {
@@ -192,7 +194,7 @@ class ActionButtonView: View {
     private fun commonInit() {
         semiPaint.color = Color.parseColor("#99FFFFFF")
         semiLightPaint.color = Color.parseColor("#33FFFFFF")
-        semiDarkPaint.color = Color.parseColor("#33000000")
+        semiDarkPaint.color = Color.parseColor("#88000000")
         semiDarkLightPaint.color = Color.parseColor("#11000000")
 
         greenPaint.color = Color.parseColor("#05AD2E")
@@ -345,6 +347,12 @@ class ActionButtonView: View {
             else if (type == Type.BLACK_COLOR_DEFAULT)
             {
                 drawBlackColorDefault(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.LOCK_OPEN) {
+                drawLockOpenAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.LOCK_CLOSE) {
+                drawLockCloseAction(touchState == TouchState.ACTIVE, canvas)
             }
 
             restore()
@@ -609,16 +617,13 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             primaryPaint = semiDarkPaint
             accentPaint = semiDarkPaint
             outLinePaint.color = whitePaint.color
         }
 
-        if (selected && !isStatic && !SessionSettings.instance.darkIcons) {
-            primaryPaint = lightYellowPaint
-        }
-        else if (selected && !isStatic && SessionSettings.instance.darkIcons) {
+        if (selected) {
             primaryPaint = lightYellowPaint
         }
 
@@ -647,10 +652,14 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (SessionSettings.instance.darkIcons) {
+        if (colorMode == ColorMode.BLACK) {
+            primaryPaint = semiDarkPaint
+        }
+
+        /*if (SessionSettings.instance.darkIcons) {
             primaryPaint = semiDarkPaint
             outLinePaint.color = whitePaint.color
-        }
+        }*/
 
         if (selected && !isStatic) {
             primaryPaint = lightYellowPaint
@@ -687,10 +696,14 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (SessionSettings.instance.darkIcons) {
+        if (colorMode == ColorMode.BLACK) {
+            primaryPaint = semiDarkPaint
+        }
+
+        /*if (SessionSettings.instance.darkIcons) {
             primaryPaint = semiDarkPaint
             outLinePaint.color = whitePaint.color
-        }
+        }*/
 
         if (selected && !isStatic) {
             primaryPaint = lightYellowPaint
@@ -807,7 +820,7 @@ class ActionButtonView: View {
         cols = 3
 
         var paint = semiPaint
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -899,7 +912,7 @@ class ActionButtonView: View {
             paint = lightYellowPaint
         }
 
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -936,7 +949,7 @@ class ActionButtonView: View {
             paint = lightYellowPaint
         }
 
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -958,7 +971,7 @@ class ActionButtonView: View {
             paint = lightYellowPaint
         }
 
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -985,7 +998,7 @@ class ActionButtonView: View {
         cols = 1
 
         var paint = semiPaint
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -1003,7 +1016,7 @@ class ActionButtonView: View {
         cols = 5
 
         var paint = semiPaint
-        if (SessionSettings.instance.darkIcons) {
+        if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
         }
 
@@ -2425,6 +2438,153 @@ class ActionButtonView: View {
             drawPixel(5, 7, paint, canvas)
             drawPixel(6, 7, paint, canvas)
             drawPixel(7, 7, paint, canvas)
+        }
+    }
+
+    private fun drawLockOpenAction(selected: Boolean, canvas: Canvas) {
+        rows = 9
+        cols = 8
+
+        var paint = lightGrayPaint
+
+        if (colorMode == ColorMode.BLACK) {
+            paint = semiDarkPaint
+        }
+        else if (colorMode == ColorMode.WHITE) {
+            paint = semiPaint
+        }
+
+        if (selected) {
+            paint = lightYellowPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+
+            // row 2
+            drawPixel(2, 1, paint, canvas)
+            drawPixel(5, 1, paint, canvas)
+
+            // row 3
+            drawPixel(5, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+            drawPixel(3, 3, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+            drawPixel(5, 3, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+            drawPixel(7, 3, paint, canvas)
+
+            // row 5
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(7, 4, paint, canvas)
+
+            // row 6
+            drawPixel(0, 5, paint, canvas)
+            drawPixel(3, 5, paint, canvas)
+            drawPixel(4, 5, paint, canvas)
+            drawPixel(7, 5, paint, canvas)
+
+            // row 7
+            drawPixel(0, 6, paint, canvas)
+            drawPixel(3, 6, paint, canvas)
+            drawPixel(4, 6, paint, canvas)
+            drawPixel(7, 6, paint, canvas)
+
+            // row 8
+            drawPixel(0, 7, paint, canvas)
+            drawPixel(7, 7, paint, canvas)
+
+            // row 9
+            drawPixel(0, 8, paint, canvas)
+            drawPixel(1, 8, paint, canvas)
+            drawPixel(2, 8, paint, canvas)
+            drawPixel(3, 8, paint, canvas)
+            drawPixel(4, 8, paint, canvas)
+            drawPixel(5, 8, paint, canvas)
+            drawPixel(6, 8, paint, canvas)
+            drawPixel(7, 8, paint, canvas)
+        }
+    }
+
+    private fun drawLockCloseAction(selected: Boolean, canvas: Canvas) {
+        rows = 9
+        cols = 8
+
+        var paint = lightGrayPaint
+
+        if (colorMode == ColorMode.BLACK) {
+            paint = semiDarkPaint
+        }
+        else if (colorMode == ColorMode.WHITE) {
+            paint = semiPaint
+        }
+
+        if (selected) {
+            paint = lightYellowPaint
+        }
+
+        canvas.apply {
+            // row 1
+            drawPixel(2, 0, paint, canvas)
+            drawPixel(3, 0, paint, canvas)
+            drawPixel(4, 0, paint, canvas)
+            drawPixel(5, 0, paint, canvas)
+
+            // row 2
+            drawPixel(2, 1, paint, canvas)
+            drawPixel(5, 1, paint, canvas)
+
+            // row 3
+            drawPixel(2, 2, paint, canvas)
+            drawPixel(5, 2, paint, canvas)
+
+            // row 4
+            drawPixel(0, 3, paint, canvas)
+            drawPixel(1, 3, paint, canvas)
+            drawPixel(2, 3, paint, canvas)
+            drawPixel(3, 3, paint, canvas)
+            drawPixel(4, 3, paint, canvas)
+            drawPixel(5, 3, paint, canvas)
+            drawPixel(6, 3, paint, canvas)
+            drawPixel(7, 3, paint, canvas)
+
+            // row 5
+            drawPixel(0, 4, paint, canvas)
+            drawPixel(7, 4, paint, canvas)
+
+            // row 6
+            drawPixel(0, 5, paint, canvas)
+            drawPixel(3, 5, paint, canvas)
+            drawPixel(4, 5, paint, canvas)
+            drawPixel(7, 5, paint, canvas)
+
+            // row 7
+            drawPixel(0, 6, paint, canvas)
+            drawPixel(3, 6, paint, canvas)
+            drawPixel(4, 6, paint, canvas)
+            drawPixel(7, 6, paint, canvas)
+
+            // row 8
+            drawPixel(0, 7, paint, canvas)
+            drawPixel(7, 7, paint, canvas)
+
+            // row 9
+            drawPixel(0, 8, paint, canvas)
+            drawPixel(1, 8, paint, canvas)
+            drawPixel(2, 8, paint, canvas)
+            drawPixel(3, 8, paint, canvas)
+            drawPixel(4, 8, paint, canvas)
+            drawPixel(5, 8, paint, canvas)
+            drawPixel(6, 8, paint, canvas)
+            drawPixel(7, 8, paint, canvas)
         }
     }
 

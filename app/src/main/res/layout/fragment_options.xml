@@ -12,13 +12,13 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent">
+                android:layout_width="match_parent"
+                android:layout_marginTop="-11dp">
 
             <TextView
                     android:id="@+id/options_title_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-13dp"
                     android:layout_marginBottom="10dp"
                     android:layout_gravity="center_horizontal"
                     app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +27,7 @@
                     android:textStyle="bold"
                     android:textColor="#DDFFFFFF"
                     android:gravity="center"
-                    android:text="@string/options_menu_title"
+                    android:text="@string/options_title"
                     android:shadowColor="#7F000000"
                     android:shadowDx="3"
                     android:shadowDy="0"
@@ -204,7 +204,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_frame_color_container"
+                    android:id="@+id/option_canvas_background_primary_color_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -213,6 +213,80 @@
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
                     app:layout_constraintTop_toBottomOf="@id/option_grid_line_color_container">
+
+                <TextView
+                        android:id="@+id/option_canvas_background_primary_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/option_canvas_background_primary_color_title"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_canvas_background_primary_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_canvas_background_primary_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_canvas_background_secondary_color_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_canvas_background_primary_color_container">
+
+                <TextView
+                        android:id="@+id/option_canvas_background_secondary_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="@string/option_canvas_background_secondary_color_title"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_canvas_background_secondary_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_canvas_background_secondary_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_frame_color_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_canvas_background_secondary_color_container">
 
                 <TextView
                         android:id="@+id/option_frame_color_title"

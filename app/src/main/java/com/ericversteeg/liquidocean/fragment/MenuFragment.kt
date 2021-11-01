@@ -49,6 +49,13 @@ class MenuFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        view.setBackgroundColor(Color.BLACK)
+
+        val allViews = listOf<View>(back_button, back_action, draw_menu_text,
+            options_menu_text, how_to_menu_text, menu_button_container)
+
+        fadeInAllView(allViews)
+
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
@@ -275,6 +282,12 @@ class MenuFragment: Fragment() {
 
         //view.alpha = 0F
         //view.animate().alphaBy(1F).setDuration(500)
+    }
+
+    private fun fadeInAllView(list: List<View>) {
+        for (vw in list) {
+            Animator.fadeInView(vw, 1000)
+        }
     }
 
     private fun animateMenuButtons(layer: Int, out: Boolean = false) {

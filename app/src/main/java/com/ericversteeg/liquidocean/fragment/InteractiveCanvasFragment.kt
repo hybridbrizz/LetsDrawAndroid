@@ -60,7 +60,7 @@ import kotlin.math.min
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
-    PalettesFragmentListener, DrawFrameConfigFragmentListener {
+    PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener {
 
     var scaleFactor = 1f
 
@@ -136,6 +136,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
         else {
             context?.apply {
+                val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+
+                SessionSettings.instance.restoreDeviceViewportLeft = deviceViewport.left
+                SessionSettings.instance.restoreDeviceViewportTop = deviceViewport.top
+                SessionSettings.instance.restoreDeviceViewportRight = deviceViewport.right
+                SessionSettings.instance.restoreDeviceViewportBottom = deviceViewport.bottom
+
+                SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+
                 SessionSettings.instance.save(this)
                 StatTracker.instance.save(this)
             }
@@ -598,10 +607,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 )
             }
 
-            surface_view.interactiveCanvas.updateDeviceViewport(
-                this,
-                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
-            )
+            if (SessionSettings.instance.restoreDeviceViewportLeft == 0F) {
+                surface_view.interactiveCanvas.updateDeviceViewport(
+                    this,
+                    surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
+                )
+            }
+            else {
+                val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
+                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
+
+                surface_view.interactiveCanvas.deviceViewport = restoreDeviceViewport
+            }
         }
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -609,9 +626,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
         surface_view.objectSelectionListener = this
+        surface_view.canvasEdgeTouchListener = this
 
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.artExportListener = this
+        surface_view.interactiveCanvas.deviceCanvasViewportResetListener = this
 
         // palette
         palette_name_text.setOnClickListener {
@@ -710,6 +729,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         close_paint_panel.actionBtnView = close_paint_panel_top_layer
 
+        if (SessionSettings.instance.lockPaintPanel) {
+            lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
+        }
+        else {
+            lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
+        }
+        lock_paint_panel.actionBtnView = lock_paint_panel_action
+
+        // panel theme config
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
@@ -727,15 +755,26 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.BLACK)
+            palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F555555"))
 
             paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+
+            palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
+            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
+
+            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
 
             paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+
+            palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+
+            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
         // outside paint panel
@@ -943,6 +982,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             closePopoverFragment()
         }
 
+        lock_paint_panel.setOnClickListener {
+            SessionSettings.instance.lockPaintPanel = !SessionSettings.instance.lockPaintPanel
+
+            if (SessionSettings.instance.lockPaintPanel) {
+                lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
+            }
+            else {
+                lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
+            }
+        }
+
         paint_qty_bar.panelThemeConfig = panelThemeConfig
         paint_qty_circle.panelThemeConfig = panelThemeConfig
         paint_indicator_view.panelThemeConfig = panelThemeConfig
@@ -1079,6 +1129,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
 
+            if (SessionSettings.instance.backgroundColorsIndex == 6 && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
+                SessionSettings.instance.backgroundColorsIndex = 0
+            }
+
             invalidateButtons()
 
             if (canvas_summary_container.visibility == View.VISIBLE) {
@@ -1108,7 +1162,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
         // open tools button
         open_tools_button.setOnClickListener {
-            toggleTools()
+            if (toolboxOpen) {
+                toggleTools(false)
+            }
+            else {
+                toggleTools(true)
+            }
         }
 
         // recent colors background
@@ -1152,7 +1211,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         // open toolbox
-        toggleTools()
+        toggleTools(true)
 
         // tablet & righty
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
@@ -1655,7 +1714,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    private fun togglePaintPanel(show: Boolean) {
+    private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
         if (show) {
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
@@ -1664,6 +1723,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             background_button.visibility = View.INVISIBLE
 
             open_tools_button.visibility = View.INVISIBLE
+
+            toggleTools(false)
 
             if (pixel_history_fragment_container.visibility == View.VISIBLE) {
                 pixel_history_fragment_container.visibility = View.GONE
@@ -1713,6 +1774,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
             back_button.visibility = View.GONE
         }
+        else if (softHide) {
+            paint_panel.visibility = View.GONE
+
+            toggleTools(false)
+        }
         else {
             surface_view.endPainting(false)
 
@@ -1740,10 +1806,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    private fun toggleTools() {
+    private fun toggleTools(show: Boolean) {
         if (!animatingTools) {
-            animatingTools = true
-            if (!toolboxOpen) {
+            if (show && !toolboxOpen) {
+                animatingTools = true
+
                 export_button.visibility = View.VISIBLE
                 background_button.visibility = View.VISIBLE
                 grid_lines_button.visibility = View.VISIBLE
@@ -1758,13 +1825,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingTools = false
+                            toolboxOpen = true
                         }
                     }
                 )
 
                 toolboxOpen = true
             }
-            else {
+            else if (!show && toolboxOpen) {
+                animatingTools = true
+
                 Animator.animateMenuItems(
                     listOf(
                         listOf(export_button), listOf(background_button), listOf(
@@ -1774,6 +1844,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingTools = false
+                            toolboxOpen = false
                         }
                     }
                 )
@@ -1883,9 +1954,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_no_container.visibility = View.GONE
     }
 
-    override fun notifyCloseRecentColors() {
+    override fun notifyPaintActionStarted() {
         recent_colors_action.visibility = View.VISIBLE
         recent_colors_container.visibility = View.GONE
+
+        if (!SessionSettings.instance.lockPaintPanel) {
+            togglePaintPanel(show = false, softHide = true)
+        }
     }
 
     override fun notifyClosePaletteFragment() {
@@ -1984,13 +2059,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         pixel_history_fragment_container.visibility = View.GONE
 
         syncPaletteAndColor()
-
-        if (index == 0) {
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
-        }
-        else {
-            setupColorPalette(palette.colors.toTypedArray())
-        }
     }
 
     override fun onPaletteDeleted(palette: Palette) {
@@ -2067,6 +2135,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
         else {
             canvas_summary_container.visibility = View.INVISIBLE
+        }
+    }
+
+    override fun onTouchCanvasEdge() {
+        togglePaintPanel(true)
+    }
+
+    override fun resetDeviceCanvasViewport() {
+        context?.apply {
+            surface_view.interactiveCanvas.lastScaleFactor = surface_view.interactiveCanvas.startScaleFactor
+            surface_view.scaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+            surface_view.interactiveCanvas.ppu = (surface_view.interactiveCanvas.basePpu * surface_view.scaleFactor ).toInt()
+
+            surface_view.interactiveCanvas.updateDeviceViewport(
+                this,
+                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
+            )
         }
     }
 }

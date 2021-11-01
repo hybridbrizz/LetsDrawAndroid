@@ -137,6 +137,10 @@ class SessionSettings {
 
     var canvasGridLineColor = -1
 
+    var canvasBackgroundPrimaryColor = 0
+
+    var canvasBackgroundSecondaryColor = 0
+
     var frameColor = -1
 
     var closePaintBackButtonColor = -1
@@ -157,6 +161,8 @@ class SessionSettings {
 
     var smallActionButtons = false
 
+    var lockPaintPanel = false
+
     var pincodeSet = false
 
     var firstLaunch = true
@@ -166,6 +172,7 @@ class SessionSettings {
     var selectedPaletteIndex = 0
     set(value) {
         field = value
+
         palette = palettes[selectedPaletteIndex]
     }
 
@@ -173,6 +180,15 @@ class SessionSettings {
 
     var lastDrawFrameWidth = 0
     var lastDrawFrameHeight = 0
+
+    var restoreDeviceViewportLeft = 0F
+    var restoreDeviceViewportTop = 0F
+    var restoreDeviceViewportRight = 0F
+    var restoreDeviceViewportBottom = 0F
+
+    var restoreCanvasScaleFactor = 0F
+    var restoreCanvasViewScaleFactor = 0F
+    var restoreCanvasPpu = 0
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -231,6 +247,10 @@ class SessionSettings {
 
         ed.putInt("canvas_grid_line_color", canvasGridLineColor)
 
+        ed.putInt("canvas_background_primary_color", canvasBackgroundPrimaryColor)
+
+        ed.putInt("canvas_background_secondary_color", canvasBackgroundSecondaryColor)
+
         ed.putInt("frame_color", frameColor)
 
         ed.putInt("close_paint_back_button_color", closePaintBackButtonColor)
@@ -249,6 +269,8 @@ class SessionSettings {
 
         ed.putBoolean("small_action_buttons", smallActionButtons)
 
+        ed.putBoolean("lock_paint_panel", lockPaintPanel)
+
         ed.putBoolean("pin_code_set", pincodeSet)
 
         ed.putBoolean("first_launch", firstLaunch)
@@ -256,6 +278,20 @@ class SessionSettings {
         ed.putString("palettes", palettesJsonStr())
 
         ed.putInt("selected_palette_index", selectedPaletteIndex)
+
+        ed.putFloat("restore_device_viewport_left", restoreDeviceViewportLeft)
+
+        ed.putFloat("restore_device_viewport_top", restoreDeviceViewportTop)
+
+        ed.putFloat("restore_device_viewport_right", restoreDeviceViewportRight)
+
+        ed.putFloat("restore_device_viewport_bottom", restoreDeviceViewportBottom)
+
+        ed.putFloat("restore_canvas_scale_factor", restoreCanvasScaleFactor)
+
+        ed.putFloat("restore_canvas_view_scale_factor", restoreCanvasViewScaleFactor)
+
+        ed.putInt("restore_canvas_ppu", restoreCanvasPpu)
 
         ed.apply()
     }
@@ -315,6 +351,10 @@ class SessionSettings {
 
         canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", -1)
 
+        canvasBackgroundPrimaryColor = getSharedPrefs(context).getInt("canvas_background_primary_color", 0)
+
+        canvasBackgroundSecondaryColor = getSharedPrefs(context).getInt("canvas_background_secondary_color", 0)
+
         frameColor = getSharedPrefs(context).getInt("frame_color", Color.GRAY)
 
         closePaintBackButtonColor = getSharedPrefs(context).getInt(
@@ -337,6 +377,8 @@ class SessionSettings {
 
         smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
 
+        lockPaintPanel = getSharedPrefs(context).getBoolean("lock_paint_panel", false)
+
         pincodeSet = getSharedPrefs(context).getBoolean("pin_code_set", false)
 
         firstLaunch = getSharedPrefs(context).getBoolean("first_launch", true)
@@ -349,6 +391,7 @@ class SessionSettings {
         palettes.add(0, Palette("Recent Color"))
 
         selectedPaletteIndex = getSharedPrefs(context).getInt("selected_palette_index", 0)
+
         //selectedPaletteIndex = 0
 
         /*val palette1 = Palette("Palette 1")
@@ -361,6 +404,18 @@ class SessionSettings {
         palette2.addColor(103040)
 
         palettes.add(palette2)*/
+
+        restoreDeviceViewportLeft = getSharedPrefs(context).getFloat("restore_device_viewport_left", 0F)
+        restoreDeviceViewportTop = getSharedPrefs(context).getFloat("restore_device_viewport_top", 0F)
+        restoreDeviceViewportRight = getSharedPrefs(context).getFloat("restore_device_viewport_right", 0F)
+        restoreDeviceViewportBottom = getSharedPrefs(context).getFloat("restore_device_viewport_bottom", 0F)
+
+        restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
+        restoreCanvasViewScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_view_scale_factor", 0F)
+
+        restoreCanvasPpu = getSharedPrefs(context).getInt("restore_canvas_ppu", 0)
+
+
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -461,7 +516,7 @@ class SessionSettings {
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.bird_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.hfs_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.paint_bucket_json))
-        addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fire_badge_json))
+        //addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fire_badge_json))
         addToShowcase(ArtView.artFromJsonResource(resources, R.raw.fries_json))
     }
 
