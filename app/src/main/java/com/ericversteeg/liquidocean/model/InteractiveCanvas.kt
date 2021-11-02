@@ -19,6 +19,7 @@ import com.ericversteeg.liquidocean.view.ActionButtonView
 import io.socket.client.Socket
 import org.json.JSONArray
 import org.json.JSONObject
+import java.lang.Exception
 import java.net.URISyntaxException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -79,6 +80,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var summary: MutableList<RestorePoint> = ArrayList()
 
     companion object {
+        var rows = 1024
+        var cols = 1024
+
         var GRID_LINE_MODE_ON = 0
         var GRID_LINE_MODE_OFF = 1
 
@@ -89,6 +93,53 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val BACKGROUND_CLASSIC = 4
         val BACKGROUND_CHESS = 5
         val BACKGROUND_CUSTOM = 6
+
+        fun importCanvasFromJson(context: Context, jsonString: String): Boolean {
+            try {
+                val jsonArray = JSONArray(jsonString)
+                for (i in 0 until jsonArray.length()) {
+                    val jsonObject = jsonArray.getJSONObject(i)
+
+                    val x = jsonObject.getInt("x")
+                    val y = jsonObject.getInt("y")
+                    jsonObject.getInt("color")
+
+                    if (x < 0 || x > cols - 1 || y < 0 || y > rows - 1) {
+                        return false
+                    }
+                }
+            }
+            catch (ex: Exception) {
+                return false
+            }
+
+            val ed = SessionSettings.instance.getSharedPrefs(context).edit()
+            ed.putString("arr_canvas", jsonString)
+
+            ed.apply()
+
+            return true
+        }
+
+        fun exportCanvasToJson(arr: Array<IntArray>): String {
+            val pixelList: MutableList<Map<String, Int>> = ArrayList()
+            for (y in 0 until rows) {
+                for (x in 0 until cols) {
+                    val color = arr[y][x]
+
+                    if (color != 0) {
+                        val map = HashMap<String, Int>()
+                        with(map) {
+                            put("x", x)
+                            put("y", y)
+                            put("color", color)
+                        }
+                        pixelList.add(map)
+                    }
+                }
+            }
+            return JSONArray(pixelList.toTypedArray()).toString()
+        }
     }
 
     private fun initType() {
@@ -193,7 +244,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             arr = Array(rows) { IntArray(cols) }
 
             val arrJsonStr = sessionSettings.getSharedPrefs(context).getString(
-                "arr_single",
+                "arr_canvas",
                 null
             )
 
@@ -394,7 +445,28 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    private fun initPixels(arrJsonStr: String) {
+    private fun initPixels(pixelsJsonStr: String) {
+        val jsonArray = JSONArray(pixelsJsonStr)
+
+        for (i in 0 until jsonArray.length()) {
+            val jsonObject = jsonArray.getJSONObject(i)
+
+            val x = jsonObject.getInt("x")
+            val y = jsonObject.getInt("y")
+
+            val color = jsonObject.getInt("color")
+
+            arr[y][x] = color
+
+            if (color != 0) {
+                summary.add(RestorePoint(Point(x, y), color, color))
+            }
+        }
+
+        drawCallbackListener?.notifyRedraw()
+    }
+
+    /*private fun initPixels(arrJsonStr: String) {
         val outerArray = JSONArray(arrJsonStr)
 
         for (i in 0 until outerArray.length()) {
@@ -410,7 +482,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         drawCallbackListener?.notifyRedraw()
-    }
+    }*/
 
     private fun initChunkPixelsFromMemory() {
         for (i in arr.indices) {
@@ -748,7 +820,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
         }
         else {
-            ed.putString("arr_single", jsonArr.toString())
+            ed.putString("arr_canvas", exportCanvasToJson(arr))
             ed.putString(
                 "recent_colors_single",
                 JSONArray(recentColorsList.toTypedArray()).toString()

@@ -30,6 +30,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
 
     var recentlyDeletedItem: Palette? = null
     var recentlyDeletedItemPosition: Int? = null
+    var recentlyDeletedSelected = false
 
     var hideTitle = false
     set(value) {
@@ -145,6 +146,7 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
     fun deleteItem(position: Int) {
         recentlyDeletedItem = palettes[position - 1]
         recentlyDeletedItemPosition = position
+        recentlyDeletedSelected = SessionSettings.instance.selectedPaletteIndex == position - 1
 
         palettes.removeAt(position - 1)
         notifyItemRemoved(position)

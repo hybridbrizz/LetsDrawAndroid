@@ -17,7 +17,7 @@
                 android:padding="15dp">
 
             <TextView
-                    android:id="@+id/canvas_export_title_text"
+                    android:id="@+id/canvas_import_title_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -26,7 +26,7 @@
                     android:textStyle="bold"
                     android:textColor="#DDFFFFFF"
                     android:gravity="center"
-                    android:text="@string/canvas_export_title_text"
+                    android:text="@string/canvas_import_title_text"
                     android:shadowColor="#7F000000"
                     android:shadowDx="3"
                     android:shadowDy="0"
@@ -39,8 +39,7 @@
                     android:layout_height="50dp"
                     android:textSize="8pt"
                     android:textColor="#FF999999"
-                    android:gravity="center"
-                    android:text="@string/canvas_export_email_title" />
+                    android:gravity="center" />
 
             <LinearLayout
                     android:layout_width="match_parent"
@@ -52,11 +51,11 @@
                         android:layout_height="wrap_content"
                         android:textSize="8pt"
                         android:textColor="#FF999999"
-                        android:text="@string/canvas_export_email_title"
+                        android:text="@string/pastebin_url"
                         android:layout_weight="1" />
 
                 <EditText
-                        android:id="@+id/email_input"
+                        android:id="@+id/data_url_input"
                         android:layout_width="240dp"
                         android:layout_height="50dp"
                         android:background="#FF333333"
@@ -66,11 +65,11 @@
             </LinearLayout>
 
             <Button
-                    android:id="@+id/canvas_export_button"
+                    android:id="@+id/canvas_import_button"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="10dp"
-                    android:text="@string/canvas_export_confirm_button_text" />
+                    android:text="@string/canvas_import_confirm_button_title" />
 
             <View
                     android:layout_width="match_parent"
@@ -81,14 +80,14 @@
     </ScrollView>
 
     <com.ericversteeg.liquidocean.view.ActionButtonFrame
-            android:id="@+id/back_button_canvas_export"
+            android:id="@+id/back_button"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/back_action_canvas_export"
+                android:id="@+id/back_action"
                 android:layout_width="49dp"
                 android:layout_height="35dp"
                 android:layout_margin="10dp"

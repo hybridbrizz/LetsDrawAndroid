@@ -607,8 +607,8 @@ class ActionButtonView: View {
     }
 
     private fun drawPaintAction(selected: Boolean, canvas: Canvas) {
-        rows = 3
-        cols = 3
+        rows = 2
+        cols = 2
 
         var primaryPaint = semiPaint
         var accentPaint = semiPaint
@@ -629,22 +629,17 @@ class ActionButtonView: View {
 
         canvas.apply {
             // row 1
-            drawPixel(2, 0, primaryPaint, canvas)
-            //drawOutline(3, 0, outLinePaint, canvas)
+            drawPixel(0, 0, primaryPaint, canvas)
+            drawPixel(1, 0, primaryPaint, canvas)
 
             // row 2
             drawPixel(1, 1, primaryPaint, canvas)
-            //drawOutline(2, 1, outLinePaint, canvas)
-
-            // row 3
-            drawPixel(0, 2, primaryPaint, canvas)
-            //drawOutline(1, 2, outLinePaint, canvas)
         }
     }
 
     private fun drawAddAction(selected: Boolean, canvas: Canvas) {
-        rows = 5
-        cols = 5
+        rows = 7
+        cols = 7
 
         var primaryPaint = semiPaint
 
@@ -667,28 +662,37 @@ class ActionButtonView: View {
 
         canvas.apply {
             // row 1
-            drawPixel(2, 0, primaryPaint, canvas)
+            drawPixel(3, 0, primaryPaint, canvas)
 
             // row 2
-            drawPixel(2, 1, primaryPaint, canvas)
+            drawPixel(3, 1, primaryPaint, canvas)
 
-            drawPixel(0, 2, primaryPaint, canvas)
-            drawPixel(1, 2, primaryPaint, canvas)
-            drawPixel(2, 2, primaryPaint, canvas)
+            // row 3
             drawPixel(3, 2, primaryPaint, canvas)
-            drawPixel(4, 2, primaryPaint, canvas)
 
             // row 4
+            drawPixel(0, 3, primaryPaint, canvas)
+            drawPixel(1, 3, primaryPaint, canvas)
             drawPixel(2, 3, primaryPaint, canvas)
+            drawPixel(3, 3, primaryPaint, canvas)
+            drawPixel(4, 3, primaryPaint, canvas)
+            drawPixel(5, 3, primaryPaint, canvas)
+            drawPixel(6, 3, primaryPaint, canvas)
 
             // row 5
-            drawPixel(2, 4, primaryPaint, canvas)
+            drawPixel(3, 4, primaryPaint, canvas)
+
+            // row 6
+            drawPixel(3, 5, primaryPaint, canvas)
+
+            // row 7
+            drawPixel(3, 6, primaryPaint, canvas)
         }
     }
 
     private fun drawRemoveAction(selected: Boolean, canvas: Canvas) {
         rows = 1
-        cols = 5
+        cols = 7
 
         var primaryPaint = semiPaint
 
@@ -715,6 +719,8 @@ class ActionButtonView: View {
             drawPixel(2, 0, primaryPaint, canvas)
             drawPixel(3, 0, primaryPaint, canvas)
             drawPixel(4, 0, primaryPaint, canvas)
+            drawPixel(5, 0, primaryPaint, canvas)
+            drawPixel(6, 0, primaryPaint, canvas)
         }
     }
 

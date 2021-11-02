@@ -24,6 +24,7 @@ import com.ericversteeg.liquidocean.SignInActivity
 import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.FragmentListener
 import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -36,7 +37,7 @@ import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
 
 
-class OptionsFragment: Fragment() {
+class OptionsFragment: Fragment(), FragmentListener {
 
     var optionsListener: OptionsListener? = null
 
@@ -127,12 +128,20 @@ class OptionsFragment: Fragment() {
         }
 
         context?.apply {
-            if (!SessionSettings.instance.getSharedPrefs(this).contains("arr_single")) {
+            if (!SessionSettings.instance.getSharedPrefs(this).contains("arr_canvas")) {
                 reset_single_play.isEnabled = false
             }
 
             reset_single_play.setOnClickListener {
                 showSinglePlayRestWarning()
+            }
+
+            import_single_play.setOnClickListener {
+                showCanvasImportFragment()
+            }
+
+            export_single_play.setOnClickListener {
+                showCanvasExportFragment()
             }
 
             // option paint panel background
@@ -555,6 +564,8 @@ class OptionsFragment: Fragment() {
 
             recovery_pincode_button.text = "Change access pincode"
         }
+
+        fragment_container.visibility = View.GONE
     }
 
     private fun setupNumRecentColorsChoices() {
@@ -580,12 +591,12 @@ class OptionsFragment: Fragment() {
         val alert = AlertDialog.Builder(context)
 
         val editText = EditText(activity)
-        alert.setMessage(getString(R.string.reset_single_play_alert_message))
+        alert.setMessage(getString(R.string.replace_canvas_dialog_message))
 
         alert.setView(editText)
 
         alert.setPositiveButton(
-            "Proceed"
+            "Replace"
         ) { dialog, _ ->
             if (editText.text.toString() == getString(R.string.reset_single_play_confirm_string)) {
                 resetSinglePlay()
@@ -603,11 +614,39 @@ class OptionsFragment: Fragment() {
     private fun resetSinglePlay() {
         context?.apply {
             val ed = SessionSettings.instance.getSharedPrefs(this).edit()
-            ed.remove("arr_single")
-            ed.remove("grid_line_color")
+            ed.remove("arr_canvas")
             ed.apply()
 
+            SessionSettings.instance.restoreDeviceViewportLeft = 0F
+            SessionSettings.instance.restoreDeviceViewportTop = 0F
+            SessionSettings.instance.restoreDeviceViewportRight = 0F
+            SessionSettings.instance.restoreDeviceViewportBottom = 0F
+
+            SessionSettings.instance.restoreCanvasScaleFactor = 0F
+
             optionsListener?.onResetSinglePlay()
+        }
+    }
+
+    private fun showCanvasImportFragment() {
+        fragmentManager?.apply {
+            val canvasImportFragment = CanvasImportFragment()
+            canvasImportFragment.fragmentListener = this@OptionsFragment
+
+            beginTransaction().replace(R.id.fragment_container, canvasImportFragment).commit()
+
+            fragment_container.visibility = View.VISIBLE
+        }
+    }
+
+    private fun showCanvasExportFragment() {
+        fragmentManager?.apply {
+            val canvasExportFragment = CanvasExportFragment()
+            canvasExportFragment.fragmentListener = this@OptionsFragment
+
+            beginTransaction().replace(R.id.fragment_container, canvasExportFragment).commit()
+
+            fragment_container.visibility = View.VISIBLE
         }
     }
 
@@ -699,5 +738,9 @@ class OptionsFragment: Fragment() {
         }
 
         requestQueue.add(request)
+    }
+
+    override fun onFragmentRemoved() {
+        fragment_container.visibility = View.GONE
     }
 }

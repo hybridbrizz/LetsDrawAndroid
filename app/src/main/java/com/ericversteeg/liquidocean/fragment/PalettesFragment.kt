@@ -23,6 +23,8 @@ import kotlinx.android.synthetic.main.fragment_palettes.*
 import kotlinx.android.synthetic.main.fragment_pixel_history.*
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.SwipeToDeleteCallback
 
 
@@ -123,6 +125,12 @@ class PalettesFragment: Fragment() {
 
         val itemTouchHelper = ItemTouchHelper(SwipeToDeleteCallback(adapter))
         itemTouchHelper.attachToRecyclerView(palettes_recycler_view)
+
+        scrollToSelectedPalette()
+    }
+
+    fun scrollToSelectedPalette() {
+        (palettes_recycler_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(SessionSettings.instance.selectedPaletteIndex + 1, Utils.dpToPx(context, 100))
     }
 
     private fun hideNameInput() {

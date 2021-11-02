@@ -1,19 +1,32 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.fragment.app.Fragment
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.AppDataExporter
+import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.FragmentListener
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_canvas_export.*
+import kotlinx.android.synthetic.main.fragment_canvas_import.*
 
 
-class CanvasExportFragment: Fragment() {
+class CanvasImportFragment: Fragment() {
 
     var fragmentListener: FragmentListener? = null
 
@@ -21,7 +34,7 @@ class CanvasExportFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_canvas_export, container, false)
+        val view = inflater.inflate(R.layout.fragment_canvas_import, container, false)
 
         // setup views here
 
@@ -31,36 +44,39 @@ class CanvasExportFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button_canvas_export.actionBtnView = back_action_canvas_export
-        back_action_canvas_export.type = ActionButtonView.Type.BACK_SOLID
+        back_button.actionBtnView = back_action
+        back_action.type = ActionButtonView.Type.BACK_SOLID
 
-        back_button_canvas_export.setOnClickListener {
+        back_button.setOnClickListener {
             fragmentManager?.apply {
-                beginTransaction().remove(this@CanvasExportFragment).commit()
+                beginTransaction().remove(this@CanvasImportFragment).commit()
                 fragmentListener?.onFragmentRemoved()
             }
         }
 
-        canvas_export_button.setOnClickListener {
-            val emailStr = email_input.text.trim()
-            if (emailStr.length < 50) {
-                if (emailStr.matches(Regex("^[\\d\\w]+@[\\d\\w]+\\.[\\w]+$"))) {
-                    context?.apply {
-                        val sp = SessionSettings.instance.getSharedPrefs(this)
-                        if (sp.contains("arr_canvas")) {
-                            AppDataExporter.export(this, emailStr.toString())
+        canvas_import_button.setOnClickListener {
+            val urlStr = data_url_input.text.trim().toString()
+            if (urlStr.isEmpty()) {
+                showStatusText("Please enter a Pastebin url.")
+            }
+            else if (urlStr.length < 50) {
+                context?.apply {
+                    if (urlStr.contains("/")) {
+                        val tokens = urlStr.split("/")
+                        if (tokens.isNotEmpty()) {
+                            getCanvasData(this, tokens[tokens.size - 1])
                         }
                         else {
-                            showStatusText("No canvas to export.")
+                            showStatusText("Could not find code in url")
                         }
                     }
-                }
-                else {
-                    showStatusText("Not an email address.")
+                    else {
+                        getCanvasData(this, urlStr)
+                    }
                 }
             }
             else {
-                showStatusText("Not an email address.")
+                showStatusText("Not a pastebin url")
             }
         }
     }
@@ -69,5 +85,57 @@ class CanvasExportFragment: Fragment() {
         status_text.visibility = View.VISIBLE
         status_text.setTextColor(color)
         status_text.text = text
+    }
+
+    private fun importCanvasData(context: Context, jsonStr: String) {
+        val success = InteractiveCanvas.importCanvasFromJson(context, jsonStr)
+        if (!success) {
+            showStatusText("Error reading canvas data.")
+        }
+        else {
+            showStatusText("Canvas data imported!", color = ActionButtonView.greenPaint.color)
+        }
+    }
+
+    private fun getCanvasData(context: Context, code: String) {
+        val url = "https://pastebin.com/raw/$code"
+        val request = StringRequest(Request.Method.GET, url,
+            {
+                showCanvasReplaceAlert(context, it)
+            },
+            {
+                showStatusText("Error downloading canvas data.")
+            }
+        )
+
+        Volley.newRequestQueue(context).add(request)
+    }
+
+    private fun showCanvasReplaceAlert(context: Context, jsonStr: String) {
+        val alert = AlertDialog.Builder(context)
+
+        val editText = EditText(activity)
+        alert.setMessage(getString(R.string.replace_canvas_dialog_message))
+
+        alert.setView(editText)
+
+        alert.setPositiveButton(
+            "Import"
+        ) { dialog, _ ->
+            if (editText.text.toString() == getString(R.string.replace_canvas_dialog_confirm_string)) {
+                importCanvasData(context, jsonStr)
+                dialog?.dismiss()
+            }
+            else {
+                showStatusText("Import cancelled.")
+            }
+        }
+
+        alert.setNegativeButton("Cancel") { dialog, _ ->
+            showStatusText("Import cancelled.")
+            dialog?.dismiss()
+        }
+
+        alert.show()
     }
 }

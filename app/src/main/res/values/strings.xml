@@ -17,7 +17,7 @@
     <string name="client_id">454898966293-ii55sno355a2jvrr0qllcljgfe49u9rj.apps.googleusercontent.com</string>
 
     <string name="option_change_name_title">Display name</string>
-    <string name="option_paint_panel_texture_title">Draw Panel Background Texture</string>
+    <string name="option_paint_panel_texture_title">Panel Background Texture</string>
     <string name="option_canvas_lock_border_title">Canvas Lock Border</string>
     <string name="option_emitters_container_title">Particle Emitters</string>
     <string name="option_canvas_lock_color_title">Canvas Lock Color</string>
@@ -27,17 +27,17 @@
     <string name="alert_message_palette_remove_color">Remove this color from %s?</string>
     <string name="no_pixel_history">No data</string>
     <string name="option_num_recent_color_title">Recent colors</string>
-    <string name="option_paint_indicator_width_title">Draw color indicator size</string>
-    <string name="option_paint_indicator_fill_circle">Circle draw color indicator</string>
-    <string name="option_paint_indicator_outline_title">Draw color indicator outline</string>
+    <string name="option_paint_indicator_width_title">Color indicator size</string>
+    <string name="option_paint_indicator_fill_circle">Circle color indicator</string>
+    <string name="option_paint_indicator_square">Square color indicator</string>
+    <string name="option_paint_indicator_outline_title">Color indicator outline</string>
     <string name="option_grid_line_color_title">Canvas grid line color</string>
     <string name="option_canvas_background_primary_color_title">Canvas background primary color</string>
     <string name="option_canvas_background_secondary_color_title">Canvas background secondary color</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close draw panel button color</string>
-    <string name="option_paint_indicator_square">Square draw color indicator</string>
-    <string name="step1">It\'s easy to get started. In draw mode, tap the draw icon to bring up the draw panel. From here you can choose a color.
-        Tap and drag anywhere on the canvas to draw that color. Tap and drag back over any pixels that you want to remove. Finalize
+    <string name="step1">It\'s easy to get started. Enter into the canvas then tap the three dot icon to bring up the color panel. From here you can choose a color and do many other things.
+        Tap and drag anywhere on the canvas to draw the currently selected color. Tap and drag back over any pixels that you want to remove. Finalize
         by tapping the green checkmark, or to cancel tap the red x.</string>
     <string name="step2">The first tool is the export tool. Tap the icon then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
     save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
@@ -73,13 +73,17 @@
     <string name="width_title">Width</string>
     <string name="unit_pixel">px</string>
     <string name="height_title">Height</string>
-    <string name="reset_single_play_button_title">Reset Draw Mode</string>
-    <string name="reset_single_play_alert_message">Please understand that resetting draw mode will permanently erase the
-        contents of your current canvas, to proceed please type ERASE in all caps.</string>
-    <string name="reset_single_play_confirm_string">ERASE</string>
+    <string name="reset_single_play_button_title">ERASE CANVAS</string>
+    <string name="reset_single_play_alert_message">This will erase your canvas and all of it\'s contents,
+        to proceed please type ERASE CANVAS in all caps.</string>
+    <string name="reset_single_play_confirm_string">ERASE CANVAS</string>
+    <string name="export_canvas_button_title">EXPORT CANVAS</string>
+    <string name="import_canvas_button_title">IMPORT CANVAS</string>
     <string name="draw_menu_title">CANVAS</string>
     <string name="options_menu_title">OPTIONS</string>
     <string name="how_to_menu_title">HOWTO</string>
+    <string name="lefty_menu_title">LEFTY</string>
+    <string name="righty_menu_title">RIGHTY</string>
     <string name="options_title">Options</string>
     <string name="howto_title">Howto</string>
     <string name="howto_step2_title">Export and Share</string>
@@ -91,4 +95,13 @@
     <string name="howto_step8_title">Color Palettes</string>
     <string name="howto_step9_title">Frames</string>
     <string name="howto_step10_title">Eraser</string>
+    <string name="canvas_export_title_text">Canvas Export</string>
+    <string name="canvas_export_email_title">Email address (we don\'t store or share this):</string>
+    <string name="canvas_export_confirm_button_text">SEND EMAIL</string>
+    <string name="canvas_import_title_text">Canvas Import</string>
+    <string name="pastebin_url">Pastebin URL (pastebin.com/code):</string>
+    <string name="canvas_import_confirm_button_title">IMPORT</string>
+    <string name="replace_canvas_dialog_message">Importing canvas data will replace your current canvas and the canvas will be permanently erased. You may want to
+    export your current canvas data first before proceeding. To proceed please type REPLACE CANVAS in all caps.</string>
+    <string name="replace_canvas_dialog_confirm_string">REPLACE CANVAS</string>
 </resources>

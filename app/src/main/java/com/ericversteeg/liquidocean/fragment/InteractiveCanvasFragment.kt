@@ -500,8 +500,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     val fragment = PalettesFragment()
 
                     palettesFragment = fragment
-
-                    fragment.palettesFragmentListener = this@InteractiveCanvasFragment
+                    palettesFragment?.palettesFragmentListener = this@InteractiveCanvasFragment
 
                     beginTransaction().replace(
                         R.id.pixel_history_fragment_container,
@@ -754,8 +753,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            palette_name_text.setTextColor(Color.BLACK)
-            palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F555555"))
+            palette_name_text.setTextColor(Color.parseColor("#FF111111"))
+            palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
             paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
             paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
@@ -1301,6 +1300,26 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     //layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
                     palette_name_text.textSize = 28F
 
+                    var actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
+                    actionButtonLayoutParams.gravity = Gravity.CENTER
+                    palette_add_color_action.layoutParams = actionButtonLayoutParams
+
+                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 4))
+                    actionButtonLayoutParams.gravity = Gravity.CENTER
+                    palette_remove_color_action.layoutParams = actionButtonLayoutParams
+
+                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 27), Utils.dpToPx(context, 30))
+                    actionButtonLayoutParams.gravity = Gravity.CENTER
+                    lock_paint_panel_action.layoutParams = actionButtonLayoutParams
+
+                    layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+                    layoutParams.topToBottom = palette_name_text.id
+                    layoutParams.topMargin = Utils.dpToPx(context, 10)
+
+                    color_action_button_menu.layoutParams = layoutParams
+
                     /*layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
                     layoutParams.topMargin = Utils.dpToPx(context, 20)
                     layoutParams.bottomMargin = Utils.dpToPx(context, 50)
@@ -1308,7 +1327,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
                     palette_name_text.layoutParams = layoutParams*/
 
-                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
+                    /*layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
                     layoutParams.topMargin = Utils.dpToPx(context, 20)
                     layoutParams.startToStart = ConstraintSet.PARENT_ID
                     layoutParams.endToEnd = ConstraintSet.PARENT_ID
@@ -1334,7 +1353,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     frameLayoutParams.topMargin = Utils.dpToPx(context, 17)
                     frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
 
-                    palette_remove_color_action.layoutParams = frameLayoutParams
+                    palette_remove_color_action.layoutParams = frameLayoutParams*/
                 }
 
                 // paint text info placement
@@ -2063,6 +2082,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
 
     override fun onPaletteDeleted(palette: Palette) {
         showPaletteUndoSnackbar(palette)
+        if (palette.name == palette_name_text.text) {
+            if (SessionSettings.instance.palettes.size > 0) {
+                palette_name_text.text = SessionSettings.instance.palettes[0].name
+            }
+        }
     }
 
     private fun showPaletteUndoSnackbar(palette: Palette) {
@@ -2070,6 +2094,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
             snackbar.setAction("Undo") {
                 undoDelete()
+                this@InteractiveCanvasFragment.palette_name_text.text = SessionSettings.instance.palette.name
             }
             snackbar.show()
         }

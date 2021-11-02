@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
@@ -34,6 +36,8 @@ class MenuFragment: Fragment() {
     var route = -1
 
     var animatingMenu = false
+
+    var menuButtonContainerWidth = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -91,14 +95,6 @@ class MenuFragment: Fragment() {
         //dev_button.type = ActionButtonView.Type.DEV
         //dev_button.topLayer = true
         //dev_button_bottom_layer.type = ActionButtonView.Type.DEV
-
-        lefty_button.type = ActionButtonView.Type.LEFTY
-        lefty_button.topLayer = true
-        lefty_button_bottom_layer.type = ActionButtonView.Type.LEFTY
-
-        righty_button.type = ActionButtonView.Type.RIGHTY
-        righty_button.topLayer = true
-        righty_button_bottom_layer.type = ActionButtonView.Type.RIGHTY
 
         /*val artShowcase = SessionSettings.instance.artShowcase
         if (artShowcase != null && artShowcase.size > 0) {
@@ -161,6 +157,7 @@ class MenuFragment: Fragment() {
 
                 lefty_button_container.visibility = View.VISIBLE
                 righty_button_container.visibility = View.VISIBLE
+
                 //empty_button_1_container.visibility = View.VISIBLE
                 //empty_button_2_container.visibility = View.VISIBLE
 
@@ -232,11 +229,11 @@ class MenuFragment: Fragment() {
             }
         }
 
-        lefty_button.setOnClickListener {
+        lefty_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, route)
         }
 
-        righty_button.setOnClickListener {
+        righty_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, route)
         }
 
@@ -277,6 +274,8 @@ class MenuFragment: Fragment() {
                     Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
                 }
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                menuButtonContainerWidth = menu_button_container.width
             }
         })
 
@@ -314,7 +313,7 @@ class MenuFragment: Fragment() {
                 )
             }
             else if (layer == 2) {
-                Animator.animateMenuItems(listOf(listOf(lefty_button_bottom_layer, lefty_button), listOf(righty_button_bottom_layer, righty_button)),
+                Animator.animateMenuItems(listOf(listOf(lefty_menu_text), listOf(righty_menu_text)),
                     cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
