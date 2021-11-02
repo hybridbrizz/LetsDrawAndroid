@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:background="@drawable/gradient_dark_gray">
+
+    <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="15dp">
+
+            <TextView
+                    android:id="@+id/canvas_export_title_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_gravity="center_horizontal"
+                    android:textSize="50dp"
+                    android:textStyle="bold"
+                    android:textColor="#DDFFFFFF"
+                    android:gravity="center"
+                    android:text="@string/canvas_export_title_text"
+                    android:shadowColor="#7F000000"
+                    android:shadowDx="3"
+                    android:shadowDy="0"
+                    android:shadowRadius="4" />
+
+            <TextView
+                    android:id="@+id/status_text"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:textSize="8pt"
+                    android:textColor="#FF999999"
+                    android:gravity="center"
+                    android:text="@string/canvas_export_email_title" />
+
+            <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="8pt"
+                        android:textColor="#FF999999"
+                        android:text="@string/canvas_export_email_title"
+                        android:layout_weight="1" />
+
+                <EditText
+                        android:id="@+id/email_input"
+                        android:layout_width="240dp"
+                        android:layout_height="50dp"
+                        android:background="#FF333333"
+                        android:textSize="9pt"
+                        android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+            <Button
+                    android:id="@+id/canvas_export_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/canvas_export_confirm_button_text" />
+
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1000dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/back_button_canvas_export"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/back_action_canvas_export"
+                android:layout_width="49dp"
+                android:layout_height="35dp"
+                android:layout_margin="10dp"
+                android:layout_gravity="start|top" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
