@@ -14,6 +14,7 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import org.json.JSONArray
 import java.util.*
 import kotlin.math.max
@@ -80,12 +81,29 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
     private fun commonInit() {
         interactiveCanvas.scaleCallbackListener = this
 
+        // scale
         if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
             interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
         }
 
         scaleFactor = interactiveCanvas.lastScaleFactor
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
+
+        // position
+        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
+            interactiveCanvas.updateDeviceViewport(
+                context,
+                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
+            )
+        }
+        else {
+            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
+
+            /*val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
+                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
+
+            interactiveCanvas.deviceViewport = restoreDeviceViewport*/
+        }
 
         //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
 

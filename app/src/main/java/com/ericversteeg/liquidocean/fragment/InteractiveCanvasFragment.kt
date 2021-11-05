@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.fragment
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
@@ -14,8 +15,11 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -138,10 +142,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             context?.apply {
                 val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
 
-                SessionSettings.instance.restoreDeviceViewportLeft = deviceViewport.left
-                SessionSettings.instance.restoreDeviceViewportTop = deviceViewport.top
-                SessionSettings.instance.restoreDeviceViewportRight = deviceViewport.right
-                SessionSettings.instance.restoreDeviceViewportBottom = deviceViewport.bottom
+                SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
+                SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
 
                 SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
 
@@ -605,19 +607,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     surface_view.interactiveCanvas.getGridLineColor()
                 )
             }
-
-            if (SessionSettings.instance.restoreDeviceViewportLeft == 0F) {
-                surface_view.interactiveCanvas.updateDeviceViewport(
-                    this,
-                    surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
-                )
-            }
-            else {
-                val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
-                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
-
-                surface_view.interactiveCanvas.deviceViewport = restoreDeviceViewport
-            }
         }
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -824,6 +813,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 try {
                     val color = Color.parseColor("#$s")
                     color_picker_view.setInitialColor(color)
+
+                    hideKeyboard()
                 }
                 catch (exception: Exception) {
 
@@ -836,6 +827,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
 
         color_hex_string_input.addTextChangedListener(textChangeListener)
+
+        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                hideKeyboard()
+            }
+            true
+        }
 
         color_picker_view.setEnabledAlpha(false)
 
@@ -1228,34 +1226,56 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                     color_picker_frame.layoutParams = layoutParams
 
                     color_hex_string_input.textSize = 28F
-                    val linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), Utils.dpToPx(context, 50))
+                    var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), Utils.dpToPx(context, 50))
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
                     linearLayoutParams.gravity = Gravity.BOTTOM
 
                     color_hex_string_input.layoutParams = linearLayoutParams
 
                     // default color buttons size
-                    var frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 64), Utils.dpToPx(context, 64))
-                    frameLayoutParams.rightMargin = Utils.dpToPx(context, 20)
+                    var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
+                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                    frameLayoutParams.height = frameLayoutParams.width
 
                     default_black_color_action.layoutParams = frameLayoutParams
 
-                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 64), Utils.dpToPx(context, 64))
-                    frameLayoutParams.rightMargin = 0
+                    frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
+                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                    frameLayoutParams.height = frameLayoutParams.width
 
                     default_white_color_action.layoutParams = frameLayoutParams
 
-                    // paint panel width
+                    linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
+
+                    if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+                        linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
+                    }
+                    else {
+                        linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
+                    }
+
+                    default_white_color_button.layoutParams = linearLayoutParams
+
+                    // paint panel
                     layoutParams = ConstraintLayout.LayoutParams(
-                        ((250 / 1000F) * view.height).toInt(),
+                        ((150 / 1000F) * view.width).toInt(),
                         ConstraintLayout.LayoutParams.MATCH_PARENT
                     )
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
                     paint_panel.layoutParams = layoutParams
 
+                    linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
+                    if (paint_panel.layoutParams.width < 288) {
+                        linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
+                    }
+                    else {
+                        linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
+                    }
+                    paint_yes_container.layoutParams = linearLayoutParams
+
                     // paint indicator size
-                    val frameWidth = ((250 / 1000F) * view.height).toInt()
+                    val frameWidth = ((150 / 1000F) * view.width).toInt()
                     val indicatorMargin = (frameWidth * 0.15).toInt()
                     val indicatorWidth = frameWidth - indicatorMargin
 
@@ -1372,40 +1392,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 }
 
                 // background texture scaling
-                context?.apply {
-                    val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
-
-                    if (SessionSettings.instance.tablet) {
-                        val scale = view.height / backgroundDrawable.bitmap.height.toFloat()
-
-                        val newWidth = (backgroundDrawable.bitmap.width * scale).toInt()
-                        val newHeight = (backgroundDrawable.bitmap.height * scale).toInt()
-                        val newBitmap = Bitmap.createScaledBitmap(backgroundDrawable.bitmap, newWidth,
-                            newHeight, false)
-                        val scaledBitmapDrawable = BitmapDrawable(resources, newBitmap)
-
-                        var layerDrawable: LayerDrawable = ContextCompat.getDrawable(
-                            this,
-                            R.drawable.panel_texture_background
-                        ) as LayerDrawable
-
-                        if (SessionSettings.instance.rightHanded) {
-                            scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.RIGHT
-                        }
-                        else {
-                            scaledBitmapDrawable.gravity = Gravity.TOP or Gravity.LEFT
-                        }
-
-                        if (Build.VERSION.SDK_INT >= 23) {
-                            layerDrawable.addLayer(scaledBitmapDrawable)
-                        }
-
-                        paint_panel.setBackgroundDrawable(layerDrawable)
-                    }
-                    else {
-                        paint_panel.setBackgroundDrawable(backgroundDrawable)
-                    }
-                }
+                setPanelBackground()
 
                 // right-handed
                 if (SessionSettings.instance.rightHanded) {
@@ -1540,6 +1527,144 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 }
             }
         })
+    }
+
+    // screen rotation
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        paint_panel.background = null
+
+        Utils.setViewLayoutListener(view!!, object : Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                // interactive canvas
+                surface_view.interactiveCanvas.deviceViewport?.apply {
+                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
+                    surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+                }
+
+                // color picker frame width
+                var layoutParams = ConstraintLayout.LayoutParams(
+                    (view.width * 0.35).toInt(),
+                    ConstraintLayout.LayoutParams.MATCH_PARENT
+                )
+
+                layoutParams.leftToLeft = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+
+                color_picker_frame.layoutParams = layoutParams
+
+                // color picker default color buttons
+                var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
+                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                frameLayoutParams.height = frameLayoutParams.width
+
+                default_black_color_action.layoutParams = frameLayoutParams
+
+                frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
+                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                frameLayoutParams.height = frameLayoutParams.width
+
+                default_white_color_action.layoutParams = frameLayoutParams
+
+                var linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
+                if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+                    linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
+                }
+                else {
+                    linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
+                }
+                default_white_color_button.layoutParams = linearLayoutParams
+
+                // paint panel
+                layoutParams = ConstraintLayout.LayoutParams(
+                    ((150 / 1000F) * view.width).toInt(),
+                    ConstraintLayout.LayoutParams.MATCH_PARENT
+                )
+                layoutParams.leftToLeft = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+
+                paint_panel.layoutParams = layoutParams
+
+                linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
+                if (paint_panel.layoutParams.width < 288) {
+                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
+                }
+                else {
+                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
+                }
+                paint_yes_container.layoutParams = linearLayoutParams
+
+                // paint indicator size
+                val frameWidth = ((150 / 1000F) * view.width).toInt()
+                val indicatorMargin = (frameWidth * 0.15).toInt()
+                val indicatorWidth = frameWidth - indicatorMargin
+
+                layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
+                layoutParams.topToTop = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).topToTop
+                layoutParams.bottomToBottom = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).bottomToBottom
+                layoutParams.leftToLeft = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+
+                paint_indicator_view_bottom_layer.layoutParams = layoutParams
+                paint_indicator_view.layoutParams = layoutParams
+
+                device_canvas_viewport_view.updateDeviceViewport()
+
+                setPanelBackground()
+            }
+        })
+    }
+
+    private fun setPanelBackground() {
+        context?.apply {
+            val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
+
+            if (SessionSettings.instance.tablet) {
+                paint_panel.clipChildren = false
+
+                val scale = view!!.height / backgroundDrawable.bitmap.height.toFloat()
+
+                val newWidth = (backgroundDrawable.bitmap.width * scale).toInt()
+                val newHeight = (backgroundDrawable.bitmap.height * scale).toInt()
+                val newBitmap = Bitmap.createScaledBitmap(backgroundDrawable.bitmap, newWidth,
+                    newHeight, false)
+                val scaledBitmapDrawable = BitmapDrawable(resources, newBitmap)
+
+                val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - paint_panel.width / 2), 0, paint_panel.width, scaledBitmapDrawable.bitmap.height)
+                val resizedBitmapDrawable = BitmapDrawable(resizedBitmap)
+
+                /*var layerDrawable: LayerDrawable = ContextCompat.getDrawable(
+                    this,
+                    R.drawable.panel_texture_background
+                ) as LayerDrawable*/
+
+                scaledBitmapDrawable.gravity = Gravity.CENTER
+
+                /*if (SessionSettings.instance.rightHanded) {
+                    scaledBitmapDrawable.gravity = Gravity.RIGHT
+                }
+                else {
+                    scaledBitmapDrawable.gravity = Gravity.LEFT
+                }*/
+
+                /*if (Build.VERSION.SDK_INT >= 23) {
+                    layerDrawable.addLayer(scaledBitmapDrawable)
+                }*/
+
+                paint_panel.setBackgroundDrawable(resizedBitmapDrawable)
+            }
+            else {
+                paint_panel.setBackgroundDrawable(backgroundDrawable)
+            }
+        }
+    }
+
+    private fun hideKeyboard() {
+        context?.apply {
+            val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
+        }
     }
 
     private fun setupColorPalette(colors: Array<Int>?) {

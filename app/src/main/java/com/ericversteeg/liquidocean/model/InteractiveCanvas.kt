@@ -739,7 +739,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val h = bottom - top
 
         // error! reset the canvas viewport
-        if (w <= 0 || h <= 0 || w <= h) {
+        if (w <= 0 || h <= 0) {
             deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
         }
     }
@@ -801,7 +801,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val h = bottom - top
 
             // error! reset the canvas viewport
-            if (w <= 0 || h <= 0 || w <= h) {
+            if (w <= 0 || h <= 0) {
                 deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
             }
         }

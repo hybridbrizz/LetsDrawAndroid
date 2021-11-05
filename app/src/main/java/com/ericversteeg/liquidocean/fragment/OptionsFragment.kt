@@ -591,12 +591,12 @@ class OptionsFragment: Fragment(), FragmentListener {
         val alert = AlertDialog.Builder(context)
 
         val editText = EditText(activity)
-        alert.setMessage(getString(R.string.replace_canvas_dialog_message))
+        alert.setMessage(getString(R.string.reset_single_play_alert_message))
 
         alert.setView(editText)
 
         alert.setPositiveButton(
-            "Replace"
+            "Erase"
         ) { dialog, _ ->
             if (editText.text.toString() == getString(R.string.reset_single_play_confirm_string)) {
                 resetSinglePlay()

@@ -187,8 +187,9 @@ class SessionSettings {
     var restoreDeviceViewportBottom = 0F
 
     var restoreCanvasScaleFactor = 0F
-    var restoreCanvasViewScaleFactor = 0F
-    var restoreCanvasPpu = 0
+
+    var restoreDeviceViewportCenterX = 0F
+    var restoreDeviceViewportCenterY = 0F
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -289,9 +290,9 @@ class SessionSettings {
 
         ed.putFloat("restore_canvas_scale_factor", restoreCanvasScaleFactor)
 
-        ed.putFloat("restore_canvas_view_scale_factor", restoreCanvasViewScaleFactor)
+        ed.putFloat("restore_device_viewport_center_x", restoreDeviceViewportCenterX)
 
-        ed.putInt("restore_canvas_ppu", restoreCanvasPpu)
+        ed.putFloat("restore_device_viewport_center_y", restoreDeviceViewportCenterY)
 
         ed.apply()
     }
@@ -410,12 +411,10 @@ class SessionSettings {
         restoreDeviceViewportRight = getSharedPrefs(context).getFloat("restore_device_viewport_right", 0F)
         restoreDeviceViewportBottom = getSharedPrefs(context).getFloat("restore_device_viewport_bottom", 0F)
 
+        restoreDeviceViewportCenterX = getSharedPrefs(context).getFloat("restore_device_viewport_center_x", 0F)
+        restoreDeviceViewportCenterY = getSharedPrefs(context).getFloat("restore_device_viewport_center_y", 0F)
+
         restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
-        restoreCanvasViewScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_view_scale_factor", 0F)
-
-        restoreCanvasPpu = getSharedPrefs(context).getInt("restore_canvas_ppu", 0)
-
-
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

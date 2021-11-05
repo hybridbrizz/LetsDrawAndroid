@@ -139,6 +139,12 @@ class DeviceCanvasViewportView: View {
         }
     }
 
+    fun updateDeviceViewport() {
+        interactiveCanvas?.apply {
+            updateDeviceViewport(this)
+        }
+    }
+
     fun updateDeviceViewport(interactiveCanvas: InteractiveCanvas) {
         this.interactiveCanvas = interactiveCanvas
         viewportScaleFactor = interactiveCanvas.lastScaleFactor

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Let\'s Draw 2021</string>
+    <string name="app_name">Let\'s Draw</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -40,7 +40,7 @@
         Tap and drag anywhere on the canvas to draw the currently selected color. Tap and drag back over any pixels that you want to remove. Finalize
         by tapping the green checkmark, or to cancel tap the red x.</string>
     <string name="step2">The first tool is the export tool. Tap the icon then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
-    save your drawing locally to your device photos. The right icon is to share your drawing through text, email, and various other ways.</string>
+    save your drawing locally to your device photos. The right icon is to share your drawing through text, email, social media, and other apps.</string>
     <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas backgrounds.</string>
     <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines. Grid lines appear when zoomed into the canvas.</string>
     <string name="step5">The fourth and final tool is the Canvas Summary tool. This shows a summary of all the pixels drawn onto the canvas.</string>

@@ -6,7 +6,6 @@
 
     <com.ericversteeg.liquidocean.view.InteractiveCanvasView
             android:id="@+id/surface_view"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -424,15 +423,15 @@
                     <com.ericversteeg.liquidocean.view.ActionButtonView
                             android:id="@+id/default_black_color_action"
                             android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="10dp" />
+                            android:layout_height="40dp" />
 
                 </com.ericversteeg.liquidocean.view.ActionButtonFrame>
 
                 <com.ericversteeg.liquidocean.view.ActionButtonFrame
                         android:id="@+id/default_white_color_button"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp">
 
                     <com.ericversteeg.liquidocean.view.ActionButtonView
                             android:id="@+id/default_white_color_action"

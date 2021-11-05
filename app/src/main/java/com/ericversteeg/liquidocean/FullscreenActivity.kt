@@ -1,5 +1,6 @@
 package com.ericversteeg.liquidocean
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
 import android.os.StrictMode
@@ -54,6 +55,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!Utils.isTablet(this)) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+        }
 
         setContentView(R.layout.activity_fullscreen)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

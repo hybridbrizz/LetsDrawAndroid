@@ -263,7 +263,7 @@ class MenuFragment: Fragment() {
 
                 if (art_showcase != null) {
                     safeViews.add(art_showcase)
-                    safeViews.add(menu_button_container)
+                    safeViews.add(menu_button_container_horizontal_spacer)
 
                     Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
                     Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())

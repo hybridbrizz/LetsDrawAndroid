@@ -1,5 +1,6 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -104,18 +105,25 @@ class ArtExportFragment: Fragment() {
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 if (SessionSettings.instance.tablet) {
-                    val layoutParams = ConstraintLayout.LayoutParams(view.width - save_button.height * 2, view.height - save_button.height * 2)
+                    val layoutParams = (art_view.layoutParams as ConstraintLayout.LayoutParams)
 
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
-                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+                    layoutParams.topMargin = Utils.dpToPx(context, 80)
 
                     art_view.layoutParams = layoutParams
                 }
             }
         })
     }
+
+    /*override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        Utils.setViewLayoutListener(art_view, object: Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                art_view.invalidate()
+            }
+        })
+    }*/
 
     private fun sendArtPixels() {
         val requestQueue = Volley.newRequestQueue(context)

@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
+import com.ericversteeg.liquidocean.R
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
 import kotlin.math.min
@@ -94,6 +95,10 @@ class Utils {
                     view.viewTreeObserver.removeOnGlobalLayoutListener(this)
                 }
             })
+        }
+
+        fun isTablet(context: Context): Boolean {
+            return context.resources.getBoolean(R.bool.isTablet)
         }
     }
 }
