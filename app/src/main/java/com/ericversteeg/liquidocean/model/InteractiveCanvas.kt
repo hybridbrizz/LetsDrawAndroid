@@ -43,6 +43,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var deviceViewport: RectF? = null
 
     var interactiveCanvasListener: InteractiveCanvasListener? = null
+    var interactiveCanvasDrawer: InteractiveCanvasDrawer? = null
     var scaleCallbackListener: InteractiveCanvasScaleCallback? = null
     var paintSelectionListener: PaintSelectionListener? = null
     var recentColorsListener: RecentColorsListener? = null
@@ -349,7 +350,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
                 sessionSettings.addShortTermPixels(shortTermPixels)
 
-                interactiveCanvasListener?.notifyRedraw()
+                interactiveCanvasDrawer?.notifyRedraw()
             })
         }
 
@@ -463,7 +464,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
         }
 
-        interactiveCanvasListener?.notifyRedraw()
+        interactiveCanvasDrawer?.notifyRedraw()
     }
 
     /*private fun initPixels(arrJsonStr: String) {
@@ -600,7 +601,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         if (redraw) {
-            interactiveCanvasListener?.notifyRedraw()
+            interactiveCanvasDrawer?.notifyRedraw()
         }
     }
 
@@ -806,7 +807,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
         }
 
-        interactiveCanvasListener?.notifyRedraw()
+        interactiveCanvasDrawer?.notifyRedraw()
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)

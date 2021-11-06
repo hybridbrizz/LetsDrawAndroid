@@ -78,10 +78,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var toolboxOpen = false
 
-    val paint = Paint()
-    val gridLinePaint = Paint()
-    val gridLinePaintAlt = Paint()
-
     lateinit var panelThemeConfig: PanelThemeConfig
 
     var paintTextMode = 2
@@ -677,7 +673,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 canvas_summary_view.invalidate()
             }
 
-            surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
+            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
         }
 
         // grid lines toggle button
@@ -690,7 +686,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 SessionSettings.instance.gridLineMode = 0
             }
 
-            surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
+            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
         }
 
         // canvas summary toggle button
@@ -715,36 +711,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         context?.apply {
             // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
-        }
-
-        // surface view holder
-        val holder = surface_view.holder
-        holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                if (holder != null) {
-                    drawInteractiveCanvas(holder)
-                }
-            }
-
-            override fun surfaceDestroyed(p0: SurfaceHolder) {
-
-            }
-
-            override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
-
-            }
-        })
-
-        // scale gesture recognizer (not used?)
-        val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
-            override fun onScale(detector: ScaleGestureDetector): Boolean {
-                scaleFactor *= detector.scaleFactor
-
-                // Don't let the object get too small or too large.
-                scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f))
-
-                return true
-            }
         }
 
         // tablet & righty
@@ -1145,7 +1111,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 // interactive canvas
                 surface_view.interactiveCanvas.deviceViewport?.apply {
                     surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
-                    surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
+                    surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
                 }
 
                 // color picker frame width
@@ -1322,158 +1288,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         canvas_summary_action.invalidate()
         recent_colors_action.invalidate()
         open_tools_action.invalidate()
-    }
-
-    // drawing
-    fun drawInteractiveCanvas(holder: SurfaceHolder) {
-        paint.color = Color.parseColor("#FFFFFFFF")
-
-        val canvas = holder.lockCanvas()
-
-        val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
-        val ppu = surface_view.interactiveCanvas.ppu
-
-        canvas.drawARGB(255, 0, 0, 0)
-
-        drawUnits(canvas, deviceViewport, ppu)
-        drawGridLines(canvas, deviceViewport, ppu)
-
-        holder.unlockCanvasAndPost(canvas)
-    }
-
-    private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
-        val gridLineMode = SessionSettings.instance.gridLineMode
-        if (gridLineMode == InteractiveCanvas.GRID_LINE_MODE_ON && surface_view.interactiveCanvas.ppu >= surface_view.interactiveCanvas.autoCloseGridLineThreshold) {
-
-            val gridLineColor = surface_view.interactiveCanvas.getGridLineColor()
-
-            gridLinePaint.strokeWidth = 1f
-            gridLinePaint.color = gridLineColor
-
-            gridLinePaintAlt.strokeWidth = 1f
-            gridLinePaintAlt.color = gridLineColor
-
-            if (!world) {
-                gridLinePaint.color = surface_view.interactiveCanvas.getGridLineColor()
-                gridLinePaintAlt.color = surface_view.interactiveCanvas.getGridLineColor()
-            }
-
-            val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
-            val unitsTall = canvas.height / surface_view.interactiveCanvas.ppu
-
-            val gridXOffsetPx = (ceil(deviceViewport.left) - deviceViewport.left) * ppu
-            val gridYOffsetPx = (ceil(deviceViewport.top) - deviceViewport.top) * ppu
-
-            for (y in 0..unitsTall) {
-                if (y % 2 == 0) {
-                    canvas.drawLine(
-                        0F,
-                        floor(y * ppu.toFloat() + gridYOffsetPx),
-                        canvas.width.toFloat(),
-                        floor(y * ppu.toFloat() + gridYOffsetPx),
-                        gridLinePaint
-                    )
-                }
-                else {
-                    canvas.drawLine(
-                        0F,
-                        floor(y * ppu.toFloat() + gridYOffsetPx),
-                        canvas.width.toFloat(),
-                        floor(y * ppu.toFloat() + gridYOffsetPx),
-                        gridLinePaintAlt
-                    )
-                }
-            }
-
-            for (x in 0..unitsWide) {
-                if (x % 2 == 0) {
-                    canvas.drawLine(
-                        x * ppu.toFloat() + gridXOffsetPx,
-                        0F,
-                        x * ppu.toFloat() + gridXOffsetPx,
-                        canvas.height.toFloat(),
-                        gridLinePaint
-                    )
-                }
-                else {
-                    canvas.drawLine(
-                        x * ppu.toFloat() + gridXOffsetPx,
-                        0F,
-                        x * ppu.toFloat() + gridXOffsetPx,
-                        canvas.height.toFloat(),
-                        gridLinePaintAlt
-                    )
-                }
-            }
-        }
-
-    }
-
-    private fun drawUnits(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
-        val interactiveCanvas = surface_view.interactiveCanvas
-
-        interactiveCanvas.deviceViewport?.apply {
-            val startUnitIndexX = floor(left).toInt()
-            val endUnitIndexX = ceil(right).toInt()
-            val startUnitIndexY = floor(top).toInt()
-            val endUnitIndexY = ceil(bottom).toInt()
-
-            // val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
-
-            val rangeX = endUnitIndexX - startUnitIndexX
-            val rangeY = endUnitIndexY - startUnitIndexY
-
-            paint.color = Color.BLACK
-
-            val backgroundColors = interactiveCanvas.getBackgroundColors(SessionSettings.instance.backgroundColorsIndex)
-
-            for (x in 0..rangeX) {
-                for (y in 0..rangeY) {
-                    val unitX = x + startUnitIndexX
-                    val unitY = y + startUnitIndexY
-
-                    val inGrid = unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows
-
-                    if (inGrid) {
-                        val color = interactiveCanvas.arr[unitY][unitX]
-                        // val alpha = 0xFF and (color shr 24)
-
-                        // background
-                        if (color == 0) {
-                            if ((unitX + unitY) % 2 == 0) {
-                                paint.color = backgroundColors[0]
-                            }
-                            else {
-                                paint.color = backgroundColors[1]
-                            }
-                        }
-                        else {
-                            paint.color = interactiveCanvas.arr[unitY][unitX]
-                        }
-                    }
-                    else {
-                        paint.color = Color.BLACK
-                    }
-                    val rect = interactiveCanvas.getScreenSpaceForUnit(
-                        x + startUnitIndexX,
-                        y + startUnitIndexY
-                    )
-
-                    canvas.drawRect(rect, paint)
-
-                    // transparency
-                    /* if (inGrid) {
-                        val color = interactiveCanvas.arr[unitY][unitX]
-                        val alpha = 0xFF and (color shr 24)
-
-                        if (color != 0 && alpha < 255) {
-                            altPaint.color = color
-                            canvas.drawRect(rect, altPaint)
-                        }
-                    } */
-                }
-            }
-        }
     }
 
     // view toggles
@@ -1912,10 +1726,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     // interactive canvas listener
-    override fun notifyRedraw() {
-        drawInteractiveCanvas(surface_view.holder)
-    }
-
     override fun notifyPaintColorUpdate(color: Int) {
         color_picker_view.setInitialColor(color)
         paint_indicator_view.setPaintColor(color)
