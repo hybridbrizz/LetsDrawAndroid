@@ -584,7 +584,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
-        SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)
+        //SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)
+        SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
 
         SessionSettings.instance.paintQtyListeners.add(this)
 

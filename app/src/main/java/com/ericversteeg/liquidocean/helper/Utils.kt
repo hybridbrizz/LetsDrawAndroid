@@ -9,6 +9,7 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.model.SessionSettings
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
 import kotlin.math.min
@@ -99,6 +100,42 @@ class Utils {
 
         fun isTablet(context: Context): Boolean {
             return context.resources.getBoolean(R.bool.isTablet)
+        }
+
+        fun randomSettings() {
+            SessionSettings.instance.gridLineMode = randomIndex(2)
+            SessionSettings.instance.canvasGridLineColor = randomColor()
+            SessionSettings.instance.panelBackgroundResIndex = randomIndex(SessionSettings.instance.panelResIds.size)
+
+            val colorIndicatorType = randomIndex(3)
+            if (colorIndicatorType == 0) {
+                SessionSettings.instance.colorIndicatorSquare = true
+                SessionSettings.instance.colorIndicatorFill = false
+            }
+            else if (colorIndicatorType == 1) {
+                SessionSettings.instance.colorIndicatorSquare = false
+                SessionSettings.instance.colorIndicatorFill = true
+            }
+            else {
+                SessionSettings.instance.colorIndicatorSquare = false
+                SessionSettings.instance.colorIndicatorFill = false
+            }
+
+            SessionSettings.instance.colorIndicatorOutline = randomBool()
+            SessionSettings.instance.backgroundColorsIndex = randomIndex(7)
+            SessionSettings.instance.paintColor = randomColor()
+        }
+
+        private fun randomBool(): Boolean {
+            return Math.random() < 0.5
+        }
+
+        private fun randomIndex(size: Int): Int {
+            return (Math.random() * size).toInt()
+        }
+
+        private fun randomColor(): Int {
+            return Color.argb(255, randomIndex(256), randomIndex(256), randomIndex(256))
         }
     }
 }
