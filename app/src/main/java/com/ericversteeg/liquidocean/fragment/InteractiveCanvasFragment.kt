@@ -7,7 +7,6 @@ import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -19,18 +18,15 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
-import com.android.volley.RetryPolicy
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
@@ -41,27 +37,22 @@ import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
-import com.ericversteeg.liquidocean.view.PaintQuantityBar
-import com.ericversteeg.liquidocean.view.PaintQuantityCircle
 import com.google.android.material.snackbar.Snackbar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.palette_adapter_view.*
-import okhttp3.internal.Util
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
-import kotlin.math.min
 
 
-class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, PaintQtyListener,
+class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener {
@@ -118,464 +109,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         return view
     }
 
-    override fun onPause() {
-        super.onPause()
-
-        stopEmittingParticles()
-
-        // unregister listeners
-        SessionSettings.instance.paintQtyListeners.remove(this)
-
-        context?.apply {
-            surface_view.interactiveCanvas.saveUnits(this)
-            surface_view.interactiveCanvas.drawCallbackListener = null
-
-            SessionSettings.instance.saveLastPaintColor(this, world)
-        }
-
-        paintEventTimer?.cancel()
-
-        if (world) {
-            InteractiveCanvasSocket.instance.socket?.disconnect()
-        }
-        else {
-            context?.apply {
-                val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
-
-                SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
-                SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
-
-                SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
-
-                SessionSettings.instance.save(this)
-                StatTracker.instance.save(this)
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if (world) {
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    context?.apply {
-                        var connected = Utils.isNetworkAvailable(this)
-                        if (!connected) {
-                            (context as Activity?)?.runOnUiThread {
-                                showDisconnectedMessage(0)
-                            }
-                        } else {
-                            sendApiStatusCheck()
-                        }
-                    }
-                }
-            }, 1000 * 60, 1000 * 60)
-
-            getPaintTimerInfo()
-        }
-
-        surface_view.interactiveCanvas.drawCallbackListener = this
-
-        if (world) {
-            InteractiveCanvasSocket.instance.socket?.apply {
-                if (!connected()) {
-                    connect()
-                }
-            }
-        }
-    }
-
-    private fun sendApiStatusCheck() {
-        val requestQueue = Volley.newRequestQueue(context)
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/status",
-            null,
-            { response ->
-                (context as Activity?)?.runOnUiThread {
-                    sendSocketStatusCheck()
-                }
-            },
-            { error ->
-                (context as Activity?)?.runOnUiThread {
-                    showDisconnectedMessage(1)
-                }
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
-        }
-
-        request.retryPolicy = DefaultRetryPolicy(20000, 1, 1.5f)
-        requestQueue.add(request)
-    }
-
-    private fun sendSocketStatusCheck() {
-        InteractiveCanvasSocket.instance.checkSocketStatus()
-    }
-
-    // socket check callback
-    override fun onSocketStatusError() {
-        (context as Activity?)?.runOnUiThread {
-            showDisconnectedMessage(2)
-        }
-    }
-
-    private fun showDisconnectedMessage(type: Int) {
-        AlertDialog.Builder(context)
-            .setMessage("Lost connection to world server (code=$type)")
-            // The dialog is automatically dismissed when a dialog button is clicked.
-            .setPositiveButton(
-                android.R.string.ok,
-                object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface?, id: Int) {
-                        interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
-                        dialog?.dismiss()
-                    }
-                })
-            .setOnDismissListener {
-                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
-            }
-            .show()
-    }
-
-    private fun getPaintTimerInfo() {
-        val requestQueue = Volley.newRequestQueue(context)
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/paint/time/sync",
-            null,
-            { response ->
-                (context as Activity?)?.runOnUiThread {
-                    val timeUntil = response.getInt("s").toLong()
-
-                    if (timeUntil < 0) {
-                        paint_time_info.text = "???"
-                    } else {
-                        SessionSettings.instance.timeSync = timeUntil
-                        setupPaintEventTimer()
-                    }
-                }
-            },
-            { error ->
-                (context as Activity?)?.runOnUiThread {
-
-                }
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
-        }
-
-        requestQueue.add(request)
-    }
-
-    private fun setupPaintEventTimer() {
-        paintEventTimer = Timer()
-        paintEventTimer?.schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
-                        SessionSettings.instance.nextPaintTime =
-                            System.currentTimeMillis() + 300 * 1000
-                    }
-
-                    val m =
-                        (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
-                    val s =
-                        ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
-
-                    if (m == 0L) {
-                        try {
-                            paint_time_info.text = s.toString()
-                        } catch (ex: IllegalStateException) {
-
-                        }
-                    } else {
-                        try {
-                            paint_time_info.text = String.format("%02d:%02d", m, s)
-
-                            if (paint_time_info.visibility == View.VISIBLE) {
-                                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                                layoutParams.width = (paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt()
-
-                                paint_time_info_container.layoutParams = layoutParams
-                            }
-
-                        } catch (ex: IllegalStateException) {
-
-                        }
-                    }
-                }
-            }
-        }, 0, 1000)
-    }
-
-    // pixel history listener
-    override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
-        fragmentManager?.apply {
-            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
-                surface_view.interactiveCanvas.lastSelectedUnitPoint
-            ), object : PixelHistoryCallback {
-                override fun onHistoryJsonResponse(historyJson: JSONArray) {
-                    // set bottom-left of view to screenPoint
-
-                    pixel_history_fragment_container?.apply {
-                        val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                        val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
-                            context,
-                            10
-                        )).toFloat()
-
-                        pixel_history_fragment_container.x = dX
-                        pixel_history_fragment_container.y = dY
-
-                        if (firstInfoTap) {
-                            pixel_history_fragment_container.y -= Utils.dpToPx(
-                                context,
-                                firstInfoTapFixYOffset
-                            )
-                            firstInfoTap = false
-                        }
-
-                        view?.apply {
-                            if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                            } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x =
-                                    width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
-                                        context,
-                                        20
-                                    ).toFloat()
-                            }
-
-                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                            } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y =
-                                    height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
-                                        context,
-                                        20
-                                    ).toFloat()
-                            }
-
-                            val fragment = PixelHistoryFragment()
-                            fragment.pixelHistoryJson = historyJson
-
-                            beginTransaction().replace(
-                                R.id.pixel_history_fragment_container,
-                                fragment
-                            ).commit()
-
-                            pixel_history_fragment_container.visibility = View.VISIBLE
-                        }
-                    }
-                }
-            })
-        }
-    }
-
-    override fun showDrawFrameConfigFragmentPopover(screenPoint: Point) {
-        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-            closePopoverFragment()
-            return
-        }
-
-        if (canvas_summary_view.visibility == View.VISIBLE) {
-            canvas_summary_container.visibility = View.INVISIBLE
-        }
-
-        fragmentManager?.apply {
-            pixel_history_fragment_container?.apply {
-                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
-                    context,
-                    10
-                )).toFloat()
-
-                pixel_history_fragment_container.x = dX
-                pixel_history_fragment_container.y = dY
-
-                if (firstInfoTap) {
-                    pixel_history_fragment_container.y -= Utils.dpToPx(
-                        context,
-                        firstInfoTapFixYOffset
-                    )
-                    firstInfoTap = false
-                }
-
-                view?.apply {
-                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x =
-                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
-                                context,
-                                20
-                            ).toFloat()
-                    }
-
-                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y =
-                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
-                                context,
-                                20
-                            ).toFloat()
-                    }
-
-                    val fragment = DrawFrameConfigFragment()
-                    fragment.drawFrameConfigFragmentListener = this@InteractiveCanvasFragment
-
-                    fragment.centerX = surface_view.interactiveCanvas.lastSelectedUnitPoint.x
-                    fragment.centerY = surface_view.interactiveCanvas.lastSelectedUnitPoint.y
-
-                    beginTransaction().replace(
-                        R.id.pixel_history_fragment_container,
-                        fragment
-                    ).commit()
-
-                    pixel_history_fragment_container.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
-
-    private fun showPalettesFragmentPopover() {
-        var screenPoint = Point(surface_view.width, 0)
-        if (SessionSettings.instance.rightHanded) {
-            screenPoint = Point(0, 0)
-        }
-
-        fragmentManager?.apply {
-            // set bottom-left of view to screenPoint
-
-            pixel_history_fragment_container?.apply {
-                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
-                    context,
-                    10
-                )).toFloat()
-
-                pixel_history_fragment_container.x = dX
-                pixel_history_fragment_container.y = dY
-
-                if (firstInfoTap) {
-                    pixel_history_fragment_container.y -= Utils.dpToPx(
-                        context,
-                        firstInfoTapFixYOffset
-                    )
-                    firstInfoTap = false
-                }
-
-                view?.apply {
-                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x =
-                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
-                                context,
-                                20
-                            ).toFloat()
-                    }
-
-                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y =
-                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
-                                context,
-                                20
-                            ).toFloat()
-                    }
-
-                    val fragment = PalettesFragment()
-
-                    palettesFragment = fragment
-                    palettesFragment?.palettesFragmentListener = this@InteractiveCanvasFragment
-
-                    beginTransaction().replace(
-                        R.id.pixel_history_fragment_container,
-                        fragment
-                    ).commit()
-
-                    pixel_history_fragment_container.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
-
-    override fun onInteractiveCanvasPan() {
-        pixel_history_fragment_container.visibility = View.GONE
-
-        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
-        }
-    }
-
-    override fun onInteractiveCanvasScale() {
-        pixel_history_fragment_container.visibility = View.GONE
-
-        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
-        }
-    }
-
-    override fun onArtExported(pixelPositions: List<InteractiveCanvas.RestorePoint>) {
-        toggleExportBorder(false)
-
-        val fragment = ArtExportFragment()
-        fragment.art = pixelPositions
-        fragment.listener = this
-
-        fragmentManager?.apply {
-            // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
-
-            beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
-
-            export_fragment_container.visibility = View.VISIBLE
-            export_fragment_container.setOnClickListener {
-
-            }
-        }
-    }
-
-    override fun onArtExportBack() {
-        fragmentManager?.popBackStack()
-
-        export_fragment_container.visibility = View.GONE
-        surface_view.endExport()
-
-        export_action.touchState = ActionButtonView.TouchState.INACTIVE
-    }
-
-    private fun toggleExportBorder(show: Boolean) {
-        if (show) {
-            context?.apply {
-                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
-                drawable.setStroke(
-                    Utils.dpToPx(this, 2),
-                    ActionButtonView.lightYellowSemiPaint.color
-                ) // set stroke width and stroke color
-            }
-            export_border_view.visibility = View.VISIBLE
-        }
-        else {
-            export_border_view.visibility = View.GONE
-            export_action.touchState = ActionButtonView.TouchState.INACTIVE
-        }
-    }
-
+    // setup views
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -1137,7 +671,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 canvas_summary_view.invalidate()
             }
 
-            surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+            surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
         }
 
         // grid lines toggle button
@@ -1150,7 +684,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 SessionSettings.instance.gridLineMode = 0
             }
 
-            surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+            surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
         }
 
         // canvas summary toggle button
@@ -1177,7 +711,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
         }
 
-        surface_view.interactiveCanvas.drawCallbackListener = this
+        surface_view.interactiveCanvas.interactiveCanvasListener = this
 
         val holder = surface_view.holder
         holder.addCallback(object : SurfaceHolder.Callback {
@@ -1530,6 +1064,74 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         })
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        stopEmittingParticles()
+
+        // unregister listeners
+        SessionSettings.instance.paintQtyListeners.remove(this)
+
+        context?.apply {
+            surface_view.interactiveCanvas.saveUnits(this)
+            surface_view.interactiveCanvas.interactiveCanvasListener = null
+
+            SessionSettings.instance.saveLastPaintColor(this, world)
+        }
+
+        paintEventTimer?.cancel()
+
+        if (world) {
+            InteractiveCanvasSocket.instance.socket?.disconnect()
+        }
+        else {
+            context?.apply {
+                val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+
+                SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
+                SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
+
+                SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+
+                SessionSettings.instance.save(this)
+                StatTracker.instance.save(this)
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (world) {
+            Timer().schedule(object : TimerTask() {
+                override fun run() {
+                    context?.apply {
+                        var connected = Utils.isNetworkAvailable(this)
+                        if (!connected) {
+                            (context as Activity?)?.runOnUiThread {
+                                showDisconnectedMessage(0)
+                            }
+                        } else {
+                            sendApiStatusCheck()
+                        }
+                    }
+                }
+            }, 1000 * 60, 1000 * 60)
+
+            getPaintTimerInfo()
+        }
+
+        surface_view.interactiveCanvas.interactiveCanvasListener = this
+
+        if (world) {
+            InteractiveCanvasSocket.instance.socket?.apply {
+                if (!connected()) {
+                    connect()
+                }
+            }
+        }
+    }
+
     // screen rotation
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -1541,7 +1143,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 // interactive canvas
                 surface_view.interactiveCanvas.deviceViewport?.apply {
                     surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
-                    surface_view.interactiveCanvas.drawCallbackListener?.notifyRedraw()
+                    surface_view.interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
                 }
 
                 // color picker frame width
@@ -1617,6 +1219,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         })
     }
 
+    // view helper
     private fun setPanelBackground() {
         context?.apply {
             val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
@@ -1708,6 +1311,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    private fun invalidateButtons() {
+        back_action.invalidate()
+        paint_panel_action_view.invalidate()
+        export_action.invalidate()
+        background_action.invalidate()
+        grid_lines_action.invalidate()
+        canvas_summary_action.invalidate()
+        recent_colors_action.invalidate()
+        open_tools_action.invalidate()
+    }
+
+    // drawing
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
         paint.color = Color.parseColor("#FFFFFFFF")
 
@@ -1859,6 +1474,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    // view toggles
     private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
         if (show) {
             paint_panel.visibility = View.VISIBLE
@@ -1999,6 +1615,221 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    private fun toggleExportBorder(show: Boolean) {
+        if (show) {
+            context?.apply {
+                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
+                drawable.setStroke(
+                    Utils.dpToPx(this, 2),
+                    ActionButtonView.lightYellowSemiPaint.color
+                ) // set stroke width and stroke color
+            }
+            export_border_view.visibility = View.VISIBLE
+        }
+        else {
+            export_border_view.visibility = View.GONE
+            export_action.touchState = ActionButtonView.TouchState.INACTIVE
+        }
+    }
+
+    // "Window" fragments
+    // pixel history listener
+    override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
+        fragmentManager?.apply {
+            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
+                surface_view.interactiveCanvas.lastSelectedUnitPoint
+            ), object : PixelHistoryCallback {
+                override fun onHistoryJsonResponse(historyJson: JSONArray) {
+                    // set bottom-left of view to screenPoint
+
+                    pixel_history_fragment_container?.apply {
+                        val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                        val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                            context,
+                            10
+                        )).toFloat()
+
+                        pixel_history_fragment_container.x = dX
+                        pixel_history_fragment_container.y = dY
+
+                        if (firstInfoTap) {
+                            pixel_history_fragment_container.y -= Utils.dpToPx(
+                                context,
+                                firstInfoTapFixYOffset
+                            )
+                            firstInfoTap = false
+                        }
+
+                        view?.apply {
+                            if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                            } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.x =
+                                    width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                        context,
+                                        20
+                                    ).toFloat()
+                            }
+
+                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                            } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                                pixel_history_fragment_container.y =
+                                    height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                        context,
+                                        20
+                                    ).toFloat()
+                            }
+
+                            val fragment = PixelHistoryFragment()
+                            fragment.pixelHistoryJson = historyJson
+
+                            beginTransaction().replace(
+                                R.id.pixel_history_fragment_container,
+                                fragment
+                            ).commit()
+
+                            pixel_history_fragment_container.visibility = View.VISIBLE
+                        }
+                    }
+                }
+            })
+        }
+    }
+
+    // Palette and Canvas Frame fragments also use pixel_history_fragment_container
+    override fun showDrawFrameConfigFragmentPopover(screenPoint: Point) {
+        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+            closePopoverFragment()
+            return
+        }
+
+        if (canvas_summary_view.visibility == View.VISIBLE) {
+            canvas_summary_container.visibility = View.INVISIBLE
+        }
+
+        fragmentManager?.apply {
+            pixel_history_fragment_container?.apply {
+                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                    context,
+                    10
+                )).toFloat()
+
+                pixel_history_fragment_container.x = dX
+                pixel_history_fragment_container.y = dY
+
+                if (firstInfoTap) {
+                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                        context,
+                        firstInfoTapFixYOffset
+                    )
+                    firstInfoTap = false
+                }
+
+                view?.apply {
+                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x =
+                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y =
+                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    val fragment = DrawFrameConfigFragment()
+                    fragment.drawFrameConfigFragmentListener = this@InteractiveCanvasFragment
+
+                    fragment.centerX = surface_view.interactiveCanvas.lastSelectedUnitPoint.x
+                    fragment.centerY = surface_view.interactiveCanvas.lastSelectedUnitPoint.y
+
+                    beginTransaction().replace(
+                        R.id.pixel_history_fragment_container,
+                        fragment
+                    ).commit()
+
+                    pixel_history_fragment_container.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    private fun showPalettesFragmentPopover() {
+        var screenPoint = Point(surface_view.width, 0)
+        if (SessionSettings.instance.rightHanded) {
+            screenPoint = Point(0, 0)
+        }
+
+        fragmentManager?.apply {
+            // set bottom-left of view to screenPoint
+
+            pixel_history_fragment_container?.apply {
+                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                    context,
+                    10
+                )).toFloat()
+
+                pixel_history_fragment_container.x = dX
+                pixel_history_fragment_container.y = dY
+
+                if (firstInfoTap) {
+                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                        context,
+                        firstInfoTapFixYOffset
+                    )
+                    firstInfoTap = false
+                }
+
+                view?.apply {
+                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x =
+                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y =
+                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    val fragment = PalettesFragment()
+
+                    palettesFragment = fragment
+                    palettesFragment?.palettesFragmentListener = this@InteractiveCanvasFragment
+
+                    beginTransaction().replace(
+                        R.id.pixel_history_fragment_container,
+                        fragment
+                    ).commit()
+
+                    pixel_history_fragment_container.visibility = View.VISIBLE
+                }
+            }
+        }
+    }
+
+    // particle emitters
     private fun startParticleEmitters() {
         if (SessionSettings.instance.emittersEnabled) {
             topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
@@ -2040,6 +1871,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    // prompts
     private fun showExitPrompt() {
         AlertDialog.Builder(context)
             .setMessage(resources.getString(R.string.alert_message_exit_canvas))
@@ -2077,7 +1909,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
             .show()
     }
 
-    // interactive canvas drawer callback
+    // interactive canvas listener
     override fun notifyRedraw() {
         drawInteractiveCanvas(surface_view.holder)
     }
@@ -2116,6 +1948,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         return pixel_history_fragment_container.visibility == View.VISIBLE
     }
 
+    // interactive canvas gesture listener
+    override fun onInteractiveCanvasPan() {
+        pixel_history_fragment_container.visibility = View.GONE
+
+        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        }
+    }
+
+    override fun onInteractiveCanvasScale() {
+        pixel_history_fragment_container.visibility = View.GONE
+
+        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        }
+    }
+
     // paint qty listener
     override fun paintQtyChanged(qty: Int) {
         //drops_amt_text.text = qty.toString()
@@ -2124,12 +1973,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    // recent colors listener
     override fun onNewRecentColors(colors: Array<Int>) {
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(colors)
         }
     }
 
+    // paint bar action listener
     override fun onPaintBarDoubleTapped() {
         if (world) {
             paintTextMode += 1
@@ -2167,17 +2018,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    private fun invalidateButtons() {
-        back_action.invalidate()
-        paint_panel_action_view.invalidate()
-        export_action.invalidate()
-        background_action.invalidate()
-        grid_lines_action.invalidate()
-        canvas_summary_action.invalidate()
-        recent_colors_action.invalidate()
-        open_tools_action.invalidate()
-    }
-
+    // object selection listener
     override fun onObjectSelectionBoundsChanged(startPoint: PointF, endPoint: PointF) {
         object_selection_view.visibility = View.VISIBLE
 
@@ -2198,6 +2039,37 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         object_selection_view.visibility = View.GONE
     }
 
+    // art export listener
+    override fun onArtExported(pixelPositions: List<InteractiveCanvas.RestorePoint>) {
+        toggleExportBorder(false)
+
+        val fragment = ArtExportFragment()
+        fragment.art = pixelPositions
+        fragment.listener = this
+
+        fragmentManager?.apply {
+            // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+
+            beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
+
+            export_fragment_container.visibility = View.VISIBLE
+            export_fragment_container.setOnClickListener {
+
+            }
+        }
+    }
+
+    // art export fragment listener
+    override fun onArtExportBack() {
+        fragmentManager?.popBackStack()
+
+        export_fragment_container.visibility = View.GONE
+        surface_view.endExport()
+
+        export_action.touchState = ActionButtonView.TouchState.INACTIVE
+    }
+
+    // palettes fragment listener
     override fun onPaletteSelected(palette: Palette, index: Int) {
         palette_name_text.text = palette.name
 
@@ -2215,6 +2087,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    // palette fragment helper
     private fun showPaletteUndoSnackbar(palette: Palette) {
         palettesFragment?.apply {
             val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
@@ -2261,12 +2134,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
-    private fun closePopoverFragment() {
-        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-            pixel_history_fragment_container.visibility = View.GONE
-        }
-    }
-
     // draw frame config listener
     override fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
         surface_view.createDrawFrame(centerX, centerY, width, height, color)
@@ -2289,10 +2156,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
         }
     }
 
+    // canvas edge touch listener
     override fun onTouchCanvasEdge() {
         togglePaintPanel(true)
     }
 
+    // device canvas viewport reset listener
     override fun resetDeviceCanvasViewport() {
         context?.apply {
             surface_view.interactiveCanvas.lastScaleFactor = surface_view.interactiveCanvas.startScaleFactor
@@ -2304,5 +2173,146 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasDrawerCallback, P
                 surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
             )
         }
+    }
+
+    private fun closePopoverFragment() {
+        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+            pixel_history_fragment_container.visibility = View.GONE
+        }
+    }
+
+    // world API
+    private fun sendApiStatusCheck() {
+        val requestQueue = Volley.newRequestQueue(context)
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/status",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    sendSocketStatusCheck()
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
+                    showDisconnectedMessage(1)
+                }
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
+
+        request.retryPolicy = DefaultRetryPolicy(20000, 1, 1.5f)
+        requestQueue.add(request)
+    }
+
+    private fun sendSocketStatusCheck() {
+        InteractiveCanvasSocket.instance.checkSocketStatus()
+    }
+
+    // socket check callback
+    override fun onSocketStatusError() {
+        (context as Activity?)?.runOnUiThread {
+            showDisconnectedMessage(2)
+        }
+    }
+
+    private fun showDisconnectedMessage(type: Int) {
+        AlertDialog.Builder(context)
+            .setMessage("Lost connection to world server (code=$type)")
+            // The dialog is automatically dismissed when a dialog button is clicked.
+            .setPositiveButton(
+                android.R.string.ok,
+                object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, id: Int) {
+                        interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+                        dialog?.dismiss()
+                    }
+                })
+            .setOnDismissListener {
+                interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+            }
+            .show()
+    }
+
+    private fun getPaintTimerInfo() {
+        val requestQueue = Volley.newRequestQueue(context)
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/paint/time/sync",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    val timeUntil = response.getInt("s").toLong()
+
+                    if (timeUntil < 0) {
+                        paint_time_info.text = "???"
+                    } else {
+                        SessionSettings.instance.timeSync = timeUntil
+                        setupPaintEventTimer()
+                    }
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
+
+                }
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
+        }
+
+        requestQueue.add(request)
+    }
+
+    private fun setupPaintEventTimer() {
+        paintEventTimer = Timer()
+        paintEventTimer?.schedule(object : TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
+                        SessionSettings.instance.nextPaintTime =
+                            System.currentTimeMillis() + 300 * 1000
+                    }
+
+                    val m =
+                        (SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000 / 60
+                    val s =
+                        ((SessionSettings.instance.nextPaintTime - System.currentTimeMillis()) / 1000) % 60
+
+                    if (m == 0L) {
+                        try {
+                            paint_time_info.text = s.toString()
+                        } catch (ex: IllegalStateException) {
+
+                        }
+                    } else {
+                        try {
+                            paint_time_info.text = String.format("%02d:%02d", m, s)
+
+                            if (paint_time_info.visibility == View.VISIBLE) {
+                                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
+                                layoutParams.width = (paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt()
+
+                                paint_time_info_container.layoutParams = layoutParams
+                            }
+
+                        } catch (ex: IllegalStateException) {
+
+                        }
+                    }
+                }
+            }
+        }, 0, 1000)
     }
 }

@@ -155,14 +155,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
         }
         else if (mode == Mode.PAINTING) {
             if(ev.action == MotionEvent.ACTION_DOWN) {
-                interactiveCanvas.drawCallbackListener?.apply {
+                interactiveCanvas.interactiveCanvasListener?.apply {
                     if (isPaletteFragmentOpen()) {
                         notifyClosePaletteFragment()
                         return false
                     }
                 }
 
-                interactiveCanvas.drawCallbackListener?.notifyPaintActionStarted()
+                interactiveCanvas.interactiveCanvasListener?.notifyPaintActionStarted()
 
                 if ((ev.x > width - Utils.dpToPx(context, 50) && !SessionSettings.instance.rightHanded) || (ev.x < Utils.dpToPx(context, 50) && SessionSettings.instance.rightHanded)) {
                     canvasEdgeTouchListener?.onTouchCanvasEdge()
@@ -189,10 +189,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
                 }
 
                 if (interactiveCanvas.restorePoints.size == 1) {
-                    interactiveCanvas.drawCallbackListener?.notifyPaintingStarted()
+                    interactiveCanvas.interactiveCanvasListener?.notifyPaintingStarted()
                 }
                 else if (interactiveCanvas.restorePoints.size == 0) {
-                    interactiveCanvas.drawCallbackListener?.notifyPaintingEnded()
+                    interactiveCanvas.interactiveCanvasListener?.notifyPaintingEnded()
                 }
             }
             else if(ev.action == MotionEvent.ACTION_MOVE) {
@@ -212,10 +212,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
                 }
 
                 if (interactiveCanvas.restorePoints.size == 1) {
-                    interactiveCanvas.drawCallbackListener?.notifyPaintingStarted()
+                    interactiveCanvas.interactiveCanvasListener?.notifyPaintingStarted()
                 }
                 else if (interactiveCanvas.restorePoints.size == 0) {
-                    interactiveCanvas.drawCallbackListener?.notifyPaintingEnded()
+                    interactiveCanvas.interactiveCanvasListener?.notifyPaintingEnded()
                 }
             }
         }
@@ -225,7 +225,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
                 unitPoint?.apply {
                     if (unitPoint.x in 0 until interactiveCanvas.cols && unitPoint.y in 0 until interactiveCanvas.rows) {
                         SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
-                        interactiveCanvas.drawCallbackListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                        interactiveCanvas.interactiveCanvasListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
                     }
                 }
             }
@@ -297,7 +297,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
 
         interactiveCanvas.clearRestorePoints()
 
-        interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
         mode = Mode.EXPLORING
     }
 
@@ -349,7 +349,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
             interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
             interactiveCanvas.updateDeviceViewport(context, true)
-            interactiveCanvas.drawCallbackListener?.notifyRedraw()
+            interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
 
             interactiveCanvas.lastScaleFactor = scaleFactor
             lastPanOrScaleTime = System.currentTimeMillis()
@@ -464,6 +464,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasScaleCallback, Devic
 
     override fun onDeviceViewportUpdate(viewport: RectF) {
         interactiveCanvas.deviceViewport = viewport
-        interactiveCanvas.drawCallbackListener?.notifyRedraw()
+        interactiveCanvas.interactiveCanvasListener?.notifyRedraw()
     }
 }
