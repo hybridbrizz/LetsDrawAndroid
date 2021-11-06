@@ -79,7 +79,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var toolboxOpen = false
 
     val paint = Paint()
-    val altPaint = Paint()
     val gridLinePaint = Paint()
     val gridLinePaintAlt = Paint()
 
@@ -118,7 +117,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
-        //SessionSettings.instance.darkIcons = (surface_view.interactiveCanvas.getGridLineColor() == Color.BLACK)
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
 
         SessionSettings.instance.paintQtyListeners.add(this)
@@ -146,14 +144,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
+        // listeners
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
         surface_view.objectSelectionListener = this
         surface_view.canvasEdgeTouchListener = this
 
+        surface_view.interactiveCanvas.interactiveCanvasListener = this
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.artExportListener = this
         surface_view.interactiveCanvas.deviceCanvasViewportResetListener = this
+
+        InteractiveCanvasSocket.instance.socketStatusCallback = this
+
+        paint_qty_bar.actionListener = this
+        paint_qty_circle.actionListener = this
 
         // palette
         palette_name_text.setOnClickListener {
@@ -206,20 +211,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_qty_circle.visibility = View.GONE
         }
 
-        InteractiveCanvasSocket.instance.socketStatusCallback = this
-
         // paint_qty_bar.world = world
-
-        color_picker_view.setSelectorColor(Color.WHITE)
 
         pixel_history_fragment_container.x = 0F
         pixel_history_fragment_container.y = 0F
 
-        paint_qty_bar.actionListener = this
-        paint_qty_circle.actionListener = this
-
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK
+
+        // paint panel
+        paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
 
         paint_panel_button.actionBtnView = paint_panel_action_view
         paint_panel_action_view.type = ActionButtonView.Type.PAINT
@@ -259,6 +260,45 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
         }
         lock_paint_panel.actionBtnView = lock_paint_panel_action
+
+        paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
+        paint_indicator_view.topLayer = true
+
+        paint_color_accept.actionBtnView = paint_color_accept_image_top_layer
+
+        paint_color_accept_image_bottom_layer.type = paint_color_accept_image_top_layer.type
+        paint_color_accept_image_bottom_layer.isStatic = true
+
+        paint_color_accept_image_top_layer.topLayer = true
+        paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
+        paint_color_accept_image_top_layer.hideOnTouchEnd = true
+
+        // toolbox
+        export_action.type = ActionButtonView.Type.EXPORT
+        export_button.actionBtnView = export_action
+
+        background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
+        background_button.actionBtnView = background_action
+
+        grid_lines_action.type = ActionButtonView.Type.GRID_LINES
+        grid_lines_button.actionBtnView = grid_lines_action
+
+        canvas_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
+        canvas_summary_button.actionBtnView = canvas_summary_action
+
+        open_tools_action.type = ActionButtonView.Type.DOT
+        open_tools_button.actionBtnView = open_tools_action
+
+        // open toolbox
+        toggleTools(true)
+
+        // recent colors
+        recent_colors_action.type = ActionButtonView.Type.DOT
+        recent_colors_button.actionBtnView = recent_colors_action
+
+        if (SessionSettings.instance.selectedPaletteIndex == 0) {
+            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        }
 
         // panel theme config
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
@@ -300,31 +340,24 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
-        // outside paint panel
-        recent_colors_action.type = ActionButtonView.Type.DOT
-        recent_colors_button.actionBtnView = recent_colors_action
-
-        export_action.type = ActionButtonView.Type.EXPORT
-        export_button.actionBtnView = export_action
-
-        background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-        background_button.actionBtnView = background_action
-
-        grid_lines_action.type = ActionButtonView.Type.GRID_LINES
-        grid_lines_button.actionBtnView = grid_lines_action
-
-        canvas_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-        canvas_summary_button.actionBtnView = canvas_summary_action
-
-        open_tools_action.type = ActionButtonView.Type.DOT
-        open_tools_button.actionBtnView = open_tools_action
-
-        // setup recent colors
-        if (SessionSettings.instance.selectedPaletteIndex == 0) {
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
+            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
         }
 
+        if (panelThemeConfig.inversePaintEventInfo) {
+            paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
+            paint_time_info.setTextColor(ActionButtonView.blackPaint.color)
+            paint_amt_info.setTextColor(ActionButtonView.blackPaint.color)
+        }
+
+        paint_qty_bar.panelThemeConfig = panelThemeConfig
+        paint_qty_circle.panelThemeConfig = panelThemeConfig
+        paint_indicator_view.panelThemeConfig = panelThemeConfig
+
         // color picker view
+        color_picker_view.setSelectorColor(Color.WHITE)
+
         default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
         default_black_color_button.actionBtnView = default_black_color_action
 
@@ -413,35 +446,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         })
 
-        paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.topLayer = true
-
-        paint_color_accept.actionBtnView = paint_color_accept_image_top_layer
-
-        paint_color_accept_image_bottom_layer.type = paint_color_accept_image_top_layer.type
-        if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
-        }
-
-        paint_color_accept_image_bottom_layer.isStatic = true
-
-        paint_color_accept_image_top_layer.topLayer = true
-        paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
-        paint_color_accept_image_top_layer.hideOnTouchEnd = true
-
-        if (panelThemeConfig.inversePaintEventInfo) {
-            paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
-            paint_time_info.setTextColor(ActionButtonView.blackPaint.color)
-            paint_amt_info.setTextColor(ActionButtonView.blackPaint.color)
-        }
-
-        paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
-
+        // button clicks
         paint_panel.setOnClickListener {
             closePopoverFragment()
         }
 
+        // paint buttons
         paint_panel_button.setOnClickListener {
             togglePaintPanel(true)
         }
@@ -524,10 +534,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
             }
         }
-
-        paint_qty_bar.panelThemeConfig = panelThemeConfig
-        paint_qty_circle.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.panelThemeConfig = panelThemeConfig
 
         paint_indicator_view.setOnClickListener {
             // start color selection mode
@@ -711,8 +717,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
         }
 
-        surface_view.interactiveCanvas.interactiveCanvasListener = this
-
+        // surface view holder
         val holder = surface_view.holder
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
@@ -741,9 +746,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 return true
             }
         }
-
-        // open toolbox
-        toggleTools(true)
 
         // tablet & righty
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
