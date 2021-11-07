@@ -10,14 +10,16 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.model.Palette
 import com.ericversteeg.liquidocean.model.SessionSettings
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.palette_header_view.view.*
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: MutableList<Palette>): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: MutableList<Palette>, private val panelThemeConfig: PanelThemeConfig): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     lateinit var recyclerView: RecyclerView
 
@@ -78,6 +80,15 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         else {
             holder.titleTextView.visibility = View.VISIBLE
         }
+
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            holder.titleTextView.setTextColor(Color.parseColor("#FF111111"))
+            holder.titleTextView.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
+        }
+        else {
+            holder.titleTextView.setTextColor(Color.parseColor("#DDFFFFFF"))
+            holder.titleTextView.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F000000"))
+        }
     }
 
     private fun setupPaletteViewHolder(holder: PaletteViewHolder, position: Int) {
@@ -86,6 +97,9 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         holder.nameTextView.text = palette.name
         if (SessionSettings.instance.palette.name == palette.name) {
             holder.nameTextView.setTextColor(Color.parseColor("#df7126"))
+        }
+        else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            holder.nameTextView.setTextColor(Color.BLACK)
         }
         else {
             holder.nameTextView.setTextColor(Color.WHITE)
@@ -99,6 +113,13 @@ class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: M
         }
         else {
             holder.numColorsTextView.text = String.format("%d colors", palette.colors.size)
+        }
+
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            holder.numColorsTextView.setTextColor(Color.parseColor("#CC000000"))
+        }
+        else {
+            holder.numColorsTextView.setTextColor(Color.parseColor("#CCFFFFFF"))
         }
 
         holder.itemView.setOnClickListener {

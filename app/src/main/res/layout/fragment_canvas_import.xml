@@ -14,16 +14,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="15dp">
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:paddingBottom="15dp">
 
             <TextView
                     android:id="@+id/canvas_import_title_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="-10dp"
                     android:layout_marginBottom="10dp"
                     android:layout_gravity="center_horizontal"
-                    android:textSize="50dp"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/inter_medium"
+                    android:textSize="45dp"
                     android:textColor="#DDFFFFFF"
                     android:gravity="center"
                     android:text="@string/canvas_import_title_text"
@@ -37,6 +40,7 @@
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
+                    android:fontFamily="@font/inter_light"
                     android:textSize="8pt"
                     android:textColor="#FF999999"
                     android:gravity="center" />
@@ -49,6 +53,7 @@
                 <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_light"
                         android:textSize="8pt"
                         android:textColor="#FF999999"
                         android:text="@string/pastebin_url"
@@ -59,6 +64,7 @@
                         android:layout_width="240dp"
                         android:layout_height="50dp"
                         android:background="#FF333333"
+                        android:fontFamily="@font/inter_light"
                         android:textSize="9pt"
                         android:textColor="@android:color/white" />
 
@@ -69,6 +75,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="10dp"
+                    android:fontFamily="@font/inter_medium"
                     android:text="@string/canvas_import_confirm_button_title" />
 
             <View
@@ -88,8 +95,8 @@
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
                 android:id="@+id/back_action"
-                android:layout_width="49dp"
-                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_height="25dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="start|top" />
 

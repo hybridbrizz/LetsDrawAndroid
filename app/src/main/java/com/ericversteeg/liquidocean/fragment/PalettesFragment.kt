@@ -1,11 +1,11 @@
 package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -24,8 +24,11 @@ import kotlinx.android.synthetic.main.fragment_pixel_history.*
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.SwipeToDeleteCallback
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import kotlin.math.max
 
 
 class PalettesFragment: Fragment() {
@@ -33,6 +36,8 @@ class PalettesFragment: Fragment() {
     var palettesFragmentListener: PalettesFragmentListener? = null
 
     lateinit var adapter: PalettesRecyclerViewAdapter
+
+    lateinit var panelThemeConfig: PanelThemeConfig
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,6 +61,7 @@ class PalettesFragment: Fragment() {
         }*/
 
         add_action.type = ActionButtonView.Type.ADD
+
         add_button.actionBtnView = add_action
         add_button.setOnClickListener {
             add_button.visibility = View.GONE
@@ -69,7 +75,14 @@ class PalettesFragment: Fragment() {
             showKeyboard(palette_name_input)
         }
 
-        adapter = PalettesRecyclerViewAdapter(context, SessionSettings.instance.palettes)
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            add_action.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+        else {
+            add_action.colorMode = ActionButtonView.ColorMode.WHITE
+        }
+
+        adapter = PalettesRecyclerViewAdapter(context, SessionSettings.instance.palettes, panelThemeConfig)
 
         palette_name_input.setOnEditorActionListener(object: TextView.OnEditorActionListener {
             override fun onEditorAction(textView: TextView?, actionId: Int, event: KeyEvent?): Boolean {
@@ -127,6 +140,29 @@ class PalettesFragment: Fragment() {
         itemTouchHelper.attachToRecyclerView(palettes_recycler_view)
 
         scrollToSelectedPalette()
+
+        Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
+            override fun onViewLayout(view: View) {
+                setBackground(view)
+            }
+        })
+    }
+
+    private fun setBackground(view: View) {
+        context?.apply {
+            val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
+
+            val scale = view.width / backgroundDrawable.bitmap.width.toFloat()
+
+            val newWidth = (backgroundDrawable.bitmap.width * scale).toInt()
+            val newHeight = (backgroundDrawable.bitmap.height * scale).toInt()
+            val scaledBitmap = Bitmap.createScaledBitmap(backgroundDrawable.bitmap, newWidth,
+                newHeight, false)
+            val resizedBitmap = Bitmap.createBitmap(scaledBitmap, 0, scaledBitmap.height / 2 - view.height / 2, view.width, view.height)
+            val resizedBitmapDrawable = BitmapDrawable(resizedBitmap)
+
+            view.setBackgroundDrawable(resizedBitmapDrawable)
+        }
     }
 
     fun scrollToSelectedPalette() {

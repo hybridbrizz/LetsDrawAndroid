@@ -109,6 +109,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        context?.apply {
+            SessionSettings.instance.tablet = Utils.isTablet(this)
+        }
+
         // must call before darkIcons
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
@@ -269,6 +273,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
         paint_color_accept_image_top_layer.hideOnTouchEnd = true
 
+        togglePaintPanel(SessionSettings.instance.paintPanelOpen)
+
         // toolbox
         export_action.type = ActionButtonView.Type.EXPORT
         export_button.actionBtnView = export_action
@@ -286,7 +292,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         open_tools_button.actionBtnView = open_tools_action
 
         // open toolbox
-        toggleTools(true)
+        toggleTools(SessionSettings.instance.toolboxOpen)
 
         // recent colors
         recent_colors_action.type = ActionButtonView.Type.DOT
@@ -1104,6 +1110,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
+        if (!SessionSettings.instance.tablet) {
+            return
+        }
+
         paint_panel.background = null
 
         Utils.setViewLayoutListener(view!!, object : Utils.ViewLayoutListener {
@@ -1206,23 +1216,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - paint_panel.width / 2), 0, paint_panel.width, scaledBitmapDrawable.bitmap.height)
                 val resizedBitmapDrawable = BitmapDrawable(resizedBitmap)
 
-                /*var layerDrawable: LayerDrawable = ContextCompat.getDrawable(
-                    this,
-                    R.drawable.panel_texture_background
-                ) as LayerDrawable*/
-
                 scaledBitmapDrawable.gravity = Gravity.CENTER
-
-                /*if (SessionSettings.instance.rightHanded) {
-                    scaledBitmapDrawable.gravity = Gravity.RIGHT
-                }
-                else {
-                    scaledBitmapDrawable.gravity = Gravity.LEFT
-                }*/
-
-                /*if (Build.VERSION.SDK_INT >= 23) {
-                    layerDrawable.addLayer(scaledBitmapDrawable)
-                }*/
 
                 paint_panel.setBackgroundDrawable(resizedBitmapDrawable)
             }
@@ -1350,6 +1344,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             back_button.visibility = View.GONE
+
+            SessionSettings.instance.paintPanelOpen = true
         }
         else if (softHide) {
             paint_panel.visibility = View.GONE
@@ -1380,6 +1376,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             toggleExportBorder(false)
 
             stopEmittingParticles()
+
+            SessionSettings.instance.paintPanelOpen = false
         }
     }
 
@@ -1408,6 +1406,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 )
 
                 toolboxOpen = true
+                SessionSettings.instance.toolboxOpen = true
             }
             else if (!show && toolboxOpen) {
                 animatingTools = true
@@ -1427,6 +1426,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 )
 
                 toolboxOpen = false
+                SessionSettings.instance.toolboxOpen = false
             }
         }
     }
@@ -1567,6 +1567,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val fragment = DrawFrameConfigFragment()
                     fragment.drawFrameConfigFragmentListener = this@InteractiveCanvasFragment
 
+                    fragment.panelThemeConfig = panelThemeConfig
+
                     fragment.centerX = surface_view.interactiveCanvas.lastSelectedUnitPoint.x
                     fragment.centerY = surface_view.interactiveCanvas.lastSelectedUnitPoint.y
 
@@ -1633,6 +1635,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     palettesFragment = fragment
                     palettesFragment?.palettesFragmentListener = this@InteractiveCanvasFragment
+                    palettesFragment?.panelThemeConfig = panelThemeConfig
 
                     beginTransaction().replace(
                         R.id.pixel_history_fragment_container,

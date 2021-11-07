@@ -13,8 +13,8 @@
     <com.ericversteeg.liquidocean.view.ActionButtonView
             android:id="@+id/selected_icon"
             android:visibility="gone"
-            android:layout_width="56dp"
-            android:layout_height="40dp"
+            android:layout_width="21dp"
+            android:layout_height="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginBottom="15dp"
             app:layout_constraintRight_toRightOf="parent"

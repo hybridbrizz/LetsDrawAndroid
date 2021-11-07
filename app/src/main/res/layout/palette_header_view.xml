@@ -3,20 +3,20 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/background_view"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
+        android:layout_height="46dp">
 
     <TextView
             android:id="@+id/title_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="-5dp"
             android:layout_marginBottom="10dp"
-            android:layout_gravity="center_horizontal"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
+            android:fontFamily="@font/inter_medium"
             android:textSize="35dp"
-            android:textStyle="bold"
             android:textColor="#DDFFFFFF"
-            android:gravity="center"
+            android:gravity="center_horizontal"
             android:text="@string/palettes_title"
             android:shadowColor="#7F000000"
             android:shadowDx="3"

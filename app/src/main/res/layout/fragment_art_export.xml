@@ -14,8 +14,8 @@
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
                 android:id="@+id/back_action_export"
-                android:layout_width="49dp"
-                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_height="25dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="start|top" />
 
@@ -45,10 +45,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:fontFamily="@font/inter_medium"
                 android:text="@string/screen_size"
                 android:textColor="#99FFFFFF"
                 android:textSize="12pt"
-                android:textStyle="bold"
                 android:layout_marginEnd="10dp" />
 
         <androidx.appcompat.widget.SwitchCompat
@@ -62,10 +62,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:fontFamily="@font/inter_medium"
                 android:text="@string/actual_size"
                 android:textColor="#99FFFFFF"
                 android:textSize="12pt"
-                android:textStyle="bold"
                 android:layout_marginEnd="10dp" />
 
     </LinearLayout>

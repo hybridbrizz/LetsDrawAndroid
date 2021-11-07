@@ -23,8 +23,8 @@
                     android:layout_gravity="center_horizontal"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
-                    android:textSize="50dp"
-                    android:textStyle="bold"
+                    android:fontFamily="@font/inter_medium"
+                    android:textSize="45dp"
                     android:textColor="#DDFFFFFF"
                     android:gravity="center"
                     android:text="@string/options_title"
@@ -37,9 +37,9 @@
                     android:id="@+id/option_paint_panel_texture_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_medium"
                     android:text="@string/option_paint_panel_texture_title"
                     android:textSize="16sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/white"
                     android:layout_marginTop="20dp"
                     android:layout_marginLeft="30dp"
@@ -82,9 +82,9 @@
                         android:id="@+id/option_right_handed_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_right_handed_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -113,9 +113,9 @@
                         android:id="@+id/option_canvas_lock_border_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_canvas_lock_border_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -144,9 +144,9 @@
                         android:id="@+id/option_canvas_lock_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_canvas_lock_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -155,6 +155,7 @@
                         android:id="@+id/option_canvas_lock_color_reset"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
                 
                 <View
@@ -181,9 +182,9 @@
                         android:id="@+id/option_grid_line_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_grid_line_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -192,6 +193,7 @@
                         android:id="@+id/option_grid_line_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -218,9 +220,9 @@
                         android:id="@+id/option_canvas_background_primary_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_canvas_background_primary_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -229,6 +231,7 @@
                         android:id="@+id/option_canvas_background_primary_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -255,9 +258,9 @@
                         android:id="@+id/option_canvas_background_secondary_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_canvas_background_secondary_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -266,6 +269,7 @@
                         android:id="@+id/option_canvas_background_secondary_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -292,9 +296,9 @@
                         android:id="@+id/option_frame_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_frame_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -303,6 +307,7 @@
                         android:id="@+id/option_frame_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -330,9 +335,9 @@
                         android:id="@+id/option_show_paint_bar_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_show_paint_bar_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -362,9 +367,9 @@
                         android:id="@+id/option_show_paint_circle_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_show_paint_circle_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -394,9 +399,9 @@
                         android:id="@+id/option_paint_bar_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_paint_bar_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -405,6 +410,7 @@
                         android:id="@+id/option_paint_bar_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -431,9 +437,9 @@
                         android:id="@+id/option_option_emitters_container_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_emitters_container_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -462,9 +468,9 @@
                         android:id="@+id/option_paint_indicator_fill_circle_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_paint_indicator_fill_circle"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -493,9 +499,9 @@
                         android:id="@+id/option_paint_indicator_square_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_paint_indicator_square"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -524,9 +530,9 @@
                         android:id="@+id/option_paint_indicator_outline_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_paint_indicator_outline_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -555,9 +561,9 @@
                         android:id="@+id/option_paint_indicator_width_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_paint_indicator_width_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -577,6 +583,7 @@
                         android:id="@+id/option_paint_indicator_width_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/white"
@@ -611,9 +618,9 @@
                         android:id="@+id/option_close_paint_panel_color_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_close_paint_panel_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -622,6 +629,7 @@
                         android:id="@+id/option_close_paint_panel_color_reset_button"
                         android:layout_width="wrap_content"
                         android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
                         android:text="Reset" />
 
                 <View
@@ -648,9 +656,9 @@
                         android:id="@+id/option_small_action_buttons_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_small_action_buttons_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -679,9 +687,9 @@
                         android:id="@+id/option_prompt_to_exit_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_prompt_to_exit_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -710,9 +718,9 @@
                         android:id="@+id/option_num_recent_colors_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
                         android:text="@string/option_num_recent_color_title"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
@@ -728,6 +736,7 @@
                             android:id="@+id/option_num_recent_colors_1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="4"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -738,6 +747,7 @@
                             android:id="@+id/option_num_recent_colors_2"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="8"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -748,6 +758,7 @@
                             android:id="@+id/option_num_recent_colors_3"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="12"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -758,6 +769,7 @@
                             android:id="@+id/option_num_recent_colors_4"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="16"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -768,6 +780,7 @@
                             android:id="@+id/option_num_recent_colors_5"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="20"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -778,6 +791,7 @@
                             android:id="@+id/option_num_recent_colors_6"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="24"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -788,6 +802,7 @@
                             android:id="@+id/option_num_recent_colors_7"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="28"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -798,6 +813,7 @@
                             android:id="@+id/option_num_recent_colors_8"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_medium"
                             android:text="32"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -812,6 +828,7 @@
             <Button
                     android:id="@+id/sign_in_button"
                     android:visibility="gone"
+                    android:fontFamily="@font/inter_medium"
                     android:text="Sign in"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -824,6 +841,7 @@
             <Button
                     android:id="@+id/recovery_pincode_button"
                     android:visibility="gone"
+                    android:fontFamily="@font/inter_medium"
                     android:text="Set access pincode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -835,6 +853,7 @@
 
             <Button
                     android:id="@+id/export_single_play"
+                    android:fontFamily="@font/inter_medium"
                     android:text="@string/export_canvas_button_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -845,6 +864,7 @@
 
             <Button
                     android:id="@+id/import_single_play"
+                    android:fontFamily="@font/inter_medium"
                     android:text="@string/import_canvas_button_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -855,6 +875,7 @@
 
             <Button
                     android:id="@+id/reset_single_play"
+                    android:fontFamily="@font/inter_medium"
                     android:text="@string/reset_single_play_button_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1028,8 +1049,8 @@
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
                 android:id="@+id/back_action"
-                android:layout_width="49dp"
-                android:layout_height="35dp"
+                android:layout_width="35dp"
+                android:layout_height="25dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="start|top" />
 

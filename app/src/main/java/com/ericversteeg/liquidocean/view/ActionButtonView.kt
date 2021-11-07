@@ -647,7 +647,10 @@ class ActionButtonView: View {
         outLinePaint.color = blackPaint.color
         outLinePaint.strokeWidth = 2F
 
-        if (colorMode == ColorMode.BLACK) {
+        if (colorMode == ColorMode.WHITE) {
+            primaryPaint = semiPaint
+        }
+        else if (colorMode == ColorMode.BLACK) {
             primaryPaint = semiDarkPaint
         }
 

@@ -191,6 +191,9 @@ class SessionSettings {
     var restoreDeviceViewportCenterX = 0F
     var restoreDeviceViewportCenterY = 0F
 
+    var toolboxOpen = true
+    var paintPanelOpen = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -293,6 +296,10 @@ class SessionSettings {
         ed.putFloat("restore_device_viewport_center_x", restoreDeviceViewportCenterX)
 
         ed.putFloat("restore_device_viewport_center_y", restoreDeviceViewportCenterY)
+
+        ed.putBoolean("toolbox_open", toolboxOpen)
+
+        ed.putBoolean("paint_panel_open", paintPanelOpen)
 
         ed.apply()
     }
@@ -415,6 +422,10 @@ class SessionSettings {
         restoreDeviceViewportCenterY = getSharedPrefs(context).getFloat("restore_device_viewport_center_y", 0F)
 
         restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
+
+        toolboxOpen = getSharedPrefs(context).getBoolean("toolbox_open", true)
+
+        paintPanelOpen = getSharedPrefs(context).getBoolean("paint_panel_open", false)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

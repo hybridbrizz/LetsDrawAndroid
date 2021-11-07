@@ -68,7 +68,7 @@
     <string name="actual_size">Pixel Size</string>
     <string name="screen_size">Screen Size</string>
     <string name="palettes_title">Palettes</string>
-    <string name="draw_frame_config_title">Frame</string>
+    <string name="draw_frame_config_title">Canvas Frame</string>
     <string name="draw_frame_config_done_button_text">CREATE</string>
     <string name="width_title">Width</string>
     <string name="unit_pixel">px</string>
