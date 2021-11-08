@@ -108,12 +108,19 @@ class ActionButtonView: View {
         WHITE_COLOR_DEFAULT,
         BLACK_COLOR_DEFAULT,
         LOCK_OPEN,
-        LOCK_CLOSE
+        LOCK_CLOSE,
+        SOLID
     }
 
     enum class TouchState {
         ACTIVE,
-        INACTIVE
+        INACTIVE,
+    }
+
+    enum class ToggleState {
+        NONE,
+        SINGLE,
+        DOUBLE
     }
 
     enum class ColorMode {
@@ -131,6 +138,13 @@ class ActionButtonView: View {
             field = value
 
             touchStateListener?.onTouchStateChanged(value)
+
+            invalidate()
+        }
+
+    var toggleState = ToggleState.NONE
+        set(value) {
+            field = value
 
             invalidate()
         }
@@ -353,6 +367,9 @@ class ActionButtonView: View {
             }
             else if (type == Type.LOCK_CLOSE) {
                 drawLockCloseAction(touchState == TouchState.ACTIVE, canvas)
+            }
+            else if (type == Type.SOLID) {
+                drawSolidAction(touchState == TouchState.ACTIVE, canvas)
             }
 
             restore()
@@ -835,6 +852,13 @@ class ActionButtonView: View {
 
         if (selected) {
             paint = lightYellowPaint
+        }
+
+        if (toggleState == ToggleState.SINGLE) {
+            paint = lightYellowPaint
+        }
+        else if (toggleState == ToggleState.DOUBLE) {
+            paint = lightGreenPaint
         }
 
         canvas.apply {
@@ -2594,6 +2618,25 @@ class ActionButtonView: View {
             drawPixel(5, 8, paint, canvas)
             drawPixel(6, 8, paint, canvas)
             drawPixel(7, 8, paint, canvas)
+        }
+    }
+
+    private fun drawSolidAction(selected: Boolean, canvas: Canvas) {
+        rows = 1
+        cols = 1
+
+        var paint = semiPaint
+
+        if (selected) {
+            paint = lightYellowPaint
+        }
+
+        if (SessionSettings.instance.darkIcons && !isStatic) {
+            paint = semiDarkPaint
+        }
+
+        canvas.apply {
+            drawPixel(0, 0, paint, canvas)
         }
     }
 

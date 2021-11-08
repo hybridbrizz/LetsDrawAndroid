@@ -49,6 +49,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var recentColorsListener: RecentColorsListener? = null
     var artExportListener: ArtExportListener? = null
     var deviceCanvasViewportResetListener: DeviceCanvasViewportResetListener? = null
+    var selectedObjectListener: SelectedObjectListener? = null
 
     var recentColorsList: MutableList<Int> = ArrayList()
 
@@ -79,6 +80,30 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     lateinit var connectingTimer: Timer
 
     var summary: MutableList<RestorePoint> = ArrayList()
+
+    var selectedPixels: List<RestorePoint>? = null
+    set(value) {
+        field = value
+
+        if (value != null) {
+            startSelectedPixels = copyPixels(value)
+        }
+    }
+
+    lateinit var startSelectedPixels: List<RestorePoint>
+
+    lateinit var startSelectedStartUnit: Point
+    lateinit var startSelectedEndUnit: Point
+
+    lateinit var cSelectedStartUnit: Point
+    lateinit var cSelectedEndUnit: Point
+
+    enum class Direction {
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT
+    }
 
     companion object {
         var rows = 1024
@@ -556,6 +581,24 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return null
     }
 
+    fun unitToScreenPoint(x: Int, y: Int): Point? {
+        deviceViewport?.apply {
+            val topViewportPx = top * ppu
+            val leftViewportPx = left * ppu
+
+            val absXPx = x * ppu
+            val absYPx = y * ppu
+
+            val point = Point()
+            point.x = (absXPx - leftViewportPx).toInt()
+            point.y = (absYPx - topViewportPx).toInt()
+
+            return point
+        }
+
+        return null
+    }
+
     fun isBackground(unitPoint: Point): Boolean {
         return arr[unitPoint.y][unitPoint.x] == 0
     }
@@ -743,6 +786,13 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         if (w <= 0 || h <= 0) {
             deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
         }
+
+        if (fromScale) {
+            // selected object
+            if (selectedPixels != null) {
+                selectedObjectListener?.onSelectedObjectMoved()
+            }
+        }
     }
 
     fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
@@ -805,6 +855,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             if (w <= 0 || h <= 0) {
                 deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
             }
+        }
+
+        // selected object
+        if (selectedPixels != null) {
+            selectedObjectListener?.onSelectedObjectMoved()
         }
 
         interactiveCanvasDrawer?.notifyRedraw()
@@ -870,7 +925,201 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
+    fun startMoveSelection(startUnit: Point, endUnit: Point) {
+        selectedPixels = getPixels(startUnit, endUnit)
+
+        startSelectedStartUnit = startUnit
+        cSelectedStartUnit = Point(startSelectedStartUnit.x, startSelectedStartUnit.y)
+
+        startSelectedEndUnit = endUnit
+        cSelectedEndUnit = Point(startSelectedEndUnit.x, startSelectedEndUnit.y)
+
+        selectedObjectListener?.onObjectSelected()
+        selectedObjectListener?.onSelectedObjectMoveStart()
+
+        interactiveCanvasDrawer?.notifyRedraw()
+    }
+
+    fun startMoveSelection(onePointWithin: Point) {
+        val pixels = getPixelsInForm(onePointWithin)
+        selectedPixels = pixels
+
+        val startAndEndUnits = getStartAndEndUnits(pixels)
+        startSelectedStartUnit = startAndEndUnits.first
+        cSelectedStartUnit = Point(startSelectedStartUnit.x, startSelectedStartUnit.y)
+
+        startSelectedEndUnit = startAndEndUnits.second
+        cSelectedEndUnit = Point(startSelectedEndUnit.x, startSelectedEndUnit.y)
+
+        selectedObjectListener?.onObjectSelected()
+        selectedObjectListener?.onSelectedObjectMoveStart()
+
+        interactiveCanvasDrawer?.notifyRedraw()
+    }
+
+    fun moveSelection(direction: Direction): Boolean {
+        selectedPixels?.apply {
+            val moved = movePixels(this, direction)
+            if (moved) {
+                selectedObjectListener?.onSelectedObjectMoved()
+                interactiveCanvasDrawer?.notifyRedraw()
+            }
+        }
+        return false
+    }
+
+    fun endMoveSelection(confirm: Boolean) {
+        if (confirm) {
+            for (pixel in startSelectedPixels) {
+                val x = pixel.point.x
+                val y = pixel.point.y
+
+                arr[y][x] = 0
+            }
+
+            selectedPixels?.apply {
+                for (pixel in this) {
+                    val x = pixel.point.x
+                    val y = pixel.point.y
+
+                    arr[y][x] = pixel.color
+                }
+            }
+        }
+
+        selectedPixels = null
+
+        selectedObjectListener?.onSelectedObjectMoveEnd()
+        interactiveCanvasDrawer?.notifyRedraw()
+    }
+
+    fun cancelMoveSelection() {
+        endMoveSelection(false)
+    }
+
+    private fun movePixels(pixels: List<RestorePoint>, direction: Direction): Boolean {
+        // check bounds
+        for (pixel in pixels) {
+            when (direction) {
+                Direction.UP -> {
+                    if (pixel.point.y < 1) {
+                        return false
+                    }
+                }
+                Direction.DOWN -> {
+                    if (pixel.point.y > rows - 2) {
+                        return false
+                    }
+                }
+                Direction.LEFT -> {
+                    if (pixel.point.x < 1) {
+                        return false
+                    }
+                }
+                Direction.RIGHT -> {
+                    if (pixel.point.x > cols - 2) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        // move pixels
+        for (pixel in pixels) {
+            when (direction) {
+                Direction.UP -> {
+                    pixel.point.y -= 1
+                }
+                Direction.DOWN -> {
+                    pixel.point.y += 1
+                }
+                Direction.LEFT -> {
+                    pixel.point.x -= 1
+                }
+                Direction.RIGHT -> {
+                    pixel.point.x += 1
+                }
+            }
+        }
+
+        when (direction) {
+            Direction.UP -> {
+                cSelectedStartUnit.y -= 1
+                cSelectedEndUnit.y -= 1
+            }
+            Direction.DOWN -> {
+                cSelectedStartUnit.y += 1
+                cSelectedEndUnit.y += 1
+            }
+            Direction.LEFT -> {
+                cSelectedStartUnit.x -= 1
+                cSelectedEndUnit.x -= 1
+            }
+            Direction.RIGHT -> {
+                cSelectedStartUnit.x += 1
+                cSelectedEndUnit.x += 1
+            }
+        }
+
+        return true
+    }
+
+    fun commitMovePixels(pixels: List<RestorePoint>) {
+        for (pixel in pixels) {
+            val x = pixel.point.x
+            val y = pixel.point.y
+
+            arr[y][x] = pixel.color
+        }
+    }
+
     fun exportSelection(startUnit: Point, endUnit: Point) {
+        artExportListener?.onArtExported(getPixels(startUnit, endUnit))
+    }
+
+    fun exportSelection(onePointWithin: Point) {
+        artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
+    }
+
+    private fun getPixelsInForm(unitPoint: Point): List<RestorePoint> {
+        val pixels: MutableList<RestorePoint> = ArrayList()
+
+        stepPixelsInForm(unitPoint.x, unitPoint.y, pixels, 0)
+
+        return pixels
+    }
+
+    private fun stepPixelsInForm(x: Int, y: Int, pixelsOut: MutableList<RestorePoint>, depth: Int) {
+        // a background color
+        // or already in list
+        // or out of bounds
+        if (x < 0 || x > cols - 1 || y < 0 || y > rows - 1 ||
+            arr[y][x] == 0 || unitInRestorePoints(Point(x, y), pixelsOut) != null || depth > 10000) {
+            return
+        }
+        else {
+            pixelsOut.add(RestorePoint(Point(x, y), arr[y][x], arr[y][x]))
+        }
+
+        // left
+        stepPixelsInForm(x - 1, y, pixelsOut, depth + 1)
+        // top
+        stepPixelsInForm(x, y - 1, pixelsOut, depth + 1)
+        // right
+        stepPixelsInForm(x + 1, y, pixelsOut, depth + 1)
+        // bottom
+        stepPixelsInForm(x, y + 1, pixelsOut, depth + 1)
+        // top-left
+        stepPixelsInForm(x - 1, y - 1, pixelsOut, depth + 1)
+        // top-right
+        stepPixelsInForm(x + 1, y - 1, pixelsOut, depth + 1)
+        // bottom-left
+        stepPixelsInForm(x - 1, y + 1, pixelsOut, depth + 1)
+        // bottom-right
+        stepPixelsInForm(x + 1, y + 1, pixelsOut, depth + 1)
+    }
+
+    fun getPixels(startUnit: Point, endUnit: Point): List<RestorePoint> {
         val pixelsOut: MutableList<RestorePoint> = ArrayList()
 
         var numLeadingCols = 0
@@ -945,49 +1194,49 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
         }
 
-        artExportListener?.onArtExported(pixelsOut)
+        return pixelsOut
     }
 
-    fun exportSelection(onePointWithin: Point) {
-        artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
-    }
+    fun getStartAndEndUnits(pixels: List<RestorePoint>): Pair<Point, Point> {
+        var minX = cols
+        var maxX = -1
+        var minY = rows
+        var maxY = -1
 
-    private fun getPixelsInForm(unitPoint: Point): List<RestorePoint> {
-        val pixels: MutableList<RestorePoint> = ArrayList()
+        for (pixel in pixels) {
+            val x = pixel.point.x
+            val y = pixel.point.y
 
-        stepPixelsInForm(unitPoint.x, unitPoint.y, pixels, 0)
+            if (x < minX) {
+                minX = x
+            }
 
-        return pixels
-    }
+            if (x > maxX) {
+                maxX = x
+            }
 
-    private fun stepPixelsInForm(x: Int, y: Int, pixelsOut: MutableList<RestorePoint>, depth: Int) {
-        // a background color
-        // or already in list
-        // or out of bounds
-        if (x < 0 || x > cols - 1 || y < 0 || y > rows - 1 ||
-            arr[y][x] == 0 || unitInRestorePoints(Point(x, y), pixelsOut) != null || depth > 10000) {
-            return
+            if (y < minY) {
+                minY = y
+            }
+
+            if (y > maxY) {
+                maxY = y
+            }
         }
-        else {
-            pixelsOut.add(RestorePoint(Point(x, y), arr[y][x], arr[y][x]))
-        }
 
-        // left
-        stepPixelsInForm(x - 1, y, pixelsOut, depth + 1)
-        // top
-        stepPixelsInForm(x, y - 1, pixelsOut, depth + 1)
-        // right
-        stepPixelsInForm(x + 1, y, pixelsOut, depth + 1)
-        // bottom
-        stepPixelsInForm(x, y + 1, pixelsOut, depth + 1)
-        // top-left
-        stepPixelsInForm(x - 1, y - 1, pixelsOut, depth + 1)
-        // top-right
-        stepPixelsInForm(x + 1, y - 1, pixelsOut, depth + 1)
-        // bottom-left
-        stepPixelsInForm(x - 1, y + 1, pixelsOut, depth + 1)
-        // bottom-right
-        stepPixelsInForm(x + 1, y + 1, pixelsOut, depth + 1)
+        return Pair(Point(minX, minY), Point(maxX, maxY))
+    }
+
+    fun hasSelectedObjectMoved(): Boolean {
+        return startSelectedStartUnit.x != cSelectedStartUnit.x || startSelectedStartUnit.y != cSelectedStartUnit.y
+    }
+
+    fun copyPixels(pixels: List<RestorePoint>): List<RestorePoint> {
+        val list: MutableList<RestorePoint> = ArrayList()
+        for (pixel in pixels) {
+            list.add(RestorePoint(Point(pixel.point.x, pixel.point.y), pixel.color, pixel.newColor))
+        }
+        return list
     }
 
     fun getBackgroundColors(index: Int): List<Int> {

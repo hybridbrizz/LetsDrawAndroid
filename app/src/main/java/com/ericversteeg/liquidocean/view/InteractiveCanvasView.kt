@@ -12,20 +12,21 @@ import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import org.json.JSONArray
 import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, DeviceCanvasViewportListener {
+class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, DeviceCanvasViewportListener, SelectedObjectListener {
 
     enum class Mode {
         EXPLORING,
         PAINTING,
         PAINT_SELECTION,
-        EXPORTING
+        EXPORTING,
+        OBJECT_MOVE_SELECTION,
+        OBJECT_MOVING
     }
 
     private var mode = Mode.EXPLORING
@@ -48,6 +49,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     var gestureListener: InteractiveCanvasGestureListener? = null
 
     var objectSelectionListener: ObjectSelectionListener? = null
+    var selectedObjectView: SelectedObjectView? = null
+    var selectedObjectMoveView: SelectedObjectMoveView? = null
 
     var canvasEdgeTouchListener: CanvasEdgeTouchListener? = null
 
@@ -83,6 +86,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     private fun commonInit() {
         interactiveCanvas.scaleCallbackListener = this
+        interactiveCanvas.selectedObjectListener = this
 
         // scale
         if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
@@ -249,7 +253,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 }
             }
         }
-        else if (mode == Mode.EXPORTING) {
+        else if (mode == Mode.EXPORTING || mode == Mode.OBJECT_MOVE_SELECTION) {
             if (ev.action == MotionEvent.ACTION_DOWN) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
@@ -266,7 +270,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                         if (unitPoint != null) {
-                            interactiveCanvas.exportSelection(unitPoint)
+                            if (mode == Mode.EXPORTING) {
+                                interactiveCanvas.exportSelection(unitPoint)
+                            }
+                            else if (mode == Mode.OBJECT_MOVE_SELECTION) {
+                                interactiveCanvas.startMoveSelection(unitPoint)
+
+                                mode = Mode.OBJECT_MOVING
+                            }
                         }
                     }
                     else {
@@ -276,7 +287,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         val maxX = max(unitPoint.x, objectSelectionStartUnit.x)
                         val maxY = max(unitPoint.y, objectSelectionStartUnit.y)
 
-                        interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                        if (mode == Mode.EXPORTING) {
+                            interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                        }
+                        else if (mode == Mode.OBJECT_MOVE_SELECTION) {
+                            interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))
+
+                            mode = Mode.OBJECT_MOVING
+                        }
                     }
                     objectSelectionListener?.onObjectSelectionEnded()
                 }
@@ -294,6 +312,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                     objectSelectionListener?.onObjectSelectionBoundsChanged(PointF(minX, minY), PointF(maxX, maxY))
                 }
             }
+        }
+        else if (mode == Mode.OBJECT_MOVING) {
+            mPanDetector.onTouchEvent(ev)
+            mScaleDetector.onTouchEvent(ev)
         }
 
         return true
@@ -339,7 +361,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             distanceY: Float
         ): Boolean {
 
-            // Log.i("Drag distance", "x=$distanceX, y=$distanceY")
             interactiveCanvas.translateBy(context, distanceX, distanceY)
 
             lastPanOrScaleTime = System.currentTimeMillis()
@@ -434,8 +455,35 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         mode = Mode.EXPLORING
     }
 
+    fun startObjectMove() {
+        mode = Mode.OBJECT_MOVE_SELECTION
+    }
+
+    fun endObjectMove() {
+        mode = Mode.EXPLORING
+    }
+
     fun isExporting(): Boolean {
         return mode == Mode.EXPORTING
+    }
+
+    fun isObjectMoving(): Boolean {
+        return mode == Mode.OBJECT_MOVING
+    }
+
+    fun isObjectMoveSelection(): Boolean {
+        return mode == Mode.OBJECT_MOVE_SELECTION
+    }
+
+    private fun screenBoundsForSelectedObject(): Rect {
+        val selectedStartUnit = interactiveCanvas.cSelectedStartUnit
+        val selectedStartUnitScreen = interactiveCanvas.unitToScreenPoint(selectedStartUnit.x, selectedStartUnit.y)
+
+        val selectedEndUnit = interactiveCanvas.cSelectedEndUnit
+        val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x, selectedEndUnit.y)
+
+        return Rect(selectedStartUnitScreen!!.x, selectedStartUnitScreen.y,
+            selectedEndUnitScreen!!.x + interactiveCanvas.ppu, selectedEndUnitScreen.y + interactiveCanvas.ppu)
     }
 
     fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
@@ -490,6 +538,41 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     // interactive canvas drawer
     override fun notifyRedraw() {
         drawInteractiveCanvas(holder)
+    }
+
+    // selected object listener
+    override fun onObjectSelected() {
+
+    }
+
+    override fun onSelectedObjectMoveStart() {
+        val bounds = screenBoundsForSelectedObject()
+        selectedObjectMoveView?.showSelectedObjectMoveButtons(bounds)
+    }
+
+    override fun onSelectedObjectMoved() {
+        val bounds = screenBoundsForSelectedObject()
+        selectedObjectMoveView?.updateSelectedObjectMoveButtons(bounds)
+
+        val cX = (bounds.left + bounds.right) / 2
+        val cY = (bounds.top + bounds.bottom) / 2
+
+        if (interactiveCanvas.hasSelectedObjectMoved()) {
+            selectedObjectView?.showSelectedObjectYesAndNoButtons(Point(cX, cY))
+        }
+        else {
+            selectedObjectView?.hideSelectedObjectYesAndNoButtons()
+        }
+    }
+
+    override fun onSelectedObjectMoveEnd() {
+        endObjectMove()
+
+        selectedObjectMoveView?.hideSelectedObjectMoveButtons()
+        selectedObjectMoveView?.selectedObjectMoveEnded()
+
+        selectedObjectView?.hideSelectedObjectYesAndNoButtons()
+        selectedObjectView?.selectedObjectEnded()
     }
 
     // drawing
@@ -593,6 +676,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
             paint.color = Color.BLACK
 
+            val isObjectSelected = interactiveCanvas.selectedPixels != null
+
             val backgroundColors = interactiveCanvas.getBackgroundColors(SessionSettings.instance.backgroundColorsIndex)
 
             for (x in 0..rangeX) {
@@ -627,6 +712,9 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         y + startUnitIndexY
                     )
 
+                    if (isObjectSelected) {
+                        paint.color = Utils.brightenColor(paint.color, -0.5F)
+                    }
                     canvas.drawRect(rect, paint)
 
                     // transparency
@@ -639,6 +727,21 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                             canvas.drawRect(rect, altPaint)
                         }
                     } */
+                }
+            }
+
+            // selected object
+            interactiveCanvas.selectedPixels?.apply {
+                for (pixel in this) {
+                    val x = pixel.point.x
+                    val y = pixel.point.y
+
+                    if (x in startUnitIndexX..endUnitIndexX && y in startUnitIndexY..endUnitIndexY) {
+                        paint.color = pixel.color
+                        val rect = interactiveCanvas.getScreenSpaceForUnit(x, y)
+
+                        canvas.drawRect(rect, paint)
+                    }
                 }
             }
         }

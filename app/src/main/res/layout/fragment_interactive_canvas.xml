@@ -923,4 +923,108 @@
 
     </FrameLayout>
 
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/object_move_up_button"
+            android:visibility="gone"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/object_move_up_action"
+                android:layout_width="15dp"
+                android:layout_height="5dp"
+                android:layout_gravity="bottom|center_horizontal" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/object_move_down_button"
+            android:visibility="gone"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/object_move_down_action"
+                android:layout_width="15dp"
+                android:layout_height="5dp"
+                android:layout_gravity="top|center_horizontal" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/object_move_left_button"
+            android:visibility="gone"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/object_move_left_action"
+                android:layout_width="5dp"
+                android:layout_height="15dp"
+                android:layout_gravity="end|center_vertical" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+            android:id="@+id/object_move_right_button"
+            android:visibility="gone"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonView
+                android:id="@+id/object_move_right_action"
+                android:layout_width="5dp"
+                android:layout_height="15dp"
+                android:layout_gravity="start|center_vertical" />
+
+    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+    <LinearLayout
+            android:id="@+id/selected_object_yes_no_container"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/howto_step_background"
+            android:padding="5dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                android:id="@+id/selected_object_yes_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/selected_object_yes_action"
+                    android:layout_width="21dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center" />
+
+        </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+        <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                android:id="@+id/selected_object_no_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <com.ericversteeg.liquidocean.view.ActionButtonView
+                    android:id="@+id/selected_object_no_action"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="center" />
+
+        </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+    </LinearLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

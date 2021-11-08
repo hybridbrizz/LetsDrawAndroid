@@ -47,15 +47,14 @@ import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
 import java.util.*
-import kotlin.math.ceil
-import kotlin.math.floor
 import kotlin.math.max
 
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQtyListener,
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
-    PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener {
+    PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
+    SelectedObjectMoveView, SelectedObjectView {
 
     var scaleFactor = 1f
 
@@ -148,6 +147,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
         surface_view.objectSelectionListener = this
+        surface_view.selectedObjectMoveView = this
+        surface_view.selectedObjectView = this
         surface_view.canvasEdgeTouchListener = this
 
         surface_view.interactiveCanvas.interactiveCanvasListener = this
@@ -638,6 +639,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
+            else if (surface_view.isObjectMoveSelection()) {
+                surface_view.interactiveCanvas.cancelMoveSelection()
+                toggleExportBorder(false, double = true)
+
+                surface_view.startExport()
+                toggleExportBorder(true)
+            }
+            else if (surface_view.isObjectMoving()) {
+                surface_view.interactiveCanvas.cancelMoveSelection()
+                toggleExportBorder(false)
+            }
             else {
                 if (SessionSettings.instance.promptToExit) {
                     showExitPrompt()
@@ -650,10 +662,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         // export button
         export_button.setOnClickListener {
-            surface_view.startExport()
-            export_action.touchState = ActionButtonView.TouchState.ACTIVE
-
-            toggleExportBorder(true)
+            if (export_action.toggleState == ActionButtonView.ToggleState.NONE) {
+                surface_view.startExport()
+                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+                toggleExportBorder(true)
+            }
+            else if (export_action.toggleState == ActionButtonView.ToggleState.SINGLE) {
+                surface_view.endExport()
+                surface_view.startObjectMove()
+                export_action.toggleState = ActionButtonView.ToggleState.DOUBLE
+                toggleExportBorder(true, double = true)
+            }
+            else if (export_action.toggleState == ActionButtonView.ToggleState.DOUBLE) {
+                surface_view.interactiveCanvas.cancelMoveSelection()
+                toggleExportBorder(false)
+            }
         }
 
         // background button
@@ -1431,20 +1454,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
-    private fun toggleExportBorder(show: Boolean) {
+    private fun toggleExportBorder(show: Boolean, double: Boolean = false) {
+        var color = ActionButtonView.lightYellowSemiPaint.color
+        if (double) {
+            color = ActionButtonView.lightGreenPaint.color
+        }
         if (show) {
             context?.apply {
                 val drawable: GradientDrawable = export_border_view.background as GradientDrawable
                 drawable.setStroke(
                     Utils.dpToPx(this, 2),
-                    ActionButtonView.lightYellowSemiPaint.color
+                    color
                 ) // set stroke width and stroke color
             }
             export_border_view.visibility = View.VISIBLE
         }
         else {
             export_border_view.visibility = View.GONE
-            export_action.touchState = ActionButtonView.TouchState.INACTIVE
+
+            if (double) {
+                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            }
+            else {
+                export_action.toggleState = ActionButtonView.ToggleState.NONE
+            }
         }
     }
 
@@ -1994,6 +2027,117 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (pixel_history_fragment_container.visibility == View.VISIBLE) {
             pixel_history_fragment_container.visibility = View.GONE
         }
+    }
+
+    // selected object view
+    override fun showSelectedObjectYesAndNoButtons(screenPoint: Point) {
+        selected_object_yes_button.actionBtnView = selected_object_yes_action
+        selected_object_no_button.actionBtnView = selected_object_no_action
+
+        selected_object_yes_action.type = ActionButtonView.Type.YES
+        selected_object_yes_action.colorMode = ActionButtonView.ColorMode.COLOR
+
+        selected_object_no_action.type = ActionButtonView.Type.NO
+        selected_object_no_action.colorMode = ActionButtonView.ColorMode.COLOR
+
+        selected_object_yes_no_container.x = (screenPoint.x - selected_object_yes_button.layoutParams.width - Utils.dpToPx(context, 5)).toFloat()
+        selected_object_yes_no_container.y = (screenPoint.y - selected_object_yes_button.layoutParams.height / 2 - Utils.dpToPx(context, 5)).toFloat()
+
+        selected_object_yes_button.setOnClickListener {
+            surface_view.interactiveCanvas.endMoveSelection(true)
+        }
+
+        selected_object_no_button.setOnClickListener {
+            surface_view.interactiveCanvas.endMoveSelection(false)
+        }
+
+        selected_object_yes_no_container.visibility = View.VISIBLE
+    }
+
+    override fun hideSelectedObjectYesAndNoButtons() {
+        selected_object_yes_button.visibility = View.GONE
+        selected_object_no_button.visibility = View.GONE
+    }
+
+    override fun selectedObjectEnded() {
+
+    }
+
+    // selected object move view
+    override fun showSelectedObjectMoveButtons(bounds: Rect) {
+        object_move_up_button.actionBtnView = object_move_up_action
+        object_move_up_action.type = ActionButtonView.Type.SOLID
+        object_move_up_button.visibility = View.VISIBLE
+
+        object_move_down_button.actionBtnView = object_move_down_action
+        object_move_down_action.type = ActionButtonView.Type.SOLID
+        object_move_down_button.visibility = View.VISIBLE
+
+        object_move_left_button.actionBtnView = object_move_left_action
+        object_move_left_action.type = ActionButtonView.Type.SOLID
+        object_move_left_button.visibility = View.VISIBLE
+
+        object_move_right_button.actionBtnView = object_move_right_action
+        object_move_right_action.type = ActionButtonView.Type.SOLID
+        object_move_right_button.visibility = View.VISIBLE
+
+        object_move_up_button.setOnClickListener {
+            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.UP)
+        }
+        object_move_down_button.setOnClickListener {
+            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.DOWN)
+        }
+        object_move_left_button.setOnClickListener {
+            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.LEFT)
+        }
+        object_move_right_button.setOnClickListener {
+            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.RIGHT)
+        }
+
+        val cX = (bounds.right + bounds.left) / 2
+        val cY = (bounds.bottom + bounds.top) / 2
+
+        object_move_up_button.x = (cX - object_move_up_button.layoutParams.width / 2).toFloat()
+        object_move_up_button.y = (bounds.top - object_move_up_button.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
+
+        object_move_down_button.x = (cX - object_move_down_button.layoutParams.width / 2).toFloat()
+        object_move_down_button.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
+
+        object_move_left_button.x = (bounds.left - Utils.dpToPx(context, 20) - object_move_left_button.layoutParams.width).toFloat()
+        object_move_left_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+
+        object_move_right_button.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
+        object_move_right_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+    }
+
+    override fun updateSelectedObjectMoveButtons(bounds: Rect) {
+        val cX = (bounds.right + bounds.left) / 2
+        val cY = (bounds.bottom + bounds.top) / 2
+
+        object_move_up_button.x = (cX - object_move_up_button.layoutParams.width / 2).toFloat()
+        object_move_up_button.y = (bounds.top - object_move_up_button.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
+
+        object_move_down_button.x = (cX - object_move_down_button.layoutParams.width / 2).toFloat()
+        object_move_down_button.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
+
+        object_move_left_button.x = (bounds.left - Utils.dpToPx(context, 20) - object_move_left_button.layoutParams.width).toFloat()
+        object_move_left_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+
+        object_move_right_button.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
+        object_move_right_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+    }
+
+    override fun hideSelectedObjectMoveButtons() {
+        object_move_up_button.visibility = View.GONE
+        object_move_down_button.visibility = View.GONE
+        object_move_left_button.visibility = View.GONE
+        object_move_right_button.visibility = View.GONE
+
+        selected_object_yes_no_container.visibility = View.GONE
+    }
+
+    override fun selectedObjectMoveEnded() {
+        toggleExportBorder(false)
     }
 
     // world API
