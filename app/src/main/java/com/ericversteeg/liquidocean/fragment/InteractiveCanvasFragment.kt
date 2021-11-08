@@ -640,14 +640,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
             else if (surface_view.isObjectMoveSelection()) {
-                surface_view.interactiveCanvas.cancelMoveSelection()
+                surface_view.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false, double = true)
 
                 surface_view.startExport()
                 toggleExportBorder(true)
             }
             else if (surface_view.isObjectMoving()) {
-                surface_view.interactiveCanvas.cancelMoveSelection()
+                surface_view.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
             else {
@@ -674,15 +674,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 toggleExportBorder(true, double = true)
             }
             else if (export_action.toggleState == ActionButtonView.ToggleState.DOUBLE) {
-                surface_view.interactiveCanvas.cancelMoveSelection()
+                surface_view.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
         }
 
         // background button
         background_button.setOnClickListener {
-            toggleExportBorder(false)
-
             if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
                 SessionSettings.instance.backgroundColorsIndex = 0
             }
@@ -707,8 +705,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         // grid lines toggle button
         grid_lines_button.setOnClickListener {
-            toggleExportBorder(false)
-
             SessionSettings.instance.gridLineMode += 1
 
             if (SessionSettings.instance.gridLineMode > 1) {
@@ -1216,6 +1212,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 device_canvas_viewport_view.updateDeviceViewport()
 
                 setPanelBackground()
+
+                surface_view.interactiveCanvas.notifyDeviceViewportUpdate()
             }
         })
     }
@@ -1236,7 +1234,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     newHeight, false)
                 val scaledBitmapDrawable = BitmapDrawable(resources, newBitmap)
 
-                val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - paint_panel.width / 2), 0, paint_panel.width, scaledBitmapDrawable.bitmap.height)
+                val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - paint_panel.layoutParams.width / 2), 0, paint_panel.layoutParams.width, scaledBitmapDrawable.bitmap.height)
                 val resizedBitmapDrawable = BitmapDrawable(resizedBitmap)
 
                 scaledBitmapDrawable.gravity = Gravity.CENTER
@@ -1305,6 +1303,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         canvas_summary_action.invalidate()
         recent_colors_action.invalidate()
         open_tools_action.invalidate()
+        object_move_up_action.invalidate()
+        object_move_down_action.invalidate()
+        object_move_left_action.invalidate()
+        object_move_right_action.invalidate()
     }
 
     // view toggles

@@ -925,12 +925,17 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    fun startMoveSelection(startUnit: Point, endUnit: Point) {
+    fun startMoveSelection(startUnit: Point, endUnit: Point): Boolean {
         if (!unitInBounds(startUnit) || !unitInBounds(endUnit)) {
-            return
+            return false
         }
 
-        selectedPixels = getPixels(startUnit, endUnit)
+        val pixels = getPixels(startUnit, endUnit)
+        if (pixels.isEmpty()) {
+            return false
+        }
+
+        selectedPixels = pixels
 
         val startAndEndUnits = getStartAndEndUnits(selectedPixels!!)
 
@@ -944,14 +949,20 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         selectedObjectListener?.onSelectedObjectMoveStart()
 
         interactiveCanvasDrawer?.notifyRedraw()
+
+        return true
     }
 
-    fun startMoveSelection(onePointWithin: Point) {
+    fun startMoveSelection(onePointWithin: Point): Boolean {
         if (!unitInBounds(onePointWithin)) {
-            return
+            return false
         }
 
         val pixels = getPixelsInForm(onePointWithin)
+        if (pixels.isEmpty()) {
+            return false
+        }
+
         selectedPixels = pixels
 
         val startAndEndUnits = getStartAndEndUnits(pixels)
@@ -965,6 +976,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         selectedObjectListener?.onSelectedObjectMoveStart()
 
         interactiveCanvasDrawer?.notifyRedraw()
+
+        return true
     }
 
     fun moveSelection(direction: Direction): Boolean {
@@ -1003,7 +1016,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         interactiveCanvasDrawer?.notifyRedraw()
     }
 
-    fun cancelMoveSelection() {
+    fun cancelMoveSelectedObject() {
         endMoveSelection(false)
     }
 
@@ -1259,6 +1272,12 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             list.add(RestorePoint(Point(pixel.point.x, pixel.point.y), pixel.color, pixel.newColor))
         }
         return list
+    }
+
+    fun notifyDeviceViewportUpdate() {
+        if (selectedPixels != null) {
+            selectedObjectListener?.onSelectedObjectMoved()
+        }
     }
 
     fun getBackgroundColors(index: Int): List<Int> {

@@ -274,9 +274,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                                 interactiveCanvas.exportSelection(unitPoint)
                             }
                             else if (mode == Mode.OBJECT_MOVE_SELECTION) {
-                                interactiveCanvas.startMoveSelection(unitPoint)
+                                val valid = interactiveCanvas.startMoveSelection(unitPoint)
 
-                                mode = Mode.OBJECT_MOVING
+                                if (valid) {
+                                    mode = Mode.OBJECT_MOVING
+                                }
                             }
                         }
                     }
@@ -295,9 +297,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                                 interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
                             }
                             else if (mode == Mode.OBJECT_MOVE_SELECTION) {
-                                interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))
+                                val valid = interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))
 
-                                mode = Mode.OBJECT_MOVING
+                                if (valid) {
+                                    mode = Mode.OBJECT_MOVING
+                                }
                             }
                         }
                     }
@@ -327,6 +331,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     fun startPainting() {
+        if (mode == Mode.OBJECT_MOVE_SELECTION || mode == Mode.OBJECT_MOVING) {
+            interactiveCanvas.cancelMoveSelectedObject()
+        }
+
         mode = Mode.PAINTING
     }
 
@@ -555,6 +563,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     override fun onDeviceViewportUpdate(viewport: RectF) {
         interactiveCanvas.deviceViewport = viewport
         interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+        interactiveCanvas.notifyDeviceViewportUpdate()
     }
 
     // interactive canvas drawer
