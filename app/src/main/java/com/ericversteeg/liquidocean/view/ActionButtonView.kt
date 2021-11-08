@@ -640,7 +640,7 @@ class ActionButtonView: View {
             outLinePaint.color = whitePaint.color
         }
 
-        if (selected) {
+        if (selected && !isStatic) {
             primaryPaint = lightYellowPaint
         }
 
@@ -850,7 +850,7 @@ class ActionButtonView: View {
             paint = semiDarkPaint
         }
 
-        if (selected) {
+        if (selected && !isStatic) {
             paint = lightYellowPaint
         }
 
@@ -935,18 +935,18 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawChangeBackgroundAction(light: Boolean, canvas: Canvas) {
+    private fun drawChangeBackgroundAction(selected: Boolean, canvas: Canvas) {
         rows = 4
         cols = 3
 
         var paint = semiPaint
 
-        if (light) {
-            paint = lightYellowPaint
-        }
-
         if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
+        }
+
+        if (selected && !isStatic) {
+            paint = lightYellowPaint
         }
 
         canvas.apply {
@@ -972,18 +972,18 @@ class ActionButtonView: View {
         }
     }
 
-    private fun drawGridLinesAction(light: Boolean, canvas: Canvas) {
+    private fun drawGridLinesAction(selected: Boolean, canvas: Canvas) {
         rows = 1
         cols = 3
 
         var paint = semiPaint
 
-        if (light) {
-            paint = lightYellowPaint
-        }
-
         if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
+        }
+
+        if (selected && !isStatic) {
+            paint = lightYellowPaint
         }
 
         canvas.apply {
@@ -1000,12 +1000,12 @@ class ActionButtonView: View {
 
         var paint = semiPaint
 
-        if (selected) {
-            paint = lightYellowPaint
-        }
-
         if (SessionSettings.instance.darkIcons && !isStatic) {
             paint = semiDarkPaint
+        }
+
+        if (selected && !isStatic) {
+            paint = lightYellowPaint
         }
 
         canvas.apply {
@@ -1035,7 +1035,7 @@ class ActionButtonView: View {
             paint = semiDarkPaint
         }
 
-        if (selected) {
+        if (selected && !isStatic) {
             paint = lightYellowPaint
         }
 
@@ -1053,7 +1053,7 @@ class ActionButtonView: View {
             paint = semiDarkPaint
         }
 
-        if (selected) {
+        if (selected && !isStatic) {
             paint = lightYellowPaint
         }
 

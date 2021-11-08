@@ -269,7 +269,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                     if (unitPoint.x == objectSelectionStartUnit.x && unitPoint.y == objectSelectionStartUnit.y) {
                         val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
-                        if (unitPoint != null) {
+                        if (unitPoint != null && interactiveCanvas.unitInBounds(unitPoint)) {
                             if (mode == Mode.EXPORTING) {
                                 interactiveCanvas.exportSelection(unitPoint)
                             }
@@ -287,13 +287,18 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         val maxX = max(unitPoint.x, objectSelectionStartUnit.x)
                         val maxY = max(unitPoint.y, objectSelectionStartUnit.y)
 
-                        if (mode == Mode.EXPORTING) {
-                            interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
-                        }
-                        else if (mode == Mode.OBJECT_MOVE_SELECTION) {
-                            interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))
+                        val startUnit = Point(minX, minY)
+                        val endUnit = Point(minX, minY)
 
-                            mode = Mode.OBJECT_MOVING
+                        if (interactiveCanvas.unitInBounds(startUnit) && interactiveCanvas.unitInBounds(endUnit)) {
+                            if (mode == Mode.EXPORTING) {
+                                interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                            }
+                            else if (mode == Mode.OBJECT_MOVE_SELECTION) {
+                                interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))
+
+                                mode = Mode.OBJECT_MOVING
+                            }
                         }
                     }
                     objectSelectionListener?.onObjectSelectionEnded()
@@ -482,8 +487,25 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         val selectedEndUnit = interactiveCanvas.cSelectedEndUnit
         val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x, selectedEndUnit.y)
 
-        return Rect(selectedStartUnitScreen!!.x, selectedStartUnitScreen.y,
+        val bounds = Rect(selectedStartUnitScreen!!.x, selectedStartUnitScreen.y,
             selectedEndUnitScreen!!.x + interactiveCanvas.ppu, selectedEndUnitScreen.y + interactiveCanvas.ppu)
+
+        val minWidth = Utils.dpToPx(context, 60)
+        val minHeight = Utils.dpToPx(context, 60)
+
+        if (bounds.width() < minWidth) {
+            val diff = minWidth - bounds.width()
+            bounds.left -= diff / 2
+            bounds.right += diff / 2
+        }
+
+        if (bounds.height() < minHeight) {
+            val diff = minHeight - bounds.height()
+            bounds.top -= diff / 2
+            bounds.bottom += diff / 2
+        }
+
+        return bounds
     }
 
     fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {

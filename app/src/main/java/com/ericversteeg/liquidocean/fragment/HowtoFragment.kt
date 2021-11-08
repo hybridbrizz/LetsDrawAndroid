@@ -58,6 +58,7 @@ class HowtoFragment: Fragment() {
         howto_dot_action_2.isStatic = true
         howto_dot_action_3.isStatic = true
         howto_frame_action.isStatic = true
+        howto_export_move_action.isStatic = true
 
         paint_action.type = ActionButtonView.Type.PAINT
         share_action.type = ActionButtonView.Type.EXPORT
@@ -68,6 +69,7 @@ class HowtoFragment: Fragment() {
         howto_dot_action_2.type = ActionButtonView.Type.DOT
         howto_dot_action_3.type = ActionButtonView.Type.DOT
         howto_frame_action.type = ActionButtonView.Type.FRAME
+        howto_export_move_action.type = ActionButtonView.Type.EXPORT
 
         val colorStrs = arrayOf("#000000", "#222034", "#45283C", "#663931", "#8F563B", "#DF7126", "#D9A066", "#EEC39A",
                                 "#FBF236", "#99E550", "#6ABE30", "#37946E", "#4B692F", "#524B24", "#323C39", "#3F3F74")

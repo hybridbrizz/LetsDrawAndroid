@@ -2055,8 +2055,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun hideSelectedObjectYesAndNoButtons() {
-        selected_object_yes_button.visibility = View.GONE
-        selected_object_no_button.visibility = View.GONE
+        selected_object_yes_no_container.visibility = View.GONE
     }
 
     override fun selectedObjectEnded() {

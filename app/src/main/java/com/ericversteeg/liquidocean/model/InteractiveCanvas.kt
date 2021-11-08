@@ -926,12 +926,18 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun startMoveSelection(startUnit: Point, endUnit: Point) {
+        if (!unitInBounds(startUnit) || !unitInBounds(endUnit)) {
+            return
+        }
+
         selectedPixels = getPixels(startUnit, endUnit)
 
-        startSelectedStartUnit = startUnit
+        val startAndEndUnits = getStartAndEndUnits(selectedPixels!!)
+
+        startSelectedStartUnit = startAndEndUnits.first
         cSelectedStartUnit = Point(startSelectedStartUnit.x, startSelectedStartUnit.y)
 
-        startSelectedEndUnit = endUnit
+        startSelectedEndUnit = startAndEndUnits.second
         cSelectedEndUnit = Point(startSelectedEndUnit.x, startSelectedEndUnit.y)
 
         selectedObjectListener?.onObjectSelected()
@@ -941,6 +947,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun startMoveSelection(onePointWithin: Point) {
+        if (!unitInBounds(onePointWithin)) {
+            return
+        }
+
         val pixels = getPixelsInForm(onePointWithin)
         selectedPixels = pixels
 
@@ -1074,10 +1084,18 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun exportSelection(startUnit: Point, endUnit: Point) {
+        if (!unitInBounds(startUnit) || !unitInBounds(endUnit)) {
+            return
+        }
+
         artExportListener?.onArtExported(getPixels(startUnit, endUnit))
     }
 
     fun exportSelection(onePointWithin: Point) {
+        if (!unitInBounds(onePointWithin)) {
+            return
+        }
+
         artExportListener?.onArtExported(getPixelsInForm(onePointWithin))
     }
 
@@ -1225,6 +1243,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         return Pair(Point(minX, minY), Point(maxX, maxY))
+    }
+
+    fun unitInBounds(point: Point): Boolean {
+        return point.x in 0 until cols && point.y in 0 until rows
     }
 
     fun hasSelectedObjectMoved(): Boolean {
