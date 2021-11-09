@@ -53,6 +53,8 @@ class MenuFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        SessionSettings.instance.canvasOpen = false
+
         view.setBackgroundColor(Color.BLACK)
 
         val allViews = listOf<View>(back_button, back_action, draw_menu_text,

@@ -78,7 +78,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         hide()
 
-        showMenuFragment()
+        if (SessionSettings.instance.canvasOpen) {
+            showInteractiveCanvasFragment(false, 0, null)
+        }
+        else {
+            showMenuFragment()
+        }
 
         //TrustAllSSLCertsDebug.trust()
 

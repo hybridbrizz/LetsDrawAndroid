@@ -108,6 +108,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        SessionSettings.instance.canvasOpen = true
+
         context?.apply {
             SessionSettings.instance.tablet = Utils.isTablet(this)
         }
