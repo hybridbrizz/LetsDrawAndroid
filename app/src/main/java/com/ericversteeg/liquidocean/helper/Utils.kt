@@ -2,12 +2,16 @@ package com.ericversteeg.liquidocean.helper
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.text.TextPaint
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
+import android.widget.TextView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
 import kotlinx.android.synthetic.main.fragment_menu.*
@@ -136,6 +140,32 @@ class Utils {
 
         private fun randomColor(): Int {
             return Color.argb(255, randomIndex(256), randomIndex(256), randomIndex(256))
+        }
+
+        fun colorizeTextView(textView: TextView, colorString1: String, colorString2: String) {
+            val paint: TextPaint = textView.paint
+            val width: Float = paint.measureText("Tianjin, China")
+
+            val textShader: Shader = LinearGradient(
+                0F, 0F, width, textView.textSize, intArrayOf(
+                    Color.parseColor(colorString1),
+                    Color.parseColor(colorString2)
+                ), null, Shader.TileMode.CLAMP
+            )
+            textView.paint.shader = textShader
+        }
+
+        fun colorizeTextView(textView: TextView, color1: Int, color2: Int) {
+            val paint: TextPaint = textView.paint
+            val width: Float = paint.measureText("Tianjin, China")
+
+            val textShader: Shader = LinearGradient(
+                0F, 0F, width, textView.textSize, intArrayOf(
+                    color1,
+                    color2
+                ), null, Shader.TileMode.CLAMP
+            )
+            textView.paint.shader = textShader
         }
     }
 }

@@ -1,11 +1,15 @@
 package com.ericversteeg.liquidocean.fragment
 
 import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Shader
 import android.os.Build
 import android.os.Bundle
+import android.text.TextPaint
 import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
@@ -15,6 +19,7 @@ import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
+import com.ericversteeg.liquidocean.listener.MenuCardListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_art_export.*
@@ -39,6 +44,14 @@ class MenuFragment: Fragment() {
 
     var menuButtonContainerWidth = 0
 
+    var menuCardListener: MenuCardListener? = null
+
+    var touchEventCount = 1
+    var touchEventPollInterval = 5
+
+    var touchTotalX = 0F
+    var touchTotalY = 0F
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,7 +70,7 @@ class MenuFragment: Fragment() {
 
         view.setBackgroundColor(Color.BLACK)
 
-        val allViews = listOf<View>(back_button, back_action, draw_menu_text,
+        val allViews = listOf<View>(back_button, back_action,
             options_menu_text, how_to_menu_text, menu_button_container)
 
         fadeInAllView(allViews)
@@ -112,15 +125,17 @@ class MenuFragment: Fragment() {
         background_option_classic.type = ActionButtonView.Type.BACKGROUND_CLASSIC
         background_option_chess.type = ActionButtonView.Type.BACKGROUND_CHESS
 
-        val menuTextViews = listOf(draw_menu_text, options_menu_text, how_to_menu_text)
+        val menuTextViews = listOf(options_menu_text, how_to_menu_text, lefty_menu_text, righty_menu_text)
         for (textView in menuTextViews) {
             textView.setOnTouchListener(object: View.OnTouchListener {
                 override fun onTouch(view: View?, ev: MotionEvent): Boolean {
                     if (ev.action == MotionEvent.ACTION_DOWN) {
-                        textView.setTextColor(ActionButtonView.altGreenPaint.color)
+                        Utils.colorizeTextView(textView, ActionButtonView.yellowPaint.color, ActionButtonView.lightYellowPaint.color)
+                        textView.invalidate()
                     }
                     else if (ev.action == MotionEvent.ACTION_CANCEL) {
-                        textView.setTextColor(Color.parseColor("#DDFFFFFF"))
+                        Utils.colorizeTextView(textView, "#CCCCCC", "#DDDDDD")
+                        textView.invalidate()
                     }
 
                     return false
@@ -128,7 +143,7 @@ class MenuFragment: Fragment() {
             })
         }
 
-        draw_menu_text.setOnClickListener {
+        /*draw_menu_text.setOnClickListener {
             /*// menuButtonListener?.onMenuButtonSelected(playMenuIndex)
             play_button_container.visibility = View.GONE
 
@@ -170,11 +185,13 @@ class MenuFragment: Fragment() {
             }
             else {
                 menuButtonListener?.onMenuButtonSelected(singleMenuIndex)
+                menuCardListener?.closeMenu()
             }
-        }
+        }*/
 
         options_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(optionsMenuIndex)
+            menuCardListener?.closeMenu()
         }
 
         stats_button.setOnClickListener {
@@ -183,6 +200,7 @@ class MenuFragment: Fragment() {
 
         how_to_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
+            menuCardListener?.closeMenu()
         }
 
         single_button.setOnClickListener {
@@ -232,11 +250,11 @@ class MenuFragment: Fragment() {
         }
 
         lefty_menu_text.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, route)
+            menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, singleMenuIndex)
         }
 
         righty_menu_text.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, route)
+            menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, singleMenuIndex)
         }
 
         menu_button_container.setOnClickListener {
@@ -253,7 +271,12 @@ class MenuFragment: Fragment() {
             }
         }
 
-        animateMenuButtons(0)
+        if (SessionSettings.instance.selectedHand) {
+            options_button_container.visibility = View.VISIBLE
+            howto_button_container.visibility = View.VISIBLE
+
+            animateMenuButtons(0)
+        }
 
         view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -281,9 +304,63 @@ class MenuFragment: Fragment() {
             }
         })
 
-        //view.alpha = 0F
-        //view.animate().alphaBy(1F).setDuration(500)
+        view.setOnTouchListener(object: View.OnTouchListener {
+            override fun onTouch(vw: View?, ev: MotionEvent?): Boolean {
+                mPanDetector.onTouchEvent(ev)
+
+                return true
+            }
+        })
+
+        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(lefty_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(righty_menu_text, "#CCCCCC", "#DDDDDD")
+
+        if (!SessionSettings.instance.selectedHand) {
+            selectHand()
+        }
     }
+
+    fun clearMenuTextHighlights() {
+        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
+    }
+
+    private fun selectHand() {
+        if (!SessionSettings.instance.selectedHand) {
+            lefty_button_container.visibility = View.VISIBLE
+            righty_button_container.visibility = View.VISIBLE
+
+            animateMenuButtons(2)
+        }
+    }
+
+    // panning
+
+    private val mGestureListener = object : GestureDetector.SimpleOnGestureListener() {
+
+        override fun onScroll(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
+            touchTotalX += distanceX
+            touchTotalY += distanceY
+            if (touchEventCount == touchEventPollInterval) {
+                menuCardListener?.moveMenuCardBy(-touchTotalX, -touchTotalY)
+                touchEventCount = 1
+            }
+            else {
+                touchEventCount++
+            }
+
+            return true
+        }
+    }
+
+    private val mPanDetector = GestureDetector(context, mGestureListener)
 
     private fun fadeInAllView(list: List<View>) {
         for (vw in list) {
@@ -295,7 +372,7 @@ class MenuFragment: Fragment() {
         if (!animatingMenu) {
             animatingMenu = true
             if (layer == 0) {
-                Animator.animateMenuItems(listOf(listOf(draw_menu_text), listOf(options_menu_text),
+                Animator.animateMenuItems(listOf(listOf(options_menu_text),
                     listOf(stats_button_bottom_layer, stats_button), listOf(how_to_menu_text)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -389,7 +466,7 @@ class MenuFragment: Fragment() {
     }
 
     private fun resetMenu() {
-        draw_button_container.visibility = View.VISIBLE
+        //draw_button_container.visibility = View.VISIBLE
 
         options_button_container.visibility = View.VISIBLE
 

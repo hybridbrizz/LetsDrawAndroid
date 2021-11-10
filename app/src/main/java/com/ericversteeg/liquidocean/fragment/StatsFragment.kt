@@ -18,8 +18,6 @@ import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.AchievementIcon
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_button
 import kotlinx.android.synthetic.main.fragment_options.*
 import kotlinx.android.synthetic.main.fragment_stats.*
 import java.text.NumberFormat
@@ -42,8 +40,8 @@ class StatsFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
+        //back_button.actionBtnView = back_action
+        //back_action.type = ActionButtonView.Type.BACK_SOLID
 
         stats_image.type = ActionButtonView.Type.STATS
         stats_image.isStatic = true
@@ -52,9 +50,9 @@ class StatsFragment: Fragment() {
         achievements_image.type = ActionButtonView.Type.ACHIEVEMENTS
         achievements_image.isStatic = true
 
-        back_button.setOnClickListener {
+        /*back_button.setOnClickListener {
             statsFragmentListener?.onStatsBack()
-        }
+        }*/
 
         stat_num_pixels_painted_single.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(

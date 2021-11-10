@@ -191,7 +191,7 @@ class SessionSettings {
     var restoreDeviceViewportCenterX = 0F
     var restoreDeviceViewportCenterY = 0F
 
-    var toolboxOpen = true
+    var toolboxOpen = false
     var paintPanelOpen = false
 
     var canvasOpen = false
@@ -427,7 +427,7 @@ class SessionSettings {
 
         restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
 
-        toolboxOpen = getSharedPrefs(context).getBoolean("toolbox_open", true)
+        toolboxOpen = getSharedPrefs(context).getBoolean("toolbox_open", false)
 
         paintPanelOpen = getSharedPrefs(context).getBoolean("paint_panel_open", false)
 

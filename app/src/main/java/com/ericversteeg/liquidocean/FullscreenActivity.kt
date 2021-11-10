@@ -51,7 +51,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     private val mHideRunnable = Runnable { hide() }
 
     private val backgrounds = intArrayOf(R.drawable.gradient, R.drawable.gradient_2, R.drawable.gradient_3, R.drawable.gradient_4, R.drawable.gradient_5,
-        R.drawable.gradient_6, R.drawable.gradient_7, R.drawable.gradient_8, R.drawable.gradient_9, R.drawable.gradient_10)
+        R.drawable.gradient_6, R.drawable.gradient_8, R.drawable.gradient_9, R.drawable.gradient_10)
+
+    var optionsFragment: OptionsFragment? = null
+    var howtoFragment: HowtoFragment? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,12 +81,14 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         hide()
 
-        if (SessionSettings.instance.canvasOpen) {
+        showInteractiveCanvasFragment(false, 0, null)
+
+        /*if (SessionSettings.instance.canvasOpen) {
             showInteractiveCanvasFragment(false, 0, null)
         }
         else {
             showMenuFragment()
-        }
+        }*/
 
         //TrustAllSSLCertsDebug.trust()
 
@@ -144,11 +149,11 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     private fun showHowtoFragment() {
-        val frag = HowtoFragment()
+        howtoFragment = HowtoFragment()
 
-        frag.listener = this
+        howtoFragment?.listener = this
 
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+        supportFragmentManager.beginTransaction().add(R.id.fullscreen_content, howtoFragment!!).commit()
     }
 
     private fun showMenuFragment() {
@@ -159,10 +164,10 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     private fun showOptionsFragment() {
-        val frag = OptionsFragment()
-        frag.optionsListener = this
+        optionsFragment = OptionsFragment()
+        optionsFragment?.optionsListener = this
 
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
     }
 
     private fun showLoadingFragment(world: Boolean, realmId: Int) {
@@ -330,6 +335,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 SessionSettings.instance.rightHanded = false
                 SessionSettings.instance.selectedHand = true
 
+                SessionSettings.instance.toolboxOpen = true
+
                 if (route == MenuFragment.singleMenuIndex) {
                     showInteractiveCanvasFragment(false, 0, null)
                 }
@@ -343,6 +350,8 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
             MenuFragment.rightyMenuIndex -> {
                 SessionSettings.instance.rightHanded = true
                 SessionSettings.instance.selectedHand = true
+
+                SessionSettings.instance.toolboxOpen = true
 
                 if (route == MenuFragment.singleMenuIndex) {
                     showInteractiveCanvasFragment(false, 0, null)
@@ -362,11 +371,11 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     override fun onResetSinglePlay() {
-        showMenuFragment()
+
     }
 
     override fun onOptionsBack() {
-        showMenuFragment()
+        showInteractiveCanvasFragment(false, 0, null)
     }
 
     override fun onInteractiveCanvasBack() {
@@ -378,7 +387,9 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     override fun onHowtoBack() {
-        showMenuFragment()
+        howtoFragment?.apply {
+            supportFragmentManager.beginTransaction().remove(this).commit()
+        }
     }
 
     override fun onDisplayAchievement(

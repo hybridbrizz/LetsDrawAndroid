@@ -29,6 +29,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.FullscreenActivity
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
@@ -54,7 +55,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
-    SelectedObjectMoveView, SelectedObjectView {
+    SelectedObjectMoveView, SelectedObjectView, MenuCardListener {
 
     var scaleFactor = 1f
 
@@ -91,6 +92,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var recentlyRemovedColor = 0
     var recentlyRemovedColorIndex = 0
+
+    var menuFragment: MenuFragment? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -219,8 +222,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         pixel_history_fragment_container.x = 0F
         pixel_history_fragment_container.y = 0F
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK
+        menu_button.actionBtnView = menu_action
+        menu_action.type = ActionButtonView.Type.MENU
 
         // paint panel
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
@@ -631,8 +634,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        // back button
-        back_button.setOnClickListener {
+        // menu button
+        if (!SessionSettings.instance.selectedHand) {
+            toggleMenu(true)
+        }
+
+        menu_button.setOnClickListener {
             if (surface_view.isExporting()) {
                 export_fragment_container.visibility = View.INVISIBLE
                 surface_view.endExport()
@@ -653,12 +660,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 toggleExportBorder(false)
             }
             else {
-                if (SessionSettings.instance.promptToExit) {
-                    showExitPrompt()
-                }
-                else {
-                    interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
-                }
+                toggleMenu(menu_container.visibility != View.VISIBLE)
             }
         }
 
@@ -1297,7 +1299,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun invalidateButtons() {
-        back_action.invalidate()
+        menu_action.invalidate()
         paint_panel_action_view.invalidate()
         export_action.invalidate()
         background_action.invalidate()
@@ -1370,7 +1372,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 pixel_history_fragment_container.visibility = View.GONE
             }
 
-            back_button.visibility = View.GONE
+            menu_button.visibility = View.GONE
+            menu_container.visibility = View.GONE
 
             SessionSettings.instance.paintPanelOpen = true
         }
@@ -1396,7 +1399,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 grid_lines_button.visibility = View.VISIBLE
             }
 
-            back_button.visibility = View.VISIBLE
+            menu_button.visibility = View.VISIBLE
 
             open_tools_button.visibility = View.VISIBLE
 
@@ -1482,6 +1485,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 export_action.toggleState = ActionButtonView.ToggleState.NONE
             }
+        }
+    }
+
+    private fun toggleMenu(open: Boolean) {
+        if (menuFragment == null) {
+            menuFragment = MenuFragment()
+
+            menuFragment?.menuButtonListener = (activity as FullscreenActivity)
+            menuFragment?.menuCardListener = this
+
+            fragmentManager?.apply {
+                beginTransaction().replace(menu_container.id, menuFragment!!).commit()
+
+                //interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
+            }
+        }
+        else {
+            menuFragment!!.clearMenuTextHighlights()
+        }
+        if (open) {
+            menu_container.visibility = View.VISIBLE
+        }
+        else {
+            menu_container.visibility = View.GONE
         }
     }
 
@@ -2276,5 +2303,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }, 0, 1000)
+    }
+
+    // menu card listener
+    override fun moveMenuCardBy(x: Float, y: Float) {
+        menu_container.x += x
+        menu_container.y += y
+
+        view?.apply {
+            if (menu_container.x + menu_container.width > width) {
+                menu_container.x = (width - menu_container.width).toFloat()
+            }
+            if (menu_container.x < 0) {
+                menu_container.x = 0F
+            }
+            if (menu_container.y + menu_container.height > height) {
+                menu_container.y = (height - menu_container.height).toFloat()
+            }
+            if (menu_container.y < 0) {
+                menu_container.y = 0F
+            }
+        }
+    }
+
+    override fun closeMenu() {
+        menu_container.visibility = View.GONE
     }
 }

@@ -69,11 +69,11 @@ class Animator {
                 view.y = y - view.height / 2F
                 view.alpha = 0F
 
-                var rA = Math.random() / 5
+                val rA = Math.random() / 5
 
-                if (Math.random() < 0.15) {
+                /*if (Math.random() < 0.15) {
                     rA = 1.0
-                }
+                }*/
 
                 val rR = (Math.random() * 256).toInt()
                 val rG = (Math.random() * 256).toInt()

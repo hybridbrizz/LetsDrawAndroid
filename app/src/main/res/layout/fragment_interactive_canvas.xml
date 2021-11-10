@@ -758,16 +758,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.ericversteeg.liquidocean.view.ActionButtonFrame
-            android:id="@+id/back_button"
+            android:id="@+id/menu_button"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
         <com.ericversteeg.liquidocean.view.ActionButtonView
-                android:id="@+id/back_action"
-                android:layout_width="35dp"
-                android:layout_height="25dp"
+                android:id="@+id/menu_action"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="start|top" />
 
@@ -1026,5 +1026,17 @@
 
         </com.ericversteeg.liquidocean.view.ActionButtonFrame>
     </LinearLayout>
+
+    <androidx.cardview.widget.CardView
+            android:id="@+id/menu_container"
+            android:visibility="gone"
+            android:background="@drawable/shadow_background"
+            android:layout_width="500dp"
+            android:layout_height="300dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:cardCornerRadius="20dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

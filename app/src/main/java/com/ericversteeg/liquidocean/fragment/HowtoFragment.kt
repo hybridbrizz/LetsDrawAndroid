@@ -17,18 +17,19 @@ import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.listener.HowtoFragmentListener
 import com.ericversteeg.liquidocean.listener.StatsFragmentListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_howto.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.back_button
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_action
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_button
 import java.util.*
 
 class HowtoFragment: Fragment() {
 
-    var listener: StatsFragmentListener? = null
+    var listener: HowtoFragmentListener? = null
 
     var paintEventTimer: Timer? = null
 
@@ -85,7 +86,7 @@ class HowtoFragment: Fragment() {
         }
 
         back_button.setOnClickListener {
-            listener?.onStatsBack()
+            listener?.onHowtoBack()
         }
 
         if (!SessionSettings.instance.tablet) {
