@@ -308,6 +308,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
         }
 
+        // bold action buttons
+        if (SessionSettings.instance.boldActionButtons) {
+            menu_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            paint_panel_action_view.toggleState = ActionButtonView.ToggleState.SINGLE
+            export_action.exportBold = true
+            background_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            grid_lines_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            canvas_summary_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            open_tools_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            recent_colors_action.toggleState = ActionButtonView.ToggleState.SINGLE
+        }
+
         // panel theme config
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
@@ -978,6 +990,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
                         layoutParams.rightToRight = -1
                         layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                        layoutParams.leftMargin = Utils.dpToPx(context, 6)
                         button.layoutParams = layoutParams
                     }
 

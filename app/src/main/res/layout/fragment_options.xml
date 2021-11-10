@@ -673,7 +673,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_prompt_to_exit_container"
+                    android:id="@+id/option_bold_action_buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -684,18 +684,18 @@
                     app:layout_constraintTop_toBottomOf="@id/option_small_action_buttons_container">
 
                 <TextView
-                        android:id="@+id/option_prompt_to_exit_title"
+                        android:id="@+id/option_bold_action_buttons_title"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_prompt_to_exit_title"
+                        android:text="@string/option_bold_action_buttons_title"
                         android:textSize="16sp"
                         android:textColor="@android:color/white"
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
 
                 <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/option_prompt_to_exit_switch"
+                        android:id="@+id/option_bold_action_buttons_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
@@ -712,7 +712,7 @@
                     android:gravity="center_vertical"
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/option_prompt_to_exit_container">
+                    app:layout_constraintTop_toBottomOf="@id/option_bold_action_buttons">
 
                 <TextView
                         android:id="@+id/option_num_recent_colors_title"

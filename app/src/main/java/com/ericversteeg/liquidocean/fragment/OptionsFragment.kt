@@ -375,10 +375,10 @@ class OptionsFragment: Fragment(), FragmentListener {
             SessionSettings.instance.emittersEnabled = value
         }
 
-        // option prompt to exit
-        option_prompt_to_exit_switch.isChecked = SessionSettings.instance.promptToExit
-        option_prompt_to_exit_switch.setOnCheckedChangeListener { _, value ->
-            SessionSettings.instance.promptToExit = value
+        // option bold action buttons
+        option_bold_action_buttons_switch.isChecked = SessionSettings.instance.boldActionButtons
+        option_bold_action_buttons_switch.setOnCheckedChangeListener { _, value ->
+            SessionSettings.instance.boldActionButtons = value
         }
 
         // option paint indicator width

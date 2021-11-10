@@ -21,7 +21,7 @@
     <string name="option_canvas_lock_border_title">Canvas Lock Border</string>
     <string name="option_emitters_container_title">Particle Emitters</string>
     <string name="option_canvas_lock_color_title">Canvas Lock Color</string>
-    <string name="option_prompt_to_exit_title">Prompt Back</string>
+    <string name="option_bold_action_buttons_title">Bold action buttons</string>
 
     <string name="alert_message_exit_canvas">Are you sure you would like to go back?</string>
     <string name="alert_message_palette_remove_color">Remove this color from %s?</string>

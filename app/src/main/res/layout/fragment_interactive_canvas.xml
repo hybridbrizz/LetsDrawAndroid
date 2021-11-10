@@ -24,8 +24,8 @@
                 android:layout_width="21dp"
                 android:layout_height="21dp"
                 android:elevation="5dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginTop="17dp"
+                android:layout_marginRight="17dp"
                 android:layout_gravity="top|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -482,7 +482,7 @@
                 android:id="@+id/recent_colors_action"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
-                android:layout_margin="24dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="start|bottom" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -768,7 +768,7 @@
                 android:id="@+id/menu_action"
                 android:layout_width="21dp"
                 android:layout_height="21dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="start|top" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -807,7 +807,7 @@
                 android:id="@+id/export_action"
                 android:layout_width="33dp"
                 android:layout_height="33dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="top|end" />
 
         <FrameLayout
@@ -815,7 +815,7 @@
                 android:visibility="gone"
                 android:layout_width="33dp"
                 android:layout_height="33dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="top|end"
                 android:background="@drawable/export_background" />
 
@@ -833,7 +833,7 @@
                 android:id="@+id/background_action"
                 android:layout_width="33dp"
                 android:layout_height="44dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="top|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -850,7 +850,7 @@
                 android:id="@+id/grid_lines_action"
                 android:layout_width="33dp"
                 android:layout_height="11dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="top|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -867,7 +867,7 @@
                 android:id="@+id/canvas_summary_action"
                 android:layout_width="33dp"
                 android:layout_height="33dp"
-                android:layout_margin="10dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="top|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -883,7 +883,7 @@
                 android:id="@+id/open_tools_action"
                 android:layout_width="11dp"
                 android:layout_height="11dp"
-                android:layout_margin="24dp"
+                android:layout_margin="17dp"
                 android:layout_gravity="bottom|end" />
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>

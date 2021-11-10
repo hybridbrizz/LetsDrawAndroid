@@ -196,6 +196,8 @@ class SessionSettings {
 
     var canvasOpen = false
 
+    var boldActionButtons = true
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -304,6 +306,8 @@ class SessionSettings {
         ed.putBoolean("paint_panel_open", paintPanelOpen)
 
         ed.putBoolean("canvas_open", canvasOpen)
+
+        ed.putBoolean("bold_action_buttons", boldActionButtons)
 
         ed.apply()
     }
@@ -432,6 +436,8 @@ class SessionSettings {
         paintPanelOpen = getSharedPrefs(context).getBoolean("paint_panel_open", false)
 
         canvasOpen = getSharedPrefs(context).getBoolean("canvas_open", false)
+
+        boldActionButtons = getSharedPrefs(context).getBoolean("bold_action_buttons", true)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

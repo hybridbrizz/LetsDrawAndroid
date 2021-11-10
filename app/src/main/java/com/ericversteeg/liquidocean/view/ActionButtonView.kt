@@ -180,6 +180,8 @@ class ActionButtonView: View {
     val menuButtonRows = 4
     val menuButtonCols = 26
 
+    var exportBold = false
+
     constructor(context: Context) : super(context) {
         commonInit()
     }
@@ -531,10 +533,21 @@ class ActionButtonView: View {
         rows = 2
         cols = 2
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -656,10 +669,21 @@ class ActionButtonView: View {
         rows = 2
         cols = 2
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -830,28 +854,28 @@ class ActionButtonView: View {
 
         canvas.apply {
             // row 1
-            drawPixel(0, 0, paint, canvas)
-            drawPixel(1, 0, paint, canvas)
-            drawPixel(2, 0, paint, canvas)
-            drawPixel(3, 0, paint, canvas)
+            drawPixel(0, 0, colorPaint, canvas)
+            drawPixel(1, 0, colorPaint, canvas)
+            drawPixel(2, 0, colorPaint, canvas)
+            drawPixel(3, 0, colorPaint, canvas)
 
             // row 2
-            drawPixel(0, 1, paint, canvas)
+            drawPixel(0, 1, colorPaint, canvas)
             drawPixel(1, 1, colorPaint, canvas)
             drawPixel(2, 1, colorPaint, canvas)
-            drawPixel(3, 1, paint, canvas)
+            drawPixel(3, 1, colorPaint, canvas)
 
             // row 3
-            drawPixel(0, 2, paint, canvas)
+            drawPixel(0, 2, colorPaint, canvas)
             drawPixel(1, 2, colorPaint, canvas)
             drawPixel(2, 2, colorPaint, canvas)
-            drawPixel(3, 2, paint, canvas)
+            drawPixel(3, 2, colorPaint, canvas)
 
             // row 4
-            drawPixel(0, 3, paint, canvas)
-            drawPixel(1, 3, paint, canvas)
-            drawPixel(2, 3, paint, canvas)
-            drawPixel(3, 3, paint, canvas)
+            drawPixel(0, 3, colorPaint, canvas)
+            drawPixel(1, 3, colorPaint, canvas)
+            drawPixel(2, 3, colorPaint, canvas)
+            drawPixel(3, 3, colorPaint, canvas)
 
             // outline
             // val outlineLeft = rectForPixel(1, 1).left
@@ -867,10 +891,21 @@ class ActionButtonView: View {
         rows = 3
         cols = 3
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (!exportBold && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -962,10 +997,21 @@ class ActionButtonView: View {
         rows = 4
         cols = 3
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -999,10 +1045,21 @@ class ActionButtonView: View {
         rows = 1
         cols = 3
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -1021,10 +1078,21 @@ class ActionButtonView: View {
         rows = 3
         cols = 3
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -1053,10 +1121,21 @@ class ActionButtonView: View {
         rows = 1
         cols = 1
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
@@ -1072,10 +1151,21 @@ class ActionButtonView: View {
         rows = 6
         cols = 5
 
-        var paint = semiLightPaint
+        var paint: Paint
 
-        if (SessionSettings.instance.darkIcons && !isStatic) {
-            paint = semiDarkLightPaint
+        if (toggleState == ToggleState.NONE && !isStatic) {
+            paint = semiLightPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkLightPaint
+            }
+        }
+        else {
+            paint = semiPaint
+
+            if (SessionSettings.instance.darkIcons && !isStatic) {
+                paint = semiDarkPaint
+            }
         }
 
         if (selected && !isStatic) {
