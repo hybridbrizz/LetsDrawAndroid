@@ -406,6 +406,31 @@ class OptionsFragment: Fragment(), FragmentListener {
             SessionSettings.instance.colorIndicatorWidth = value
         }
 
+        // option color palette size
+        option_color_palette_size_value.text = SessionSettings.instance.colorPaletteSize.toString()
+
+        option_color_palette_size_action_minus.type = ActionButtonView.Type.DOT
+        option_color_palette_size_action_plus.type = ActionButtonView.Type.DOT
+
+        option_color_palette_size_button_minus.actionBtnView = option_color_palette_size_action_minus
+        option_color_palette_size_button_plus.actionBtnView = option_color_palette_size_action_plus
+
+        option_color_palette_size_button_minus.setOnClickListener {
+            var value = option_color_palette_size_value.text.toString().toInt() - 1
+            if (value <= 0) value = 1
+
+            option_color_palette_size_value.text = value.toString()
+            SessionSettings.instance.colorPaletteSize = value
+        }
+
+        option_color_palette_size_button_plus.setOnClickListener {
+            var value = option_color_palette_size_value.text.toString().toInt() + 1
+            if (value >= 15) value = 14
+
+            option_color_palette_size_value.text = value.toString()
+            SessionSettings.instance.colorPaletteSize = value
+        }
+
         // option paint indicator fill circle
         option_paint_indicator_fill_circle_switch.isChecked = SessionSettings.instance.colorIndicatorFill
 

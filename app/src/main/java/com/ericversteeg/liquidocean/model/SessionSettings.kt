@@ -198,6 +198,8 @@ class SessionSettings {
 
     var boldActionButtons = true
 
+    var colorPaletteSize = 4
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -308,6 +310,8 @@ class SessionSettings {
         ed.putBoolean("canvas_open", canvasOpen)
 
         ed.putBoolean("bold_action_buttons", boldActionButtons)
+
+        ed.putInt("color_palette_size", colorPaletteSize)
 
         ed.apply()
     }
@@ -438,6 +442,8 @@ class SessionSettings {
         canvasOpen = getSharedPrefs(context).getBoolean("canvas_open", false)
 
         boldActionButtons = getSharedPrefs(context).getBoolean("bold_action_buttons", true)
+
+        colorPaletteSize = getSharedPrefs(context).getInt("color_palette_size", 4)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {

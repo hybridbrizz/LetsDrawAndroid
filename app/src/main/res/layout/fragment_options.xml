@@ -704,7 +704,7 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_num_recent_colors"
+                    android:id="@+id/option_color_palette_size"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -713,6 +713,63 @@
                     android:padding="10dp"
                     android:background="@drawable/white_border_background"
                     app:layout_constraintTop_toBottomOf="@id/option_bold_action_buttons">
+
+                <TextView
+                        android:id="@+id/option_color_palette_size_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_color_palette_size_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                        android:id="@+id/option_color_palette_size_button_minus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp">
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/option_color_palette_size_action_minus"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center" />
+                </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+                <TextView
+                        android:id="@+id/option_color_palette_size_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+                <com.ericversteeg.liquidocean.view.ActionButtonFrame
+                        android:id="@+id/option_color_palette_size_button_plus"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp">
+                    <com.ericversteeg.liquidocean.view.ActionButtonView
+                            android:id="@+id/option_color_palette_size_action_plus"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center" />
+                </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_num_recent_colors"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_color_palette_size">
 
                 <TextView
                         android:id="@+id/option_num_recent_colors_title"

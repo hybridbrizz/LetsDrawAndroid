@@ -108,4 +108,5 @@
     <string name="step11">To move an object tap the export and share button until it turns green (2 taps). Select or drag around the object you want to move.
         Direction indicators will appear. Tap the direction indicators and move the object in any direction. Confirm the move with the green checkmark,
         or cancel with the red x.</string>
+    <string name="option_color_palette_size_title">Color palette size</string>
 </resources>

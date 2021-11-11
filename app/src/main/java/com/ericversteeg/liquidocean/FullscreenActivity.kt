@@ -72,7 +72,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         var rIndex = (Math.random() * backgrounds.size).toInt()
 
         if (SessionSettings.instance.firstLaunch) {
-            rIndex = 8
+            rIndex = 7
         }
 
         SessionSettings.instance.menuBackgroundResId = backgrounds[rIndex]

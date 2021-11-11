@@ -770,11 +770,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     color_picker_frame.layoutParams = layoutParams
 
                     color_hex_string_input.textSize = 28F
-                    var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), Utils.dpToPx(context, 50))
+                    var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), LinearLayout.LayoutParams.MATCH_PARENT)
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
                     linearLayoutParams.gravity = Gravity.BOTTOM
 
                     color_hex_string_input.layoutParams = linearLayoutParams
+
+                    color_hex_string_input.gravity = Gravity.BOTTOM
 
                     // default color buttons size
                     var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
@@ -1294,6 +1296,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         recent_colors_action.visibility = View.VISIBLE
                     }
                 }
+
+                val layoutParams = v.layoutParams
+
+                layoutParams.width = Utils.dpToPx(context, SessionSettings.instance.colorPaletteSize * 10)
+                layoutParams.height = Utils.dpToPx(context, SessionSettings.instance.colorPaletteSize * 10)
+
+                v.layoutParams = layoutParams
 
                 i++
             }
