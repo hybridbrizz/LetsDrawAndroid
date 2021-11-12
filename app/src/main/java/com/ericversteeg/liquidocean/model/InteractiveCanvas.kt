@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
 import android.util.DisplayMetrics
@@ -581,7 +582,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return null
     }
 
-    fun unitToScreenPoint(x: Int, y: Int): Point? {
+    fun unitToScreenPoint(x: Float, y: Float): Point? {
         deviceViewport?.apply {
             val topViewportPx = top * ppu
             val leftViewportPx = left * ppu
@@ -761,8 +762,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
 
-        val canvasCenterXPx = (canvasCenterX * ppu).toInt()
-        val canvasCenterYPx = (canvasCenterY * ppu).toInt()
+        val canvasCenterXPx = (canvasCenterX * ppu)
+        val canvasCenterYPx = (canvasCenterY * ppu)
 
         var top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
         var bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
@@ -787,12 +788,13 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
         }
 
-        if (fromScale) {
-            // selected object
-            if (selectedPixels != null) {
-                selectedObjectListener?.onSelectedObjectMoved()
-            }
+        // selected object
+        if (selectedPixels != null) {
+            selectedObjectListener?.onSelectedObjectMoved()
         }
+
+        interactiveCanvasListener?.onDeviceViewportUpdate()
+        interactiveCanvasDrawer?.notifyRedraw()
     }
 
     fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
@@ -843,26 +845,30 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 dY = diff
             }
 
-            left += dX
+            /*left += dX
             right += dX
             top += dY
             bottom += dY
 
-            val w = right - left
+            interactiveCanvasDrawer?.notifyRedraw()*/
+
+            updateDeviceViewport(context, centerX() + dX, centerY() + dY)
+
+            /*val w = right - left
             val h = bottom - top
 
             // error! reset the canvas viewport
             if (w <= 0 || h <= 0) {
                 deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
-            }
+            }*/
         }
 
         // selected object
-        if (selectedPixels != null) {
+        /*if (selectedPixels != null) {
             selectedObjectListener?.onSelectedObjectMoved()
         }
 
-        interactiveCanvasDrawer?.notifyRedraw()
+        interactiveCanvasDrawer?.notifyRedraw()*/
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -1274,10 +1280,15 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return list
     }
 
-    fun notifyDeviceViewportUpdate() {
-        if (selectedPixels != null) {
-            selectedObjectListener?.onSelectedObjectMoved()
+    fun canvasScreenBounds(): Rect {
+        deviceViewport?.apply {
+            val topLeftScreen = unitToScreenPoint(0F, 0F)
+            val bottomRightScreen = unitToScreenPoint(cols.toFloat(), rows.toFloat())
+
+            return Rect(topLeftScreen!!.x, topLeftScreen.y, bottomRightScreen!!.x, bottomRightScreen.y)
         }
+
+        return Rect()
     }
 
     fun getBackgroundColors(index: Int): List<Int> {

@@ -18,7 +18,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, DeviceCanvasViewportListener, SelectedObjectListener {
+class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, SelectedObjectListener {
 
     enum class Mode {
         EXPLORING,
@@ -88,30 +88,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         interactiveCanvas.scaleCallbackListener = this
         interactiveCanvas.selectedObjectListener = this
 
-        // scale
-        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
-            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
-        }
-
-        scaleFactor = interactiveCanvas.lastScaleFactor
-        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
-
-        // position
-        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
-            interactiveCanvas.updateDeviceViewport(
-                context,
-                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
-            )
-        }
-        else {
-            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
-
-            /*val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
-                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
-
-            interactiveCanvas.deviceViewport = restoreDeviceViewport*/
-        }
-
         //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
 
         /*Timer().schedule(object: TimerTask() {
@@ -141,6 +117,32 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
             }
         })
+    }
+
+    fun setInitialPositionAndScale() {
+        // scale
+        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
+            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
+        }
+
+        scaleFactor = interactiveCanvas.lastScaleFactor
+        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
+
+        // position
+        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
+            interactiveCanvas.updateDeviceViewport(
+                context,
+                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
+            )
+        }
+        else {
+            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
+
+            /*val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
+                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
+
+            interactiveCanvas.deviceViewport = restoreDeviceViewport*/
+        }
     }
 
     fun simulateDraw() {
@@ -402,7 +404,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
             interactiveCanvas.updateDeviceViewport(context, true)
-            interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
 
             interactiveCanvas.lastScaleFactor = scaleFactor
             lastPanOrScaleTime = System.currentTimeMillis()
@@ -490,10 +491,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     private fun screenBoundsForSelectedObject(): Rect {
         val selectedStartUnit = interactiveCanvas.cSelectedStartUnit
-        val selectedStartUnitScreen = interactiveCanvas.unitToScreenPoint(selectedStartUnit.x, selectedStartUnit.y)
+        val selectedStartUnitScreen = interactiveCanvas.unitToScreenPoint(selectedStartUnit.x.toFloat(), selectedStartUnit.y.toFloat())
 
         val selectedEndUnit = interactiveCanvas.cSelectedEndUnit
-        val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x, selectedEndUnit.y)
+        val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x.toFloat(), selectedEndUnit.y.toFloat())
 
         val bounds = Rect(selectedStartUnitScreen!!.x, selectedStartUnitScreen.y,
             selectedEndUnitScreen!!.x + interactiveCanvas.ppu, selectedEndUnitScreen.y + interactiveCanvas.ppu)
@@ -557,14 +558,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         SessionSettings.instance.paintColor = oldColor
 
         endPainting(true)
-    }
-
-    // device canvas viewport listener
-    override fun onDeviceViewportUpdate(viewport: RectF) {
-        interactiveCanvas.deviceViewport = viewport
-        interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-
-        interactiveCanvas.notifyDeviceViewportUpdate()
     }
 
     // interactive canvas drawer

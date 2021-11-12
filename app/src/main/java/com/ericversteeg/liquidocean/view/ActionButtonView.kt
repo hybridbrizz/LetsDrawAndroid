@@ -538,14 +538,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -674,14 +674,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -896,14 +896,14 @@ class ActionButtonView: View {
         if (!exportBold && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -1002,14 +1002,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -1050,14 +1050,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -1083,14 +1083,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
@@ -1126,14 +1126,14 @@ class ActionButtonView: View {
         if (toggleState == ToggleState.NONE && !isStatic) {
             paint = semiLightPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkLightPaint
             }
         }
         else {
             paint = semiPaint
 
-            if (SessionSettings.instance.darkIcons && !isStatic) {
+            if (colorMode == ColorMode.BLACK && !isStatic) {
                 paint = semiDarkPaint
             }
         }
