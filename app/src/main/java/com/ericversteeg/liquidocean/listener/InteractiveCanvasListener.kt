@@ -10,4 +10,8 @@ interface InteractiveCanvasListener {
 
     fun isPaletteFragmentOpen(): Boolean
     fun notifyClosePaletteFragment()
+
+    fun notifyDeviceViewportUpdate()
+
+    fun notifyUpdateCanvasSummary()
 }

@@ -1044,4 +1044,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:cardCornerRadius="20dp" />
 
+    <FrameLayout
+            android:id="@+id/terminal_container"
+            android:visibility="gone"
+            android:background="@android:color/transparent"
+            android:layout_width="500dp"
+            android:layout_height="300dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:cardCornerRadius="20dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

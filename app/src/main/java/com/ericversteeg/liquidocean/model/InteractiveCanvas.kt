@@ -26,6 +26,7 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.set
 import kotlin.math.floor
+import kotlin.math.max
 
 
 class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettings) {
@@ -643,6 +644,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
         }
 
+        interactiveCanvasListener?.notifyUpdateCanvasSummary()
+
         if (redraw) {
             interactiveCanvasDrawer?.notifyRedraw()
         }
@@ -689,6 +692,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 summary.add(RestorePoint(restorePoint.point, restorePoint.newColor, restorePoint.newColor))
             }
         }
+
+        clearRestorePoints()
 
         updateRecentColors()
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
@@ -793,6 +798,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 selectedObjectListener?.onSelectedObjectMoved()
             }
         }
+
+        interactiveCanvasListener?.notifyDeviceViewportUpdate()
     }
 
     fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
@@ -814,7 +821,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     fun translateBy(context: Context, x: Float, y: Float) {
         deviceViewport?.apply {
-            var margin = Utils.dpToPx(context, 200) / ppu
+            val len = max(width(), height())
+            val margin = len * 2 / 3
 
             var dX = x / ppu
             var dY = y / ppu
@@ -862,6 +870,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             selectedObjectListener?.onSelectedObjectMoved()
         }
 
+        interactiveCanvasListener?.notifyDeviceViewportUpdate()
         interactiveCanvasDrawer?.notifyRedraw()
     }
 
