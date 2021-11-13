@@ -147,7 +147,9 @@ class ActionButtonView: View {
         set(value) {
             field = value
 
-            invalidate()
+            if (autoInvalidate) {
+                invalidate()
+            }
         }
 
     var touchStateListener: TouchStateListener? = null
@@ -157,19 +159,25 @@ class ActionButtonView: View {
     var representingColor: Int? = null
         set(value) {
             field = value
-            invalidate()
+            if (autoInvalidate) {
+                invalidate()
+            }
         }
 
     var semiGloss = false
         set(value) {
             field = value
-            invalidate()
+            if (autoInvalidate) {
+                invalidate()
+            }
         }
 
     var colorMode = ColorMode.WHITE
     set(value) {
         field = value
-        invalidate()
+        if (autoInvalidate) {
+            invalidate()
+        }
     }
 
     var isStatic = false
@@ -181,6 +189,8 @@ class ActionButtonView: View {
     val menuButtonCols = 26
 
     var exportBold = false
+
+    var autoInvalidate = true
 
     constructor(context: Context) : super(context) {
         commonInit()

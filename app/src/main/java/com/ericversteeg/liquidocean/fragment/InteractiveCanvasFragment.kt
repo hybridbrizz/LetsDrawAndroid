@@ -327,6 +327,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         visibleActionViews = arrayOf(menu_action, paint_panel_action_view, export_action, background_action,
         grid_lines_action, canvas_summary_action, open_tools_action, recent_colors_action)
 
+        menu_action.autoInvalidate = false
+        paint_panel_action_view.autoInvalidate = false
+        export_action.autoInvalidate = false
+        background_action.autoInvalidate = false
+        grid_lines_action.autoInvalidate = false
+        canvas_summary_action.autoInvalidate = false
+        open_tools_action.autoInvalidate = false
+        recent_colors_action.autoInvalidate = false
+
         recolorVisibleActionViews()
 
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
@@ -1289,47 +1298,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 actionView.colorMode = ActionButtonView.ColorMode.WHITE
             }
-        }
 
-        val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
-        Log.v("canvas bounds", canvasBounds.toString())
-
-        for (actionView in visibleActionViews) {
-            val location = IntArray(2)
-            actionView.getLocationOnScreen(location)
-
-            val x = location[0]
-            val y = location[1]
-
-            var inBounds = true
-
-            // left
-            if (x + actionView.width / 2 < canvasBounds.left) {
-                inBounds = false
-            }
-            // top
-            else if (y + actionView.height / 2 < canvasBounds.top) {
-                inBounds = false
-            }
-            // right
-            else if (x + actionView.width / 2 > canvasBounds.right) {
-                inBounds = false
-            }
-            // bottom
-            else if (y + actionView.height / 2 > canvasBounds.bottom) {
-                inBounds = false
-            }
-
-            if (!inBounds) {
-                actionView.colorMode = ActionButtonView.ColorMode.WHITE
-            }
-            else {
-                if (SessionSettings.instance.darkIcons) {
-                    actionView.colorMode = ActionButtonView.ColorMode.BLACK
-                } else {
-                    actionView.colorMode = ActionButtonView.ColorMode.WHITE
-                }
-            }
+            actionView.invalidate()
         }
     }
 
@@ -1910,7 +1880,52 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun onDeviceViewportUpdate() {
-        recolorVisibleActionViews()
+        val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
+        Log.v("canvas bounds", canvasBounds.toString())
+
+        for (actionView in visibleActionViews) {
+            val lastColorMode = actionView.colorMode
+
+            val location = IntArray(2)
+            actionView.getLocationOnScreen(location)
+
+            val x = location[0]
+            val y = location[1]
+
+            var inBounds = true
+
+            // left
+            if (x + actionView.width / 2 < canvasBounds.left) {
+                inBounds = false
+            }
+            // top
+            else if (y + actionView.height / 2 < canvasBounds.top) {
+                inBounds = false
+            }
+            // right
+            else if (x + actionView.width / 2 > canvasBounds.right) {
+                inBounds = false
+            }
+            // bottom
+            else if (y + actionView.height / 2 > canvasBounds.bottom) {
+                inBounds = false
+            }
+
+            if (!inBounds) {
+                actionView.colorMode = ActionButtonView.ColorMode.WHITE
+            }
+            else {
+                if (SessionSettings.instance.darkIcons) {
+                    actionView.colorMode = ActionButtonView.ColorMode.BLACK
+                } else {
+                    actionView.colorMode = ActionButtonView.ColorMode.WHITE
+                }
+            }
+
+            if (actionView.colorMode != lastColorMode) {
+                actionView.invalidate()
+            }
+        }
     }
 
     // interactive canvas gesture listener

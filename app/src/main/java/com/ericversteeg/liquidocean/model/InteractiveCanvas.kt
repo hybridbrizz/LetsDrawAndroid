@@ -765,11 +765,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val canvasCenterXPx = (canvasCenterX * ppu)
         val canvasCenterYPx = (canvasCenterY * ppu)
 
-        var top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
-        var bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
-        var left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
-        var right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
-
+        val top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
+        val bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
+        val left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
+        val right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
 
         if (top < 0 || bottom > rows || left < 0 || right > cols) {
             if (fromScale) {
