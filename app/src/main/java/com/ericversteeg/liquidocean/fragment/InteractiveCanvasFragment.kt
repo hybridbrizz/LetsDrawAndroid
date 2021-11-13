@@ -29,7 +29,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.FullscreenActivity
+import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
@@ -48,7 +48,6 @@ import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.math.max
 
 
@@ -57,8 +56,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener {
-
-    var scaleFactor = 1f
 
     var initalColor = 0
 
@@ -463,14 +460,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
 
-                /* if (Utils.isColorDark(color)) {
-                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white_border))
-                }
-                else {
-                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white))
-                    DrawableCompat.setTint(paint_yes.drawable, color)
-                } */
-
                 color_hex_string_input.removeTextChangedListener(textChangeListener)
 
                 val hexColor = java.lang.String.format("%06X", 0xFFFFFF and color)
@@ -621,9 +610,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
-            //recent_colors_container.visibility = View.GONE
-            //recent_colors_button.visibility = View.VISIBLE
-
             if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                 paint_yes_container.visibility = View.GONE
                 paint_no_container.visibility = View.GONE
@@ -766,10 +752,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // recent colors background
         recent_colors_container.setOnClickListener {
 
-        }
-
-        context?.apply {
-            // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
         }
 
         // tablet & righty
@@ -1134,7 +1116,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
-        if (world) {
+        /*if (world) {
             Timer().schedule(object : TimerTask() {
                 override fun run() {
                     context?.apply {
@@ -1151,7 +1133,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }, 1000 * 60, 1000 * 60)
 
             getPaintTimerInfo()
-        }
+        }*/
 
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
@@ -1537,6 +1519,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 export_action.toggleState = ActionButtonView.ToggleState.NONE
             }
+
+            export_action.invalidate()
         }
     }
 
@@ -1544,7 +1528,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (menuFragment == null) {
             menuFragment = MenuFragment()
 
-            menuFragment?.menuButtonListener = (activity as FullscreenActivity)
+            menuFragment?.menuButtonListener = (activity as InteractiveCanvasActivity)
             menuFragment?.menuCardListener = this
 
             fragmentManager?.apply {
@@ -1881,7 +1865,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun onDeviceViewportUpdate() {
         val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
-        Log.v("canvas bounds", canvasBounds.toString())
+        //Log.v("canvas bounds", canvasBounds.toString())
 
         for (actionView in visibleActionViews) {
             val lastColorMode = actionView.colorMode
@@ -2270,6 +2254,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         toggleExportBorder(false)
     }
 
+    // menu card listener
+    override fun moveMenuCardBy(x: Float, y: Float) {
+        menu_container.x += x
+        menu_container.y += y
+
+        view?.apply {
+            if (menu_container.x + menu_container.width > width) {
+                menu_container.x = (width - menu_container.width).toFloat()
+            }
+            if (menu_container.x < 0) {
+                menu_container.x = 0F
+            }
+            if (menu_container.y + menu_container.height > height) {
+                menu_container.y = (height - menu_container.height).toFloat()
+            }
+            if (menu_container.y < 0) {
+                menu_container.y = 0F
+            }
+        }
+    }
+
+    override fun closeMenu() {
+        menu_container.visibility = View.GONE
+    }
+
     // world API
     private fun sendApiStatusCheck() {
         val requestQueue = Volley.newRequestQueue(context)
@@ -2403,30 +2412,5 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }, 0, 1000)
-    }
-
-    // menu card listener
-    override fun moveMenuCardBy(x: Float, y: Float) {
-        menu_container.x += x
-        menu_container.y += y
-
-        view?.apply {
-            if (menu_container.x + menu_container.width > width) {
-                menu_container.x = (width - menu_container.width).toFloat()
-            }
-            if (menu_container.x < 0) {
-                menu_container.x = 0F
-            }
-            if (menu_container.y + menu_container.height > height) {
-                menu_container.y = (height - menu_container.height).toFloat()
-            }
-            if (menu_container.y < 0) {
-                menu_container.y = 0F
-            }
-        }
-    }
-
-    override fun closeMenu() {
-        menu_container.visibility = View.GONE
     }
 }

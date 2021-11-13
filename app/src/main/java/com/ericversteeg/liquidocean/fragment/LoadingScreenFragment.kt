@@ -488,7 +488,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                 var errorType = 0
                 var message = "Oops, could not find world pixel data. Please try again"
 
-                context?.apply {
+                /*context?.apply {
                     if (!Utils.isNetworkAvailable(this)) {
                         errorType = 1
                         message = "No network connectivity"
@@ -497,7 +497,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                         errorType = 2
                         message = "Socket connection error"
                     }
-                }
+                }*/
 
                 AlertDialog.Builder(context)
                     .setMessage(message)

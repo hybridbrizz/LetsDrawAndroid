@@ -1,16 +1,15 @@
-package com.ericversteeg.liquidocean
+package com.ericversteeg.liquidocean.activity
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
-import android.os.StrictMode
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.fragment.*
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -25,7 +24,7 @@ import kotlin.collections.HashMap
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener,
+class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener,
     InteractiveCanvasFragmentListener, StatsFragmentListener, AchievementListener, HowtoFragmentListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
@@ -50,8 +49,17 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     private var mVisible: Boolean = false
     private val mHideRunnable = Runnable { hide() }
 
-    private val backgrounds = intArrayOf(R.drawable.gradient, R.drawable.gradient_2, R.drawable.gradient_3, R.drawable.gradient_4, R.drawable.gradient_5,
-        R.drawable.gradient_6, R.drawable.gradient_8, R.drawable.gradient_9, R.drawable.gradient_10)
+    private val backgrounds = intArrayOf(
+        R.drawable.gradient,
+        R.drawable.gradient_2,
+        R.drawable.gradient_3,
+        R.drawable.gradient_4,
+        R.drawable.gradient_5,
+        R.drawable.gradient_6,
+        R.drawable.gradient_8,
+        R.drawable.gradient_9,
+        R.drawable.gradient_10
+    )
 
     var optionsFragment: OptionsFragment? = null
     var howtoFragment: HowtoFragment? = null
@@ -83,13 +91,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         showInteractiveCanvasFragment(false, 0, null)
 
-        /*if (SessionSettings.instance.canvasOpen) {
-            showInteractiveCanvasFragment(false, 0, null)
-        }
-        else {
-            showMenuFragment()
-        }*/
-
         //TrustAllSSLCertsDebug.trust()
 
         /*StrictMode.setThreadPolicy(
@@ -119,12 +120,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         StatTracker.instance.achievementListener = this
 
         // after device settings have been loaded
-        if (!SessionSettings.instance.sentUniqueId) {
+        /*if (!SessionSettings.instance.sentUniqueId) {
             sendDeviceId()
         }
         else {
             getDeviceInfo()
-        }
+        }*/
 
         ActionButtonView(this)
     }
@@ -231,11 +232,11 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
 
                 // server-side event sync
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
+                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
+                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
+                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
 
-                StatTracker.instance.displayAchievements(this@FullscreenActivity)
+                StatTracker.instance.displayAchievements(this@InteractiveCanvasActivity)
             },
             { error ->
 
@@ -307,7 +308,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     // menu buttons
-
     override fun onMenuButtonSelected(index: Int, route: Int) {
         when (index) {
             MenuFragment.playMenuIndex -> {
