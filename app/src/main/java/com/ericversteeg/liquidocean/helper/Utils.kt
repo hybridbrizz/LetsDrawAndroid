@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.helper
 import android.content.Context
 import android.graphics.Color
 import android.graphics.LinearGradient
+import android.graphics.Point
 import android.graphics.Shader
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -14,8 +15,10 @@ import android.view.ViewTreeObserver
 import android.widget.TextView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.view.InteractiveCanvasView
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
+import java.util.*
 import kotlin.math.min
 
 class Utils {
@@ -73,7 +76,7 @@ class Utils {
             return Color.argb(255, red, green, blue)
         }
 
-        fun isNetworkAvailable(context: Context): Boolean {
+        /*fun isNetworkAvailable(context: Context): Boolean {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val nw      = connectivityManager.activeNetwork ?: return false
@@ -91,7 +94,7 @@ class Utils {
                 val nwInfo = connectivityManager.activeNetworkInfo ?: return false
                 return nwInfo.isConnected
             }
-        }
+        }*/
 
         fun setViewLayoutListener(view: View, completion: ViewLayoutListener) {
             view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
@@ -167,5 +170,44 @@ class Utils {
             )
             textView.paint.shader = textShader
         }
+    }
+
+    fun startSimulateDraw(interactiveCanvasView: InteractiveCanvasView) {
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                val rT = (Math.random() * 20 + 1).toInt()
+                Timer().schedule(object: TimerTask() {
+                    override fun run() {
+                        simulateDraw(interactiveCanvasView)
+                    }
+                }, 1000L * rT)
+            }
+
+        }, 3000)
+    }
+
+    fun simulateDraw(interactiveCanvasView: InteractiveCanvasView) {
+        val rSmallAmt = (Math.random() * 20 + 2).toInt()
+        val rBigAmt = (Math.random() * 100 + 50).toInt()
+
+        interactiveCanvasView.startPainting()
+
+        val r = (Math.random() * 10).toInt()
+        if (r < 2) {
+            for (i in 0 until rBigAmt) {
+                val rX = (Math.random() * interactiveCanvasView.interactiveCanvas.cols).toInt()
+                val rY = (Math.random() * interactiveCanvasView.interactiveCanvas.rows).toInt()
+                interactiveCanvasView.interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+            }
+        }
+        else {
+            for (i in 0 until rSmallAmt) {
+                val rX = (Math.random() * interactiveCanvasView.interactiveCanvas.cols).toInt()
+                val rY = (Math.random() * interactiveCanvasView.interactiveCanvas.rows).toInt()
+                interactiveCanvasView.interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+            }
+        }
+
+        interactiveCanvasView.endPainting(true)
     }
 }

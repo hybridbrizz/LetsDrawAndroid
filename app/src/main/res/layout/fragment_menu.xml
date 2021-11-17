@@ -310,69 +310,6 @@
         </LinearLayout>
     </FrameLayout>
 
-    <LinearLayout
-            android:id="@+id/single_background_options"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_black"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_white"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_gray_thirds"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_photoshop"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_classic"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-            <com.ericversteeg.liquidocean.view.ActionButtonView
-                    android:id="@+id/background_option_chess"
-                    android:layout_width="195dp"
-                    android:layout_height="135dp"
-                    android:layout_margin="10dp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
     <View
             android:id="@+id/pixel_view_1"
             android:layout_width="10dp"

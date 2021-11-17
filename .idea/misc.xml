@@ -1,5 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_10.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_2.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_3.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_4.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_5.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_6.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/gradient_8.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable-v24/menu_button_border.xml" value="0.24010416666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/dark_rounded_white_border.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/gradient.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/gradient_7.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/gradient_9.xml" value="0.24791666666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/howto_step_background.xml" value="0.2520833333333333" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/panel_texture_background.xml" value="0.25833333333333336" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/rounded_corner.xml" value="0.25" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/shadow_background.xml" value="0.25" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/white_border_background.xml" value="0.24010416666666667" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/activity_fullscreen.xml" value="0.25833333333333336" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/activity_launch.xml" value="0.25833333333333336" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_art_export.xml" value="0.2375" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_canvas_export.xml" value="0.24375" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_canvas_import.xml" value="0.24375" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_draw_frame_config.xml" value="0.19791666666666666" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_howto.xml" value="0.225" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_interactive_canvas.xml" value="0.2375" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_menu.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_options.xml" value="0.2015625" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_palettes.xml" value="0.2015625" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_stats.xml" value="0.2015625" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_terminal.xml" value="0.20520833333333333" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/palette_adapter_view.xml" value="0.2015625" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/palette_header_view.xml" value="0.23125" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/panel_adapter_view.xml" value="0.22395833333333334" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/mipmap-anydpi-v26/ic_new_icon.xml" value="0.23489583333333333" />
+      </map>
+    </option>
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>

@@ -18,7 +18,7 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
-class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, DeviceCanvasViewportListener, SelectedObjectListener {
+class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, SelectedObjectListener {
 
     enum class Mode {
         EXPLORING,
@@ -30,7 +30,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     private var mode = Mode.EXPLORING
-    private var lastMode = Mode.EXPLORING
 
     var undo = false
 
@@ -38,8 +37,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     var oldPpu = 0
 
     val paint = Paint()
-    val gridLinePaint = Paint()
-    val gridLinePaintAlt = Paint()
+    private val gridLinePaint = Paint()
+    private val gridLinePaintAlt = Paint()
 
     var paintActionListener: PaintActionListener? = null
 
@@ -88,44 +87,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         interactiveCanvas.scaleCallbackListener = this
         interactiveCanvas.selectedObjectListener = this
 
-        // scale
-        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
-            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
-        }
-
-        scaleFactor = interactiveCanvas.lastScaleFactor
-        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
-
-        // position
-        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
-            interactiveCanvas.updateDeviceViewport(
-                context,
-                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
-            )
-        }
-        else {
-            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
-
-            /*val restoreDeviceViewport = RectF(SessionSettings.instance.restoreDeviceViewportLeft, SessionSettings.instance.restoreDeviceViewportTop,
-                SessionSettings.instance.restoreDeviceViewportRight, SessionSettings.instance.restoreDeviceViewportBottom)
-
-            interactiveCanvas.deviceViewport = restoreDeviceViewport*/
-        }
-
-        //interactiveCanvas.updateDeviceViewport(context, interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F)
-
-        /*Timer().schedule(object: TimerTask() {
-            override fun run() {
-                val rT = (Math.random() * 20 + 1).toInt()
-                Timer().schedule(object: TimerTask() {
-                    override fun run() {
-                        simulateDraw()
-                    }
-                }, 1000L * rT)
-            }
-
-        }, 3000)*/
-
         // surface view holder
         holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
@@ -143,35 +104,31 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         })
     }
 
-    fun simulateDraw() {
-        val rSmallAmt = (Math.random() * 20 + 2).toInt()
-        val rBigAmt = (Math.random() * 100 + 50).toInt()
+    fun setInitialPositionAndScale() {
+        // scale
+        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
+            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
+        }
 
-        startPainting()
+        scaleFactor = interactiveCanvas.lastScaleFactor
+        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
-        val r = (Math.random() * 10).toInt()
-        if (r < 2) {
-            for (i in 0 until rBigAmt) {
-                val rX = (Math.random() * interactiveCanvas.cols).toInt()
-                val rY = (Math.random() * interactiveCanvas.rows).toInt()
-                interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
-            }
+        // position
+        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
+            interactiveCanvas.updateDeviceViewport(
+                context,
+                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
+            )
         }
         else {
-            for (i in 0 until rSmallAmt) {
-                val rX = (Math.random() * interactiveCanvas.cols).toInt()
-                val rY = (Math.random() * interactiveCanvas.rows).toInt()
-                interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
-            }
+            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
         }
-
-        endPainting(true)
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
 
         if (mode == Mode.EXPLORING) {
-            // Let the ScaleGestureDetector inspect all events.
+            // pass event into gesture detectors
             mPanDetector.onTouchEvent(ev)
             mScaleDetector.onTouchEvent(ev)
             mTapDetector.onTouchEvent(ev)
@@ -330,41 +287,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         return true
     }
 
-    fun startPainting() {
-        if (mode == Mode.OBJECT_MOVE_SELECTION || mode == Mode.OBJECT_MOVING) {
-            interactiveCanvas.cancelMoveSelectedObject()
-        }
-
-        mode = Mode.PAINTING
-    }
-
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun endPainting(accept: Boolean) {
-        if (!accept) {
-            interactiveCanvas.undoPendingPaint()
-            SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
-        }
-        else {
-            // before restore points are cleared
-            interactiveCanvas.commitPixels()
-        }
-
-        interactiveCanvas.clearRestorePoints()
-
-        interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-        mode = Mode.EXPLORING
-    }
-
-    fun startPaintSelection() {
-        mode = Mode.PAINT_SELECTION
-    }
-
-    fun endPaintSelection() {
-        mode = Mode.PAINTING
-    }
-
     // panning
-
     private val mGestureListener = object : GestureDetector.SimpleOnGestureListener() {
 
         override fun onScroll(
@@ -402,7 +325,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
             interactiveCanvas.updateDeviceViewport(context, true)
-            interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
 
             interactiveCanvas.lastScaleFactor = scaleFactor
             lastPanOrScaleTime = System.currentTimeMillis()
@@ -415,7 +337,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     private val mScaleDetector = ScaleGestureDetector(context, scaleListener)
 
-    // pixel tap
+    // pixel tap & long press
     private val mTapListener = object : GestureDetector.SimpleOnGestureListener() {
 
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
@@ -460,6 +382,40 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         interactiveCanvas.ppu = oldPpu
     }
 
+    // modes
+    fun startPainting() {
+        if (mode == Mode.OBJECT_MOVE_SELECTION || mode == Mode.OBJECT_MOVING) {
+            interactiveCanvas.cancelMoveSelectedObject()
+        }
+
+        mode = Mode.PAINTING
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun endPainting(accept: Boolean) {
+        if (!accept) {
+            interactiveCanvas.undoPendingPaint()
+            SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
+        }
+        else {
+            // before restore points are cleared
+            interactiveCanvas.commitPixels()
+        }
+
+        interactiveCanvas.clearRestorePoints()
+
+        interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+        mode = Mode.EXPLORING
+    }
+
+    fun startPaintSelection() {
+        mode = Mode.PAINT_SELECTION
+    }
+
+    fun endPaintSelection() {
+        mode = Mode.PAINTING
+    }
+
     fun startExport() {
         mode = Mode.EXPORTING
     }
@@ -488,12 +444,47 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         return mode == Mode.OBJECT_MOVE_SELECTION
     }
 
+    // interactive canvas selected object listener
+    override fun onObjectSelected() {
+
+    }
+
+    override fun onSelectedObjectMoveStart() {
+        val bounds = screenBoundsForSelectedObject()
+        selectedObjectMoveView?.showSelectedObjectMoveButtons(bounds)
+    }
+
+    override fun onSelectedObjectMoved() {
+        val bounds = screenBoundsForSelectedObject()
+        selectedObjectMoveView?.updateSelectedObjectMoveButtons(bounds)
+
+        val cX = (bounds.left + bounds.right) / 2
+        val cY = (bounds.top + bounds.bottom) / 2
+
+        if (interactiveCanvas.hasSelectedObjectMoved()) {
+            selectedObjectView?.showSelectedObjectYesAndNoButtons(Point(cX, cY))
+        }
+        else {
+            selectedObjectView?.hideSelectedObjectYesAndNoButtons()
+        }
+    }
+
+    override fun onSelectedObjectMoveEnd() {
+        endObjectMove()
+
+        selectedObjectMoveView?.hideSelectedObjectMoveButtons()
+        selectedObjectMoveView?.selectedObjectMoveEnded()
+
+        selectedObjectView?.hideSelectedObjectYesAndNoButtons()
+        selectedObjectView?.selectedObjectEnded()
+    }
+
     private fun screenBoundsForSelectedObject(): Rect {
         val selectedStartUnit = interactiveCanvas.cSelectedStartUnit
-        val selectedStartUnitScreen = interactiveCanvas.unitToScreenPoint(selectedStartUnit.x, selectedStartUnit.y)
+        val selectedStartUnitScreen = interactiveCanvas.unitToScreenPoint(selectedStartUnit.x.toFloat(), selectedStartUnit.y.toFloat())
 
         val selectedEndUnit = interactiveCanvas.cSelectedEndUnit
-        val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x, selectedEndUnit.y)
+        val selectedEndUnitScreen = interactiveCanvas.unitToScreenPoint(selectedEndUnit.x.toFloat(), selectedEndUnit.y.toFloat())
 
         val bounds = Rect(selectedStartUnitScreen!!.x, selectedStartUnitScreen.y,
             selectedEndUnitScreen!!.x + interactiveCanvas.ppu, selectedEndUnitScreen.y + interactiveCanvas.ppu)
@@ -516,6 +507,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         return bounds
     }
 
+    // canvas frames
     fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
         startPainting()
 
@@ -559,55 +551,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         endPainting(true)
     }
 
-    // device canvas viewport listener
-    override fun onDeviceViewportUpdate(viewport: RectF) {
-        interactiveCanvas.deviceViewport = viewport
-        interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-
-        interactiveCanvas.notifyDeviceViewportUpdate()
-    }
-
-    // interactive canvas drawer
+    // draw canvas
     override fun notifyRedraw() {
         drawInteractiveCanvas(holder)
     }
 
-    // selected object listener
-    override fun onObjectSelected() {
-
-    }
-
-    override fun onSelectedObjectMoveStart() {
-        val bounds = screenBoundsForSelectedObject()
-        selectedObjectMoveView?.showSelectedObjectMoveButtons(bounds)
-    }
-
-    override fun onSelectedObjectMoved() {
-        val bounds = screenBoundsForSelectedObject()
-        selectedObjectMoveView?.updateSelectedObjectMoveButtons(bounds)
-
-        val cX = (bounds.left + bounds.right) / 2
-        val cY = (bounds.top + bounds.bottom) / 2
-
-        if (interactiveCanvas.hasSelectedObjectMoved()) {
-            selectedObjectView?.showSelectedObjectYesAndNoButtons(Point(cX, cY))
-        }
-        else {
-            selectedObjectView?.hideSelectedObjectYesAndNoButtons()
-        }
-    }
-
-    override fun onSelectedObjectMoveEnd() {
-        endObjectMove()
-
-        selectedObjectMoveView?.hideSelectedObjectMoveButtons()
-        selectedObjectMoveView?.selectedObjectMoveEnded()
-
-        selectedObjectView?.hideSelectedObjectYesAndNoButtons()
-        selectedObjectView?.selectedObjectEnded()
-    }
-
-    // drawing
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
         paint.color = Color.parseColor("#FFFFFFFF")
 
@@ -701,8 +649,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             val startUnitIndexY = floor(top).toInt()
             val endUnitIndexY = ceil(bottom).toInt()
 
-            // val unitsWide = canvas.width / surface_view.interactiveCanvas.ppu
-
             val rangeX = endUnitIndexX - startUnitIndexX
             val rangeY = endUnitIndexY - startUnitIndexY
 
@@ -721,7 +667,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                     if (inGrid) {
                         val color = interactiveCanvas.arr[unitY][unitX]
-                        // val alpha = 0xFF and (color shr 24)
 
                         // background
                         if (color == 0) {
@@ -748,17 +693,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         paint.color = Utils.brightenColor(paint.color, -0.5F)
                     }
                     canvas.drawRect(rect, paint)
-
-                    // transparency
-                    /* if (inGrid) {
-                        val color = interactiveCanvas.arr[unitY][unitX]
-                        val alpha = 0xFF and (color shr 24)
-
-                        if (color != 0 && alpha < 255) {
-                            altPaint.color = color
-                            canvas.drawRect(rect, altPaint)
-                        }
-                    } */
                 }
             }
 

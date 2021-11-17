@@ -1,16 +1,15 @@
-package com.ericversteeg.liquidocean
+package com.ericversteeg.liquidocean.activity
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
-import android.os.StrictMode
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.fragment.*
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -25,7 +24,7 @@ import kotlin.collections.HashMap
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener,
+class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonListener, OptionsListener,
     InteractiveCanvasFragmentListener, StatsFragmentListener, AchievementListener, HowtoFragmentListener {
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
@@ -50,8 +49,17 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     private var mVisible: Boolean = false
     private val mHideRunnable = Runnable { hide() }
 
-    private val backgrounds = intArrayOf(R.drawable.gradient, R.drawable.gradient_2, R.drawable.gradient_3, R.drawable.gradient_4, R.drawable.gradient_5,
-        R.drawable.gradient_6, R.drawable.gradient_8, R.drawable.gradient_9, R.drawable.gradient_10)
+    private val backgrounds = intArrayOf(
+        R.drawable.gradient,
+        R.drawable.gradient_2,
+        R.drawable.gradient_3,
+        R.drawable.gradient_4,
+        R.drawable.gradient_5,
+        R.drawable.gradient_6,
+        R.drawable.gradient_8,
+        R.drawable.gradient_9,
+        R.drawable.gradient_10
+    )
 
     var optionsFragment: OptionsFragment? = null
     var howtoFragment: HowtoFragment? = null
@@ -81,14 +89,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         hide()
 
-        showInteractiveCanvasFragment(false, 0, null)
-
-        /*if (SessionSettings.instance.canvasOpen) {
-            showInteractiveCanvasFragment(false, 0, null)
-        }
-        else {
-            showMenuFragment()
-        }*/
+        showInteractiveCanvasFragment(false, 0)
 
         //TrustAllSSLCertsDebug.trust()
 
@@ -119,12 +120,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         StatTracker.instance.achievementListener = this
 
         // after device settings have been loaded
-        if (!SessionSettings.instance.sentUniqueId) {
+        /*if (!SessionSettings.instance.sentUniqueId) {
             sendDeviceId()
         }
         else {
             getDeviceInfo()
-        }
+        }*/
 
         ActionButtonView(this)
     }
@@ -138,6 +139,20 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
         SessionSettings.instance.save(this)
         StatTracker.instance.save(this)
+    }
+
+    private fun showMenuFragment() {
+        val frag = MenuFragment()
+        frag.menuButtonListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showOptionsFragment() {
+        optionsFragment = OptionsFragment()
+        optionsFragment?.optionsListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
     }
 
     private fun showStatsFragment() {
@@ -156,20 +171,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         supportFragmentManager.beginTransaction().add(R.id.fullscreen_content, howtoFragment!!).commit()
     }
 
-    private fun showMenuFragment() {
-        val frag = MenuFragment()
-        frag.menuButtonListener = this
-
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
-    }
-
-    private fun showOptionsFragment() {
-        optionsFragment = OptionsFragment()
-        optionsFragment?.optionsListener = this
-
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
-    }
-
     private fun showLoadingFragment(world: Boolean, realmId: Int) {
         val frag = LoadingScreenFragment()
         frag.dataLoadingCallback = this
@@ -181,8 +182,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
 
     private fun showInteractiveCanvasFragment(
         world: Boolean,
-        realmId: Int,
-        backgroundOption: ActionButtonView.Type? = null
+        realmId: Int
     ) {
         val frag = InteractiveCanvasFragment()
         frag.world = world
@@ -190,111 +190,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         frag.interactiveCanvasFragmentListener = this
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
-    }
-
-    private fun hide() {
-        // Hide UI first
-        supportActionBar?.hide()
-        fullscreen_content_controls.visibility = View.GONE
-        mVisible = false
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable)
-        mHideHandler.postDelayed(mHidePart2Runnable, 0)
-    }
-
-    /**
-     * Schedules a call to hide() in [delayMillis], canceling any
-     * previously scheduled calls.
-     */
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
-    }
-
-    private fun getDeviceInfo() {
-        val requestQueue = Volley.newRequestQueue(this)
-
-        val uniqueId = SessionSettings.instance.uniqueId
-
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
-            null,
-            { response ->
-                SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                SessionSettings.instance.xp = response.getInt("xp")
-
-                SessionSettings.instance.displayName = response.getString("name")
-
-                StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-
-                // server-side event sync
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
-                StatTracker.instance.reportEvent(this@FullscreenActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
-
-                StatTracker.instance.displayAchievements(this@FullscreenActivity)
-            },
-            { error ->
-
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
-        }
-
-        requestQueue.add(request)
-    }
-
-    private fun sendDeviceId() {
-        val requestQueue = Volley.newRequestQueue(this)
-
-        val uniqueId = SessionSettings.instance.uniqueId
-
-        uniqueId?.apply {
-            val requestParams = HashMap<String, String>()
-
-            requestParams["uuid"] = uniqueId
-
-            val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-            val request = object: JsonObjectRequest(
-                Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/register",
-                paramsJson,
-                { response ->
-                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                    SessionSettings.instance.xp = response.getInt("xp")
-
-                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
-                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
-                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
-
-                    SessionSettings.instance.sentUniqueId = true
-                },
-                { error ->
-
-                }) {
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json; charset=utf-8"
-                    headers["key1"] = Utils.key1
-                    return headers
-                }
-            }
-
-            request.tag = "download"
-            requestQueue.add(request)
-        }
     }
 
     // data load callback
@@ -307,7 +202,6 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
     }
 
     // menu buttons
-
     override fun onMenuButtonSelected(index: Int, route: Int) {
         when (index) {
             MenuFragment.playMenuIndex -> {
@@ -323,7 +217,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 showHowtoFragment()
             }
             MenuFragment.singleMenuIndex -> {
-                showInteractiveCanvasFragment(false, 0, null)
+                showInteractiveCanvasFragment(false, 0)
             }
             MenuFragment.worldMenuIndex -> {
                 showLoadingFragment(true, 1)
@@ -338,7 +232,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 SessionSettings.instance.toolboxOpen = true
 
                 if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0, null)
+                    showInteractiveCanvasFragment(false, 0)
                 }
                 else if (route == MenuFragment.worldMenuIndex) {
                     showLoadingFragment(true, 1)
@@ -354,7 +248,7 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
                 SessionSettings.instance.toolboxOpen = true
 
                 if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0, null)
+                    showInteractiveCanvasFragment(false, 0)
                 }
                 else if (route == MenuFragment.worldMenuIndex) {
                     showLoadingFragment(true, 1)
@@ -366,16 +260,12 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
         }
     }
 
-    override fun onSingleBackgroundOptionSelected(backgroundOption: ActionButtonView.Type) {
-        showInteractiveCanvasFragment(false, 0, backgroundOption)
-    }
-
     override fun onResetSinglePlay() {
 
     }
 
     override fun onOptionsBack() {
-        showInteractiveCanvasFragment(false, 0, null)
+        showInteractiveCanvasFragment(false, 0)
     }
 
     override fun onInteractiveCanvasBack() {
@@ -440,5 +330,25 @@ class FullscreenActivity : AppCompatActivity(), DataLoadingCallback, MenuButtonL
             }
 
         }, 5000)
+    }
+
+    private fun hide() {
+        // Hide UI first
+        supportActionBar?.hide()
+        fullscreen_content_controls.visibility = View.GONE
+        mVisible = false
+
+        // Schedule a runnable to remove the status and navigation bar after a delay
+        mHideHandler.removeCallbacks(mShowPart2Runnable)
+        mHideHandler.postDelayed(mHidePart2Runnable, 0)
+    }
+
+    /**
+     * Schedules a call to hide() in [delayMillis], canceling any
+     * previously scheduled calls.
+     */
+    private fun delayedHide(delayMillis: Int) {
+        mHideHandler.removeCallbacks(mHideRunnable)
+        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 }

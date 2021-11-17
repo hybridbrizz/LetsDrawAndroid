@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.RectF
 import android.os.Build
 import android.util.DisplayMetrics
@@ -30,6 +31,7 @@ import kotlin.math.max
 
 
 class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettings) {
+
     var rows = 1024
     var cols = 1024
 
@@ -39,14 +41,12 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var ppu = basePpu
 
     val autoCloseGridLineThreshold = 50
-    val autoFarGridLineThreshold = 25
 
     var deviceViewport: RectF? = null
 
     var interactiveCanvasListener: InteractiveCanvasListener? = null
     var interactiveCanvasDrawer: InteractiveCanvasDrawer? = null
     var scaleCallbackListener: InteractiveCanvasScaleCallback? = null
-    var paintSelectionListener: PaintSelectionListener? = null
     var recentColorsListener: RecentColorsListener? = null
     var artExportListener: ArtExportListener? = null
     var deviceCanvasViewportResetListener: DeviceCanvasViewportResetListener? = null
@@ -106,20 +106,29 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         RIGHT
     }
 
+    class RestorePoint(var point: Point, var color: Int, var newColor: Int)
+
+    class ShortTermPixel(var restorePoint: RestorePoint) {
+        var time = 0L
+        init {
+            time = System.currentTimeMillis()
+        }
+    }
+
     companion object {
         var rows = 1024
         var cols = 1024
 
-        var GRID_LINE_MODE_ON = 0
-        var GRID_LINE_MODE_OFF = 1
+        const val GRID_LINE_MODE_ON = 0
+        const val GRID_LINE_MODE_OFF = 1
 
-        val BACKGROUND_BLACK = 0
-        val BACKGROUND_WHITE = 1
-        val BACKGROUND_GRAY_THIRDS = 2
-        val BACKGROUND_PHOTOSHOP = 3
-        val BACKGROUND_CLASSIC = 4
-        val BACKGROUND_CHESS = 5
-        val BACKGROUND_CUSTOM = 6
+        const val BACKGROUND_BLACK = 0
+        const val BACKGROUND_WHITE = 1
+        const val BACKGROUND_GRAY_THIRDS = 2
+        const val BACKGROUND_PHOTOSHOP = 3
+        const val BACKGROUND_CLASSIC = 4
+        const val BACKGROUND_CHESS = 5
+        const val BACKGROUND_CUSTOM = 6
 
         fun importCanvasFromJson(context: Context, jsonString: String): Boolean {
             try {
@@ -426,52 +435,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }, 0, 5000)
     }*/
 
-    private fun initSinglePlayPixels(type: ActionButtonView.Type) {
-        var paint1 = ActionButtonView.redPaint
-        var paint2 = ActionButtonView.redPaint
-
-        when (type) {
-            ActionButtonView.Type.BACKGROUND_WHITE -> {
-                paint1 = ActionButtonView.whitePaint
-                paint2 = ActionButtonView.whitePaint
-            }
-            ActionButtonView.Type.BACKGROUND_BLACK -> {
-                paint1 = ActionButtonView.blackPaint
-                paint2 = ActionButtonView.blackPaint
-            }
-            ActionButtonView.Type.BACKGROUND_GRAY_THIRDS -> {
-                paint1 = ActionButtonView.thirdGray
-                paint2 = ActionButtonView.twoThirdGray
-            }
-            ActionButtonView.Type.BACKGROUND_PHOTOSHOP -> {
-                paint1 = ActionButtonView.whitePaint
-                paint2 = ActionButtonView.photoshopGray
-            }
-            ActionButtonView.Type.BACKGROUND_CLASSIC -> {
-                paint1 = ActionButtonView.classicGrayLight
-                paint2 = ActionButtonView.classicGrayDark
-            }
-            ActionButtonView.Type.BACKGROUND_CHESS -> {
-                paint1 = ActionButtonView.chessTan
-                paint2 = ActionButtonView.blackPaint
-            }
-        }
-
-        for (i in 0 until rows - 1) {
-            for (j in 0 until cols - 1) {
-                var paint = paint2
-                if ((i + j) % 2 == 0) {
-                    paint = paint1
-                }
-                arr[j][i] = paint.color
-            }
-        }
-
-        if ((paint1.color == Color.BLACK && paint2.color == Color.BLACK) || (paint1.color == Color.WHITE && paint2.color == Color.WHITE)) {
-            arr[rows / 2 - 4][cols / 2 - 4] = ActionButtonView.altGreenPaint.color
-        }
-    }
-
     private fun initPixels(pixelsJsonStr: String) {
         val jsonArray = JSONArray(pixelsJsonStr)
 
@@ -492,24 +455,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         interactiveCanvasDrawer?.notifyRedraw()
     }
-
-    /*private fun initPixels(arrJsonStr: String) {
-        val outerArray = JSONArray(arrJsonStr)
-
-        for (i in 0 until outerArray.length()) {
-            val innerArr = outerArray.getJSONArray(i)
-            for (j in 0 until innerArr.length()) {
-                val color = innerArr.getInt(j)
-                arr[i][j] = color
-
-                if (color != 0) {
-                    summary.add(RestorePoint(Point(j, i), color, color))
-                }
-            }
-        }
-
-        drawCallbackListener?.notifyRedraw()
-    }*/
 
     private fun initChunkPixelsFromMemory() {
         for (i in arr.indices) {
@@ -537,10 +482,32 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     private fun initDefault() {
         for (i in 0 until rows - 1) {
             for (j in 0 until cols - 1) {
-                var color = 0
+                val color = 0
                 arr[j][i] = color
             }
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun saveUnits(context: Context) {
+        val jsonArr = JSONArray(arr)
+
+        val ed = sessionSettings.getSharedPrefs(context).edit()
+
+        if (world) {
+            ed.putString("arr", jsonArr.toString())
+            ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
+        }
+        else {
+            ed.putString("arr_canvas", exportCanvasToJson(arr))
+            ed.putString(
+                "recent_colors_single",
+                JSONArray(recentColorsList.toTypedArray()).toString()
+            )
+            ed.putInt("grid_line_color", getGridLineColor())
+        }
+
+        ed.apply()
     }
 
     fun getGridLineColor(): Int {
@@ -561,49 +528,49 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return Color.RED
     }
 
-    fun screenPointToUnit(x: Float, y: Float): Point? {
-        deviceViewport?.apply {
-            val topViewportPx = top * ppu
-            val leftViewportPx = left * ppu
-
-            val absXPx = leftViewportPx + x
-            val absYPx = topViewportPx + y
-
-            val absX = absXPx / ppu
-            val absY = absYPx / ppu
-
-            val point = Point()
-            point.x = floor(absX).toInt()
-            point.y = floor(absY).toInt()
-
-            return point
+    fun getBackgroundColors(index: Int): List<Int> {
+        when (index) {
+            BACKGROUND_BLACK -> return listOf(0, 0)
+            BACKGROUND_WHITE -> return listOf(Color.WHITE, Color.WHITE)
+            BACKGROUND_GRAY_THIRDS -> return listOf(ActionButtonView.thirdGray.color, ActionButtonView.twoThirdGray.color)
+            BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
+            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.classicGrayLight.color, ActionButtonView.classicGrayDark.color)
+            BACKGROUND_CHESS -> return listOf(ActionButtonView.chessTan.color, ActionButtonView.blackPaint.color)
+            BACKGROUND_CUSTOM -> return listOf(SessionSettings.instance.canvasBackgroundPrimaryColor,
+                SessionSettings.instance.canvasBackgroundSecondaryColor)
         }
 
-        return null
+        return listOf()
     }
 
-    fun unitToScreenPoint(x: Int, y: Int): Point? {
-        deviceViewport?.apply {
-            val topViewportPx = top * ppu
-            val leftViewportPx = left * ppu
-
-            val absXPx = x * ppu
-            val absYPx = y * ppu
-
-            val point = Point()
-            point.x = (absXPx - leftViewportPx).toInt()
-            point.y = (absYPx - topViewportPx).toInt()
-
-            return point
+    fun updateRecentColors() {
+        var colorIndex = -1
+        for (restorePoint in restorePoints) {
+            var contains = false
+            for (i in 0 until recentColorsList.size) {
+                if (restorePoint.newColor == recentColorsList[i]) {
+                    contains = true
+                    colorIndex = i
+                }
+            }
+            if (!contains) {
+                if (recentColorsList.size == sessionSettings.numRecentColors) {
+                    recentColorsList.removeAt(0)
+                }
+                recentColorsList.add(restorePoint.newColor)
+            }
+            else {
+                recentColorsList.removeAt(colorIndex)
+                recentColorsList.add(restorePoint.newColor)
+            }
         }
-
-        return null
     }
 
     fun isBackground(unitPoint: Point): Boolean {
         return arr[unitPoint.y][unitPoint.x] == 0
     }
 
+    // painting
     fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0, redraw: Boolean = true) {
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
@@ -683,11 +650,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             )
         }
         else {
-            /*StatTracker.instance.reportEvent(context,
-                StatTracker.EventType.PIXEL_PAINTED_SINGLE,
-                restorePoints.size
-            )*/
-
             for (restorePoint in restorePoints) {
                 summary.add(RestorePoint(restorePoint.point, restorePoint.newColor, restorePoint.newColor))
             }
@@ -697,29 +659,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         updateRecentColors()
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
-    }
-
-    fun updateRecentColors() {
-        var colorIndex = -1
-        for (restorePoint in restorePoints) {
-            var contains = false
-            for (i in 0 until recentColorsList.size) {
-                if (restorePoint.newColor == recentColorsList[i]) {
-                    contains = true
-                    colorIndex = i
-                }
-            }
-            if (!contains) {
-                if (recentColorsList.size == sessionSettings.numRecentColors) {
-                    recentColorsList.removeAt(0)
-                }
-                recentColorsList.add(restorePoint.newColor)
-            }
-            else {
-                recentColorsList.removeAt(colorIndex)
-                recentColorsList.add(restorePoint.newColor)
-            }
-        }
     }
 
     fun undoPendingPaint() {
@@ -742,7 +681,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return null
     }
 
-    fun unitInRestorePoints(unitPoint: Point, list: List<RestorePoint>): RestorePoint? {
+    private fun unitInRestorePoints(unitPoint: Point, list: List<RestorePoint>): RestorePoint? {
         for(restorePoint: RestorePoint in list) {
             if (restorePoint.point.x == unitPoint.x && restorePoint.point.y == unitPoint.y) {
                 return restorePoint
@@ -752,6 +691,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return null
     }
 
+    // viewport
     fun updateDeviceViewport(
         context: Context,
         canvasCenterX: Float,
@@ -766,14 +706,13 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val screenWidth = displayMetrics.widthPixels
         val screenHeight = displayMetrics.heightPixels
 
-        val canvasCenterXPx = (canvasCenterX * ppu).toInt()
-        val canvasCenterYPx = (canvasCenterY * ppu).toInt()
+        val canvasCenterXPx = (canvasCenterX * ppu)
+        val canvasCenterYPx = (canvasCenterY * ppu)
 
-        var top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
-        var bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
-        var left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
-        var right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
-
+        val top = (canvasCenterYPx - screenHeight / 2) / ppu.toFloat()
+        val bottom = (canvasCenterYPx + screenHeight / 2) / ppu.toFloat()
+        val left = (canvasCenterXPx - screenWidth / 2) / ppu.toFloat()
+        val right = (canvasCenterXPx + screenWidth / 2) / ppu.toFloat()
 
         if (top < 0 || bottom > rows || left < 0 || right > cols) {
             if (fromScale) {
@@ -792,14 +731,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
         }
 
-        if (fromScale) {
-            // selected object
-            if (selectedPixels != null) {
-                selectedObjectListener?.onSelectedObjectMoved()
-            }
+        // selected object
+        if (selectedPixels != null) {
+            selectedObjectListener?.onSelectedObjectMoved()
         }
 
         interactiveCanvasListener?.notifyDeviceViewportUpdate()
+        interactiveCanvasListener?.onDeviceViewportUpdate()
+        interactiveCanvasDrawer?.notifyRedraw()
     }
 
     fun updateDeviceViewport(context: Context, fromScale: Boolean = false) {
@@ -808,21 +747,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    fun getScreenSpaceForUnit(x: Int, y: Int): RectF {
-        deviceViewport?.apply {
-            val offsetX = (x - left) * ppu
-            val offsetY = (y - top) * ppu
-
-            return RectF(offsetX, offsetY, offsetX + ppu, offsetY + ppu)
-        }
-
-        return RectF(0F, 0F, 0F, 0F)
-    }
-
     fun translateBy(context: Context, x: Float, y: Float) {
         deviceViewport?.apply {
             val len = max(width(), height())
-            val margin = len * 2 / 3
+            val margin = Utils.dpToPx(context, 200) / ppu
 
             var dX = x / ppu
             var dY = y / ppu
@@ -851,78 +779,76 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 dY = diff
             }
 
-            left += dX
-            right += dX
-            top += dY
-            bottom += dY
+            updateDeviceViewport(context, centerX() + dX, centerY() + dY)
+        }
+    }
 
-            val w = right - left
-            val h = bottom - top
+    fun getScreenSpaceForUnit(x: Int, y: Int): RectF {
+        deviceViewport?.apply {
+            val offsetX = (x - left) * ppu
+            val offsetY = (y - top) * ppu
 
-            // error! reset the canvas viewport
-            if (w <= 0 || h <= 0) {
-                deviceCanvasViewportResetListener?.resetDeviceCanvasViewport()
-            }
+            return RectF(offsetX, offsetY, offsetX + ppu, offsetY + ppu)
         }
 
-        // selected object
-        if (selectedPixels != null) {
-            selectedObjectListener?.onSelectedObjectMoved()
+        return RectF(0F, 0F, 0F, 0F)
+    }
+
+    fun canvasScreenBounds(): Rect {
+        deviceViewport?.apply {
+            val topLeftScreen = unitToScreenPoint(0F, 0F)
+            val bottomRightScreen = unitToScreenPoint(cols.toFloat(), rows.toFloat())
+
+            return Rect(topLeftScreen!!.x, topLeftScreen.y, bottomRightScreen!!.x, bottomRightScreen.y)
         }
 
         interactiveCanvasListener?.notifyDeviceViewportUpdate()
         interactiveCanvasDrawer?.notifyRedraw()
+
+        return Rect()
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun saveUnits(context: Context) {
-        val jsonArr = JSONArray(arr)
+    fun screenPointToUnit(x: Float, y: Float): Point? {
+        deviceViewport?.apply {
+            val topViewportPx = top * ppu
+            val leftViewportPx = left * ppu
 
-        val ed = sessionSettings.getSharedPrefs(context).edit()
+            val absXPx = leftViewportPx + x
+            val absYPx = topViewportPx + y
 
-        if (world) {
-            ed.putString("arr", jsonArr.toString())
-            ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
+            val absX = absXPx / ppu
+            val absY = absYPx / ppu
+
+            val point = Point()
+            point.x = floor(absX).toInt()
+            point.y = floor(absY).toInt()
+
+            return point
         }
-        else {
-            ed.putString("arr_canvas", exportCanvasToJson(arr))
-            ed.putString(
-                "recent_colors_single",
-                JSONArray(recentColorsList.toTypedArray()).toString()
-            )
-            ed.putInt("grid_line_color", getGridLineColor())
-        }
 
-        ed.apply()
+        return null
     }
 
-    fun getPixelHistory(pixelId: Int, callback: PixelHistoryCallback?) {
-        val requestQueue = Volley.newRequestQueue(context)
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
-            null,
-            { response ->
-                (context as Activity?)?.runOnUiThread {
-                    callback?.onHistoryJsonResponse(response.getJSONArray("data"))
-                }
-            },
-            { error ->
-                (context as Activity?)?.runOnUiThread {
+    fun unitToScreenPoint(x: Float, y: Float): Point? {
+        deviceViewport?.apply {
+            val topViewportPx = top * ppu
+            val leftViewportPx = left * ppu
 
-                }
-            }) {
+            val absXPx = x * ppu
+            val absYPx = y * ppu
 
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
+            val point = Point()
+            point.x = (absXPx - leftViewportPx).toInt()
+            point.y = (absYPx - topViewportPx).toInt()
+
+            return point
         }
 
-        requestQueue.add(request)
+        return null
+    }
 
+    fun unitInBounds(point: Point): Boolean {
+        return point.x in 0 until cols && point.y in 0 until rows
     }
 
     fun pixelIdForUnitPoint(unitPoint: Point): Int {
@@ -934,6 +860,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
+    // object move
     fun startMoveSelection(startUnit: Point, endUnit: Point): Boolean {
         if (!unitInBounds(startUnit) || !unitInBounds(endUnit)) {
             return false
@@ -1096,15 +1023,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return true
     }
 
-    fun commitMovePixels(pixels: List<RestorePoint>) {
-        for (pixel in pixels) {
-            val x = pixel.point.x
-            val y = pixel.point.y
-
-            arr[y][x] = pixel.color
-        }
+    fun hasSelectedObjectMoved(): Boolean {
+        return startSelectedStartUnit.x != cSelectedStartUnit.x || startSelectedStartUnit.y != cSelectedStartUnit.y
     }
 
+    // art export
     fun exportSelection(startUnit: Point, endUnit: Point) {
         if (!unitInBounds(startUnit) || !unitInBounds(endUnit)) {
             return
@@ -1159,7 +1082,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         stepPixelsInForm(x + 1, y + 1, pixelsOut, depth + 1)
     }
 
-    fun getPixels(startUnit: Point, endUnit: Point): List<RestorePoint> {
+    private fun getPixels(startUnit: Point, endUnit: Point): List<RestorePoint> {
         val pixelsOut: MutableList<RestorePoint> = ArrayList()
 
         var numLeadingCols = 0
@@ -1237,7 +1160,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return pixelsOut
     }
 
-    fun getStartAndEndUnits(pixels: List<RestorePoint>): Pair<Point, Point> {
+    private fun getStartAndEndUnits(pixels: List<RestorePoint>): Pair<Point, Point> {
         var minX = cols
         var maxX = -1
         var minY = rows
@@ -1267,15 +1190,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return Pair(Point(minX, minY), Point(maxX, maxY))
     }
 
-    fun unitInBounds(point: Point): Boolean {
-        return point.x in 0 until cols && point.y in 0 until rows
-    }
-
-    fun hasSelectedObjectMoved(): Boolean {
-        return startSelectedStartUnit.x != cSelectedStartUnit.x || startSelectedStartUnit.y != cSelectedStartUnit.y
-    }
-
-    fun copyPixels(pixels: List<RestorePoint>): List<RestorePoint> {
+    private fun copyPixels(pixels: List<RestorePoint>): List<RestorePoint> {
         val list: MutableList<RestorePoint> = ArrayList()
         for (pixel in pixels) {
             list.add(RestorePoint(Point(pixel.point.x, pixel.point.y), pixel.color, pixel.newColor))
@@ -1283,33 +1198,31 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return list
     }
 
-    fun notifyDeviceViewportUpdate() {
-        if (selectedPixels != null) {
-            selectedObjectListener?.onSelectedObjectMoved()
+    fun getPixelHistory(pixelId: Int, callback: PixelHistoryCallback?) {
+        val requestQueue = Volley.newRequestQueue(context)
+        val request = object: JsonObjectRequest(
+            Request.Method.GET,
+            Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
+            null,
+            { response ->
+                (context as Activity?)?.runOnUiThread {
+                    callback?.onHistoryJsonResponse(response.getJSONArray("data"))
+                }
+            },
+            { error ->
+                (context as Activity?)?.runOnUiThread {
+
+                }
+            }) {
+
+            override fun getHeaders(): MutableMap<String, String> {
+                val headers = HashMap<String, String>()
+                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["key1"] = Utils.key1
+                return headers
+            }
         }
-    }
 
-    fun getBackgroundColors(index: Int): List<Int> {
-        when (index) {
-            BACKGROUND_BLACK -> return listOf(0, 0)
-            BACKGROUND_WHITE -> return listOf(Color.WHITE, Color.WHITE)
-            BACKGROUND_GRAY_THIRDS -> return listOf(ActionButtonView.thirdGray.color, ActionButtonView.twoThirdGray.color)
-            BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
-            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.classicGrayLight.color, ActionButtonView.classicGrayDark.color)
-            BACKGROUND_CHESS -> return listOf(ActionButtonView.chessTan.color, ActionButtonView.blackPaint.color)
-            BACKGROUND_CUSTOM -> return listOf(SessionSettings.instance.canvasBackgroundPrimaryColor,
-                SessionSettings.instance.canvasBackgroundSecondaryColor)
-        }
-
-        return listOf()
-    }
-
-    class RestorePoint(var point: Point, var color: Int, var newColor: Int)
-
-    class ShortTermPixel(var restorePoint: RestorePoint) {
-        var time = 0L
-        init {
-            time = System.currentTimeMillis()
-        }
+        requestQueue.add(request)
     }
 }

@@ -1,18 +1,14 @@
-package com.ericversteeg.liquidocean
+package com.ericversteeg.liquidocean.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.fragment.SignInFragment
 import com.ericversteeg.liquidocean.listener.SignInListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 
 

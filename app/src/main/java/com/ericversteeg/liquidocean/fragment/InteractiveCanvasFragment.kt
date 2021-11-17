@@ -29,7 +29,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.FullscreenActivity
+import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
@@ -56,8 +56,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener {
-
-    var scaleFactor = 1f
 
     var initalColor = 0
 
@@ -96,6 +94,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var menuFragment: MenuFragment? = null
 
     var terminalFragment: TerminalFragment? = null
+
+    lateinit var visibleActionViews: Array<ActionButtonView>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -323,6 +323,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         // panel theme config
+        visibleActionViews = arrayOf(menu_action, paint_panel_action_view, export_action, background_action,
+        grid_lines_action, canvas_summary_action, open_tools_action, recent_colors_action)
+
+        menu_action.autoInvalidate = false
+        paint_panel_action_view.autoInvalidate = false
+        export_action.autoInvalidate = false
+        background_action.autoInvalidate = false
+        grid_lines_action.autoInvalidate = false
+        canvas_summary_action.autoInvalidate = false
+        open_tools_action.autoInvalidate = false
+        recent_colors_action.autoInvalidate = false
+
+        recolorVisibleActionViews()
+
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
@@ -447,14 +461,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
                     paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
-
-                /* if (Utils.isColorDark(color)) {
-                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white_border))
-                }
-                else {
-                    paint_yes.setImageDrawable(resources.getDrawable(R.drawable.ic_done_white))
-                    DrawableCompat.setTint(paint_yes.drawable, color)
-                } */
 
                 color_hex_string_input.removeTextChangedListener(textChangeListener)
 
@@ -606,9 +612,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
-            //recent_colors_container.visibility = View.GONE
-            //recent_colors_button.visibility = View.VISIBLE
-
             if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                 paint_yes_container.visibility = View.GONE
                 paint_no_container.visibility = View.GONE
@@ -720,6 +723,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
+            recolorVisibleActionViews()
 
             if (SessionSettings.instance.backgroundColorsIndex == 6 && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
                 SessionSettings.instance.backgroundColorsIndex = 0
@@ -763,10 +767,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // recent colors background
         recent_colors_container.setOnClickListener {
 
-        }
-
-        context?.apply {
-            // paint_panel.layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(this, 200), ConstraintLayout.LayoutParams.MATCH_PARENT)
         }
 
         // tablet & righty
@@ -1087,6 +1087,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     close_paint_panel_bottom_layer.layoutParams = layoutParams
                     close_paint_panel_top_layer.layoutParams = layoutParams
                 }
+
+                surface_view.setInitialPositionAndScale()
             }
         })
     }
@@ -1129,7 +1131,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
-        if (world) {
+        /*if (world) {
             Timer().schedule(object : TimerTask() {
                 override fun run() {
                     context?.apply {
@@ -1146,7 +1148,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }, 1000 * 60, 1000 * 60)
 
             getPaintTimerInfo()
-        }
+        }*/
 
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
@@ -1174,7 +1176,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 // interactive canvas
                 surface_view.interactiveCanvas.deviceViewport?.apply {
                     surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
-                    surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
                 }
 
                 // color picker frame width
@@ -1246,8 +1247,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 device_canvas_viewport_view.updateDeviceViewport()
 
                 setPanelBackground()
-
-                surface_view.interactiveCanvas.notifyDeviceViewportUpdate()
             }
         })
     }
@@ -1285,6 +1284,19 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         context?.apply {
             val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
             inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
+        }
+    }
+
+    private fun recolorVisibleActionViews() {
+        for (actionView in visibleActionViews) {
+            if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
+                actionView.colorMode = ActionButtonView.ColorMode.BLACK
+            }
+            else {
+                actionView.colorMode = ActionButtonView.ColorMode.WHITE
+            }
+
+            actionView.invalidate()
         }
     }
 
@@ -1522,6 +1534,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 export_action.toggleState = ActionButtonView.ToggleState.NONE
             }
+
+            export_action.invalidate()
         }
     }
 
@@ -1529,7 +1543,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (menuFragment == null) {
             menuFragment = MenuFragment()
 
-            menuFragment?.menuButtonListener = (activity as FullscreenActivity)
+            menuFragment?.menuButtonListener = (activity as InteractiveCanvasActivity)
             menuFragment?.menuCardListener = this
 
             fragmentManager?.apply {
@@ -1895,6 +1909,55 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
+    override fun onDeviceViewportUpdate() {
+        val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
+        //Log.v("canvas bounds", canvasBounds.toString())
+
+        for (actionView in visibleActionViews) {
+            val lastColorMode = actionView.colorMode
+
+            val location = IntArray(2)
+            actionView.getLocationOnScreen(location)
+
+            val x = location[0]
+            val y = location[1]
+
+            var inBounds = true
+
+            // left
+            if (x + actionView.width / 2 < canvasBounds.left) {
+                inBounds = false
+            }
+            // top
+            else if (y + actionView.height / 2 < canvasBounds.top) {
+                inBounds = false
+            }
+            // right
+            else if (x + actionView.width / 2 > canvasBounds.right) {
+                inBounds = false
+            }
+            // bottom
+            else if (y + actionView.height / 2 > canvasBounds.bottom) {
+                inBounds = false
+            }
+
+            if (!inBounds) {
+                actionView.colorMode = ActionButtonView.ColorMode.WHITE
+            }
+            else {
+                if (SessionSettings.instance.darkIcons) {
+                    actionView.colorMode = ActionButtonView.ColorMode.BLACK
+                } else {
+                    actionView.colorMode = ActionButtonView.ColorMode.WHITE
+                }
+            }
+
+            if (actionView.colorMode != lastColorMode) {
+                actionView.invalidate()
+            }
+        }
+    }
+
     // interactive canvas gesture listener
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE
@@ -2093,7 +2156,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             canvas_summary_view.drawBackground = false
             canvas_summary_view.interactiveCanvas = surface_view.interactiveCanvas
 
-            device_canvas_viewport_view.viewportListener = surface_view
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
 
             canvas_summary_container.visibility = View.VISIBLE
@@ -2238,6 +2300,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         toggleExportBorder(false)
     }
 
+    // menu card listener
+    override fun moveMenuCardBy(x: Float, y: Float) {
+        menu_container.x += x
+        menu_container.y += y
+
+        view?.apply {
+            if (menu_container.x + menu_container.width > width) {
+                menu_container.x = (width - menu_container.width).toFloat()
+            }
+            if (menu_container.x < 0) {
+                menu_container.x = 0F
+            }
+            if (menu_container.y + menu_container.height > height) {
+                menu_container.y = (height - menu_container.height).toFloat()
+            }
+            if (menu_container.y < 0) {
+                menu_container.y = 0F
+            }
+        }
+    }
+
+    override fun closeMenu() {
+        menu_container.visibility = View.GONE
+    }
+
     // world API
     private fun sendApiStatusCheck() {
         val requestQueue = Volley.newRequestQueue(context)
@@ -2371,30 +2458,5 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }, 0, 1000)
-    }
-
-    // menu card listener
-    override fun moveMenuCardBy(x: Float, y: Float) {
-        menu_container.x += x
-        menu_container.y += y
-
-        view?.apply {
-            if (menu_container.x + menu_container.width > width) {
-                menu_container.x = (width - menu_container.width).toFloat()
-            }
-            if (menu_container.x < 0) {
-                menu_container.x = 0F
-            }
-            if (menu_container.y + menu_container.height > height) {
-                menu_container.y = (height - menu_container.height).toFloat()
-            }
-            if (menu_container.y < 0) {
-                menu_container.y = 0F
-            }
-        }
-    }
-
-    override fun closeMenu() {
-        menu_container.visibility = View.GONE
     }
 }

@@ -12,8 +12,6 @@ import com.ericversteeg.liquidocean.model.InteractiveCanvas
 
 class DeviceCanvasViewportView: View {
 
-    var viewportListener: DeviceCanvasViewportListener? = null
-
     private var deviceViewport: RectF? = null
     private var baseDeviceViewport: RectF? = null
 
@@ -81,7 +79,9 @@ class DeviceCanvasViewportView: View {
                 viewportScaleFactor = Math.max(minScaleFactor, Math.min(viewportScaleFactor, maxScaleFactor))
 
                 baseDeviceViewport?.apply {
-                    viewportListener?.onDeviceViewportUpdate(scaledViewport(this, viewportScaleFactor))
+                    deviceViewport = scaledViewport(this, viewportScaleFactor)
+                    interactiveCanvasDrawer?.notifyRedraw()
+                    //viewportListener?.onDeviceViewportUpdate(scaledViewport(this, viewportScaleFactor))
                 }
             }
 
@@ -200,7 +200,8 @@ class DeviceCanvasViewportView: View {
                 scaledViewport.right = right * (interactiveCanvas!!.cols.toFloat() / width)
                 scaledViewport.bottom = bottom * (interactiveCanvas!!.rows.toFloat() / height)
 
-                viewportListener?.onDeviceViewportUpdate(scaledViewport)
+                updateDeviceViewport(context, scaledViewport.centerX(), scaledViewport.centerY())
+                //viewportListener?.onDeviceViewportUpdate(scaledViewport)
             }
         }
         invalidate()

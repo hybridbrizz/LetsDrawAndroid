@@ -20,7 +20,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.SignInActivity
+import com.ericversteeg.liquidocean.activity.SignInActivity
 import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils

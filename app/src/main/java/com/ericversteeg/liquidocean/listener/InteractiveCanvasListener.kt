@@ -14,4 +14,5 @@ interface InteractiveCanvasListener {
     fun notifyDeviceViewportUpdate()
 
     fun notifyUpdateCanvasSummary()
+    fun onDeviceViewportUpdate()
 }
