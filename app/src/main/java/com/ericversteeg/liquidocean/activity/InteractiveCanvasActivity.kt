@@ -89,7 +89,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
         hide()
 
-        showInteractiveCanvasFragment(false, 0, null)
+        showInteractiveCanvasFragment(false, 0)
 
         //TrustAllSSLCertsDebug.trust()
 
@@ -141,6 +141,20 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         StatTracker.instance.save(this)
     }
 
+    private fun showMenuFragment() {
+        val frag = MenuFragment()
+        frag.menuButtonListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showOptionsFragment() {
+        optionsFragment = OptionsFragment()
+        optionsFragment?.optionsListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
+    }
+
     private fun showStatsFragment() {
         val frag = StatsFragment()
 
@@ -157,20 +171,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().add(R.id.fullscreen_content, howtoFragment!!).commit()
     }
 
-    private fun showMenuFragment() {
-        val frag = MenuFragment()
-        frag.menuButtonListener = this
-
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
-    }
-
-    private fun showOptionsFragment() {
-        optionsFragment = OptionsFragment()
-        optionsFragment?.optionsListener = this
-
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
-    }
-
     private fun showLoadingFragment(world: Boolean, realmId: Int) {
         val frag = LoadingScreenFragment()
         frag.dataLoadingCallback = this
@@ -182,8 +182,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     private fun showInteractiveCanvasFragment(
         world: Boolean,
-        realmId: Int,
-        backgroundOption: ActionButtonView.Type? = null
+        realmId: Int
     ) {
         val frag = InteractiveCanvasFragment()
         frag.world = world
@@ -191,111 +190,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         frag.interactiveCanvasFragmentListener = this
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
-    }
-
-    private fun hide() {
-        // Hide UI first
-        supportActionBar?.hide()
-        fullscreen_content_controls.visibility = View.GONE
-        mVisible = false
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable)
-        mHideHandler.postDelayed(mHidePart2Runnable, 0)
-    }
-
-    /**
-     * Schedules a call to hide() in [delayMillis], canceling any
-     * previously scheduled calls.
-     */
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
-    }
-
-    private fun getDeviceInfo() {
-        val requestQueue = Volley.newRequestQueue(this)
-
-        val uniqueId = SessionSettings.instance.uniqueId
-
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
-            null,
-            { response ->
-                SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                SessionSettings.instance.xp = response.getInt("xp")
-
-                SessionSettings.instance.displayName = response.getString("name")
-
-                StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-
-                // server-side event sync
-                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PAINT_RECEIVED, response.getInt("tp"))
-                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PIXEL_OVERWRITE_IN, response.getInt("oi"))
-                StatTracker.instance.reportEvent(this@InteractiveCanvasActivity, StatTracker.EventType.PIXEL_OVERWRITE_OUT, response.getInt("oo"))
-
-                StatTracker.instance.displayAchievements(this@InteractiveCanvasActivity)
-            },
-            { error ->
-
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
-        }
-
-        requestQueue.add(request)
-    }
-
-    private fun sendDeviceId() {
-        val requestQueue = Volley.newRequestQueue(this)
-
-        val uniqueId = SessionSettings.instance.uniqueId
-
-        uniqueId?.apply {
-            val requestParams = HashMap<String, String>()
-
-            requestParams["uuid"] = uniqueId
-
-            val paramsJson = JSONObject(requestParams as Map<String, String>)
-
-            val request = object: JsonObjectRequest(
-                Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/register",
-                paramsJson,
-                { response ->
-                    SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
-                    SessionSettings.instance.xp = response.getInt("xp")
-
-                    StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
-                    StatTracker.instance.numPixelsPaintedSingle = response.getInt("st")
-                    StatTracker.instance.totalPaintAccrued = response.getInt("tp")
-                    StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
-                    StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
-
-                    SessionSettings.instance.sentUniqueId = true
-                },
-                { error ->
-
-                }) {
-
-                override fun getHeaders(): MutableMap<String, String> {
-                    val headers = HashMap<String, String>()
-                    headers["Content-Type"] = "application/json; charset=utf-8"
-                    headers["key1"] = Utils.key1
-                    return headers
-                }
-            }
-
-            request.tag = "download"
-            requestQueue.add(request)
-        }
     }
 
     // data load callback
@@ -323,7 +217,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 showHowtoFragment()
             }
             MenuFragment.singleMenuIndex -> {
-                showInteractiveCanvasFragment(false, 0, null)
+                showInteractiveCanvasFragment(false, 0)
             }
             MenuFragment.worldMenuIndex -> {
                 showLoadingFragment(true, 1)
@@ -338,7 +232,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 SessionSettings.instance.toolboxOpen = true
 
                 if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0, null)
+                    showInteractiveCanvasFragment(false, 0)
                 }
                 else if (route == MenuFragment.worldMenuIndex) {
                     showLoadingFragment(true, 1)
@@ -354,7 +248,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 SessionSettings.instance.toolboxOpen = true
 
                 if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0, null)
+                    showInteractiveCanvasFragment(false, 0)
                 }
                 else if (route == MenuFragment.worldMenuIndex) {
                     showLoadingFragment(true, 1)
@@ -366,16 +260,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         }
     }
 
-    override fun onSingleBackgroundOptionSelected(backgroundOption: ActionButtonView.Type) {
-        showInteractiveCanvasFragment(false, 0, backgroundOption)
-    }
-
     override fun onResetSinglePlay() {
 
     }
 
     override fun onOptionsBack() {
-        showInteractiveCanvasFragment(false, 0, null)
+        showInteractiveCanvasFragment(false, 0)
     }
 
     override fun onInteractiveCanvasBack() {
@@ -440,5 +330,25 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
             }
 
         }, 5000)
+    }
+
+    private fun hide() {
+        // Hide UI first
+        supportActionBar?.hide()
+        fullscreen_content_controls.visibility = View.GONE
+        mVisible = false
+
+        // Schedule a runnable to remove the status and navigation bar after a delay
+        mHideHandler.removeCallbacks(mShowPart2Runnable)
+        mHideHandler.postDelayed(mHidePart2Runnable, 0)
+    }
+
+    /**
+     * Schedules a call to hide() in [delayMillis], canceling any
+     * previously scheduled calls.
+     */
+    private fun delayedHide(delayMillis: Int) {
+        mHideHandler.removeCallbacks(mHideRunnable)
+        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 }

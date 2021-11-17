@@ -117,14 +117,6 @@ class MenuFragment: Fragment() {
             art_showcase.art = artShowcase[0]
         }*/
 
-        // backgrounds
-        background_option_black.type = ActionButtonView.Type.BACKGROUND_BLACK
-        background_option_white.type = ActionButtonView.Type.BACKGROUND_WHITE
-        background_option_gray_thirds.type = ActionButtonView.Type.BACKGROUND_GRAY_THIRDS
-        background_option_photoshop.type = ActionButtonView.Type.BACKGROUND_PHOTOSHOP
-        background_option_classic.type = ActionButtonView.Type.BACKGROUND_CLASSIC
-        background_option_chess.type = ActionButtonView.Type.BACKGROUND_CHESS
-
         val menuTextViews = listOf(options_menu_text, how_to_menu_text, lefty_menu_text, righty_menu_text)
         for (textView in menuTextViews) {
             textView.setOnTouchListener(object: View.OnTouchListener {
@@ -259,16 +251,6 @@ class MenuFragment: Fragment() {
 
         menu_button_container.setOnClickListener {
 
-        }
-
-        for (v1 in single_background_options.children) {
-            val v = v1 as ViewGroup
-            for (v2 in v.children) {
-                v2.setOnClickListener {
-                    val actionButton = it as ActionButtonView
-                    menuButtonListener?.onSingleBackgroundOptionSelected(actionButton.type)
-                }
-            }
         }
 
         if (SessionSettings.instance.selectedHand) {
@@ -486,7 +468,6 @@ class MenuFragment: Fragment() {
 
         empty_button_2_container.visibility = View.GONE
 
-        single_background_options.visibility = View.GONE
         back_button.visibility = View.GONE
     }
 
@@ -502,8 +483,6 @@ class MenuFragment: Fragment() {
         lefty_button_container.visibility = View.GONE
 
         righty_button_container.visibility = View.GONE
-
-        single_background_options.visibility = View.GONE
 
         empty_button_1_container.visibility = View.GONE
 
