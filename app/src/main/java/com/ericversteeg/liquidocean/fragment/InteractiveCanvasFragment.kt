@@ -1549,6 +1549,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             fragmentManager?.apply {
                 beginTransaction().replace(menu_container.id, menuFragment!!).commit()
 
+                menu_container.alpha = 0F
+                menu_container.animate().alpha(1f).setDuration(250).withEndAction {
+
+                }.start()
                 //interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
             }
         }

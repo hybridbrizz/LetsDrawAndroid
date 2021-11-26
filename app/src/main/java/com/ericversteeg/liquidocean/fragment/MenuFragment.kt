@@ -73,7 +73,7 @@ class MenuFragment: Fragment() {
         val allViews = listOf<View>(back_button, back_action,
             options_menu_text, how_to_menu_text, menu_button_container)
 
-        fadeInAllView(allViews)
+        //fadeInAllView(allViews)
 
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
