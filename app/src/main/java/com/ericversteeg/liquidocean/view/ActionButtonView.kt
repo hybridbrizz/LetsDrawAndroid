@@ -44,6 +44,7 @@ class ActionButtonView: View {
         val classicGrayLight = Paint()
         val classicGrayDark = Paint()
         val chessTan = Paint()
+        val manila = Paint()
         val linePaint = Paint()
         val lightGrayPaint = Paint()
         val bluePaint = Paint()
@@ -246,6 +247,7 @@ class ActionButtonView: View {
         classicGrayDark.color = Color.parseColor("#FF333333")
 
         chessTan.color = Color.parseColor("#FFb59870")
+        manila.color = Color.parseColor("#ffe7c9a9")
 
         lightGrayPaint.color = Color.parseColor("#FFDDDDDD")
 

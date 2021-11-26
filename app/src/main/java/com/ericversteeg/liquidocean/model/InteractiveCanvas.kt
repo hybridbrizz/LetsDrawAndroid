@@ -534,8 +534,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             BACKGROUND_WHITE -> return listOf(Color.WHITE, Color.WHITE)
             BACKGROUND_GRAY_THIRDS -> return listOf(ActionButtonView.thirdGray.color, ActionButtonView.twoThirdGray.color)
             BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
-            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.classicGrayLight.color, ActionButtonView.classicGrayDark.color)
-            BACKGROUND_CHESS -> return listOf(ActionButtonView.chessTan.color, ActionButtonView.blackPaint.color)
+            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.manila.color, ActionButtonView.classicGrayDark.color)
+            BACKGROUND_CHESS -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.blackPaint.color)
             BACKGROUND_CUSTOM -> return listOf(SessionSettings.instance.canvasBackgroundPrimaryColor,
                 SessionSettings.instance.canvasBackgroundSecondaryColor)
         }
