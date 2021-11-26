@@ -1439,8 +1439,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             paint_panel_button.visibility = View.VISIBLE
 
-            recent_colors_action.visibility = View.VISIBLE
-            recent_colors_container.visibility = View.GONE
+            //recent_colors_action.visibility = View.VISIBLE
+            //recent_colors_container.visibility = View.GONE
 
             if (toolboxOpen) {
                 export_button.visibility = View.VISIBLE
