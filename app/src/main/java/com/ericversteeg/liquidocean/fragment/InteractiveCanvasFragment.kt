@@ -1319,8 +1319,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         SessionSettings.instance.paintColor = this
                         notifyPaintColorUpdate(SessionSettings.instance.paintColor)
 
-                        recent_colors_container.visibility = View.GONE
-                        recent_colors_action.visibility = View.VISIBLE
+                        //recent_colors_container.visibility = View.GONE
+                        //recent_colors_action.visibility = View.VISIBLE
                     }
                 }
 
@@ -1881,8 +1881,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun notifyPaintActionStarted() {
-        recent_colors_action.visibility = View.VISIBLE
-        recent_colors_container.visibility = View.GONE
+        //recent_colors_action.visibility = View.VISIBLE
+        //recent_colors_container.visibility = View.GONE
 
         if (!SessionSettings.instance.lockPaintPanel) {
             togglePaintPanel(show = false, softHide = true)
