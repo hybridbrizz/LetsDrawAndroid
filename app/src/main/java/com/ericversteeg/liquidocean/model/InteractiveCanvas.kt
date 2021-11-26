@@ -655,9 +655,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
         }
 
+        updateRecentColors()
+
         clearRestorePoints()
 
-        updateRecentColors()
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
     }
 
