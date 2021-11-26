@@ -446,7 +446,7 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="bottom"
                     android:gravity="bottom"
-                    android:fontFamily="@font/inter_bold"
+                    android:fontFamily="@font/inter_light"
                     android:textSize="8pt"
                     android:lines="1"
                     android:textColor="@android:color/white"
