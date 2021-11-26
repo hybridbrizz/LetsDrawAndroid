@@ -107,7 +107,7 @@
                     <com.ericversteeg.liquidocean.view.ActionButtonView
                             android:id="@+id/palette_remove_color_action"
                             android:layout_width="20dp"
-                            android:layout_height="4dp"
+                            android:layout_height="2dp"
                             android:layout_gravity="center" />
 
                 </com.ericversteeg.liquidocean.view.ActionButtonFrame>
