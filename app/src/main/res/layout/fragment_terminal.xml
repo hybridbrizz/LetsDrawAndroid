@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:background="#BB999999"
+        android:padding="10dp">
+
+    <EditText
+            android:id="@+id/terminal_input"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#33000000"
+            android:fontFamily="@font/inter_light"
+            android:textColor="#FFF"
+            android:textSize="50dp"
+            android:lines="1"
+            android:imeOptions="actionDone"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    <com.ericversteeg.liquidocean.view.AutoCompleteView
+            android:id="@+id/autoCompleteView"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@android:color/transparent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

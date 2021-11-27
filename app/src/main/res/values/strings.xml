@@ -35,7 +35,7 @@
     <string name="option_canvas_background_primary_color_title">Canvas background primary color</string>
     <string name="option_canvas_background_secondary_color_title">Canvas background secondary color</string>
     <string name="option_frame_color_title">Frame color</string>
-    <string name="option_close_paint_panel_color_title">Close draw panel button color</string>
+    <string name="option_close_paint_panel_color_title">Close button color</string>
     <string name="step1">It\'s easy to get started. Enter into the canvas then tap the three dot icon to bring up the color panel. From here you can choose a color and do many other things.
         Tap and drag anywhere on the canvas to draw the currently selected color. Tap and drag back over any pixels that you want to remove. Finalize
         by tapping the green checkmark, or to cancel tap the red x.</string>

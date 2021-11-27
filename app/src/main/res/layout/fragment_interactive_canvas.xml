@@ -107,7 +107,7 @@
                     <com.ericversteeg.liquidocean.view.ActionButtonView
                             android:id="@+id/palette_remove_color_action"
                             android:layout_width="20dp"
-                            android:layout_height="4dp"
+                            android:layout_height="2dp"
                             android:layout_gravity="center" />
 
                 </com.ericversteeg.liquidocean.view.ActionButtonFrame>
@@ -446,7 +446,7 @@
                     android:layout_marginEnd="10dp"
                     android:layout_gravity="bottom"
                     android:gravity="bottom"
-                    android:fontFamily="@font/inter_bold"
+                    android:fontFamily="@font/inter_light"
                     android:textSize="8pt"
                     android:lines="1"
                     android:textColor="@android:color/white"
@@ -498,7 +498,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="40dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             app:layout_constraintLeft_toRightOf="@id/color_picker_frame"
@@ -1036,6 +1036,18 @@
             android:id="@+id/menu_container"
             android:visibility="gone"
             android:background="@drawable/shadow_background"
+            android:layout_width="500dp"
+            android:layout_height="300dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:cardCornerRadius="20dp" />
+
+    <FrameLayout
+            android:id="@+id/terminal_container"
+            android:visibility="gone"
+            android:background="@android:color/transparent"
             android:layout_width="500dp"
             android:layout_height="300dp"
             app:layout_constraintStart_toStartOf="parent"

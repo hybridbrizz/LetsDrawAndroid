@@ -93,6 +93,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var menuFragment: MenuFragment? = null
 
+    var terminalFragment: TerminalFragment? = null
+
     lateinit var visibleActionViews: Array<ActionButtonView>
 
     override fun onCreateView(
@@ -674,9 +676,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 surface_view.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
+            else if (terminal_container.visibility == View.VISIBLE) {
+                toggleTerminal(false)
+            }
             else {
                 toggleMenu(menu_container.visibility != View.VISIBLE)
             }
+        }
+
+        activity?.apply {
+            menu_button.setLongPressActionListener(this, object: LongPressListener {
+                override fun onLongPress() {
+                    toggleTerminal(true)
+                }
+            })
         }
 
         // export button
@@ -697,6 +710,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 toggleExportBorder(false)
             }
         }
+
+        Log.i("Panel size", SessionSettings.instance.panelResIds.size.toString())
 
         // background button
         background_button.setOnClickListener {
@@ -1304,8 +1319,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         SessionSettings.instance.paintColor = this
                         notifyPaintColorUpdate(SessionSettings.instance.paintColor)
 
-                        recent_colors_container.visibility = View.GONE
-                        recent_colors_action.visibility = View.VISIBLE
+                        //recent_colors_container.visibility = View.GONE
+                        //recent_colors_action.visibility = View.VISIBLE
                     }
                 }
 
@@ -1424,8 +1439,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             paint_panel_button.visibility = View.VISIBLE
 
-            recent_colors_action.visibility = View.VISIBLE
-            recent_colors_container.visibility = View.GONE
+            //recent_colors_action.visibility = View.VISIBLE
+            //recent_colors_container.visibility = View.GONE
 
             if (toolboxOpen) {
                 export_button.visibility = View.VISIBLE
@@ -1534,6 +1549,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             fragmentManager?.apply {
                 beginTransaction().replace(menu_container.id, menuFragment!!).commit()
 
+                menu_container.alpha = 0F
+                menu_container.animate().alpha(1f).setDuration(250).withEndAction {
+
+                }.start()
                 //interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
             }
         }
@@ -1545,6 +1564,25 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         else {
             menu_container.visibility = View.GONE
+        }
+    }
+
+    private fun toggleTerminal(open: Boolean) {
+        if (terminalFragment == null) {
+            terminalFragment = TerminalFragment()
+
+            terminalFragment?.interactiveCanvas = surface_view.interactiveCanvas
+
+            fragmentManager?.apply {
+                beginTransaction().replace(terminal_container.id, terminalFragment!!).commit()
+            }
+        }
+
+        if (open) {
+            terminal_container.visibility = View.VISIBLE
+        }
+        else {
+            terminal_container.visibility = View.GONE
         }
     }
 
@@ -1847,8 +1885,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun notifyPaintActionStarted() {
-        recent_colors_action.visibility = View.VISIBLE
-        recent_colors_container.visibility = View.GONE
+        //recent_colors_action.visibility = View.VISIBLE
+        //recent_colors_container.visibility = View.GONE
 
         if (!SessionSettings.instance.lockPaintPanel) {
             togglePaintPanel(show = false, softHide = true)
@@ -1861,6 +1899,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun isPaletteFragmentOpen(): Boolean {
         return pixel_history_fragment_container.visibility == View.VISIBLE
+    }
+
+    override fun notifyDeviceViewportUpdate() {
+        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        }
+    }
+
+    override fun notifyUpdateCanvasSummary() {
+        if (canvas_summary_container.visibility == View.VISIBLE) {
+            canvas_summary_view.invalidate()
+        }
     }
 
     override fun onDeviceViewportUpdate() {
@@ -1916,17 +1966,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE
 
-        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+        /*if (device_canvas_viewport_view.visibility == View.VISIBLE) {
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
-        }
+        }*/
     }
 
     override fun onInteractiveCanvasScale() {
         pixel_history_fragment_container.visibility = View.GONE
 
-        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
+        /*if (device_canvas_viewport_view.visibility == View.VISIBLE) {
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
-        }
+        }*/
     }
 
     // paint qty listener
