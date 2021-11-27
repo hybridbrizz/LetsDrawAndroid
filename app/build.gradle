@@ -13,7 +13,7 @@ allOpen {
 android {
     signingConfigs {
         debug {
-            storeFile file('C:\\Users\\Eric\\AndroidStudioProjects\\LiquidOcean\\keystore_debug.jks')
+            storeFile file('C:\\Users\\Eric\\Desktop\\keystore\\LetsDraw\\keystore_debug.jks')
             storePassword 'java123'
             keyAlias 'key0'
             keyPassword 'java123'
