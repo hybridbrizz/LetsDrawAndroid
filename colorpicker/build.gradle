@@ -19,10 +19,10 @@ ext {
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 31
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
