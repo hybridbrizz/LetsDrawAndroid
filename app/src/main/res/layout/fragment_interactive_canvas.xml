@@ -425,7 +425,7 @@
                     android:id="@+id/default_white_color_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp">
+                    android:layout_marginStart="5dp">
 
                 <com.ericversteeg.liquidocean.view.ActionButtonView
                         android:id="@+id/default_white_color_action"
@@ -441,13 +441,14 @@
 
             <EditText
                     android:id="@+id/color_hex_string_input"
-                    android:layout_width="100dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="10dp"
+                    android:layout_width="70dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_gravity="bottom"
-                    android:gravity="bottom"
+                    android:gravity="bottom|end"
                     android:fontFamily="@font/inter_light"
-                    android:textSize="8pt"
+                    android:textSize="15sp"
                     android:lines="1"
                     android:textColor="@android:color/white"
                     android:inputType="textCapCharacters" />
