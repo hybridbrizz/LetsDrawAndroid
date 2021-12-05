@@ -233,33 +233,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_panel_button.actionBtnView = paint_panel_action_view
         paint_panel_action_view.type = ActionButtonView.Type.PAINT
 
-        paint_yes_bottom_layer.isStatic = true
         paint_yes_bottom_layer.type = ActionButtonView.Type.YES
-        paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
-        paint_yes_top_layer.type = ActionButtonView.Type.YES
-        paint_yes_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        paint_yes_top_layer.topLayer = true
+        paint_yes.actionBtnView = paint_yes_bottom_layer
 
-        paint_yes.actionBtnView = paint_yes_top_layer
-
-        paint_no_bottom_layer.isStatic = true
         paint_no_bottom_layer.type = ActionButtonView.Type.NO
-        paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
-        paint_no_top_layer.type = ActionButtonView.Type.NO
-        paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        paint_no_top_layer.topLayer = true
+        paint_no.actionBtnView = paint_no_bottom_layer
 
-        paint_no.actionBtnView = paint_no_top_layer
-
-        close_paint_panel_bottom_layer.isStatic = true
         close_paint_panel_bottom_layer.type = ActionButtonView.Type.PAINT_CLOSE
 
-        close_paint_panel_top_layer.type = ActionButtonView.Type.PAINT_CLOSE
-        close_paint_panel_top_layer.topLayer = true
-
-        close_paint_panel.actionBtnView = close_paint_panel_top_layer
+        close_paint_panel.actionBtnView = close_paint_panel_bottom_layer
 
         if (SessionSettings.instance.lockPaintPanel) {
             lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
@@ -362,6 +346,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
+            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
@@ -372,6 +359,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+
+            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -517,9 +507,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 surface_view.endPaintSelection()
 
-                paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-                paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-
                 if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                     paint_yes_container.visibility = View.GONE
                     paint_no_container.visibility = View.GONE
@@ -580,11 +567,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 if (panelThemeConfig.actionButtonColor == Color.BLACK) {
                     paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_no_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
                 else {
                     paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_no_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
 
                 //recent_colors_button.visibility = View.GONE
@@ -608,9 +593,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_color_accept.visibility = View.GONE
 
             surface_view.endPaintSelection()
-
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-            paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
 
             if (surface_view.interactiveCanvas.restorePoints.size == 0) {
                 paint_yes_container.visibility = View.GONE

@@ -428,10 +428,10 @@ class ActionButtonView: View {
 
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
-                paint = blackPaint
+                paint = semiDarkPaint
             }
             else if (colorMode == ColorMode.WHITE) {
-                paint = whitePaint
+                paint = semiPaint
             }
         }
 
@@ -440,12 +440,7 @@ class ActionButtonView: View {
                 paint.color = Utils.brightenColor(paint.color, 0.15F)
             }
             else {
-                if (colorMode == ColorMode.BLACK) {
-                    paint = twoThirdGray
-                }
-                else if (colorMode == ColorMode.WHITE) {
-                    paint = thirdGray
-                }
+                paint = lightYellowPaint
             }
         }
 
@@ -585,24 +580,18 @@ class ActionButtonView: View {
 
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
-                paint = blackPaint
+                paint = semiDarkPaint
             }
             else if (colorMode == ColorMode.WHITE) {
-                paint = whitePaint
+                paint = semiPaint
             }
         }
 
         if (light && !isStatic) {
-            if (colorMode == ColorMode.COLOR) {
-                paint = lightGreenPaint
-            }
-            else {
-                if (colorMode == ColorMode.BLACK) {
-                    paint = twoThirdGray
-                }
-                else if (colorMode == ColorMode.WHITE) {
-                    paint = thirdGray
-                }
+            paint = if (colorMode == ColorMode.COLOR) {
+                lightGreenPaint
+            } else {
+                lightYellowPaint
             }
         }
 
@@ -634,24 +623,18 @@ class ActionButtonView: View {
 
         if (colorMode != ColorMode.COLOR) {
             if (colorMode == ColorMode.BLACK) {
-                paint = blackPaint
+                paint = semiDarkPaint
             }
             else if (colorMode == ColorMode.WHITE) {
-                paint = whitePaint
+                paint = semiPaint
             }
         }
 
         if (light) {
-            if (colorMode == ColorMode.COLOR) {
-                paint = lightRedPaint
-            }
-            else {
-                if (colorMode == ColorMode.BLACK) {
-                    paint = twoThirdGray
-                }
-                else if (colorMode == ColorMode.WHITE) {
-                    paint = thirdGray
-                }
+            paint = if (colorMode == ColorMode.COLOR) {
+                lightRedPaint
+            } else {
+                lightYellowPaint
             }
         }
 
