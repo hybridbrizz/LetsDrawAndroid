@@ -1153,11 +1153,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_panel.background = null
 
-        Utils.setViewLayoutListener(view!!, object : Utils.ViewLayoutListener {
+        Utils.setViewLayoutListener(requireView(), object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 // interactive canvas
                 surface_view.interactiveCanvas.deviceViewport?.apply {
-                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
+                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.requireContext())
                 }
 
                 // color picker frame width
@@ -1241,7 +1241,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (SessionSettings.instance.tablet) {
                 paint_panel.clipChildren = false
 
-                val scale = view!!.height / backgroundDrawable.bitmap.height.toFloat()
+                val scale = requireView().height / backgroundDrawable.bitmap.height.toFloat()
 
                 val newWidth = (backgroundDrawable.bitmap.width * scale).toInt()
                 val newHeight = (backgroundDrawable.bitmap.height * scale).toInt()
@@ -2086,7 +2086,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // palette fragment helper
     private fun showPaletteUndoSnackbar(palette: Palette) {
         palettesFragment?.apply {
-            val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
+            val snackbar = Snackbar.make(requireView(), "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
             snackbar.setAction("Undo") {
                 undoDelete()
                 this@InteractiveCanvasFragment.palette_name_text.text = SessionSettings.instance.palette.name
@@ -2096,7 +2096,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun showPaletteColorUndoSnackbar(palette: Palette) {
-        val snackbar = Snackbar.make(view!!, "Removed color from ${palette.name} palette", Snackbar.LENGTH_LONG)
+        val snackbar = Snackbar.make(requireView(), "Removed color from ${palette.name} palette", Snackbar.LENGTH_LONG)
         snackbar.setAction("Undo") {
             undoPaletteColorRemove()
         }
