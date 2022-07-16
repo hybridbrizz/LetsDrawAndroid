@@ -92,7 +92,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         super.onPause()
 
         InteractiveCanvasSocket.instance.socketConnectCallback = null
-        if (InteractiveCanvasSocket != null && InteractiveCanvasSocket.instance.socket!!.connected()) {
+        if (InteractiveCanvasSocket.instance.socket!!.connected()) {
             InteractiveCanvasSocket.instance.socket?.disconnect()
         }
 

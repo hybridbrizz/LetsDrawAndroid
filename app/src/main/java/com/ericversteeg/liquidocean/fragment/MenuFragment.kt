@@ -181,6 +181,10 @@ class MenuFragment: Fragment() {
             }
         }*/
 
+        connect_menu_text.setOnClickListener {
+            menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+        }
+
         options_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(optionsMenuIndex)
             menuCardListener?.closeMenu()
@@ -254,6 +258,7 @@ class MenuFragment: Fragment() {
         }
 
         if (SessionSettings.instance.selectedHand) {
+            connect_button_container.visibility = View.VISIBLE
             options_button_container.visibility = View.VISIBLE
             howto_button_container.visibility = View.VISIBLE
 
@@ -294,6 +299,7 @@ class MenuFragment: Fragment() {
             }
         })
 
+        Utils.colorizeTextView(connect_menu_text, "#CCCCCC", "#DDDDDD")
         Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
         Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
         Utils.colorizeTextView(lefty_menu_text, "#CCCCCC", "#DDDDDD")
@@ -354,7 +360,8 @@ class MenuFragment: Fragment() {
         if (!animatingMenu) {
             animatingMenu = true
             if (layer == 0) {
-                Animator.animateMenuItems(listOf(listOf(options_menu_text),
+                Animator.animateMenuItems(listOf(
+                    listOf(connect_menu_text), listOf(options_menu_text),
                     listOf(stats_button_bottom_layer, stats_button), listOf(how_to_menu_text)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {

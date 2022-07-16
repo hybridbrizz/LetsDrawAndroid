@@ -89,7 +89,8 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
         hide()
 
-        showInteractiveCanvasFragment(false, 0)
+        //showInteractiveCanvasFragment(false, 0)
+        showMenuFragment()
 
         //TrustAllSSLCertsDebug.trust()
 

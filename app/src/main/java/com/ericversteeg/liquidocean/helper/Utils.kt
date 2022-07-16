@@ -28,9 +28,9 @@ class Utils {
 
     companion object {
         //val baseUrlApi = "https://192.168.200.69:5000"
-        val baseUrlApi = "https://ericversteeg.com:5000"
+        val baseUrlApi = "http://104.219.251.20:5000"
         //val baseUrlSocket = "https://192.168.200.69:5010"
-        val baseUrlSocket = "https://ericversteeg.com:5010"
+        val baseUrlSocket = "http://104.219.251.20:5010"
 
         val key1 = "8AHI!VR7299G7cq3YsP359HDkKz682oNT3QHh?yyehuvkyzdm674w45o"
 

@@ -49,11 +49,38 @@
                 android:layout_marginRight="40dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/options_button_container"
+                    android:id="@+id/connect_button_container"
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp">
+
+                <TextView
+                        android:id="@+id/connect_menu_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        android:fontFamily="@font/inter_medium"
+                        android:textSize="38dp"
+                        android:textColor="#DDFFFFFF"
+                        android:gravity="center_vertical"
+                        android:text="@string/connect_menu_title"
+                        android:shadowColor="#7F000000"
+                        android:shadowDx="3"
+                        android:shadowDy="3"
+                        android:shadowRadius="4" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/options_button_container"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-5dp"
                     android:layout_marginLeft="30dp"
                     android:layout_marginRight="30dp">
 
