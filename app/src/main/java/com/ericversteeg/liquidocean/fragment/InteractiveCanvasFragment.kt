@@ -1113,11 +1113,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
-        /*if (world) {
+        if (world) {
             Timer().schedule(object : TimerTask() {
                 override fun run() {
                     context?.apply {
-                        var connected = Utils.isNetworkAvailable(this)
+                        val connected = Utils.isNetworkAvailable(this)
                         if (!connected) {
                             (context as Activity?)?.runOnUiThread {
                                 showDisconnectedMessage(0)
@@ -1130,7 +1130,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }, 1000 * 60, 1000 * 60)
 
             getPaintTimerInfo()
-        }*/
+        }
 
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 

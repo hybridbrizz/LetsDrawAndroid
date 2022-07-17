@@ -21,13 +21,22 @@ import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.listener.MenuCardListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.service.InteractiveCanvasService
+import com.ericversteeg.liquidocean.service.NoSSLv3SocketFactory
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.google.android.gms.security.ProviderInstaller
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_menu.*
 import kotlinx.android.synthetic.main.fragment_menu.back_action
 import kotlinx.android.synthetic.main.fragment_menu.back_button
 import kotlinx.android.synthetic.main.fragment_options.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
+import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 
 class MenuFragment: Fragment() {
@@ -63,8 +72,26 @@ class MenuFragment: Fragment() {
         return view
     }
 
+    private fun testRetrofit() {
+        HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3SocketFactory())
+
+        val retrofit = Retrofit.Builder().baseUrl("https://ericversteeg.com:5000/api/v1/").addConverterFactory(ScalarsConverterFactory.create()).build()
+        val service = retrofit.create(InteractiveCanvasService::class.java)
+        service.getChunkPixels(Utils.key1).enqueue(object: Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                Log.i("Response", response.body()!!)
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+
+            }
+        })
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        testRetrofit()
 
         SessionSettings.instance.canvasOpen = false
 

@@ -346,47 +346,61 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     private fun registerForSocketEvents(socket: Socket?) {
-        socket?.on("pixels_commit") {
-            (context as Activity?)?.runOnUiThread(Runnable {
-                val shortTermPixels: MutableList<ShortTermPixel> = ArrayList()
+//        socket?.on("pixels_commit") {
+//            (context as Activity?)?.runOnUiThread(Runnable {
+//                val shortTermPixels: MutableList<ShortTermPixel> = ArrayList()
+//
+//                val pixelsJsonArr = it[0] as JSONArray
+//                for (i in 0 until pixelsJsonArr.length()) {
+//                    val pixelObj = pixelsJsonArr.get(i) as JSONObject
+//
+//                    var sameRealm = false
+//
+//                    // update color
+//                    var unit1DIndex = pixelObj.getInt("id") - 1
+//
+//                    if (unit1DIndex < (512 * 512) && realmId == 2) {
+//                        sameRealm = true
+//                    }
+//                    else if (unit1DIndex >= (512 * 512) && realmId == 1) {
+//                        sameRealm = true
+//                    }
+//
+//                    // adjust from the absolute pixel id (on top of dev pixels in table (for now))
+//                    if (realmId == 1) {
+//                        unit1DIndex -= (512 * 512)
+//                    }
+//
+//                    if (sameRealm) {
+//                        val y = unit1DIndex / cols
+//                        val x = unit1DIndex % cols
+//
+//                        val color = pixelObj.getInt("color")
+//
+//                        arr[y][x] = color
+//
+//                        shortTermPixels.add(ShortTermPixel(RestorePoint(Point(x, y), color, color)))
+//                    }
+//                }
+//
+//                sessionSettings.addShortTermPixels(shortTermPixels)
+//
+//                interactiveCanvasDrawer?.notifyRedraw()
+//            })
+//        }
 
-                val pixelsJsonArr = it[0] as JSONArray
-                for (i in 0 until pixelsJsonArr.length()) {
-                    val pixelObj = pixelsJsonArr.get(i) as JSONObject
+        socket?.on("pixel_receive") {
+            val data = it[0] as String
+            val t = data.split("&")
+            val pixelId = t[0].toInt()
+            val deviceId = t[1].toInt()
+            val color = t[2].toInt()
 
-                    var sameRealm = false
+            val x = pixelId % 1024
+            val y = pixelId / 1024
 
-                    // update color
-                    var unit1DIndex = pixelObj.getInt("id") - 1
-
-                    if (unit1DIndex < (512 * 512) && realmId == 2) {
-                        sameRealm = true
-                    }
-                    else if (unit1DIndex >= (512 * 512) && realmId == 1) {
-                        sameRealm = true
-                    }
-
-                    // adjust from the absolute pixel id (on top of dev pixels in table (for now))
-                    if (realmId == 1) {
-                        unit1DIndex -= (512 * 512)
-                    }
-
-                    if (sameRealm) {
-                        val y = unit1DIndex / cols
-                        val x = unit1DIndex % cols
-
-                        val color = pixelObj.getInt("color")
-
-                        arr[y][x] = color
-
-                        shortTermPixels.add(ShortTermPixel(RestorePoint(Point(x, y), color, color)))
-                    }
-                }
-
-                sessionSettings.addShortTermPixels(shortTermPixels)
-
-                interactiveCanvasDrawer?.notifyRedraw()
-            })
+            arr[y][x] = color
+            interactiveCanvasDrawer?.notifyRedraw()
         }
 
         socket?.on("paint_qty") {
@@ -621,28 +635,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     // sends pixel updates to the web server
     fun commitPixels() {
         if (world) {
-            val arr = arrayOfNulls<Map<String, Int>>(restorePoints.size)
-
-            for((index, restorePoint) in restorePoints.withIndex()) {
-                val map = HashMap<String, Int>()
-                if (realmId == 2) {
-                    map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1
-                }
-                else if (realmId == 1) {
-                    map["id"] = (restorePoint.point.y * cols + restorePoint.point.x) + 1 + (512 * 512)
-                }
-                map["color"] = restorePoint.newColor
-
-                arr[index] = map
+            for(restorePoint in restorePoints) {
+                InteractiveCanvasSocket.instance.socket?.emit("pixel_send",
+                    buildPixelString(restorePoint.point.x, restorePoint.point.y, 15, restorePoint.newColor)
+                )
             }
-
-            val reqObj = JSONObject()
-            val jsonArr = JSONArray(arr)
-
-            reqObj.put("uuid", sessionSettings.uniqueId)
-            reqObj.put("pixels", jsonArr)
-
-            InteractiveCanvasSocket.instance.socket?.emit("pixels_event", reqObj)
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,
@@ -660,6 +657,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         clearRestorePoints()
 
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
+    }
+
+    private fun buildPixelString(x: Int, y: Int, deviceId: Int, color: Int): String {
+        val pixelId = y * cols + x
+        return String.format("%d&%d&%d", pixelId, deviceId, color)
     }
 
     fun undoPendingPaint() {

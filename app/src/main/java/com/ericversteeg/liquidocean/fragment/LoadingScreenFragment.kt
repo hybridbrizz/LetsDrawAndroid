@@ -271,13 +271,13 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["Content-Type"] = "application/json"
                 headers["key1"] = Utils.key1
                 return headers
             }
         }
 
-        jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 2, 1.0f)
+        //jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 2, 1.0f)
 
         jsonObjRequest.tag = "download"
         dataRequestQueue.add(jsonObjRequest)
@@ -380,7 +380,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
             override fun getHeaders(): MutableMap<String, String> {
                 val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
+                headers["Content-Type"] = "application/json"
                 headers["key1"] = Utils.key1
                 return headers
             }
