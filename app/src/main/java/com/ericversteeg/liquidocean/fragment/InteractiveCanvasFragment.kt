@@ -1523,7 +1523,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun toggleMenu(open: Boolean) {
         if (menuFragment == null) {
-            menuFragment = MenuFragment()
+            menuFragment = MenuFragment.createFromCanvas(this)
 
             menuFragment?.menuButtonListener = (activity as InteractiveCanvasActivity)
             menuFragment?.menuCardListener = this

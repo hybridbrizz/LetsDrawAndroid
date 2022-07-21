@@ -71,7 +71,15 @@ class OptionsFragment: Fragment(), FragmentListener {
                     SessionSettings.instance.save(this)
                 }
 
-                optionsListener?.onOptionsBack()
+                if (parentFragment != null && parentFragment is InteractiveCanvasFragment) {
+                    requireParentFragment().childFragmentManager
+                        .beginTransaction()
+                        .remove(this)
+                        .commit()
+                }
+                else {
+                    optionsListener?.onOptionsBack()
+                }
             }
         }
 

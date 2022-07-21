@@ -65,6 +65,8 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     var optionsFragment: OptionsFragment? = null
     var howtoFragment: HowtoFragment? = null
 
+    var canvasFragment: InteractiveCanvasFragment? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -154,7 +156,15 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         optionsFragment = OptionsFragment()
         optionsFragment?.optionsListener = this
 
-        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
+        if (canvasFragment != null) {
+            canvasFragment!!.childFragmentManager
+                .beginTransaction()
+                .replace(R.id.options_container, optionsFragment!!)
+                .commit()
+        }
+        else {
+            supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, optionsFragment!!).commit()
+        }
     }
 
     private fun showStatsFragment() {

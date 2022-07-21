@@ -1058,4 +1058,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:cardCornerRadius="20dp" />
 
+    <FrameLayout
+            android:id="@+id/options_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

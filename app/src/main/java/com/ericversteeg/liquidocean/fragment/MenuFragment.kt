@@ -1,5 +1,6 @@
 package com.ericversteeg.liquidocean.fragment
 
+import android.content.Context
 import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Shader
@@ -15,6 +16,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -40,6 +42,8 @@ import javax.net.ssl.HttpsURLConnection
 import kotlin.collections.ArrayList
 
 class MenuFragment: Fragment() {
+
+    var canvasFragment: InteractiveCanvasFragment? = null
 
     var menuButtonListener: MenuButtonListener? = null
 
@@ -70,6 +74,12 @@ class MenuFragment: Fragment() {
         // setup views here
 
         return view
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        (requireActivity() as InteractiveCanvasActivity).canvasFragment = canvasFragment
     }
 
     private fun testRetrofit() {
@@ -288,6 +298,10 @@ class MenuFragment: Fragment() {
             connect_button_container.visibility = View.VISIBLE
             options_button_container.visibility = View.VISIBLE
             howto_button_container.visibility = View.VISIBLE
+
+            if (canvasFragment != null) {
+                connect_button_container.visibility = View.GONE
+            }
 
             animateMenuButtons(0)
         }
@@ -533,5 +547,11 @@ class MenuFragment: Fragment() {
         val devMenuIndex = 6
         val leftyMenuIndex = 7
         val rightyMenuIndex = 8
+
+        fun createFromCanvas(canvasFragment: InteractiveCanvasFragment): MenuFragment {
+            val fragment = MenuFragment()
+            fragment.canvasFragment = canvasFragment
+            return fragment
+        }
     }
 }
