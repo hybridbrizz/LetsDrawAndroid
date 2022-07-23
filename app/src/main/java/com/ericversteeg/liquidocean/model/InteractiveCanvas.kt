@@ -14,6 +14,8 @@ import androidx.annotation.RequiresApi
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
+import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -266,14 +268,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                     }
                 }
             }
-
-            // short term pixels
-            for (shortTermPixel in sessionSettings.shortTermPixels) {
-                val x = shortTermPixel.restorePoint.point.x
-                val y = shortTermPixel.restorePoint.point.y
-
-                arr[y][x] = shortTermPixel.restorePoint.color
-            }
+//
+//            // short term pixels
+//            for (shortTermPixel in sessionSettings.shortTermPixels) {
+//                val x = shortTermPixel.restorePoint.point.x
+//                val y = shortTermPixel.restorePoint.point.y
+//
+//                arr[y][x] = shortTermPixel.restorePoint.color
+//            }
         }
         // single play
         else {
@@ -345,7 +347,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    private fun registerForSocketEvents(socket: Socket?) {
+    fun registerForSocketEvents(socket: Socket?) {
 //        socket?.on("pixels_commit") {
 //            (context as Activity?)?.runOnUiThread(Runnable {
 //                val shortTermPixels: MutableList<ShortTermPixel> = ArrayList()
@@ -403,13 +405,21 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             interactiveCanvasDrawer?.notifyRedraw()
         }
 
+        socket?.on("canvas_error") {
+            Utils.showErrorDialog(context, "Who's was it? A pixel didn't save") {
+                (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
+            }
+        }
+
         socket?.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
             sessionSettings.dropsAmt = deviceJsonObject.getInt("paint_qty")
         }
 
         socket?.on("add_paint") {
-            sessionSettings.dropsAmt++
+            if (sessionSettings.dropsAmt == 0) {
+                sessionSettings.dropsAmt = 1
+            }
         }
 
         socket?.on("add_paint_canvas_setup") {
@@ -489,6 +499,12 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
             for (j in arr[i].indices) {
                 arr[i][j] = chunk[i % 256][j]
+
+                val color = arr[i][j]
+
+                if (color != 0) {
+                    summary.add(RestorePoint(Point(j, i), color, color))
+                }
             }
         }
     }
@@ -637,7 +653,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         if (world) {
             for(restorePoint in restorePoints) {
                 InteractiveCanvasSocket.instance.socket?.emit("pixel_send",
-                    buildPixelString(restorePoint.point.x, restorePoint.point.y, 15, restorePoint.newColor)
+                    buildPixelString(restorePoint.point.x, restorePoint.point.y, SessionSettings.instance.deviceId, restorePoint.newColor)
                 )
             }
 
@@ -855,12 +871,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun pixelIdForUnitPoint(unitPoint: Point): Int {
-        if (realmId == 2) {
-            return (unitPoint.y * cols + unitPoint.x) + 1
-        }
-        else {
-            return (unitPoint.y * cols + unitPoint.x) + 1 + (512 * 512)
-        }
+        return (unitPoint.y * cols + unitPoint.x)
     }
 
     // object move
@@ -1205,7 +1216,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/canvas/pixels/${pixelId}/history",
+            Utils.baseUrlApiAlt + "/api/v1/canvas/pixels/${pixelId}/history",
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {
@@ -1227,5 +1238,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         requestQueue.add(request)
+    }
+
+    fun isSelectedPixelBackground(): Boolean {
+        return arr[lastSelectedUnitPoint.y][lastSelectedUnitPoint.x] == 0
     }
 }

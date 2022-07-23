@@ -27,37 +27,32 @@ class InteractiveCanvasSocket {
     fun startSocket() {
         val opts = IO.Options()
         opts.transports = arrayOf(WebSocket.NAME)
-        opts.reconnectionAttempts = 3
+        opts.reconnectionAttempts = 0
         //socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
         socket = IO.socket(Utils.baseUrlSocket, opts)
 
         socket?.connect()
 
         socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            Log.i("okay", it.toString())
-
-            //val map = HashMap<String, String>()
-            //map["data"] = "connected to the SocketServer android..."
-            //socket.emit("my_event", gson.toJson(map))
-
-            // checkSocketStatus()
+            Log.i("Socket", "Socket connected!")
 
             socketConnectCallback?.onSocketConnect()
         })
 
         socket?.on(Socket.EVENT_CONNECT_ERROR) {
-            Log.i("Error", it.toString())
+            Log.i("Socket", "Socket connect error!")
 
+            socket?.disconnect()
             socketConnectCallback?.onSocketConnectError()
         }
 
         socket?.on(Socket.EVENT_DISCONNECT) {
-            Log.i("Socket", "Socket disconnected.")
+            Log.i("Socket", "Socket disconnected!")
         }
+    }
 
-        socket?.on("check_success") {
-            checkStatusReceived = true
-        }
+    fun isConnected(): Boolean {
+        return socket?.connected() ?: false
     }
 
     fun checkSocketStatus() {

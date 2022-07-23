@@ -55,7 +55,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
-    SelectedObjectMoveView, SelectedObjectView, MenuCardListener {
+    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback {
 
     var initalColor = 0
 
@@ -1113,7 +1113,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
-        if (world) {
+        /*if (world) {
             Timer().schedule(object : TimerTask() {
                 override fun run() {
                     context?.apply {
@@ -1130,17 +1130,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }, 1000 * 60, 1000 * 60)
 
             getPaintTimerInfo()
-        }
+        }*/
 
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
-        if (world) {
+        /*if (world) {
             InteractiveCanvasSocket.instance.socket?.apply {
                 if (!connected()) {
                     connect()
                 }
             }
-        }
+        }*/
     }
 
     // screen rotation
@@ -1572,6 +1572,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // pixel history listener
     override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
         fragmentManager?.apply {
+            if (surface_view.interactiveCanvas.isSelectedPixelBackground()) return
+
             surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
                 surface_view.interactiveCanvas.lastSelectedUnitPoint
             ), object : PixelHistoryCallback {
@@ -2444,5 +2446,40 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }, 0, 1000)
+    }
+
+    // socket callback
+    override fun onSocketConnect() {
+        surface_view.interactiveCanvas
+            .registerForSocketEvents(InteractiveCanvasSocket.instance.socket)
+    }
+
+    override fun onSocketConnectError() {
+        scheduleSocketReconnect()
+    }
+
+    override fun onSocketDisconnect() {
+        scheduleSocketReconnect()
+    }
+
+    private fun connectToSocket() {
+        InteractiveCanvasSocket.instance.startSocket()
+    }
+
+    private var lastSocketReconnectTime = 0L
+
+    private fun scheduleSocketReconnect() {
+        if (System.currentTimeMillis() - lastSocketReconnectTime > 29000) {
+            Timer().schedule(object: TimerTask() {
+                override fun run() {
+                    requireActivity().runOnUiThread {
+                        if (!InteractiveCanvasSocket.instance.isConnected()) {
+                            connectToSocket()
+                        }
+                    }
+                }
+            }, 30000)
+            lastSocketReconnectTime = System.currentTimeMillis()
+        }
     }
 }

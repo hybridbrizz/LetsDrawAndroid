@@ -206,10 +206,11 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     // data load callback
     override fun onDataLoaded(world: Boolean, realmId: Int) {
+        SessionSettings.instance.save(this)
         showInteractiveCanvasFragment(world, realmId)
     }
 
-    override fun onConnectionError(type: Int) {
+    override fun onConnectionError() {
         showMenuFragment()
     }
 
@@ -233,6 +234,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
             }
             MenuFragment.worldMenuIndex -> {
                 showLoadingFragment(true, 1)
+                SessionSettings.instance.save(this)
             }
             MenuFragment.devMenuIndex -> {
                 showLoadingFragment(true, 2)
@@ -242,16 +244,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 SessionSettings.instance.selectedHand = true
 
                 SessionSettings.instance.toolboxOpen = true
-
-                if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0)
-                }
-                else if (route == MenuFragment.worldMenuIndex) {
-                    showLoadingFragment(true, 1)
-                }
-                else if (route == MenuFragment.devMenuIndex) {
-                    showLoadingFragment(true, 2)
-                }
             }
             MenuFragment.rightyMenuIndex -> {
                 SessionSettings.instance.rightHanded = true
@@ -277,7 +269,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     override fun onOptionsBack() {
-        showInteractiveCanvasFragment(false, 0)
+        showMenuFragment()
     }
 
     override fun onInteractiveCanvasBack() {

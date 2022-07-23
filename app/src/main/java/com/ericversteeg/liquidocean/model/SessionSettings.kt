@@ -27,6 +27,7 @@ class SessionSettings {
     private val spKey = "MyPrefs"
 
     var uniqueId: String? = null
+    var deviceId: Int = -1
 
     var googleAuth = false
 
@@ -46,7 +47,7 @@ class SessionSettings {
 
     var startTimeMillis = 0L
 
-    val maxPaintAmt = 1000
+    val maxPaintAmt = 1
 
     var paintQtyListeners: MutableSet<PaintQtyListener?> = ArraySet()
 

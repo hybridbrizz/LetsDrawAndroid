@@ -92,9 +92,6 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         super.onPause()
 
         InteractiveCanvasSocket.instance.socketConnectCallback = null
-        if (InteractiveCanvasSocket.instance.socket!!.connected()) {
-            InteractiveCanvasSocket.instance.socket?.disconnect()
-        }
 
         timer.cancel()
     }
@@ -126,30 +123,8 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         }, 3000)
 
         context?.apply {
-            // sync paint qty or register device
-            if (SessionSettings.instance.sentUniqueId) {
-                getDeviceInfo()
-            }
-            else {
-                sendDeviceId()
-            }
-
-            if (realmId == 2) {
-                downloadCanvasPixels(this)
-            }
-            else if (world) {
-                downloadChunkPixels(this, 1)
-                downloadChunkPixels(this, 2)
-                downloadChunkPixels(this, 3)
-                downloadChunkPixels(this, 4)
-            }
-
-            getTopContributors()
-
-            InteractiveCanvasSocket.instance.startSocket()
             InteractiveCanvasSocket.instance.socketConnectCallback = this@LoadingScreenFragment
-
-            SessionSettings.instance.updateShortTermPixels()
+            InteractiveCanvasSocket.instance.startSocket()
 
             if (realmId == 2) {
                 realm_art.jsonResId = R.raw.mc_tool_json
@@ -197,6 +172,28 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                 }
             }
         })
+    }
+
+    private fun getCanvas(context: Context) {
+        // sync paint qty or register device
+        if (SessionSettings.instance.sentUniqueId) {
+            getDeviceInfo()
+        }
+        else {
+            sendDeviceId()
+        }
+
+        if (realmId == 2) {
+            downloadCanvasPixels(context)
+        }
+        else if (world) {
+            downloadChunkPixels(context, 1)
+            downloadChunkPixels(context, 2)
+            downloadChunkPixels(context, 3)
+            downloadChunkPixels(context, 4)
+        }
+
+        getTopContributors()
     }
 
     private fun drawWorldCanvas() {
@@ -332,6 +329,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             Utils.baseUrlApi + "/api/v1/devices/register",
             paramsJson,
             { response ->
+                SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                 SessionSettings.instance.sentUniqueId = true
 
@@ -362,6 +360,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
             null,
             { response ->
+                SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                 SessionSettings.instance.xp = response.getInt("xp")
 
@@ -480,39 +479,32 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     }
 
     private fun showConnectionErrorMessage(socket: Boolean = false) {
+        InteractiveCanvasSocket.instance.socket?.disconnect()
+
         if (!showingError) {
             showingError = true
             (context as Activity?)?.runOnUiThread {
                 requestQueue.cancelAll("download")
 
-                var errorType = 0
-                var message = "Oops, could not find world pixel data. Please try again"
-
-                /*context?.apply {
-                    if (!Utils.isNetworkAvailable(this)) {
-                        errorType = 1
-                        message = "No network connectivity"
-                    }
-                    else if (socket) {
-                        errorType = 2
-                        message = "Socket connection error"
-                    }
-                }*/
+                val message = if (socket) {
+                    "Pixel socket isn't responding"
+                }
+                else {
+                    "No connection to pretty pictures"
+                }
 
                 AlertDialog.Builder(context)
                     .setMessage(message)
                     // The dialog is automatically dismissed when a dialog button is clicked.
                     .setPositiveButton(
-                        android.R.string.ok,
-                        object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, id: Int) {
-                                dialog?.dismiss()
-                                dataLoadingCallback?.onConnectionError(errorType)
-                                showingError = false
-                            }
-                        })
+                        "..."
+                    ) { dialog, id ->
+                        dialog?.dismiss()
+                        dataLoadingCallback?.onConnectionError()
+                        showingError = false
+                    }
                     .setOnDismissListener {
-                        dataLoadingCallback?.onConnectionError(errorType)
+                        dataLoadingCallback?.onConnectionError()
                         showingError = false
                     }
                     .show()
@@ -604,9 +596,17 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     override fun onSocketConnect() {
         doneConnectingSocket = true
         InteractiveCanvasSocket.instance.socketConnectCallback = null
+
+        getCanvas(requireContext())
     }
 
     override fun onSocketConnectError() {
+        doneConnectingSocket = false
+        showConnectionErrorMessage(true)
+    }
+
+    override fun onSocketDisconnect() {
+        doneConnectingSocket = false
         showConnectionErrorMessage(true)
     }
 }

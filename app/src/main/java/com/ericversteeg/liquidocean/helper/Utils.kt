@@ -1,5 +1,7 @@
 package com.ericversteeg.liquidocean.helper
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -8,6 +10,7 @@ import android.graphics.Shader
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
+import android.os.Message
 import android.text.TextPaint
 import android.util.TypedValue
 import android.view.View
@@ -29,6 +32,7 @@ class Utils {
     companion object {
         //val baseUrlApi = "https://192.168.200.69:5000"
         val baseUrlApi = "https://ericversteeg.com:5000"
+        val baseUrlApiAlt = "https://ericversteeg.com:5030"
         //val baseUrlSocket = "https://192.168.200.69:5010"
         val baseUrlSocket = "https://ericversteeg.com:5010"
 
@@ -131,6 +135,23 @@ class Utils {
             SessionSettings.instance.colorIndicatorOutline = randomBool()
             SessionSettings.instance.backgroundColorsIndex = randomIndex(7)
             SessionSettings.instance.paintColor = randomColor()
+        }
+
+        fun showErrorDialog(context: Context, message: String, onDismiss: () -> Unit) {
+            (context as Activity?)?.runOnUiThread {
+                AlertDialog.Builder(context)
+                    .setMessage(message)
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton(
+                        "..."
+                    ) { dialog, id ->
+                        dialog?.dismiss()
+                    }
+                    .setOnDismissListener {
+                        onDismiss.invoke()
+                    }
+                    .show()
+            }
         }
 
         private fun randomBool(): Boolean {

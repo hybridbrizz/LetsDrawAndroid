@@ -113,6 +113,29 @@ class InteractiveCanvasSummaryView: View {
             interactiveCanvas?.apply {
                 val displayPpu = width.toFloat() / cols
 
+//                for (y in 0 until rows) {
+//                    for (x in 0 until cols) {
+//                        val color = arr[y][x]
+//                        paint.color = color
+//
+//                        if (paint.color == 0) {
+//                            paint.color = Color.BLACK
+//                        }
+//
+//                        val left = floor(x * displayPpu)
+//                        val top = floor(y * displayPpu)
+//                        val right = left + 1
+//                        val bottom = top + 1
+//
+//                        canvas.drawRect(
+//                            left,
+//                            top,
+//                            right,
+//                            bottom, paint
+//                        )
+//                    }
+//                }
+
                 for (pixel in summary) {
                     paint.color = pixel.color
 

@@ -101,7 +101,7 @@ class MenuFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        testRetrofit()
+        //testRetrofit()
 
         SessionSettings.instance.canvasOpen = false
 
@@ -284,10 +284,12 @@ class MenuFragment: Fragment() {
 
         lefty_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, singleMenuIndex)
+            showMenuOptions()
         }
 
         righty_menu_text.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, singleMenuIndex)
+            showMenuOptions()
         }
 
         menu_button_container.setOnClickListener {
@@ -308,6 +310,12 @@ class MenuFragment: Fragment() {
 
         view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
+                if (view == null) return
+
+                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                if (menu_button_container == null) return
+
                 if (view.height > Utils.dpToPx(context, 500)) {
                     SessionSettings.instance.tablet = true
                 }
@@ -363,6 +371,17 @@ class MenuFragment: Fragment() {
 
             animateMenuButtons(2)
         }
+    }
+
+    private fun showMenuOptions() {
+        lefty_button_container.visibility = View.GONE
+        righty_button_container.visibility = View.GONE
+
+        connect_button_container.visibility = View.VISIBLE
+        options_button_container.visibility = View.VISIBLE
+        howto_button_container.visibility = View.VISIBLE
+
+        animateMenuButtons(0)
     }
 
     // panning
