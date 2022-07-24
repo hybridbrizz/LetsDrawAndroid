@@ -56,7 +56,6 @@ class PaintQuantityCircle : View, PaintQtyListener, PaintActionListener {
     private fun commonInit() {
         panelThemeConfig = PanelThemeConfig.defaultLightTheme()
 
-        primaryPaint.color = SessionSettings.instance.paintBarColor
         if (panelThemeConfig.darkPaintQtyBar) {
             backgroundPaint.color = ActionButtonView.darkGrayPaint.color
             borderPaint.color = Color.parseColor("#99000000")
@@ -69,6 +68,8 @@ class PaintQuantityCircle : View, PaintQtyListener, PaintActionListener {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+
+        primaryPaint.color = SessionSettings.instance.paintBarColor
 
         canvas?.let {
             it.save()

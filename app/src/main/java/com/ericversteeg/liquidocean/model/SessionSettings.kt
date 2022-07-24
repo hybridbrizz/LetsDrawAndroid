@@ -108,6 +108,8 @@ class SessionSettings {
 
     var nextPaintTime = 0L
 
+    var addPaintInterval = 3
+
     var displayName = ""
 
     var artShowcase: MutableList<MutableList<InteractiveCanvas.RestorePoint>>? = null

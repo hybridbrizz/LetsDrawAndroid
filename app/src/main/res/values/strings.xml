@@ -54,9 +54,9 @@
     and height then tap the Create button to create a frame.</string>
     <string name="step10">To erase pixels, tap anywhere on the canvas where you haven\'t drawn yet with the color picker open to pick the transparent color off the canvas. Then draw back over the
         pixels that you want to erase.</string>
-    <string name="option_show_paint_bar_title">Show draw meter bar</string>
-    <string name="option_paint_bar_color_title">Draw meter color</string>
-    <string name="option_show_paint_circle_title">Show draw meter circle</string>
+    <string name="option_show_paint_bar_title">Show pixel meter bar</string>
+    <string name="option_paint_bar_color_title">Pixel meter color</string>
+    <string name="option_show_paint_circle_title">Show pixel meter circle</string>
     <string name="option_right_handed_title">Right-handed</string>
     <string name="option_small_action_buttons_title">Small action buttons</string>
     <string name="pincode_title">8-digit pincode</string>

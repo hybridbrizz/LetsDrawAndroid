@@ -10,9 +10,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
+                android:orientation="vertical"
                 android:layout_marginTop="-11dp">
 
             <TextView
@@ -93,75 +94,6 @@
                         android:id="@+id/option_right_handed_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:id="@+id/option_canvas_lock_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="10dp"
-                    android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/option_right_handed">
-
-                <TextView
-                        android:id="@+id/option_canvas_lock_border_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_canvas_lock_border_title"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/white"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/option_canvas_lock_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                    android:id="@+id/option_canvas_lock_color_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="10dp"
-                    android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/option_canvas_lock_container">
-
-                <TextView
-                        android:id="@+id/option_canvas_lock_color_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_canvas_lock_color_title"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/white"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1" />
-
-                <Button
-                        android:id="@+id/option_canvas_lock_color_reset"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="Reset" />
-                
-                <View
-                        android:id="@+id/option_canvas_lock_color_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp" />
 
@@ -283,6 +215,7 @@
 
             <LinearLayout
                     android:id="@+id/option_frame_color_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -321,7 +254,6 @@
 
             <LinearLayout
                     android:id="@+id/option_show_paint_bar_container"
-                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -353,7 +285,6 @@
 
             <LinearLayout
                     android:id="@+id/option_show_paint_circle_container"
-                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -385,7 +316,6 @@
 
             <LinearLayout
                     android:id="@+id/option_paint_bar_color_container"
-                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
@@ -634,6 +564,75 @@
 
                 <View
                         android:id="@+id/option_close_paint_panel_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_canvas_lock_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_right_handed">
+
+                <TextView
+                        android:id="@+id/option_canvas_lock_border_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_canvas_lock_border_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/option_canvas_lock_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_canvas_lock_color_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_canvas_lock_container">
+
+                <TextView
+                        android:id="@+id/option_canvas_lock_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_canvas_lock_color_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_canvas_lock_color_reset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_canvas_lock_color_button"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:layout_marginLeft="10dp"
@@ -910,6 +909,7 @@
 
             <Button
                     android:id="@+id/export_single_play"
+                    android:visibility="gone"
                     android:fontFamily="@font/inter_medium"
                     android:text="@string/export_canvas_button_title"
                     android:layout_width="match_parent"
@@ -921,6 +921,7 @@
 
             <Button
                     android:id="@+id/import_single_play"
+                    android:visibility="gone"
                     android:fontFamily="@font/inter_medium"
                     android:text="@string/import_canvas_button_title"
                     android:layout_width="match_parent"
@@ -932,6 +933,7 @@
 
             <Button
                     android:id="@+id/reset_single_play"
+                    android:visibility="gone"
                     android:fontFamily="@font/inter_medium"
                     android:text="@string/reset_single_play_button_title"
                     android:layout_width="match_parent"
@@ -943,7 +945,6 @@
 
             <LinearLayout
                     android:id="@+id/change_name_container"
-                    android:visibility="gone"
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -986,7 +987,7 @@
                     android:layout_height="400dp"
                     app:layout_constraintTop_toBottomOf="@id/change_name_container" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.LinearLayoutCompat>
 
     </ScrollView>
 

@@ -88,8 +88,6 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         thirdGraySemiPaint.color = Color.parseColor("#99AAAAAA")
         twoThirdGraySemiPaint.color = Color.parseColor("#99555555")
 
-        paintBarPaint.color = SessionSettings.instance.paintBarColor
-
         darkLinePaint.color = darkGrayPaint.color
         darkLinePaint.strokeWidth = 1F
 
@@ -118,6 +116,8 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+
+        paintBarPaint.color = SessionSettings.instance.paintBarColor
 
         canvas?.apply {
             save()

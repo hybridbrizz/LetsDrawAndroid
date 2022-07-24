@@ -10,6 +10,8 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.fragment.*
+import com.ericversteeg.liquidocean.helper.DataManager.Companion.getDeviceInfo
+import com.ericversteeg.liquidocean.helper.DataManager.Companion.sendDeviceId
 import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
@@ -124,12 +126,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         StatTracker.instance.achievementListener = this
 
         // after device settings have been loaded
-        /*if (!SessionSettings.instance.sentUniqueId) {
-            sendDeviceId()
+        if (!SessionSettings.instance.sentUniqueId) {
+            sendDeviceId(this)
         }
         else {
-            getDeviceInfo()
-        }*/
+            getDeviceInfo(this)
+        }
 
         ActionButtonView(this)
     }

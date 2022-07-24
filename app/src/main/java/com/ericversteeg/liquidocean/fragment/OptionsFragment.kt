@@ -59,6 +59,16 @@ class OptionsFragment: Fragment(), FragmentListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (isFromInteractiveCanvas()) {
+            option_right_handed.visibility = View.GONE
+            option_small_action_buttons_container.visibility = View.GONE
+            option_bold_action_buttons.visibility = View.GONE
+            option_color_palette_size.visibility = View.GONE
+            option_num_recent_colors.visibility = View.GONE
+            option_show_paint_bar_container.visibility = View.GONE
+            option_show_paint_circle_container.visibility = View.GONE
+        }
+
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
@@ -71,11 +81,8 @@ class OptionsFragment: Fragment(), FragmentListener {
                     SessionSettings.instance.save(this)
                 }
 
-                if (parentFragment != null && parentFragment is InteractiveCanvasFragment) {
-                    requireParentFragment().childFragmentManager
-                        .beginTransaction()
-                        .remove(this)
-                        .commit()
+                if (isFromInteractiveCanvas()) {
+                    (parentFragment as InteractiveCanvasFragment).closeOptions(this@OptionsFragment)
                 }
                 else {
                     optionsListener?.onOptionsBack()
@@ -508,6 +515,11 @@ class OptionsFragment: Fragment(), FragmentListener {
                 option_show_paint_circle_switch.isChecked = false
                 SessionSettings.instance.showPaintCircle = false
             }
+            else if (!button.isChecked) {
+                option_show_paint_circle_switch.isChecked = true
+                SessionSettings.instance.showPaintBar = false
+                SessionSettings.instance.showPaintCircle = true
+            }
         }
 
         // option show paint circle
@@ -518,6 +530,11 @@ class OptionsFragment: Fragment(), FragmentListener {
             if (button.isChecked && option_show_paint_bar_switch.isChecked) {
                 option_show_paint_bar_switch.isChecked = false
                 SessionSettings.instance.showPaintBar = false
+            }
+            else if (!button.isChecked) {
+                option_show_paint_bar_switch.isChecked = true
+                SessionSettings.instance.showPaintCircle = false
+                SessionSettings.instance.showPaintBar = true
             }
         }
 
@@ -775,5 +792,9 @@ class OptionsFragment: Fragment(), FragmentListener {
 
     override fun onFragmentRemoved() {
         fragment_container.visibility = View.GONE
+    }
+
+    private fun isFromInteractiveCanvas(): Boolean {
+        return parentFragment != null && parentFragment is InteractiveCanvasFragment
     }
 }

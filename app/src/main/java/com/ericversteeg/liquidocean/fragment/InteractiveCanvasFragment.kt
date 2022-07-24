@@ -78,11 +78,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     lateinit var panelThemeConfig: PanelThemeConfig
 
-    var paintTextMode = 2
+    var paintTextMode = -1
 
     val paintTextModeTime = 0
     val paintTextModeAmt = 1
-    var paintTextModeHide = 2
+    var paintTextModeHide = -1
 
     var animatingTools = false
 
@@ -139,6 +139,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     "last_world_paint_color",
                     surface_view.interactiveCanvas.getGridLineColor()
                 )
+
+                setupPaintEventTimer()
             }
             else {
                 SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
@@ -669,7 +671,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         activity?.apply {
             menu_button.setLongPressActionListener(this, object: LongPressListener {
                 override fun onLongPress() {
-                    toggleTerminal(true)
+                    //toggleTerminal(true)
                 }
             })
         }
@@ -1982,8 +1984,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onPaintBarDoubleTapped() {
         if (world) {
             paintTextMode += 1
-            if (paintTextMode == 3) {
-                paintTextMode = 0
+            if (paintTextMode == 1) {
+                paintTextMode = -1
             }
 
             if (paintTextMode == paintTextModeTime) {
@@ -2412,9 +2414,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paintEventTimer?.schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
-                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
-                        SessionSettings.instance.nextPaintTime =
-                            System.currentTimeMillis() + 300 * 1000
+//                    if (System.currentTimeMillis() > SessionSettings.instance.nextPaintTime) {
+//                        SessionSettings.instance.nextPaintTime =
+//                            System.currentTimeMillis() + 300 * 1000
+//                    }
+
+                    if (SessionSettings.instance.nextPaintTime == 0L) {
+                        paint_time_info.text = String.format("< %d min", SessionSettings.instance.addPaintInterval)
+                        return@runOnUiThread
                     }
 
                     val m =
@@ -2481,5 +2488,63 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }, 30000)
             lastSocketReconnectTime = System.currentTimeMillis()
         }
+    }
+
+    private fun applyOptions() {
+        // panel background
+        setPanelBackground()
+
+        // back button color
+        if (SessionSettings.instance.closePaintBackButtonColor != -1) {
+            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
+            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
+        }
+        else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+        else {
+            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+        }
+
+        surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+        if (SessionSettings.instance.showPaintBar) {
+            surface_view.paintActionListener = paint_qty_bar
+            SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
+
+            paint_qty_circle.visibility = View.GONE
+        }
+        else if (SessionSettings.instance.showPaintCircle) {
+            surface_view.paintActionListener = paint_qty_circle
+            SessionSettings.instance.paintQtyListeners.add(paint_qty_circle)
+
+            paint_qty_circle.visibility = View.VISIBLE
+            paint_qty_bar.visibility = View.GONE
+        }
+        else {
+            paint_qty_bar.visibility = View.VISIBLE
+            paint_qty_circle.visibility = View.GONE
+        }
+
+        if (!world) {
+            paint_qty_bar.visibility = View.GONE
+            paint_qty_circle.visibility = View.GONE
+        }
+
+        paint_qty_bar.invalidate()
+        paint_qty_circle.invalidate()
+    }
+
+    fun closeOptions(fragment: OptionsFragment) {
+        applyOptions()
+
+        childFragmentManager
+            .beginTransaction()
+            .remove(fragment)
+            .commit()
+
+        //onViewCreated(requireView(), null)
     }
 }

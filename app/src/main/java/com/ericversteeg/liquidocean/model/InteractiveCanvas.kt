@@ -432,6 +432,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             if (sessionSettings.dropsAmt == 0) {
                 sessionSettings.dropsAmt = 1
             }
+            SessionSettings.instance.timeSync = 60L * SessionSettings.instance.addPaintInterval
         }
 
         socket?.on("add_paint_canvas_setup") {
