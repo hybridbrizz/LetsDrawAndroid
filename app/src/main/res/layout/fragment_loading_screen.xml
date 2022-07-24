@@ -358,4 +358,15 @@
 
     </LinearLayout>
 
+    <TextView
+            android:id="@+id/text_queue_pos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_margin="10dp"
+            android:text="~10 in queue"
+            android:textColor="#3F3BB8" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

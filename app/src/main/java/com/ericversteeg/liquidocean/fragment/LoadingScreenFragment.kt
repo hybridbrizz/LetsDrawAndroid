@@ -28,10 +28,7 @@ import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.listener.SocketConnectCallback
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
-import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.model.StatTracker
+import com.ericversteeg.liquidocean.model.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
@@ -39,7 +36,7 @@ import org.json.JSONObject
 import java.util.*
 import kotlin.collections.HashMap
 
-class LoadingScreenFragment : Fragment(), SocketConnectCallback {
+class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConnectCallback {
 
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
@@ -50,6 +47,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     var doneLoadingChunk4 = false
     var doneLoadingTopContributors = false
 
+    var doneConnectingQueue = false
     var doneConnectingSocket = false
 
     var dataLoadingCallback: DataLoadingCallback? = null
@@ -76,6 +74,8 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     )
 
     var showingError = false
+
+    var queuePos = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -122,16 +122,15 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
         }, 3000)
 
-        context?.apply {
-            InteractiveCanvasSocket.instance.socketConnectCallback = this@LoadingScreenFragment
-            InteractiveCanvasSocket.instance.startSocket()
+        // start connect
+        QueueSocket.instance.socketListener = this
+        QueueSocket.instance.startSocket()
 
-            if (realmId == 2) {
-                realm_art.jsonResId = R.raw.mc_tool_json
-            }
-            else {
-                realm_art.jsonResId = R.raw.globe_json
-            }
+        if (realmId == 2) {
+            realm_art.jsonResId = R.raw.mc_tool_json
+        }
+        else {
+            realm_art.jsonResId = R.raw.globe_json
         }
 
         timer.schedule(object : TimerTask() {
@@ -175,6 +174,8 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     }
 
     private fun getCanvas(context: Context) {
+        getTopContributors()
+
         // sync paint qty or register device
         if (SessionSettings.instance.sentUniqueId) {
             getDeviceInfo()
@@ -192,8 +193,6 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             downloadChunkPixels(context, 3)
             downloadChunkPixels(context, 4)
         }
-
-        getTopContributors()
     }
 
     private fun drawWorldCanvas() {
@@ -520,11 +519,13 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     }
 
     private fun updateNumLoaded() {
-        if (realmId == 2) {
-            status_text?.text = "Loading ${getNumLoaded()} / 4"
-        }
-        else if (realmId == 1) {
-            status_text?.text = "Loading ${getNumLoaded()} / 7"
+        requireActivity().runOnUiThread {
+            if (realmId == 2) {
+                status_text?.text = "Loading ${getNumLoaded()} / 4"
+            }
+            else if (realmId == 1) {
+                status_text?.text = "Loading ${getNumLoaded()} / 8"
+            }
         }
     }
 
@@ -536,7 +537,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         else if (world) {
             return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
                     doneLoadingChunk1 && doneLoadingChunk2 && doneLoadingChunk3 && doneLoadingChunk4 &&
-                    doneConnectingSocket
+                    doneConnectingQueue && doneConnectingSocket
         }
         return false
     }
@@ -585,6 +586,10 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                 num++
             }
 
+            if (doneConnectingQueue) {
+                num++
+            }
+
             if (doneConnectingSocket) {
                 num++
             }
@@ -593,8 +598,51 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         return num
     }
 
+    // queue socket listener
+    override fun onQueueConnect() {
+        doneConnectingQueue = true
+        updateNumLoaded()
+    }
+
+    override fun onQueueConnectError() {
+        doneConnectingQueue = false
+        showConnectionErrorMessage(true)
+    }
+
+    override fun onAddedToQueue(pos: Int) {
+        queuePos = pos
+        updateQueuePos(true)
+
+        timer.schedule(object: TimerTask() {
+            override fun run() {
+                requireActivity().runOnUiThread {
+                    updateQueuePos()
+                }
+            }
+        }, QueueSocket.interval * 1000L, QueueSocket.interval * 1000L)
+    }
+
+    private fun updateQueuePos(start: Boolean = false) {
+        requireActivity().runOnUiThread {
+            if (start && queuePos > 1) {
+                text_queue_pos.animate().setDuration(500).alphaBy(1F).start()
+            }
+            text_queue_pos.text = String.format("~%d in queue", queuePos--)
+        }
+    }
+
+    override fun onServiceReady() {
+        QueueSocket.instance.socketListener = null
+        QueueSocket.instance.socket?.disconnect()
+
+        InteractiveCanvasSocket.instance.socketConnectCallback = this
+        InteractiveCanvasSocket.instance.startSocket()
+    }
+
+    // canvas socket listener
     override fun onSocketConnect() {
         doneConnectingSocket = true
+        updateNumLoaded()
         InteractiveCanvasSocket.instance.socketConnectCallback = null
 
         getCanvas(requireContext())
