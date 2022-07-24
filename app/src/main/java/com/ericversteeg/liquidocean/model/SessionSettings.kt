@@ -117,10 +117,10 @@ class SessionSettings {
 
     var arrJsonStr = ""
 
-    lateinit var chunk1: Array<IntArray>
-    lateinit var chunk2: Array<IntArray>
-    lateinit var chunk3: Array<IntArray>
-    lateinit var chunk4: Array<IntArray>
+    lateinit var chunk1: String
+    lateinit var chunk2: String
+    lateinit var chunk3: String
+    lateinit var chunk4: String
 
     var firstContributorName = ""
     var secondContributorName = ""

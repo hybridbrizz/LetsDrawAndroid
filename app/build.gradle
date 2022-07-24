@@ -63,6 +63,9 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-auth:20.2.0'
 
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+
     implementation project(path: ':colorpicker')
 
     testImplementation 'junit:junit:4.13.2'

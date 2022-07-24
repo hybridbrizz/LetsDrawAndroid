@@ -30,6 +30,9 @@ import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.listener.SocketConnectCallback
 import com.ericversteeg.liquidocean.model.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -41,10 +44,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
     var doneSendingDeviceId = false
-    var doneLoadingChunk1 = false
-    var doneLoadingChunk2 = false
-    var doneLoadingChunk3 = false
-    var doneLoadingChunk4 = false
+    var doneLoadingChunkCount = 0
     var doneLoadingTopContributors = false
 
     var doneConnectingQueue = false
@@ -185,13 +185,15 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }
 
         if (realmId == 2) {
-            downloadCanvasPixels(context)
+            downloadCanvasPixels()
         }
         else if (world) {
-            downloadChunkPixels(context, 1)
-            downloadChunkPixels(context, 2)
-            downloadChunkPixels(context, 3)
-            downloadChunkPixels(context, 4)
+            Observable.fromRunnable<Void> {
+                downloadChunkPixels(1)
+                downloadChunkPixels(2)
+                downloadChunkPixels(3)
+                downloadChunkPixels(4)
+            }.subscribeOn(Schedulers.io()).subscribe()
         }
     }
 
@@ -224,38 +226,19 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }
     }
 
-    private fun downloadChunkPixels(context: Context, chunk: Int) {
+    private fun downloadChunkPixels(chunk: Int) {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
             Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels/${chunk}",
             Response.Listener { response ->
-                lateinit var arr: Array<IntArray>
-                if (chunk == 1) {
-                    SessionSettings.instance.chunk1 = Array(256) { IntArray(1024) }
-                    arr = SessionSettings.instance.chunk1
-                    doneLoadingChunk1 = true
-                } else if (chunk == 2) {
-                    SessionSettings.instance.chunk2 = Array(256) { IntArray(1024) }
-                    arr = SessionSettings.instance.chunk2
-                    doneLoadingChunk2 = true
-                } else if (chunk == 3) {
-                    SessionSettings.instance.chunk3 = Array(256) { IntArray(1024) }
-                    arr = SessionSettings.instance.chunk3
-                    doneLoadingChunk3 = true
-                } else if (chunk == 4) {
-                    SessionSettings.instance.chunk4 = Array(256) { IntArray(1024) }
-                    arr = SessionSettings.instance.chunk4
-                    doneLoadingChunk4 = true
+                when(chunk) {
+                    1 -> SessionSettings.instance.chunk1 = response
+                    2 -> SessionSettings.instance.chunk2 = response
+                    3 -> SessionSettings.instance.chunk3 = response
+                    4 -> SessionSettings.instance.chunk4 = response
                 }
 
-                val chunkJsonArr = JSONArray(response)
-                for (i in 0 until chunkJsonArr.length()) {
-                    val chunkInnerJsonArr = chunkJsonArr.getJSONArray(i)
-                    for (j in 0 until chunkInnerJsonArr.length()) {
-                        arr[i][j] = chunkInnerJsonArr.getInt(j)
-                    }
-                }
-
+                doneLoadingChunkCount += 1
                 downloadFinished()
             },
             Response.ErrorListener { error ->
@@ -279,7 +262,43 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         dataRequestQueue.add(jsonObjRequest)
     }
 
-    private fun downloadCanvasPixels(context: Context) {
+//    private fun processChunk(chunk: Int) {
+//        val response = when(chunk) {
+//            1 -> SessionSettings.instance.chunk1
+//            2 -> SessionSettings.instance.chunk2
+//            3 -> SessionSettings.instance.chunk3
+//            4 -> SessionSettings.instance.chunk4
+//            else -> ""
+//        }
+//        lateinit var arr: Array<IntArray>
+//        if (chunk == 1) {
+//            SessionSettings.instance.chunk1 = Array(256) { IntArray(1024) }
+//            arr = SessionSettings.instance.chunk1
+//            doneLoadingChunk1 = true
+//        } else if (chunk == 2) {
+//            SessionSettings.instance.chunk2 = Array(256) { IntArray(1024) }
+//            arr = SessionSettings.instance.chunk2
+//            doneLoadingChunk2 = true
+//        } else if (chunk == 3) {
+//            SessionSettings.instance.chunk3 = Array(256) { IntArray(1024) }
+//            arr = SessionSettings.instance.chunk3
+//            doneLoadingChunk3 = true
+//        } else if (chunk == 4) {
+//            SessionSettings.instance.chunk4 = Array(256) { IntArray(1024) }
+//            arr = SessionSettings.instance.chunk4
+//            doneLoadingChunk4 = true
+//        }
+//
+//        val chunkJsonArr = JSONArray(response)
+//        for (i in 0 until chunkJsonArr.length()) {
+//            val chunkInnerJsonArr = chunkJsonArr.getJSONArray(i)
+//            for (j in 0 until chunkInnerJsonArr.length()) {
+//                arr[i][j] = chunkInnerJsonArr.getInt(j)
+//            }
+//        }
+//    }
+
+    private fun downloadCanvasPixels() {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
             Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels",
@@ -536,7 +555,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }
         else if (world) {
             return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
-                    doneLoadingChunk1 && doneLoadingChunk2 && doneLoadingChunk3 && doneLoadingChunk4 &&
+                    doneLoadingChunkCount == 4 &&
                     doneConnectingQueue && doneConnectingSocket
         }
         return false
@@ -562,21 +581,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             }
         }
         else if (realmId == 1) {
-            if (doneLoadingChunk1) {
-                num++
-            }
-
-            if (doneLoadingChunk2) {
-                num++
-            }
-
-            if (doneLoadingChunk3) {
-                num++
-            }
-
-            if (doneLoadingChunk4) {
-                num++
-            }
+            num += doneLoadingChunkCount
 
             if (doneLoadingPaintQty || doneSendingDeviceId) {
                 num++

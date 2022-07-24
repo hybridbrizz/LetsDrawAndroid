@@ -19,6 +19,10 @@ import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.schedulers.Schedulers
 import io.socket.client.Socket
 import org.json.JSONArray
 import org.json.JSONObject
@@ -198,11 +202,19 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
             // world
             else if (realmId == 1) {
-                rows = 1024
-                cols = 1024
-                arr = Array(rows) { IntArray(cols) }
+                Observable.fromRunnable<Void> {
+                    rows = 1024
+                    cols = 1024
+                    arr = Array(rows) { IntArray(cols) }
 
-                initChunkPixelsFromMemory()
+                    initChunkPixelsFromMemory()
+                }
+                .doOnComplete {
+                    interactiveCanvasDrawer?.notifyRedraw()
+                }
+                .subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
             }
 
             try {
@@ -481,29 +493,29 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     private fun initChunkPixelsFromMemory() {
-        for (i in arr.indices) {
-            lateinit var chunk: Array<IntArray>
-
-            if (i < rows / 4) {
-                chunk = sessionSettings.chunk1
-            }
-            else if (i < rows / 2) {
-                chunk = sessionSettings.chunk2
-            }
-            else if (i < rows - (rows / 4)) {
-                chunk = sessionSettings.chunk3
-            }
-            else {
-                chunk = sessionSettings.chunk4
+        for (c in 1..4) {
+            val chunk = when (c) {
+                1 -> sessionSettings.chunk1
+                2 -> sessionSettings.chunk2
+                3 -> sessionSettings.chunk3
+                4 -> sessionSettings.chunk4
+                else -> ""
             }
 
-            for (j in arr[i].indices) {
-                arr[i][j] = chunk[i % 256][j]
+            val chunkJsonArr = JSONArray(chunk)
 
-                val color = arr[i][j]
+            val offset = (c - 1) * rows / 4
 
-                if (color != 0) {
-                    summary.add(RestorePoint(Point(j, i), color, color))
+            for (i in 0 until chunkJsonArr.length()) {
+                val chunkInnerJsonArr = chunkJsonArr.getJSONArray(i)
+                for (j in 0 until chunkInnerJsonArr.length()) {
+                    arr[i + offset][j] = chunkInnerJsonArr.getInt(j)
+
+                    val color = arr[i][j]
+
+                    if (color != 0) {
+                        summary.add(RestorePoint(Point(j, i), color, color))
+                    }
                 }
             }
         }
