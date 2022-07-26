@@ -38,7 +38,7 @@ object TrustAllSSLCertsDebug {
 
     fun getAllCertsIOSocket(): Socket {
         try {
-            val socketUrl: String = Utils.baseUrlSocket
+            val socketUrl: String = ""
             val hostnameVerifier =
                 HostnameVerifier { _, _ -> true }
             val trustAllCerts: Array<TrustManager> =
@@ -82,6 +82,6 @@ object TrustAllSSLCertsDebug {
 
         }
 
-        return IO.socket(Utils.baseUrlSocket)
+        return IO.socket("")
     }
 }

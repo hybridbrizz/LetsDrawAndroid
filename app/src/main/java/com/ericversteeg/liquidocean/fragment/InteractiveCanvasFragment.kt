@@ -64,6 +64,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var bottomLeftParticleSystem: ParticleSystem? = null
     var bottomRightParticleSystem: ParticleSystem? = null
 
+    var server: Server? = null
     var world = false
     var realmId = 0
 
@@ -119,7 +120,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             SessionSettings.instance.tablet = Utils.isTablet(this)
         }
 
+        if (server != null) {
+            SessionSettings.instance.addPaintInterval = server!!.pixelInterval
+        }
+
         // must call before darkIcons
+        surface_view.interactiveCanvas.server = server!!
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
@@ -2320,7 +2326,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/status",
+            "api/v1/status",
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {
@@ -2378,7 +2384,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/paint/time/sync",
+            "api/v1/paint/time/sync",
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {
@@ -2470,7 +2476,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun connectToSocket() {
-        InteractiveCanvasSocket.instance.startSocket()
+        InteractiveCanvasSocket.instance.startSocket(server!!)
     }
 
     private var lastSocketReconnectTime = 0L

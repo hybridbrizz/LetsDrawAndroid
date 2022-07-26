@@ -11,6 +11,7 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.Server
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import java.util.*
 import kotlin.math.ceil

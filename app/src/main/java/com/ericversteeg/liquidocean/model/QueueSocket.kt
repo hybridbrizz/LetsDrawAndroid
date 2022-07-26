@@ -34,12 +34,12 @@ class QueueSocket {
 
     var gson = Gson()
 
-    fun startSocket() {
+    fun startSocket(server: Server) {
         val opts = IO.Options()
         opts.transports = arrayOf(WebSocket.NAME)
         opts.reconnectionAttempts = 0
         //socket = TrustAllSSLCertsDebug.getAllCertsIOSocket()
-        socket = IO.socket(Utils.baseUrlQueueSocket, opts)
+        socket = IO.socket(server.queueSocketUrl(), opts)
 
         socket?.connect()
 

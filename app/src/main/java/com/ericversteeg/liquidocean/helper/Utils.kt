@@ -30,12 +30,14 @@ class Utils {
     }
 
     companion object {
+        val baseServersUrl = "https://ericversteeg.com:5050/"
+
         //val baseUrlApi = "https://192.168.200.69:5000"
-        val baseUrlApi = "https://ericversteeg.com:5000"
-        val baseUrlApiAlt = "https://ericversteeg.com:5030"
+        //val baseUrlApi = "https://ericversteeg.com:5000"
+        //val baseUrlApiAlt = "https://ericversteeg.com:5030"
         //val baseUrlSocket = "https://192.168.200.69:5010"
-        val baseUrlSocket = "https://ericversteeg.com:5010"
-        val baseUrlQueueSocket = "https://ericversteeg.com:5020"
+        //val baseUrlSocket = "https://ericversteeg.com:5010"
+        //val baseUrlQueueSocket = "https://ericversteeg.com:5020"
 
         val key1 = "8AHI!VR7299G7cq3YsP359HDkKz682oNT3QHh?yyehuvkyzdm674w45o"
 

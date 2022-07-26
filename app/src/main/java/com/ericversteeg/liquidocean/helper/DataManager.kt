@@ -19,7 +19,7 @@ class DataManager {
 
             val request = object: JsonObjectRequest(
                 Request.Method.GET,
-                Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
+                "api/v1/devices/$uniqueId/info",
                 null,
                 { response ->
                     SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
@@ -66,7 +66,7 @@ class DataManager {
 
                 val request = object: JsonObjectRequest(
                     Request.Method.POST,
-                    Utils.baseUrlApi + "/api/v1/devices/register",
+                    "api/v1/devices/register",
                     paramsJson,
                     { response ->
                         SessionSettings.instance.dropsAmt = response.getInt("paint_qty")

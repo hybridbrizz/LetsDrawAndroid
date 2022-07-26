@@ -15,6 +15,7 @@ import com.ericversteeg.liquidocean.helper.DataManager.Companion.sendDeviceId
 import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
+import com.ericversteeg.liquidocean.model.Server
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
@@ -126,12 +127,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         StatTracker.instance.achievementListener = this
 
         // after device settings have been loaded
-        if (!SessionSettings.instance.sentUniqueId) {
-            sendDeviceId(this)
-        }
-        else {
-            getDeviceInfo(this)
-        }
+//        if (!SessionSettings.instance.sentUniqueId) {
+//            sendDeviceId(this)
+//        }
+//        else {
+//            getDeviceInfo(this)
+//        }
 
         ActionButtonView(this)
     }
@@ -194,6 +195,15 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
+    private fun showLoadingFragment(server: Server) {
+        val frag = LoadingScreenFragment()
+        frag.dataLoadingCallback = this
+        frag.world = true
+        frag.server = server
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
     private fun showInteractiveCanvasFragment(
         world: Boolean,
         realmId: Int
@@ -206,10 +216,24 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
+    private fun showInteractiveCanvasFragment(server: Server) {
+        val frag = InteractiveCanvasFragment()
+        frag.server = server
+        frag.world = true
+        frag.interactiveCanvasFragmentListener = this
+
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
     // data load callback
     override fun onDataLoaded(world: Boolean, realmId: Int) {
         SessionSettings.instance.save(this)
         showInteractiveCanvasFragment(world, realmId)
+    }
+
+    override fun onDataLoaded(server: Server) {
+        SessionSettings.instance.save(this)
+        showInteractiveCanvasFragment(server)
     }
 
     override fun onConnectionError() {
@@ -264,6 +288,10 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 }
             }
         }
+    }
+
+    override fun onServerSelected(server: Server) {
+        showLoadingFragment(server)
     }
 
     override fun onResetSinglePlay() {

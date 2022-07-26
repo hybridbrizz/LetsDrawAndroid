@@ -136,7 +136,7 @@ class ArtExportFragment: Fragment() {
 
                 val request = object: JsonObjectRequest(
                     Request.Method.POST,
-                    Utils.baseUrlApi + "/api/v1/canvas/object/upload",
+                     "api/v1/canvas/object/upload",
                     jsonObj,
                     { response ->
 

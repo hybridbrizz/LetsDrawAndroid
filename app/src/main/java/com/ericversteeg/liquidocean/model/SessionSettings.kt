@@ -13,6 +13,7 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.PaintQtyListener
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.ArtView
+import com.google.gson.Gson
 import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import org.json.JSONArray
@@ -25,6 +26,8 @@ import kotlin.collections.HashMap
 class SessionSettings {
 
     private val spKey = "MyPrefs"
+
+    var gson = Gson()
 
     var uniqueId: String? = null
     var deviceId: Int = -1
@@ -202,6 +205,9 @@ class SessionSettings {
     var boldActionButtons = true
 
     var colorPaletteSize = 4
+
+    var servers = LinkedList<Server>()
+    var lastVisitedServer: Server? = null
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -447,6 +453,8 @@ class SessionSettings {
         boldActionButtons = getSharedPrefs(context).getBoolean("bold_action_buttons", true)
 
         colorPaletteSize = getSharedPrefs(context).getInt("color_palette_size", 4)
+
+        initServerList(context)
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -590,6 +598,32 @@ class SessionSettings {
         }
 
         return palettes
+    }
+
+    private fun initServerList(context: Context) {
+        val sp = getSharedPrefs(context)
+        val set = sp.getStringSet("servers_json", mutableSetOf())!!
+
+        for (jsonStr in set) {
+            val server = gson.fromJson(jsonStr, Server::class.java)
+            servers.add(server)
+        }
+
+        servers.sortBy { it.name }
+    }
+
+    fun addServer(context: Context, server: Server) {
+        val sp = getSharedPrefs(context)
+        val set = sp.getStringSet("servers_json", mutableSetOf())!!
+        val cp = mutableSetOf<String>().also { it.addAll(set) }
+
+        val str = gson.toJson(server, Server::class.java)
+        cp.add(str)
+
+        sp.edit().putStringSet("servers_json", cp).apply()
+
+        servers.add(server)
+        servers.sortBy { it.name }
     }
 
     companion object {

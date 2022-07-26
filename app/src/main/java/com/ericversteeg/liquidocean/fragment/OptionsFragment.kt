@@ -701,7 +701,7 @@ class OptionsFragment: Fragment(), FragmentListener {
     }
 
     fun sendNameCheck(name: String) {
-        if (name.length > 20) {
+        if (name.length > 20 || SessionSettings.instance.lastVisitedServer == null) {
             return
         }
 
@@ -709,7 +709,7 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/devices/checkname/" + name,
+            SessionSettings.instance.lastVisitedServer!!.serviceBaseUrl() + "api/v1/devices/checkname/" + name,
             null,
             { response ->
                 activity?.runOnUiThread {
@@ -755,6 +755,8 @@ class OptionsFragment: Fragment(), FragmentListener {
     }
 
     private fun updateDisplayName(name: String) {
+        if (SessionSettings.instance.lastVisitedServer == null) return
+
         val requestQueue = Volley.newRequestQueue(context)
 
         val requestParams = HashMap<String, String>()
@@ -765,7 +767,7 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         val request = object: JsonObjectRequest(
             Request.Method.POST,
-            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
+            SessionSettings.instance.lastVisitedServer!!.serviceBaseUrl() + "api/v1/devices/${SessionSettings.instance.uniqueId}",
             paramsJson,
             { response ->
                 SessionSettings.instance.displayName = response.getString("name")

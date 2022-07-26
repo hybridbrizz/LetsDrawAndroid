@@ -57,6 +57,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     var world = false
     var realmId = 0
+    lateinit var server: Server
 
     var lastDotsStr = ""
 
@@ -107,6 +108,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         if (realmId == 2) {
             connecting_title.text = "Connecting to dev server"
         }
+        connecting_title.text = String.format("Connecting to %s", server.name)
 
         val rIndex = (Math.random() * gameTips.size).toInt()
         game_tip_text.text = "Tip: ${gameTips[rIndex]}"
@@ -124,7 +126,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         // start connect
         QueueSocket.instance.socketListener = this
-        QueueSocket.instance.startSocket()
+        QueueSocket.instance.startSocket(server)
 
         if (realmId == 2) {
             realm_art.jsonResId = R.raw.mc_tool_json
@@ -173,7 +175,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         })
     }
 
-    private fun getCanvas(context: Context) {
+    private fun getCanvas() {
         getTopContributors()
 
         // sync paint qty or register device
@@ -229,7 +231,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun downloadChunkPixels(chunk: Int) {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
-            Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels/${chunk}",
+            server.serviceBaseUrl() + "api/v1/canvas/${server.id}/pixels/${chunk}",
             Response.Listener { response ->
                 when(chunk) {
                     1 -> SessionSettings.instance.chunk1 = response
@@ -301,7 +303,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun downloadCanvasPixels() {
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
-            Utils.baseUrlApi + "/api/v1/canvas/${realmId}/pixels",
+            server.serviceBaseUrl() + "api/v1/canvas/${realmId}/pixels",
             Response.Listener { response ->
                 SessionSettings.instance.arrJsonStr = response
 
@@ -344,7 +346,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         val request = object : JsonObjectRequest(
             Request.Method.POST,
-            Utils.baseUrlApi + "/api/v1/devices/register",
+            server.serviceBaseUrl() + "api/v1/devices/register",
             paramsJson,
             { response ->
                 SessionSettings.instance.deviceId = response.getInt("id")
@@ -375,7 +377,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/devices/$uniqueId/info",
+            server.serviceBaseUrl() + "api/v1/devices/$uniqueId/info",
             null,
             { response ->
                 SessionSettings.instance.deviceId = response.getInt("id")
@@ -410,7 +412,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun getTopContributors() {
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApi + "/api/v1/top/contributors",
+            server.serviceBaseUrl() + "api/v1/top/contributors",
             null,
             { response ->
                 val topContributors = response.getJSONArray("data")
@@ -508,7 +510,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                     "Pixel socket isn't responding"
                 }
                 else {
-                    "No connection to pretty pictures"
+                    "No connection to server can be established"
                 }
 
                 AlertDialog.Builder(context)
@@ -533,7 +535,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun downloadFinished() {
         updateNumLoaded()
         if (loadingDone()) {
-            dataLoadingCallback?.onDataLoaded(world, realmId)
+            dataLoadingCallback?.onDataLoaded(server)
         }
     }
 
@@ -542,7 +544,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             if (realmId == 2) {
                 status_text?.text = "Loading ${getNumLoaded()} / 4"
             }
-            else if (realmId == 1) {
+            else {
                 status_text?.text = "Loading ${getNumLoaded()} / 8"
             }
         }
@@ -580,7 +582,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 num++
             }
         }
-        else if (realmId == 1) {
+        else {
             num += doneLoadingChunkCount
 
             if (doneLoadingPaintQty || doneSendingDeviceId) {
@@ -641,7 +643,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         QueueSocket.instance.socket?.disconnect()
 
         InteractiveCanvasSocket.instance.socketConnectCallback = this
-        InteractiveCanvasSocket.instance.startSocket()
+        InteractiveCanvasSocket.instance.startSocket(server)
     }
 
     // canvas socket listener
@@ -650,7 +652,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         updateNumLoaded()
         InteractiveCanvasSocket.instance.socketConnectCallback = null
 
-        getCanvas(requireContext())
+        getCanvas()
     }
 
     override fun onSocketConnectError() {

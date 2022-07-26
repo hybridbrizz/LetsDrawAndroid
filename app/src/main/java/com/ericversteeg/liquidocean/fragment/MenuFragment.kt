@@ -11,12 +11,15 @@ import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
+import com.ericversteeg.liquidocean.adapter.ServersRecyclerAdapter
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -25,6 +28,7 @@ import com.ericversteeg.liquidocean.listener.MenuCardListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.service.InteractiveCanvasService
 import com.ericversteeg.liquidocean.service.NoSSLv3SocketFactory
+import com.ericversteeg.liquidocean.service.ServerService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.google.android.gms.security.ProviderInstaller
 import kotlinx.android.synthetic.main.fragment_art_export.*
@@ -65,6 +69,8 @@ class MenuFragment: Fragment() {
     var touchTotalX = 0F
     var touchTotalY = 0F
 
+    private val service = ServerService()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -82,26 +88,8 @@ class MenuFragment: Fragment() {
         (requireActivity() as InteractiveCanvasActivity).canvasFragment = canvasFragment
     }
 
-    private fun testRetrofit() {
-        HttpsURLConnection.setDefaultSSLSocketFactory(NoSSLv3SocketFactory())
-
-        val retrofit = Retrofit.Builder().baseUrl("https://ericversteeg.com:5000/api/v1/").addConverterFactory(ScalarsConverterFactory.create()).build()
-        val service = retrofit.create(InteractiveCanvasService::class.java)
-        service.getChunkPixels(Utils.key1).enqueue(object: Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                Log.i("Response", response.body()!!)
-            }
-
-            override fun onFailure(call: Call<String>, t: Throwable) {
-
-            }
-        })
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //testRetrofit()
 
         SessionSettings.instance.canvasOpen = false
 
@@ -115,9 +103,24 @@ class MenuFragment: Fragment() {
         back_button.actionBtnView = back_action
         back_action.type = ActionButtonView.Type.BACK_SOLID
 
+        add_button.actionBtnView = add_action
+        add_action.type = ActionButtonView.Type.ADD
+
         view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
         back_button.setOnClickListener {
+            if (recycler_view_servers.visibility == View.VISIBLE) {
+                showMenuOptions()
+            }
+            else if (connect_input_container.visibility == View.VISIBLE) {
+                if (SessionSettings.instance.servers.isEmpty()) {
+                    showMenuOptions()
+                }
+                else {
+                    showServerList()
+                }
+            }
+
             if (backCount == 1) {
                 resetMenu()
                 animateMenuButtons(0)
@@ -219,7 +222,13 @@ class MenuFragment: Fragment() {
         }*/
 
         connect_menu_text.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+            //menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+            if (SessionSettings.instance.servers.isEmpty()) {
+                showConnectInput()
+            }
+            else {
+                showServerList()
+            }
         }
 
         options_menu_text.setOnClickListener {
@@ -374,14 +383,65 @@ class MenuFragment: Fragment() {
     }
 
     private fun showMenuOptions() {
-        lefty_button_container.visibility = View.GONE
-        righty_button_container.visibility = View.GONE
+        resetMenu()
 
         connect_button_container.visibility = View.VISIBLE
         options_button_container.visibility = View.VISIBLE
         howto_button_container.visibility = View.VISIBLE
 
         animateMenuButtons(0)
+    }
+
+    private fun showConnectInput() {
+        resetMenu()
+
+        back_button.visibility = View.VISIBLE
+
+        button_add_server.setOnClickListener {
+            val accessKey = input_access_key.text.toString().trim().uppercase()
+            if (accessKey.length == 5 || accessKey.length == 8) {
+                it.isEnabled = false
+                service.getServer(accessKey) { server ->
+                    it.isEnabled = true
+
+                    if (server == null) {
+                        Toast.makeText(requireContext(), "Can't find server", Toast.LENGTH_LONG).show()
+                        return@getServer
+                    }
+
+                    SessionSettings.instance.addServer(requireContext(), server)
+                    showServerList()
+                }
+            }
+        }
+
+        connect_input_container.visibility = View.VISIBLE
+
+        animateMenuButtons(3)
+    }
+
+    private fun showServerList() {
+        back_button.visibility = View.VISIBLE
+        add_button.visibility = View.VISIBLE
+
+        add_button.setOnClickListener {
+            showConnectInput()
+        }
+
+        connect_button_container.visibility = View.GONE
+        options_button_container.visibility = View.GONE
+        howto_button_container.visibility = View.GONE
+
+        connect_input_container.visibility = View.GONE
+
+        recycler_view_servers.visibility = View.VISIBLE
+
+        with (recycler_view_servers) {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            adapter = ServersRecyclerAdapter(SessionSettings.instance.servers) { server ->
+                menuButtonListener?.onServerSelected(server)
+            }
+        }
     }
 
     // panning
@@ -442,6 +502,26 @@ class MenuFragment: Fragment() {
             }
             else if (layer == 2) {
                 Animator.animateMenuItems(listOf(listOf(lefty_menu_text), listOf(righty_menu_text)),
+                    cascade = true, out = false, inverse = false,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingMenu = false
+                        }
+                    }
+                )
+            }
+            else if (layer == 3) {
+                Animator.animateMenuItems(listOf(listOf(connect_input_container)),
+                    cascade = true, out = false, inverse = false,
+                    completion = object: Animator.CompletionHandler {
+                        override fun onCompletion() {
+                            animatingMenu = false
+                        }
+                    }
+                )
+            }
+            else if (layer == 4) {
+                Animator.animateMenuItems(listOf(listOf(connect_input_container)),
                     cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -517,11 +597,11 @@ class MenuFragment: Fragment() {
     private fun resetMenu() {
         //draw_button_container.visibility = View.VISIBLE
 
-        options_button_container.visibility = View.VISIBLE
+        options_button_container.visibility = View.GONE
 
         stats_button_container.visibility = View.GONE
 
-        howto_button_container.visibility = View.VISIBLE
+        howto_button_container.visibility = View.GONE
 
         single_button_container.visibility = View.GONE
 
@@ -535,7 +615,12 @@ class MenuFragment: Fragment() {
 
         empty_button_2_container.visibility = View.GONE
 
+        connect_input_container.visibility = View.GONE
+
+        recycler_view_servers.visibility = View.GONE
+
         back_button.visibility = View.GONE
+        add_button.visibility = View.GONE
     }
 
     private fun resetToPlayMode() {

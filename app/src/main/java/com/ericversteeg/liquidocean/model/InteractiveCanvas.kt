@@ -70,6 +70,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var lastSelectedUnitPoint = Point(0, 0)
 
+    lateinit var server: Server
+
     var world = false
     set(value) {
         field = value
@@ -201,7 +203,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }
             }
             // world
-            else if (realmId == 1) {
+            else {
                 Observable.fromRunnable<Void> {
                     rows = 1024
                     cols = 1024
@@ -1229,7 +1231,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
             Request.Method.GET,
-            Utils.baseUrlApiAlt + "/api/v1/canvas/pixels/${pixelId}/history",
+            server.serviceAltBaseUrl() + "api/v1/canvas/pixels/${pixelId}/history",
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {

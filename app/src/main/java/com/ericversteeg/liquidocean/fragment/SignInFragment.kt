@@ -376,7 +376,7 @@ class SignInFragment: Fragment() {
 
         val request = object: JsonObjectRequest(
             Request.Method.POST,
-            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
+            "api/v1/devices/${SessionSettings.instance.uniqueId}",
             paramsJson,
             { response ->
                 SessionSettings.instance.pincodeSet = true
@@ -444,7 +444,7 @@ class SignInFragment: Fragment() {
 
         val request = object: JsonObjectRequest(
             Request.Method.POST,
-            Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}/pincode",
+            "api/v1/devices/${SessionSettings.instance.uniqueId}/pincode",
             paramsJson,
             { response ->
                 if (response.has("error")) {
@@ -514,7 +514,7 @@ class SignInFragment: Fragment() {
 
         val request = object: JsonObjectRequest(
             Request.Method.POST,
-            Utils.baseUrlApi + "/api/v1/devices/pincode/auth",
+            "api/v1/devices/pincode/auth",
             paramsJson,
             { response ->
                 if (response.has("error")) {

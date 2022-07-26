@@ -156,7 +156,7 @@ class StatTracker {
 
             val request = object: JsonObjectRequest(
                 Request.Method.POST,
-                Utils.baseUrlApi + "/api/v1/devices/${SessionSettings.instance.uniqueId}",
+                "api/v1/devices/${SessionSettings.instance.uniqueId}",
                 paramsJson,
                 { response ->
                     Log.i("Stat Tracker", "State updated.")
