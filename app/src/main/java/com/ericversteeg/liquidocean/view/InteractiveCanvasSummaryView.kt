@@ -136,25 +136,25 @@ class InteractiveCanvasSummaryView: View {
 //                    }
 //                }
 
-                for (pixel in summary) {
-                    paint.color = pixel.color
-
-                    if (paint.color == 0) {
-                        paint.color = Color.BLACK
-                    }
-
-                    val left = floor(pixel.point.x * displayPpu)
-                    val top = floor(pixel.point.y * displayPpu)
-                    val right = left + 1
-                    val bottom = top + 1
-
-                    canvas.drawRect(
-                        left,
-                        top,
-                        right,
-                        bottom, paint
-                    )
-                }
+//                for (pixel in summary) {
+//                    paint.color = pixel.color
+//
+//                    if (paint.color == 0) {
+//                        paint.color = Color.BLACK
+//                    }
+//
+//                    val left = floor(pixel.point.x * displayPpu)
+//                    val top = floor(pixel.point.y * displayPpu)
+//                    val right = left + 1
+//                    val bottom = top + 1
+//
+//                    canvas.drawRect(
+//                        left,
+//                        top,
+//                        right,
+//                        bottom, paint
+//                    )
+//                }
             }
 
             /*val borderPaint = Paint()

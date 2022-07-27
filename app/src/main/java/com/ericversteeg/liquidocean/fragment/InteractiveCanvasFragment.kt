@@ -29,6 +29,7 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
@@ -43,6 +44,7 @@ import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import kotlinx.android.synthetic.main.palette_adapter_view.*
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
@@ -2149,8 +2151,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun toggleCanvasSummary() {
         if (canvas_summary_container.visibility != View.VISIBLE) {
-            canvas_summary_view.drawBackground = false
-            canvas_summary_view.interactiveCanvas = surface_view.interactiveCanvas
+            Glide.with(this).load("${server?.serviceAltBaseUrl()}/canvas").into(canvas_summary_view)
 
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
 

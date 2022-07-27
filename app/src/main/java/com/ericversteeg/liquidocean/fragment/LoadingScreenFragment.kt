@@ -23,12 +23,14 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.listener.SocketConnectCallback
 import com.ericversteeg.liquidocean.model.*
+import com.ericversteeg.liquidocean.service.ServerService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
@@ -40,6 +42,8 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConnectCallback {
+
+    private var serverService = ServerService()
 
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
@@ -128,12 +132,14 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         QueueSocket.instance.socketListener = this
         QueueSocket.instance.startSocket(server)
 
-        if (realmId == 2) {
-            realm_art.jsonResId = R.raw.mc_tool_json
-        }
-        else {
-            realm_art.jsonResId = R.raw.globe_json
-        }
+//        if (realmId == 2) {
+//            realm_art.jsonResId = R.raw.mc_tool_json
+//        }
+//        else {
+//            realm_art.jsonResId = R.raw.globe_json
+//        }
+
+        Glide.with(this).load("${server.serviceAltBaseUrl()}/canvas").into(realm_art)
 
         timer.schedule(object : TimerTask() {
             override fun run() {
@@ -196,35 +202,6 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 downloadChunkPixels(3)
                 downloadChunkPixels(4)
             }.subscribeOn(Schedulers.io()).subscribe()
-        }
-    }
-
-    private fun drawWorldCanvas() {
-        val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
-        val bitmap: Bitmap = Bitmap.createBitmap(
-            world_canvas_preview.width,
-            world_canvas_preview.height,
-            conf
-        ) // this creates a MUTABLE bitmap
-
-        val canvas = Canvas(bitmap)
-        val unitSize = world_canvas_preview.height.toFloat() / 512
-
-        val paint = Paint()
-
-        context?.apply {
-            val arrJsonStr = SessionSettings.instance.getSharedPrefs(this).getString("arr", null)
-            if (arrJsonStr != null) {
-                val outerArray = JSONArray(arrJsonStr)
-                for (i in 0 until outerArray.length()) {
-                    val innerArr = outerArray.getJSONArray(i)
-                    for (j in 0 until innerArr.length()) {
-                        val color = innerArr.getInt(j)
-                        paint.color = color
-                        canvas.drawRect(j * unitSize, i * unitSize, unitSize, unitSize, paint)
-                    }
-                }
-            }
         }
     }
 

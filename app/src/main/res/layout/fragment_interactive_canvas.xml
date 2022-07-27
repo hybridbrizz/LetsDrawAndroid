@@ -916,7 +916,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-        <com.ericversteeg.liquidocean.view.InteractiveCanvasSummaryView
+        <ImageView
                 android:id="@+id/canvas_summary_view"
                 android:layout_width="300dp"
                 android:layout_height="300dp"
