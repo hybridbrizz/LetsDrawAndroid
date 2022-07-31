@@ -149,7 +149,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         StatTracker.instance.save(this)
     }
 
-    private fun showMenuFragment() {
+    fun showMenuFragment() {
         val frag = MenuFragment()
         frag.menuButtonListener = this
 

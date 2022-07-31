@@ -167,7 +167,7 @@ class SessionSettings {
 
     var smallActionButtons = false
 
-    var lockPaintPanel = false
+    var lockPaintPanel = true
 
     var pincodeSet = false
 
@@ -204,7 +204,7 @@ class SessionSettings {
 
     var boldActionButtons = true
 
-    var colorPaletteSize = 4
+    var colorPaletteSize = 3
 
     var servers = LinkedList<Server>()
     var lastVisitedServer: Server? = null

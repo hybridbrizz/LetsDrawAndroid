@@ -580,7 +580,9 @@ class MenuFragment: Fragment() {
                                 Timer().schedule(object: TimerTask() {
                                     override fun run() {
                                         activity?.runOnUiThread {
-                                            art_showcase.animate().alpha(0F).setDuration(1500).start()
+                                            if (art_showcase != null) {
+                                                art_showcase.animate().alpha(0F).setDuration(1500).start()
+                                            }
                                         }
                                     }
 

@@ -3,6 +3,7 @@ package com.ericversteeg.liquidocean.service
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.model.Server
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -25,6 +26,18 @@ class CanvasService(server: Server) {
             }
 
             override fun onFailure(call: Call<JsonArray>, t: Throwable) {
+                completionHandler.invoke(null)
+            }
+        })
+    }
+
+    fun getPaintQty(uuid: String, completionHandler: (jsonObj: JsonObject?) -> Unit) {
+        service.getPaintQty(Utils.key1, uuid).enqueue(object: Callback<JsonObject> {
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                completionHandler.invoke(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 completionHandler.invoke(null)
             }
         })

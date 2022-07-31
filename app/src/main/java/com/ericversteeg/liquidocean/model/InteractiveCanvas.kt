@@ -1240,7 +1240,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     fun getPixelHistory(pixelId: Int, callback: PixelHistoryCallback?) {
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
-            Request.Method.GET,
+            Method.GET,
             server.serviceAltBaseUrl() + "api/v1/canvas/pixels/${pixelId}/history",
             null,
             { response ->

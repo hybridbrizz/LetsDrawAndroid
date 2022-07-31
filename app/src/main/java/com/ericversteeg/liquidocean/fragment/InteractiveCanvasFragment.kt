@@ -107,6 +107,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var paused = false
     var pauseTime = 0L
+    val maxBgTime = 60 * 60
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -133,9 +134,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (server != null) {
             SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
             canvasService = CanvasService(server!!)
+
+            SessionSettings.instance.lastVisitedServer = server
         }
 
         // must call before darkIcons
+        if (surface_view == null) {
+            (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
+            return
+        }
+
         surface_view.interactiveCanvas.server = server!!
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
@@ -555,6 +563,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         close_paint_panel.setOnClickListener {
             togglePaintPanel(false)
+
+            recent_colors_container.visibility = View.GONE
+            recent_colors_action.visibility = View.VISIBLE
+
             closePopoverFragment()
         }
 
@@ -702,9 +714,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
             else if (export_action.toggleState == ActionButtonView.ToggleState.SINGLE) {
                 surface_view.endExport()
-                surface_view.startObjectMove()
-                export_action.toggleState = ActionButtonView.ToggleState.DOUBLE
-                toggleExportBorder(true, double = true)
+                if (world) {
+                    toggleExportBorder(false)
+                }
+                else {
+                    surface_view.startObjectMove()
+                    export_action.toggleState = ActionButtonView.ToggleState.DOUBLE
+                    toggleExportBorder(true, double = true)
+                }
             }
             else if (export_action.toggleState == ActionButtonView.ToggleState.DOUBLE) {
                 surface_view.interactiveCanvas.cancelMoveSelectedObject()
@@ -1152,8 +1169,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun resumeCanvas() {
-        InteractiveCanvasSocket.instance.socketConnectCallback = this
-        reconnectToSocket()
+        val time = System.currentTimeMillis() / 1000
+
+        if (time - pauseTime > maxBgTime) {
+            (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
+        }
+        else {
+            InteractiveCanvasSocket.instance.socketConnectCallback = this
+            reconnectToSocket()
+        }
     }
 
     // screen rotation
@@ -2431,6 +2455,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
+        SessionSettings.instance.uniqueId?.also { uuid ->
+            canvasService.getPaintQty(uuid) { paintQtyInfo ->
+                paintQtyInfo?.also {
+                    val paintQty = it.get("paint_qty").asInt
+                    Log.i("Canvas Service", "Paint qty = $paintQty")
+                    SessionSettings.instance.dropsAmt = paintQty
+                }
+            }
+        }
+
         surface_view.interactiveCanvas
             .registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
 
@@ -2442,7 +2476,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         showNoSocket()
 
         if (error) {
-            scheduleReconnect()
+            //scheduleReconnect()
         }
     }
 

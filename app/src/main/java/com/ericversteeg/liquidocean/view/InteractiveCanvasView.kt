@@ -343,7 +343,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
             e?.apply {
-                if (System.currentTimeMillis() - lastPanOrScaleTime > 500) {
+                if (System.currentTimeMillis() - lastPanOrScaleTime > 100) {
                     val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
 
                     if (unitPoint != null) {

@@ -59,11 +59,14 @@ class OptionsFragment: Fragment(), FragmentListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if (!Utils.isTablet(requireContext())) {
+            option_color_palette_size.visibility = View.GONE
+        }
+
         if (isFromInteractiveCanvas()) {
             option_right_handed.visibility = View.GONE
             option_small_action_buttons_container.visibility = View.GONE
             option_bold_action_buttons.visibility = View.GONE
-            option_color_palette_size.visibility = View.GONE
             option_num_recent_colors.visibility = View.GONE
             option_show_paint_bar_container.visibility = View.GONE
             option_show_paint_circle_container.visibility = View.GONE
