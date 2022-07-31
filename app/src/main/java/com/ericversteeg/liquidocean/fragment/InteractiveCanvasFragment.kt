@@ -37,11 +37,13 @@ import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.*
+import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.google.android.material.snackbar.Snackbar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
@@ -50,11 +52,12 @@ import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
 import java.lang.Exception
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.math.max
 
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQtyListener,
-    RecentColorsListener, SocketStatusCallback, PaintBarActionListener, PixelHistoryListener,
+    RecentColorsListener, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback {
@@ -100,6 +103,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     lateinit var visibleActionViews: Array<ActionButtonView>
 
+    lateinit var canvasService: CanvasService
+
+    var paused = false
+    var pauseTime = 0L
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -123,7 +131,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         if (server != null) {
-            SessionSettings.instance.addPaintInterval = server!!.pixelInterval
+            SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
+            canvasService = CanvasService(server!!)
         }
 
         // must call before darkIcons
@@ -172,8 +181,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.recentColorsListener = this
         surface_view.interactiveCanvas.artExportListener = this
         surface_view.interactiveCanvas.deviceCanvasViewportResetListener = this
-
-        InteractiveCanvasSocket.instance.socketStatusCallback = this
 
         paint_qty_bar.actionListener = this
         paint_qty_circle.actionListener = this
@@ -485,6 +492,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         paint_yes.setOnClickListener {
+            if (world && !InteractiveCanvasSocket.instance.isConnected()) return@setOnClickListener
+
             surface_view.endPainting(true)
 
             paint_yes_container.visibility = View.GONE
@@ -1103,7 +1112,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paintEventTimer?.cancel()
 
         if (world) {
-            InteractiveCanvasSocket.instance.socket?.disconnect()
+            //InteractiveCanvasSocket.instance.socket?.disconnect()
         }
         else {
             context?.apply {
@@ -1118,39 +1127,33 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 StatTracker.instance.save(this)
             }
         }
+
+        pauseCanvas()
+    }
+
+    private fun pauseCanvas() {
+        Log.i("Interactive Canvas", "Canvas Pause")
+        InteractiveCanvasSocket.instance.disconnect()
+
+        paused = true
+        pauseTime = System.currentTimeMillis() / 1000
     }
 
     override fun onResume() {
         super.onResume()
 
-        /*if (world) {
-            Timer().schedule(object : TimerTask() {
-                override fun run() {
-                    context?.apply {
-                        val connected = Utils.isNetworkAvailable(this)
-                        if (!connected) {
-                            (context as Activity?)?.runOnUiThread {
-                                showDisconnectedMessage(0)
-                            }
-                        } else {
-                            sendApiStatusCheck()
-                        }
-                    }
-                }
-            }, 1000 * 60, 1000 * 60)
-
-            getPaintTimerInfo()
-        }*/
-
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
-        /*if (world) {
-            InteractiveCanvasSocket.instance.socket?.apply {
-                if (!connected()) {
-                    connect()
-                }
-            }
-        }*/
+        if (paused) {
+            resumeCanvas()
+
+            paused = false
+        }
+    }
+
+    private fun resumeCanvas() {
+        InteractiveCanvasSocket.instance.socketConnectCallback = this
+        reconnectToSocket()
     }
 
     // screen rotation
@@ -2331,7 +2334,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {
-                    sendSocketStatusCheck()
+                    //sendSocketStatusCheck()
                 }
             },
             { error ->
@@ -2352,17 +2355,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         requestQueue.add(request)
     }
 
-    private fun sendSocketStatusCheck() {
-        InteractiveCanvasSocket.instance.checkSocketStatus()
-    }
-
-    // socket check callback
-    override fun onSocketStatusError() {
-        (context as Activity?)?.runOnUiThread {
-            showDisconnectedMessage(2)
-        }
-    }
-
     private fun showDisconnectedMessage(type: Int) {
         AlertDialog.Builder(context)
             .setMessage("Lost connection to world server (code=$type)")
@@ -2379,41 +2371,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
             }
             .show()
-    }
-
-    private fun getPaintTimerInfo() {
-        val requestQueue = Volley.newRequestQueue(context)
-        val request = object: JsonObjectRequest(
-            Request.Method.GET,
-            "api/v1/paint/time/sync",
-            null,
-            { response ->
-                (context as Activity?)?.runOnUiThread {
-                    val timeUntil = response.getInt("s").toLong()
-
-                    if (timeUntil < 0) {
-                        paint_time_info.text = "???"
-                    } else {
-                        SessionSettings.instance.timeSync = timeUntil
-                        setupPaintEventTimer()
-                    }
-                }
-            },
-            { error ->
-                (context as Activity?)?.runOnUiThread {
-
-                }
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json; charset=utf-8"
-                headers["key1"] = Utils.key1
-                return headers
-            }
-        }
-
-        requestQueue.add(request)
     }
 
     private fun setupPaintEventTimer() {
@@ -2464,44 +2421,48 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // socket callback
     override fun onSocketConnect() {
+        Log.i("Canvas Socket", "Socket connected!")
+        canvasService.getRecentPixels(pauseTime) { pixels ->
+            pixels?.also {
+                for (element in it) {
+                    val pixelInfo = element.asString
+                    surface_view.interactiveCanvas.receivePixel(pixelInfo)
+                }
+            }
+        }
+
         surface_view.interactiveCanvas
-            .registerForSocketEvents(InteractiveCanvasSocket.instance.socket)
+            .registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
+
+        showNoSocket(false)
     }
 
-    override fun onSocketConnectError() {
-        scheduleSocketReconnect()
+    override fun onSocketDisconnect(error: Boolean) {
+        Log.i("Canvas Socket", "Socket disconnect.")
+        showNoSocket()
+
+        if (error) {
+            scheduleReconnect()
+        }
     }
 
-    override fun onSocketDisconnect() {
-        scheduleSocketReconnect()
-    }
-
-    private fun connectToSocket() {
+    private fun reconnectToSocket() {
         InteractiveCanvasSocket.instance.startSocket(server!!)
     }
 
-    private var lastSocketReconnectTime = 0L
-
-    private fun scheduleSocketReconnect() {
-        if (System.currentTimeMillis() - lastSocketReconnectTime > 29000) {
-            Timer().schedule(object: TimerTask() {
-                override fun run() {
-                    requireActivity().runOnUiThread {
-                        if (!InteractiveCanvasSocket.instance.isConnected()) {
-                            connectToSocket()
-                        }
-                    }
-                }
-            }, 30000)
-            lastSocketReconnectTime = System.currentTimeMillis()
-        }
+    private fun scheduleReconnect() {
+        val rSec = (Math.random() * 25 + 5).toLong()
+        Log.i("Canvas Socket", "Scheduling reconnect in $rSec seconds")
+        Observable.timer(rSec, TimeUnit.SECONDS).subscribe()
     }
 
     private fun applyOptions() {
         // panel background
         setPanelBackground()
 
-        // back button color
+        // panel theme config
+        panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
+
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
@@ -2513,6 +2474,49 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         else {
             close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
             close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+        }
+
+        paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
+
+        if (panelThemeConfig.actionButtonColor == Color.BLACK) {
+            palette_name_text.setTextColor(Color.parseColor("#FF111111"))
+            palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
+
+            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+
+            palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
+            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
+
+            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+
+            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+        else {
+            palette_name_text.setTextColor(Color.WHITE)
+
+            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+
+            palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+
+            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+
+            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
+        }
+
+        if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
+            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+        }
+
+        if (panelThemeConfig.inversePaintEventInfo) {
+            paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
+            paint_time_info.setTextColor(ActionButtonView.blackPaint.color)
+            paint_amt_info.setTextColor(ActionButtonView.blackPaint.color)
         }
 
         surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
@@ -2553,5 +2557,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             .commit()
 
         //onViewCreated(requireView(), null)
+    }
+
+    private fun showNoSocket(show: Boolean = true) {
+        activity?.runOnUiThread {
+            if (show) {
+                image_no_socket.visibility = View.VISIBLE
+            }
+            else {
+                image_no_socket.visibility = View.GONE
+            }
+        }
     }
 }

@@ -30,6 +30,18 @@
 
     </com.ericversteeg.liquidocean.view.ActionButtonFrame>
 
+    <ImageView
+            android:id="@+id/image_no_socket"
+            android:visibility="gone"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="-20dp"
+            android:alpha="0.5"
+            app:layout_constraintTop_toTopOf="@id/paint_panel_button"
+            app:layout_constraintEnd_toStartOf="@id/paint_panel_button"
+            android:src="@drawable/ic_no_socket" />
+
     <FrameLayout
             android:id="@+id/paint_warning_frame"
             android:visibility="gone"

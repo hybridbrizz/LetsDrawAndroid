@@ -15,6 +15,7 @@ import com.ericversteeg.liquidocean.helper.DataManager.Companion.sendDeviceId
 import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
+import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.Server
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
@@ -212,6 +213,8 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         frag.world = world
         frag.realmId = realmId
         frag.interactiveCanvasFragmentListener = this
+
+        InteractiveCanvasSocket.instance.socketConnectCallback = frag
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }

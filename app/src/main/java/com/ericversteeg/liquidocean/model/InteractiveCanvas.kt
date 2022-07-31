@@ -223,7 +223,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
                 // socket.emit("my_event", "test")
 
-                registerForSocketEvents(InteractiveCanvasSocket.instance.socket)
+                registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
 
                 // showConnectingAttempts()
 
@@ -407,16 +407,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("pixel_receive") {
             val data = it[0] as String
-            val t = data.split("&")
-            val pixelId = t[0].toInt()
-            val deviceId = t[1].toInt()
-            val color = t[2].toInt()
-
-            val x = pixelId % 1024
-            val y = pixelId / 1024
-
-            arr[y][x] = color
-            interactiveCanvasDrawer?.notifyRedraw()
+            receivePixel(data)
         }
 
         socket?.on("canvas_error") {
@@ -456,6 +447,21 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }, 1000 * 60)
             }
         }
+    }
+
+    fun receivePixel(pixelInfo: String) {
+        val t = pixelInfo.split("&")
+        val pixelId = t[0].toInt()
+        val deviceId = t[1].toInt()
+        val color = t[2].toInt()
+
+        val x = pixelId % 1024
+        val y = pixelId / 1024
+
+        arr[y][x] = color
+        interactiveCanvasDrawer?.notifyRedraw()
+
+        Log.i("Receive Pixel", pixelInfo)
     }
 
     /*fun showConnectingAttempts() {
@@ -617,6 +623,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     // painting
     fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0, redraw: Boolean = true) {
+        if (world && !InteractiveCanvasSocket.instance.isConnected()) return
+
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
             if (restorePoint == null && (sessionSettings.dropsAmt > 0 || !world)) {
@@ -665,9 +673,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     // sends pixel updates to the web server
     fun commitPixels() {
+        if (!InteractiveCanvasSocket.instance.isConnected()) return
+
         if (world) {
             for(restorePoint in restorePoints) {
-                InteractiveCanvasSocket.instance.socket?.emit("pixel_send",
+                InteractiveCanvasSocket.instance.requireSocket().emit("pixel_send",
                     buildPixelString(restorePoint.point.x, restorePoint.point.y, SessionSettings.instance.deviceId, restorePoint.newColor)
                 )
             }

@@ -17,14 +17,14 @@ class InteractiveCanvasSocket {
         val instance = InteractiveCanvasSocket()
     }
 
-    var socket: Socket? = null
-    var checkEventTimeout = 20000L
-    var checkStatusReceived = false
+    private var socket: Socket? = null
 
-    var socketStatusCallback: SocketStatusCallback? = null
     var socketConnectCallback: SocketConnectCallback? = null
 
+    private var manualDisconnect = false
+
     fun startSocket(server: Server) {
+        Log.i("Canvas Socket", "Connecting to socket... (${socketConnectCallback?.javaClass?.simpleName})")
         val opts = IO.Options()
         opts.transports = arrayOf(WebSocket.NAME)
         opts.reconnectionAttempts = 0
@@ -34,37 +34,36 @@ class InteractiveCanvasSocket {
         socket?.connect()
 
         socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            Log.i("Socket", "Socket connected!")
+            //Log.i("Socket", "Socket connected!")
 
             socketConnectCallback?.onSocketConnect()
         })
 
         socket?.on(Socket.EVENT_CONNECT_ERROR) {
-            Log.i("Socket", "Socket connect error!")
+            //Log.i("Socket", "Socket connect error!")
 
             socket?.disconnect()
-            socketConnectCallback?.onSocketConnectError()
         }
 
         socket?.on(Socket.EVENT_DISCONNECT) {
             Log.i("Socket", "Socket disconnected!")
+
+            socketConnectCallback?.onSocketDisconnect(true)
+
+            manualDisconnect = false
         }
+    }
+
+    fun disconnect() {
+        manualDisconnect = true
+        socket?.disconnect()
     }
 
     fun isConnected(): Boolean {
         return socket?.connected() ?: false
     }
 
-    fun checkSocketStatus() {
-        socket?.emit("check_event")
-
-        checkStatusReceived = false
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                if (!checkStatusReceived) {
-                    socketStatusCallback?.onSocketStatusError()
-                }
-            }
-        }, checkEventTimeout)
+    fun requireSocket(): Socket {
+        return socket!!
     }
 }

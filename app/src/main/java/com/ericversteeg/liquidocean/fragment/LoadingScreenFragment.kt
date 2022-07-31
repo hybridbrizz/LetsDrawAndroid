@@ -476,7 +476,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun showConnectionErrorMessage(socket: Boolean = false) {
-        InteractiveCanvasSocket.instance.socket?.disconnect()
+        InteractiveCanvasSocket.instance.disconnect()
 
         if (!showingError) {
             showingError = true
@@ -625,6 +625,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     // canvas socket listener
     override fun onSocketConnect() {
+        Log.i("Canvas Socket", "Socket connected!")
+
         doneConnectingSocket = true
         updateNumLoaded()
         InteractiveCanvasSocket.instance.socketConnectCallback = null
@@ -632,12 +634,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         getCanvas()
     }
 
-    override fun onSocketConnectError() {
-        doneConnectingSocket = false
-        showConnectionErrorMessage(true)
-    }
+    override fun onSocketDisconnect(error: Boolean) {
+        Log.i("Canvas Socket", "Socket disconnect.")
 
-    override fun onSocketDisconnect() {
         doneConnectingSocket = false
         showConnectionErrorMessage(true)
     }
