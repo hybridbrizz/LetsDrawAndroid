@@ -41,6 +41,7 @@ import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.ButtonFrame
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
+import com.ericversteeg.liquidocean.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
 import com.plattysoft.leonids.ParticleSystem
 import com.plattysoft.leonids.modifiers.AlphaModifier
@@ -264,10 +265,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_no.actionBtnView = paint_no_bottom_layer
 
-        close_paint_panel_bottom_layer.type = ActionButtonView.Type.PAINT_CLOSE
-
-        close_paint_panel.actionBtnView = close_paint_panel_bottom_layer
-
         if (SessionSettings.instance.lockPaintPanel) {
             lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
         }
@@ -300,16 +297,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         recolorVisibleActionViews()
 
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        }
-        else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            close_paint_panel.color = SessionSettings.instance.closePaintBackButtonColor
         }
         else {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            close_paint_panel.color = panelThemeConfig.actionButtonColor
         }
 
         paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
@@ -946,10 +937,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     layoutParams.leftToRight = paint_panel.id
                     paint_warning_frame.layoutParams = layoutParams
 
-                    // close paint panel button
-                    close_paint_panel_bottom_layer.rotation = 180F
-                    close_paint_panel_top_layer.rotation = 180F
-
                     // color picker
                     layoutParams = color_picker_frame.layoutParams as ConstraintLayout.LayoutParams
 
@@ -1023,7 +1010,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_action_button_container.removeViewAt(0)
                     paint_action_button_container.addView(paint_yes_container)*/
                 }
-
+                else {
+                    // close paint panel button
+                    close_paint_panel_action.rotation = 180F
+                }
                 // small action buttons
                 if (SessionSettings.instance.smallActionButtons) {
                     // paint yes
@@ -1051,12 +1041,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_color_accept_image_top_layer.layoutParams = layoutParams
 
                     // close paint panel
-                    layoutParams = close_paint_panel_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = close_paint_panel_action.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    close_paint_panel_bottom_layer.layoutParams = layoutParams
-                    close_paint_panel_top_layer.layoutParams = layoutParams
+                    close_paint_panel_action.layoutParams = layoutParams
                 }
 
                 surface_view.setInitialPositionAndScale()
@@ -1277,10 +1266,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (colors != null) {
             var i = 0
             for (v in recent_colors_container.children) {
-                (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
-
                 if (i < colors.size) {
-                    v.representingColor = colors[colors.size - 1 - i]
+                    (v as RecentColorView).color = colors[colors.size - 1 - i]
                     v.visibility = View.VISIBLE
                 }
                 else {
@@ -1288,7 +1275,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
 
                 v.setOnClickListener {
-                    v.representingColor?.apply {
+                    (v as RecentColorView).color?.apply {
                         SessionSettings.instance.paintColor = this
                         notifyPaintColorUpdate(SessionSettings.instance.paintColor)
 
@@ -1310,7 +1297,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             // fixes issue where with no colors on the color palette the paint panel won't open
             if (colors.isEmpty()) {
                 recent1.visibility = View.VISIBLE
-                recent1.type = ActionButtonView.Type.NONE
             }
         }
         else {
@@ -2446,16 +2432,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        }
-        else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            close_paint_panel.color = SessionSettings.instance.closePaintBackButtonColor
         }
         else {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            close_paint_panel.color = panelThemeConfig.actionButtonColor
         }
 
         paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES

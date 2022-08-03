@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.listener.PaintActionListener
@@ -123,9 +124,13 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
             save()
 
             //drawPixelBorder(this)
+            if (this@PaintQuantityBar.parent  is ViewGroup) {
+                (this@PaintQuantityBar.parent as ViewGroup).clipChildren = false
+            }
 
             // quantity
             drawQuantity(this)
+
 
             /*drawRect(rectForPixel(0, 1), greenPaint)
             drawRect(rectForPixel(1, 1), brownPaint)
@@ -205,9 +210,23 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         var curProg = 0F
 
         canvas.apply {
-            drawRect(0F, height * 0.333F, width.toFloat(), height * 0.667F, ActionButtonView.blackPaint)
+            val backgroundPaint = Paint()
+            backgroundPaint.color = ActionButtonView.blackPaint.color
+            backgroundPaint.strokeCap = Paint.Cap.ROUND
+            backgroundPaint.strokeWidth = height.toFloat()
+            drawLine(backgroundPaint.strokeWidth / 2F, height / 2F, width.toFloat() - backgroundPaint.strokeWidth / 2F, height / 2F, backgroundPaint)
 
-            drawRect((1 - relQty) * width, height * 0.333F, width.toFloat(), height * 0.667F, paintBarPaint)
+            val foregroundPaint = Paint()
+            foregroundPaint.color = paintBarPaint.color
+            foregroundPaint.strokeCap = Paint.Cap.ROUND
+            foregroundPaint.strokeWidth = height.toFloat()
+            if (relQty > 0) {
+                drawLine(((1 - relQty) * width) + foregroundPaint.strokeWidth / 2F, height / 2F, width.toFloat() - foregroundPaint.strokeWidth / 2F, height / 2F, foregroundPaint)
+            }
+
+            //drawRect(0F, 0F, width.toFloat(), height.toFloat(), ActionButtonView.blackPaint)
+
+            //drawRect((1 - relQty) * width, 0F, width.toFloat(), height.toFloat(), paintBarPaint)
 
             /*for (x in 1 until cols - 1) {
                 if (relQty > curProg) {

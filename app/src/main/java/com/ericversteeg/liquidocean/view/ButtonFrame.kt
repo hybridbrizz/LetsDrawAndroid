@@ -12,6 +12,7 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.core.widget.ImageViewCompat
+import com.ericversteeg.liquidocean.helper.Utils
 
 class ButtonFrame: FrameLayout {
     enum class ToggleState {
@@ -31,11 +32,17 @@ class ButtonFrame: FrameLayout {
             } else {
                 Color.parseColor("#000000")
             }
-            setTint(baseColor)
+            select(false)
         }
 
     private var baseColor = Color.parseColor("#DDFFFFFF")
     private val highlightColor = Color.parseColor("#FAD452")
+
+    var color: Int? = null
+        set(value) {
+            field = value
+            select(false)
+        }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context): super(context) {
@@ -49,7 +56,7 @@ class ButtonFrame: FrameLayout {
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
 
-        setTint(baseColor)
+        select(false)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -57,16 +64,16 @@ class ButtonFrame: FrameLayout {
 
         when (event.action) {
             MotionEvent.ACTION_UP -> {
-                setTint(baseColor)
+                select(false)
                 //performClick()
                 invalidate()
             }
             MotionEvent.ACTION_CANCEL -> {
-                setTint(baseColor)
+                select(false)
                 invalidate()
             }
             MotionEvent.ACTION_DOWN -> {
-                setTint(highlightColor)
+                select(true)
             }
         }
 
@@ -91,7 +98,26 @@ class ButtonFrame: FrameLayout {
         return null
     }
 
-    fun setTint(color: Int) {
+    fun select(selected: Boolean) {
+        if (color != null) {
+            if (selected) {
+                setTint(Utils.brightenColor(color!!, 0.15F))
+            }
+            else {
+                setTint(color!!)
+            }
+        }
+        else {
+            if (selected) {
+                setTint(highlightColor)
+            }
+            else {
+                setTint(baseColor)
+            }
+        }
+    }
+
+    private fun setTint(color: Int) {
         val imageView = getImageView()
         val textView = getTextView()
 
