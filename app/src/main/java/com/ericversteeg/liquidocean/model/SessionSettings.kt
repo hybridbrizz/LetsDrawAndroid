@@ -50,7 +50,7 @@ class SessionSettings {
 
     var startTimeMillis = 0L
 
-    val maxPaintAmt = 1
+    var maxPaintAmt = 1
 
     var paintQtyListeners: MutableSet<PaintQtyListener?> = ArraySet()
 

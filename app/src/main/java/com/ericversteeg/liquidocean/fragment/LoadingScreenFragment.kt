@@ -182,6 +182,15 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun getCanvas() {
+        serverService.getServer("TEST1") { server ->
+            if (server == null) {
+                showConnectionErrorMessage(false)
+                return@getServer
+            }
+
+            SessionSettings.instance.maxPaintAmt = server.maxPixels
+        }
+
         getTopContributors()
 
         // sync paint qty or register device

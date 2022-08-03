@@ -39,6 +39,7 @@ import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.*
 import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.ericversteeg.liquidocean.view.ButtonFrame
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.google.android.material.snackbar.Snackbar
 import com.plattysoft.leonids.ParticleSystem
@@ -101,13 +102,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var terminalFragment: TerminalFragment? = null
 
-    lateinit var visibleActionViews: Array<ActionButtonView>
+    lateinit var visibleActionViews: Array<ButtonFrame>
 
     lateinit var canvasService: CanvasService
 
     var paused = false
     var pauseTime = 0L
-    val maxBgTime = 60 * 60
+    private val maxBgTime = 60 * 60
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -174,6 +175,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 )
             }
         }
+
+        visibleActionViews = arrayOf(menu_button, paint_panel_button, open_tools_button, recent_colors_button,
+            export_button, background_button, grid_lines_button, canvas_summary_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
@@ -249,14 +253,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         pixel_history_fragment_container.x = 0F
         pixel_history_fragment_container.y = 0F
 
-        menu_button.actionBtnView = menu_action
-        menu_action.type = ActionButtonView.Type.MENU
-
         // paint panel
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
-
-        paint_panel_button.actionBtnView = paint_panel_action_view
-        paint_panel_action_view.type = ActionButtonView.Type.PAINT
 
         paint_yes_bottom_layer.type = ActionButtonView.Type.YES
 
@@ -292,57 +290,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
 
-        // toolbox
-        export_action.type = ActionButtonView.Type.EXPORT
-        export_button.actionBtnView = export_action
-
-        background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-        background_button.actionBtnView = background_action
-
-        grid_lines_action.type = ActionButtonView.Type.GRID_LINES
-        grid_lines_button.actionBtnView = grid_lines_action
-
-        canvas_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-        canvas_summary_button.actionBtnView = canvas_summary_action
-
-        open_tools_action.type = ActionButtonView.Type.DOT
-        open_tools_button.actionBtnView = open_tools_action
-
         // open toolbox
         toggleTools(SessionSettings.instance.toolboxOpen)
-
-        // recent colors
-        recent_colors_action.type = ActionButtonView.Type.DOT
-        recent_colors_button.actionBtnView = recent_colors_action
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
         }
-
-        // bold action buttons
-        if (SessionSettings.instance.boldActionButtons) {
-            menu_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            paint_panel_action_view.toggleState = ActionButtonView.ToggleState.SINGLE
-            export_action.exportBold = true
-            background_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            grid_lines_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            canvas_summary_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            open_tools_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            recent_colors_action.toggleState = ActionButtonView.ToggleState.SINGLE
-        }
-
-        // panel theme config
-        visibleActionViews = arrayOf(menu_action, paint_panel_action_view, export_action, background_action,
-        grid_lines_action, canvas_summary_action, open_tools_action, recent_colors_action)
-
-        menu_action.autoInvalidate = false
-        paint_panel_action_view.autoInvalidate = false
-        export_action.autoInvalidate = false
-        background_action.autoInvalidate = false
-        grid_lines_action.autoInvalidate = false
-        canvas_summary_action.autoInvalidate = false
-        open_tools_action.autoInvalidate = false
-        recent_colors_action.autoInvalidate = false
 
         recolorVisibleActionViews()
 
@@ -697,33 +650,33 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        activity?.apply {
-            menu_button.setLongPressActionListener(this, object: LongPressListener {
-                override fun onLongPress() {
-                    //toggleTerminal(true)
-                }
-            })
-        }
+//        activity?.apply {
+//            menu_button.setLongPressActionListener(this, object: LongPressListener {
+//                override fun onLongPress() {
+//                    //toggleTerminal(true)
+//                }
+//            })
+//        }
 
         // export button
         export_button.setOnClickListener {
-            if (export_action.toggleState == ActionButtonView.ToggleState.NONE) {
+            if (export_button.toggleState == ButtonFrame.ToggleState.NONE) {
                 surface_view.startExport()
-                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+                export_button.toggleState = ButtonFrame.ToggleState.SINGLE
                 toggleExportBorder(true)
             }
-            else if (export_action.toggleState == ActionButtonView.ToggleState.SINGLE) {
+            else if (export_button.toggleState == ButtonFrame.ToggleState.SINGLE) {
                 surface_view.endExport()
                 if (world) {
                     toggleExportBorder(false)
                 }
                 else {
                     surface_view.startObjectMove()
-                    export_action.toggleState = ActionButtonView.ToggleState.DOUBLE
+                    export_button.toggleState = ButtonFrame.ToggleState.DOUBLE
                     toggleExportBorder(true, double = true)
                 }
             }
-            else if (export_action.toggleState == ActionButtonView.ToggleState.DOUBLE) {
+            else if (export_button.toggleState == ButtonFrame.ToggleState.DOUBLE) {
                 surface_view.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
@@ -1185,6 +1138,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         super.onConfigurationChanged(newConfig)
 
         if (!SessionSettings.instance.tablet) {
+            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
             return
         }
 
@@ -1230,9 +1184,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
                 default_white_color_button.layoutParams = linearLayoutParams
 
+                val paintPanelWidth = if (Utils.isTablet(requireContext())) {
+                    ((150 / 1000F) * view.width).toInt()
+                }
+                else {
+                    ((250 / 1000F) * view.width).toInt()
+                }
+
                 // paint panel
                 layoutParams = ConstraintLayout.LayoutParams(
-                    ((150 / 1000F) * view.width).toInt(),
+                    paintPanelWidth,
                     ConstraintLayout.LayoutParams.MATCH_PARENT
                 )
                 layoutParams.leftToLeft = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
@@ -1307,15 +1268,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun recolorVisibleActionViews() {
-        for (actionView in visibleActionViews) {
-            if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
-                actionView.colorMode = ActionButtonView.ColorMode.BLACK
-            }
-            else {
-                actionView.colorMode = ActionButtonView.ColorMode.WHITE
-            }
-
-            actionView.invalidate()
+        for (buttonFrame in visibleActionViews) {
+            buttonFrame.isLight = SessionSettings.instance.backgroundColorsIndex != 1 && SessionSettings.instance.backgroundColorsIndex != 3
         }
     }
 
@@ -1548,10 +1502,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             export_border_view.visibility = View.GONE
 
             if (double) {
-                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+                export_button.toggleState = ButtonFrame.ToggleState.SINGLE
             }
             else {
-                export_action.toggleState = ActionButtonView.ToggleState.NONE
+                export_button.toggleState = ButtonFrame.ToggleState.NONE
             }
 
             export_action.invalidate()
@@ -1938,11 +1892,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
         //Log.v("canvas bounds", canvasBounds.toString())
 
-        for (actionView in visibleActionViews) {
-            val lastColorMode = actionView.colorMode
+        for (buttonFrame in visibleActionViews) {
+            val lastColorMode = buttonFrame.isLight
 
             val location = IntArray(2)
-            actionView.getLocationOnScreen(location)
+            buttonFrame.getLocationOnScreen(location)
 
             val x = location[0]
             val y = location[1]
@@ -1950,35 +1904,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             var inBounds = true
 
             // left
-            if (x + actionView.width / 2 < canvasBounds.left) {
+            if (x + buttonFrame.width / 2 < canvasBounds.left) {
                 inBounds = false
             }
             // top
-            else if (y + actionView.height / 2 < canvasBounds.top) {
+            else if (y + buttonFrame.height / 2 < canvasBounds.top) {
                 inBounds = false
             }
             // right
-            else if (x + actionView.width / 2 > canvasBounds.right) {
+            else if (x + buttonFrame.width / 2 > canvasBounds.right) {
                 inBounds = false
             }
             // bottom
-            else if (y + actionView.height / 2 > canvasBounds.bottom) {
+            else if (y + buttonFrame.height / 2 > canvasBounds.bottom) {
                 inBounds = false
             }
 
             if (!inBounds) {
-                actionView.colorMode = ActionButtonView.ColorMode.WHITE
+                buttonFrame.isLight = true
             }
             else {
-                if (SessionSettings.instance.darkIcons) {
-                    actionView.colorMode = ActionButtonView.ColorMode.BLACK
-                } else {
-                    actionView.colorMode = ActionButtonView.ColorMode.WHITE
-                }
+                buttonFrame.isLight = !SessionSettings.instance.darkIcons
             }
 
-            if (actionView.colorMode != lastColorMode) {
-                actionView.invalidate()
+            if (buttonFrame.isLight != lastColorMode) {
+                buttonFrame.invalidate()
             }
         }
     }
@@ -2100,8 +2050,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         export_fragment_container.visibility = View.GONE
         surface_view.endExport()
-
-        export_action.touchState = ActionButtonView.TouchState.INACTIVE
     }
 
     // palettes fragment listener

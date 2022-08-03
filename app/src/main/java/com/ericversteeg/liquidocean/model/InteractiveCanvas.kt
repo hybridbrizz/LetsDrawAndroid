@@ -422,7 +422,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         socket?.on("add_paint") {
-            if (sessionSettings.dropsAmt == 0) {
+            if (sessionSettings.dropsAmt < SessionSettings.instance.maxPaintAmt) {
                 sessionSettings.dropsAmt = 1
             }
             SessionSettings.instance.timeSync = 60L * SessionSettings.instance.addPaintInterval
