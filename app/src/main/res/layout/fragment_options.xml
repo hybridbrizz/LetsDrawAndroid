@@ -66,7 +66,7 @@
                     android:layout_height="200dp"
                     android:layout_marginTop="20dp"
                     android:paddingBottom="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_panel_texture_title" />
 
             <LinearLayout
@@ -76,7 +76,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_canvas_lock_color_container">
 
                 <TextView
@@ -113,7 +113,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_show_paint_circle_container">
 
                 <TextView
@@ -150,7 +150,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_grid_line_color_container">
 
                 <TextView
@@ -187,7 +187,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_canvas_background_primary_color_container">
 
                 <TextView
@@ -224,7 +224,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_width_container">
 
                 <TextView
@@ -261,7 +261,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/panel_recycler_view">
 
                 <TextView
@@ -292,7 +292,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_canvas_background_secondary_color_container">
 
                 <TextView
@@ -329,7 +329,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_frame_color_container">
 
                 <TextView
@@ -359,7 +359,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_show_paint_bar_container">
 
                 <TextView
@@ -389,7 +389,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_bar_color_container">
 
                 <TextView
@@ -419,7 +419,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_emitters_container">
 
                 <TextView
@@ -449,7 +449,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_fill_circle_container">
 
                 <TextView
@@ -479,7 +479,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_square_container">
 
                 <TextView
@@ -509,7 +509,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_outline_container">
 
                 <TextView
@@ -566,7 +566,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_right_handed">
 
                 <TextView
@@ -597,7 +597,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_canvas_lock_container">
 
                 <TextView
@@ -635,7 +635,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_close_paint_panel_color_container">
 
                 <TextView
@@ -666,7 +666,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_small_action_buttons_container">
 
                 <TextView
@@ -696,7 +696,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_bold_action_buttons">
 
                 <TextView
@@ -752,7 +752,7 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
-                    android:background="@drawable/white_border_background"
+                    android:background="@drawable/underline"
                     app:layout_constraintTop_toBottomOf="@id/option_color_palette_size">
 
                 <TextView
@@ -970,7 +970,7 @@
 
             <View
                     android:layout_width="match_parent"
-                    android:layout_height="400dp"
+                    android:layout_height="250dp"
                     app:layout_constraintTop_toBottomOf="@id/change_name_container" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>

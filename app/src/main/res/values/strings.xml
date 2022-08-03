@@ -82,11 +82,11 @@
     <string name="draw_menu_title">CANVAS</string>
     <string name="connect_menu_title">CONNECT</string>
     <string name="options_menu_title">SETTINGS</string>
-    <string name="how_to_menu_title">HOWTO</string>
+    <string name="how_to_menu_title">HELP</string>
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
     <string name="options_title">Settings</string>
-    <string name="howto_title">Howto</string>
+    <string name="howto_title">Help</string>
     <string name="howto_step2_title">Export and Share</string>
     <string name="howto_step3_title">Change Background</string>
     <string name="howto_step4_title">Grid Lines</string>

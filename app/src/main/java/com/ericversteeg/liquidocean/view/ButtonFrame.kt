@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.core.widget.ImageViewCompat
@@ -33,7 +34,7 @@ class ButtonFrame: FrameLayout {
             setTint(baseColor)
         }
 
-    private var baseColor = Color.parseColor("#FFFFFF")
+    private var baseColor = Color.parseColor("#DDFFFFFF")
     private val highlightColor = Color.parseColor("#FAD452")
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -72,7 +73,7 @@ class ButtonFrame: FrameLayout {
         return true
     }
 
-    fun getImageView(): ImageView? {
+    private fun getImageView(): ImageView? {
         for (child in children) {
             if (child is ImageView) {
                 return child
@@ -81,7 +82,24 @@ class ButtonFrame: FrameLayout {
         return null
     }
 
+    private fun getTextView(): TextView? {
+        for (child in children) {
+            if (child is TextView) {
+                return child
+            }
+        }
+        return null
+    }
+
     fun setTint(color: Int) {
-        ImageViewCompat.setImageTintList(getImageView()!!, ColorStateList.valueOf(color))
+        val imageView = getImageView()
+        val textView = getTextView()
+
+        if (imageView != null) {
+            ImageViewCompat.setImageTintList(getImageView()!!, ColorStateList.valueOf(color))
+        }
+        else if (textView != null) {
+            textView.setTextColor(color)
+        }
     }
 }

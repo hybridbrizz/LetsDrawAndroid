@@ -95,17 +95,6 @@ class MenuFragment: Fragment() {
 
         view.setBackgroundColor(Color.BLACK)
 
-        val allViews = listOf<View>(back_button, back_action,
-            options_menu_text, how_to_menu_text, menu_button_container)
-
-        //fadeInAllView(allViews)
-
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
-
-        add_button.actionBtnView = add_action
-        add_action.type = ActionButtonView.Type.ADD
-
         view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
         back_button.setOnClickListener {
@@ -157,24 +146,6 @@ class MenuFragment: Fragment() {
             art_showcase.art = artShowcase[0]
         }*/
 
-        val menuTextViews = listOf(options_menu_text, how_to_menu_text, lefty_menu_text, righty_menu_text)
-        for (textView in menuTextViews) {
-            textView.setOnTouchListener(object: View.OnTouchListener {
-                override fun onTouch(view: View?, ev: MotionEvent): Boolean {
-                    if (ev.action == MotionEvent.ACTION_DOWN) {
-                        Utils.colorizeTextView(textView, ActionButtonView.yellowPaint.color, ActionButtonView.lightYellowPaint.color)
-                        textView.invalidate()
-                    }
-                    else if (ev.action == MotionEvent.ACTION_CANCEL) {
-                        Utils.colorizeTextView(textView, "#CCCCCC", "#DDDDDD")
-                        textView.invalidate()
-                    }
-
-                    return false
-                }
-            })
-        }
-
         /*draw_menu_text.setOnClickListener {
             /*// menuButtonListener?.onMenuButtonSelected(playMenuIndex)
             play_button_container.visibility = View.GONE
@@ -221,7 +192,7 @@ class MenuFragment: Fragment() {
             }
         }*/
 
-        connect_menu_text.setOnClickListener {
+        connect_button.setOnClickListener {
             //menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
             if (SessionSettings.instance.servers.isEmpty()) {
                 showConnectInput()
@@ -231,18 +202,20 @@ class MenuFragment: Fragment() {
             }
         }
 
-        options_menu_text.setOnClickListener {
+        options_button.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(optionsMenuIndex)
             menuCardListener?.closeMenu()
+            clearMenuTextHighlights()
         }
 
         stats_button.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-        how_to_menu_text.setOnClickListener {
+        howto_button.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
             menuCardListener?.closeMenu()
+            clearMenuTextHighlights()
         }
 
         single_button.setOnClickListener {
@@ -255,8 +228,8 @@ class MenuFragment: Fragment() {
                 world_button_container.visibility = View.GONE
                 dev_button_container.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
+                lefty_button.visibility = View.VISIBLE
+                righty_button.visibility = View.VISIBLE
 
                 empty_button_1_container.visibility = View.VISIBLE
 
@@ -266,6 +239,7 @@ class MenuFragment: Fragment() {
                 animateMenuButtons(2)
             }
             else {
+                clearMenuTextHighlights()
                 menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
             }
         }
@@ -276,8 +250,8 @@ class MenuFragment: Fragment() {
                 world_button_container.visibility = View.GONE
                 dev_button_container.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
+                lefty_button.visibility = View.VISIBLE
+                righty_button.visibility = View.VISIBLE
 
                 empty_button_1_container.visibility = View.VISIBLE
 
@@ -306,12 +280,12 @@ class MenuFragment: Fragment() {
         }
 
         if (SessionSettings.instance.selectedHand) {
-            connect_button_container.visibility = View.VISIBLE
-            options_button_container.visibility = View.VISIBLE
-            howto_button_container.visibility = View.VISIBLE
+            connect_button.visibility = View.VISIBLE
+            options_button.visibility = View.VISIBLE
+            howto_button.visibility = View.VISIBLE
 
             if (canvasFragment != null) {
-                connect_button_container.visibility = View.GONE
+                connect_button.visibility = View.GONE
             }
 
             animateMenuButtons(0)
@@ -357,26 +331,19 @@ class MenuFragment: Fragment() {
             }
         })
 
-        Utils.colorizeTextView(connect_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(lefty_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(righty_menu_text, "#CCCCCC", "#DDDDDD")
-
         if (!SessionSettings.instance.selectedHand) {
             selectHand()
         }
     }
 
     fun clearMenuTextHighlights() {
-        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
+
     }
 
     private fun selectHand() {
         if (!SessionSettings.instance.selectedHand) {
-            lefty_button_container.visibility = View.VISIBLE
-            righty_button_container.visibility = View.VISIBLE
+            lefty_button.visibility = View.VISIBLE
+            righty_button.visibility = View.VISIBLE
 
             animateMenuButtons(2)
         }
@@ -385,9 +352,9 @@ class MenuFragment: Fragment() {
     private fun showMenuOptions() {
         resetMenu()
 
-        connect_button_container.visibility = View.VISIBLE
-        options_button_container.visibility = View.VISIBLE
-        howto_button_container.visibility = View.VISIBLE
+        connect_button.visibility = View.VISIBLE
+        options_button.visibility = View.VISIBLE
+        howto_button.visibility = View.VISIBLE
 
         animateMenuButtons(0)
     }
@@ -428,9 +395,9 @@ class MenuFragment: Fragment() {
             showConnectInput()
         }
 
-        connect_button_container.visibility = View.GONE
-        options_button_container.visibility = View.GONE
-        howto_button_container.visibility = View.GONE
+        connect_button.visibility = View.GONE
+        options_button.visibility = View.GONE
+        howto_button.visibility = View.GONE
 
         connect_input_container.visibility = View.GONE
 
@@ -599,11 +566,11 @@ class MenuFragment: Fragment() {
     private fun resetMenu() {
         //draw_button_container.visibility = View.VISIBLE
 
-        options_button_container.visibility = View.GONE
+        options_button.visibility = View.GONE
 
         stats_button_container.visibility = View.GONE
 
-        howto_button_container.visibility = View.GONE
+        howto_button.visibility = View.GONE
 
         single_button_container.visibility = View.GONE
 
@@ -611,9 +578,9 @@ class MenuFragment: Fragment() {
 
         dev_button_container.visibility = View.GONE
 
-        lefty_button_container.visibility = View.GONE
+        lefty_button.visibility = View.GONE
 
-        righty_button_container.visibility = View.GONE
+        righty_button.visibility = View.GONE
 
         empty_button_2_container.visibility = View.GONE
 
@@ -634,9 +601,9 @@ class MenuFragment: Fragment() {
 
         empty_button_2_container.visibility = View.VISIBLE
 
-        lefty_button_container.visibility = View.GONE
+        lefty_button.visibility = View.GONE
 
-        righty_button_container.visibility = View.GONE
+        righty_button.visibility = View.GONE
 
         empty_button_1_container.visibility = View.GONE
 
