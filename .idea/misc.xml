@@ -28,6 +28,7 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_export.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_open_widgets.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_palette.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_save.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_toggle_grid.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/outline_backspace_24.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/panel_texture_background.xml" value="0.25833333333333336" />
@@ -38,6 +39,8 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_highlight_alt_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_menu_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_palette_24.xml" value="0.246" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_save_alt_24.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_share_24.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_wallpaper_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_widgets_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_zoom_out_map_24.xml" value="0.224" />

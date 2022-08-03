@@ -1967,40 +1967,40 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // paint bar action listener
     override fun onPaintBarDoubleTapped() {
-        if (world) {
-            paintTextMode += 1
-            if (paintTextMode == 1) {
-                paintTextMode = -1
-            }
-
-            if (paintTextMode == paintTextModeTime) {
-                paint_time_info.visibility = View.VISIBLE
-                paint_time_info_container.visibility = View.VISIBLE
-
-                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = max((paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt(), Utils.dpToPx(context, 30))
-
-                paint_time_info_container.layoutParams = layoutParams
-
-                paint_amt_info.visibility = View.INVISIBLE
-            }
-            else if (paintTextMode == paintTextModeAmt) {
-                paint_amt_info.visibility = View.VISIBLE
-                paint_time_info_container.visibility = View.VISIBLE
-
-                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = max((paint_amt_info.paint.measureText(paint_amt_info.text.toString()) + Utils.dpToPx(context, 20)).toInt(), Utils.dpToPx(context, 30))
-
-                paint_time_info_container.layoutParams = layoutParams
-
-                paint_time_info.visibility = View.INVISIBLE
-            }
-            else if (paintTextMode == paintTextModeHide) {
-                paint_time_info.visibility = View.INVISIBLE
-                paint_time_info_container.visibility = View.INVISIBLE
-                paint_amt_info.visibility = View.INVISIBLE
-            }
-        }
+//        if (world) {
+//            paintTextMode += 1
+//            if (paintTextMode == 1) {
+//                paintTextMode = -1
+//            }
+//
+//            if (paintTextMode == paintTextModeTime) {
+//                paint_time_info.visibility = View.VISIBLE
+//                paint_time_info_container.visibility = View.VISIBLE
+//
+//                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
+//                layoutParams.width = max((paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt(), Utils.dpToPx(context, 30))
+//
+//                paint_time_info_container.layoutParams = layoutParams
+//
+//                paint_amt_info.visibility = View.INVISIBLE
+//            }
+//            else if (paintTextMode == paintTextModeAmt) {
+//                paint_amt_info.visibility = View.VISIBLE
+//                paint_time_info_container.visibility = View.VISIBLE
+//
+//                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
+//                layoutParams.width = max((paint_amt_info.paint.measureText(paint_amt_info.text.toString()) + Utils.dpToPx(context, 20)).toInt(), Utils.dpToPx(context, 30))
+//
+//                paint_time_info_container.layoutParams = layoutParams
+//
+//                paint_time_info.visibility = View.INVISIBLE
+//            }
+//            else if (paintTextMode == paintTextModeHide) {
+//                paint_time_info.visibility = View.INVISIBLE
+//                paint_time_info_container.visibility = View.INVISIBLE
+//                paint_amt_info.visibility = View.INVISIBLE
+//            }
+//        }
     }
 
     // object selection listener

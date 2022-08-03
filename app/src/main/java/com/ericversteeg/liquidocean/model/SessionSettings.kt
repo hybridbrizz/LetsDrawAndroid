@@ -204,7 +204,7 @@ class SessionSettings {
 
     var boldActionButtons = true
 
-    var colorPaletteSize = 3
+    var colorPaletteSize = 2
 
     var servers = LinkedList<Server>()
     var lastVisitedServer: Server? = null
@@ -320,7 +320,7 @@ class SessionSettings {
 
         ed.putBoolean("bold_action_buttons", boldActionButtons)
 
-        ed.putInt("color_palette_size", colorPaletteSize)
+        ed.putInt("color_palette_size", 3)
 
         ed.apply()
     }
@@ -406,7 +406,7 @@ class SessionSettings {
 
         smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
 
-        lockPaintPanel = getSharedPrefs(context).getBoolean("lock_paint_panel", false)
+        lockPaintPanel = getSharedPrefs(context).getBoolean("lock_paint_panel", true)
 
         pincodeSet = getSharedPrefs(context).getBoolean("pin_code_set", false)
 
@@ -452,7 +452,7 @@ class SessionSettings {
 
         boldActionButtons = getSharedPrefs(context).getBoolean("bold_action_buttons", true)
 
-        colorPaletteSize = getSharedPrefs(context).getInt("color_palette_size", 4)
+        colorPaletteSize = getSharedPrefs(context).getInt("color_palette_size", 3)
 
         initServerList(context)
     }

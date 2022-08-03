@@ -2,6 +2,7 @@ package com.ericversteeg.liquidocean.view
 
 import android.content.Context
 import android.graphics.*
+import android.os.Build
 import android.text.method.Touch
 import android.util.AttributeSet
 import android.util.TypedValue
@@ -258,6 +259,10 @@ class ActionButtonView: View {
 
         linePaint.color = Color.WHITE
         linePaint.strokeWidth = 1F
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            elevation = Utils.dpToPx(context, 10).toFloat()
+        }
     }
 
     override fun onDraw(canvas: Canvas?) {
