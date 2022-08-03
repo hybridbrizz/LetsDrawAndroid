@@ -17,7 +17,7 @@
     <string name="client_id">454898966293-ii55sno355a2jvrr0qllcljgfe49u9rj.apps.googleusercontent.com</string>
 
     <string name="option_change_name_title">Display name</string>
-    <string name="option_paint_panel_texture_title">Panel Background Texture</string>
+    <string name="option_paint_panel_texture_title">Background</string>
     <string name="option_canvas_lock_border_title">Canvas Lock Border</string>
     <string name="option_emitters_container_title">Particle Emitters</string>
     <string name="option_canvas_lock_color_title">Canvas Lock Color</string>
@@ -26,16 +26,16 @@
     <string name="alert_message_exit_canvas">Are you sure you would like to go back?</string>
     <string name="alert_message_palette_remove_color">Remove this color from %s?</string>
     <string name="no_pixel_history">No data</string>
-    <string name="option_num_recent_color_title">Recent colors</string>
-    <string name="option_paint_indicator_width_title">Color indicator size</string>
-    <string name="option_paint_indicator_fill_circle">Circle color indicator</string>
-    <string name="option_paint_indicator_square">Square color indicator</string>
-    <string name="option_paint_indicator_outline_title">Color indicator outline</string>
-    <string name="option_grid_line_color_title">Canvas grid line color</string>
-    <string name="option_canvas_background_primary_color_title">Canvas background primary color</string>
-    <string name="option_canvas_background_secondary_color_title">Canvas background secondary color</string>
+    <string name="option_num_recent_color_title">Palette size</string>
+    <string name="option_paint_indicator_width_title">Selected color size</string>
+    <string name="option_paint_indicator_fill_circle">Circle selected color</string>
+    <string name="option_paint_indicator_square">Square selected color</string>
+    <string name="option_paint_indicator_outline_title">Selected color outline</string>
+    <string name="option_grid_line_color_title">Grid line color</string>
+    <string name="option_canvas_background_primary_color_title">Background color</string>
+    <string name="option_canvas_background_secondary_color_title">Background color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
-    <string name="option_close_paint_panel_color_title">Close button color</string>
+    <string name="option_close_paint_panel_color_title">Close panel color</string>
     <string name="step1">It\'s easy to get started. Enter into the canvas then tap the three dot icon to bring up the color panel. From here you can choose a color and do many other things.
         Tap and drag anywhere on the canvas to draw the currently selected color. Tap and drag back over any pixels that you want to remove. Finalize
         by tapping the green checkmark, or to cancel tap the red x.</string>
@@ -54,10 +54,10 @@
     and height then tap the Create button to create a frame.</string>
     <string name="step10">To erase pixels, tap anywhere on the canvas where you haven\'t drawn yet with the color picker open to pick the transparent color off the canvas. Then draw back over the
         pixels that you want to erase.</string>
-    <string name="option_show_paint_bar_title">Show pixel meter bar</string>
+    <string name="option_show_paint_bar_title">Pixel meter bar</string>
     <string name="option_paint_bar_color_title">Pixel meter color</string>
-    <string name="option_show_paint_circle_title">Show pixel meter circle</string>
-    <string name="option_right_handed_title">Right-handed</string>
+    <string name="option_show_paint_circle_title">Pixel meter circle</string>
+    <string name="option_right_handed_title">Right handed</string>
     <string name="option_small_action_buttons_title">Small action buttons</string>
     <string name="pincode_title">8-digit pincode</string>
     <string name="pincode_repeat_title">Repeat 8-digit pincode</string>
@@ -81,11 +81,11 @@
     <string name="import_canvas_button_title">IMPORT CANVAS</string>
     <string name="draw_menu_title">CANVAS</string>
     <string name="connect_menu_title">CONNECT</string>
-    <string name="options_menu_title">OPTIONS</string>
+    <string name="options_menu_title">SETTINGS</string>
     <string name="how_to_menu_title">HOWTO</string>
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
-    <string name="options_title">Options</string>
+    <string name="options_title">Settings</string>
     <string name="howto_title">Howto</string>
     <string name="howto_step2_title">Export and Share</string>
     <string name="howto_step3_title">Change Background</string>

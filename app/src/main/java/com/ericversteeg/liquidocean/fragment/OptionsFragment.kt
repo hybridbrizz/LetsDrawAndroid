@@ -29,9 +29,6 @@ import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.*
-import kotlinx.android.synthetic.main.fragment_options.back_action
-import kotlinx.android.synthetic.main.fragment_options.back_button
-import kotlinx.android.synthetic.main.fragment_signin.*
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -71,9 +68,6 @@ class OptionsFragment: Fragment(), FragmentListener {
             option_show_paint_bar_container.visibility = View.GONE
             option_show_paint_circle_container.visibility = View.GONE
         }
-
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
 
         back_button.setOnClickListener {
             if (credits_container.visibility == View.VISIBLE) {
@@ -597,7 +591,7 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         if (!SessionSettings.instance.tablet) {
             Animator.animateTitleFromTop(options_title_text)
-
+            Animator.animateTitleFromTop(back_button)
             Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
             Animator.animateHorizontalViewEnter(panel_recycler_view, true)
             Animator.animateHorizontalViewEnter(option_right_handed, false)

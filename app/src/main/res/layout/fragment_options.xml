@@ -13,8 +13,7 @@
         <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:layout_marginTop="-11dp">
+                android:orientation="vertical">
 
             <TextView
                     android:id="@+id/options_title_text"
@@ -25,7 +24,7 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     android:fontFamily="@font/inter_medium"
-                    android:textSize="45dp"
+                    android:textSize="32dp"
                     android:textColor="#DDFFFFFF"
                     android:gravity="center"
                     android:text="@string/options_title"
@@ -65,45 +64,15 @@
                     android:id="@+id/panel_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:layout_marginTop="10dp"
-                    app:layout_constraintTop_toBottomOf="@id/option_paint_panel_texture_title" />
-
-            <LinearLayout
-                    android:id="@+id/option_right_handed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="10dp"
+                    android:layout_marginTop="20dp"
+                    android:paddingBottom="10dp"
                     android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/panel_recycler_view">
-
-                <TextView
-                        android:id="@+id/option_right_handed_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_right_handed_title"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/white"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                        android:id="@+id/option_right_handed_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp" />
-
-            </LinearLayout>
+                    app:layout_constraintTop_toBottomOf="@id/option_paint_panel_texture_title" />
 
             <LinearLayout
                     android:id="@+id/option_grid_line_color_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -138,10 +107,46 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/option_paint_bar_color_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_show_paint_circle_container">
+
+                <TextView
+                        android:id="@+id/option_paint_bar_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_paint_bar_color_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_paint_bar_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_paint_bar_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                     android:id="@+id/option_canvas_background_primary_color_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -178,8 +183,7 @@
             <LinearLayout
                     android:id="@+id/option_canvas_background_secondary_color_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -214,11 +218,77 @@
             </LinearLayout>
 
             <LinearLayout
+                    android:id="@+id/option_close_paint_panel_color_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_width_container">
+
+                <TextView
+                        android:id="@+id/option_close_paint_panel_color_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_close_paint_panel_color_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <Button
+                        android:id="@+id/option_close_paint_panel_color_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="Reset" />
+
+                <View
+                        android:id="@+id/option_close_paint_panel_color_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                    android:id="@+id/option_right_handed"
+                    android:layout_width="match_parent"
+                    android:layout_height="70dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:background="@drawable/white_border_background"
+                    app:layout_constraintTop_toBottomOf="@id/panel_recycler_view">
+
+                <TextView
+                        android:id="@+id/option_right_handed_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_medium"
+                        android:text="@string/option_right_handed_title"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white"
+                        android:layout_marginLeft="20dp"
+                        android:layout_weight="1" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/option_right_handed_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
                     android:id="@+id/option_frame_color_container"
                     android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -255,8 +325,7 @@
             <LinearLayout
                     android:id="@+id/option_show_paint_bar_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -286,8 +355,7 @@
             <LinearLayout
                     android:id="@+id/option_show_paint_circle_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -315,48 +383,9 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_paint_bar_color_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="10dp"
-                    android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/option_show_paint_circle_container">
-
-                <TextView
-                        android:id="@+id/option_paint_bar_color_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_paint_bar_color_title"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/white"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1" />
-
-                <Button
-                        android:id="@+id/option_paint_bar_color_reset_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="Reset" />
-
-                <View
-                        android:id="@+id/option_paint_bar_color_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
                     android:id="@+id/option_emitters_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -386,8 +415,7 @@
             <LinearLayout
                     android:id="@+id/option_paint_indicator_fill_circle_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -417,8 +445,7 @@
             <LinearLayout
                     android:id="@+id/option_paint_indicator_square_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -448,8 +475,7 @@
             <LinearLayout
                     android:id="@+id/option_paint_indicator_outline_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -479,8 +505,7 @@
             <LinearLayout
                     android:id="@+id/option_paint_indicator_width_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -534,48 +559,10 @@
             </LinearLayout>
 
             <LinearLayout
-                    android:id="@+id/option_close_paint_panel_color_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:padding="10dp"
-                    android:background="@drawable/white_border_background"
-                    app:layout_constraintTop_toBottomOf="@id/option_paint_indicator_width_container">
-
-                <TextView
-                        android:id="@+id/option_close_paint_panel_color_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="@string/option_close_paint_panel_color_title"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/white"
-                        android:layout_marginLeft="20dp"
-                        android:layout_weight="1" />
-
-                <Button
-                        android:id="@+id/option_close_paint_panel_color_reset_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="40dp"
-                        android:fontFamily="@font/inter_medium"
-                        android:text="Reset" />
-
-                <View
-                        android:id="@+id/option_close_paint_panel_color_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp" />
-
-            </LinearLayout>
-
-            <LinearLayout
                     android:id="@+id/option_canvas_lock_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -604,9 +591,9 @@
 
             <LinearLayout
                     android:id="@+id/option_canvas_lock_color_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -642,9 +629,9 @@
 
             <LinearLayout
                     android:id="@+id/option_small_action_buttons_container"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -673,9 +660,9 @@
 
             <LinearLayout
                     android:id="@+id/option_bold_action_buttons"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -705,8 +692,7 @@
             <LinearLayout
                     android:id="@+id/option_color_palette_size"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -762,8 +748,7 @@
             <LinearLayout
                     android:id="@+id/option_num_recent_colors"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_height="70dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:padding="10dp"
@@ -784,7 +769,7 @@
                 <LinearLayout
                         android:id="@+id/option_num_recent_colors_choice_layout"
                         android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -950,6 +935,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:layout_marginTop="10dp"
+                    android:padding="10dp"
                     app:layout_constraintTop_toBottomOf="@id/reset_single_play">
 
                 <TextView
@@ -1098,21 +1084,22 @@
 
     </ScrollView>
 
-    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+    <com.ericversteeg.liquidocean.view.ButtonFrame
             android:id="@+id/back_button"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
+        <ImageView
                 android:id="@+id/back_action"
-                android:layout_width="35dp"
-                android:layout_height="25dp"
-                android:layout_margin="10dp"
-                android:layout_gravity="start|top" />
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_margin="17dp"
+                android:layout_gravity="start|top"
+                android:src="@drawable/ic_back" />
 
-    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+    </com.ericversteeg.liquidocean.view.ButtonFrame>
 
     <FrameLayout
             android:id="@+id/fragment_container"
