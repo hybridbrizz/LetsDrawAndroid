@@ -47,28 +47,9 @@ class HowtoFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
-
-        paint_action.isStatic = true
-        share_action.isStatic = true
-        howto_background_action.isStatic = true
-        howto_grid_line_action.isStatic = true
-        howto_summary_action.isStatic = true
-        howto_dot_action_1.isStatic = true
-        howto_dot_action_2.isStatic = true
-        howto_dot_action_3.isStatic = true
         howto_frame_action.isStatic = true
         howto_export_move_action.isStatic = true
 
-        paint_action.type = ActionButtonView.Type.PAINT
-        share_action.type = ActionButtonView.Type.EXPORT
-        howto_background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-        howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
-        howto_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-        howto_dot_action_1.type = ActionButtonView.Type.DOT
-        howto_dot_action_2.type = ActionButtonView.Type.DOT
-        howto_dot_action_3.type = ActionButtonView.Type.DOT
         howto_frame_action.type = ActionButtonView.Type.FRAME
         howto_export_move_action.type = ActionButtonView.Type.EXPORT
 
@@ -91,6 +72,7 @@ class HowtoFragment: Fragment() {
 
         if (!SessionSettings.instance.tablet) {
             Animator.animateTitleFromTop(title_text)
+            Animator.animateTitleFromTop(back_button)
 
             Animator.animateHorizontalViewEnter(step1_text, true)
             Animator.animateHorizontalViewEnter(paint_action, true)

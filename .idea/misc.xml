@@ -21,6 +21,15 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/gradient_9.xml" value="0.24791666666666667" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/howto_step_background.xml" value="0.2520833333333333" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_back.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_background.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_backspace.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_brush.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_canvas_summary.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_export.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_open_widgets.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_palette.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/ic_toggle_grid.xml" value="0.224" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/outline_backspace_24.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/panel_texture_background.xml" value="0.25833333333333336" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_arrow_back_24.xml" value="0.3675" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_brush_24.xml" value="0.246" />
@@ -30,6 +39,7 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_palette_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_wallpaper_24.xml" value="0.246" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_widgets_24.xml" value="0.246" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/round_zoom_out_map_24.xml" value="0.224" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/rounded_corner.xml" value="0.25" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/shadow_background.xml" value="0.25" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/white_border_background.xml" value="0.24010416666666667" />
@@ -40,7 +50,7 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_canvas_export.xml" value="0.24375" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_canvas_import.xml" value="0.24375" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_draw_frame_config.xml" value="0.19791666666666666" />
-        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_howto.xml" value="0.225" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_howto.xml" value="0.1" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_interactive_canvas.xml" value="0.2375" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_loading_screen.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/fragment_menu.xml" value="0.20520833333333333" />
