@@ -32,6 +32,7 @@ import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.colorpicker.HSBPalette
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
@@ -351,20 +352,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view.panelThemeConfig = panelThemeConfig
 
         // color picker view
-        color_picker_view.setSelectorColor(Color.WHITE)
+        //color_picker_view.setSelectorColor(Color.WHITE)
 
         default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
         default_black_color_button.actionBtnView = default_black_color_action
 
         default_black_color_button.setOnClickListener {
-            color_picker_view.setInitialColor(ActionButtonView.blackPaint.color)
+            hsb_palette.init(ActionButtonView.blackPaint.color)
         }
 
         default_white_color_action.type = ActionButtonView.Type.WHITE_COLOR_DEFAULT
         default_white_color_button.actionBtnView = default_white_color_action
 
         default_white_color_button.setOnClickListener {
-            color_picker_view.setInitialColor(ActionButtonView.whitePaint.color)
+            hsb_palette.init(ActionButtonView.whitePaint.color)
         }
 
         val textChangeListener = object: TextWatcher {
@@ -375,7 +376,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 try {
                     val color = Color.parseColor("#$s")
-                    color_picker_view.setInitialColor(color)
+                    hsb_palette.init(color)
 
                     hideKeyboard()
                 }
@@ -398,10 +399,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             true
         }
 
-        color_picker_view.setEnabledAlpha(false)
-
-        color_picker_view.subscribe(object : ColorObserver {
-            override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+        hsb_palette.listen(object: HSBPalette.ColorListener {
+            override fun onColor(color: Int) {
                 paint_indicator_view_bottom_layer.setPaintColor(color)
 
                 if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
@@ -530,7 +529,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (color_picker_frame.visibility != View.VISIBLE) {
                 color_picker_frame.visibility = View.VISIBLE
                 initalColor = SessionSettings.instance.paintColor
-                color_picker_view.setInitialColor(initalColor)
+                hsb_palette.init(initalColor)
 
                 paint_warning_frame.visibility = View.GONE
 
@@ -581,6 +580,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             startParticleEmitters()
+
+            SessionSettings.instance.saveColor(requireContext())
         }
 
         // to stop click-through to the canvas behind
@@ -1829,7 +1830,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // interactive canvas listener
     override fun notifyPaintColorUpdate(color: Int) {
-        color_picker_view.setInitialColor(color)
+        hsb_palette.init(color)
         paint_indicator_view.setPaintColor(color)
     }
 

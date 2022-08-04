@@ -206,6 +206,8 @@ class SessionSettings {
 
     var colorPaletteSize = 2
 
+    var hsbTextVisible = true
+
     var servers = LinkedList<Server>()
     var lastVisitedServer: Server? = null
 
@@ -322,6 +324,20 @@ class SessionSettings {
 
         ed.putInt("color_palette_size", 3)
 
+        ed.putBoolean("hsb_text_visible", hsbTextVisible)
+
+        ed.apply()
+    }
+
+    fun saveColor(context: Context) {
+        val ed = getSharedPrefs(context).edit()
+        ed.putInt("last_world_paint_color", paintColor)
+        ed.apply()
+    }
+
+    fun saveHsbTextVisible(context: Context) {
+        val ed = getSharedPrefs(context).edit()
+        ed.putBoolean("hsb_text_visible", hsbTextVisible)
         ed.apply()
     }
 
@@ -453,6 +469,8 @@ class SessionSettings {
         boldActionButtons = getSharedPrefs(context).getBoolean("bold_action_buttons", true)
 
         colorPaletteSize = getSharedPrefs(context).getInt("color_palette_size", 3)
+
+        hsbTextVisible = getSharedPrefs(context).getBoolean("hsb_text_visible", true)
 
         initServerList(context)
     }

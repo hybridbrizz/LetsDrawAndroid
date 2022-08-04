@@ -110,4 +110,7 @@
         Direction indicators will appear. Tap the direction indicators and move the object in any direction. Confirm the move with the green checkmark,
         or cancel with the red x.</string>
     <string name="option_color_palette_size_title">Color palette size</string>
+    <string name="hue_value_text">H: %d°</string>
+    <string name="saturation_value_text">S: %d%%</string>
+    <string name="brightness_value_text">B: %d%%</string>
 </resources>
