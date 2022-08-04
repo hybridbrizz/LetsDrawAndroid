@@ -10,14 +10,15 @@
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackground" />
     
-    <com.ericversteeg.liquidocean.view.ActionButtonView
+    <ImageView
             android:id="@+id/selected_icon"
             android:visibility="gone"
-            android:layout_width="21dp"
-            android:layout_height="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginBottom="15dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="28dp"
+            android:layout_marginBottom="2dp"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:src="@drawable/ic_done" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -49,6 +49,10 @@ import com.plattysoft.leonids.modifiers.AlphaModifier
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.*
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import kotlinx.android.synthetic.main.palette_adapter_view.*
 import org.json.JSONArray
@@ -258,14 +262,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // paint panel
         paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
 
-        paint_yes_bottom_layer.type = ActionButtonView.Type.YES
-
-        paint_yes.actionBtnView = paint_yes_bottom_layer
-
-        paint_no_bottom_layer.type = ActionButtonView.Type.NO
-
-        paint_no.actionBtnView = paint_no_bottom_layer
-
         if (SessionSettings.instance.lockPaintPanel) {
             lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
         }
@@ -276,15 +272,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
-
-        paint_color_accept.actionBtnView = paint_color_accept_image_top_layer
-
-        paint_color_accept_image_bottom_layer.type = paint_color_accept_image_top_layer.type
-        paint_color_accept_image_bottom_layer.isStatic = true
-
-        paint_color_accept_image_top_layer.topLayer = true
-        paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
-        paint_color_accept_image_top_layer.hideOnTouchEnd = true
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
 
@@ -304,41 +291,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             close_paint_panel.color = panelThemeConfig.actionButtonColor
         }
 
-        paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
-
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.parseColor("#FF111111"))
             palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept.color = Color.BLACK
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
-            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_yes.color = Color.BLACK
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_color_accept.color = Color.WHITE
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
 
-            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_yes.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept.color = Color.BLACK
         }
 
         if (panelThemeConfig.inversePaintEventInfo) {
@@ -404,20 +384,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_indicator_view_bottom_layer.setPaintColor(color)
 
                 if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    paint_color_accept.color = Color.BLACK
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    paint_color_accept.color = Color.WHITE
                 }
                 else if (PaintColorIndicator.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    paint_color_accept.color = Color.WHITE
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    paint_color_accept.color = Color.BLACK
                 }
 
                 color_hex_string_input.removeTextChangedListener(textChangeListener)
@@ -451,7 +427,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no_container.visibility = View.GONE
             close_paint_panel_container.visibility = View.VISIBLE
 
-            paint_yes_top_layer.touchState = ActionButtonView.TouchState.INACTIVE
             paint_yes.invalidate()
 
             surface_view.startPainting()
@@ -540,10 +515,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_no_container.visibility = View.VISIBLE
 
                 if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    paint_no.color = Color.BLACK
                 }
                 else {
-                    paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    paint_no.color = Color.WHITE
                 }
 
                 //recent_colors_button.visibility = View.GONE
@@ -1018,28 +993,28 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 // small action buttons
                 if (SessionSettings.instance.smallActionButtons) {
                     // paint yes
-                    var layoutParams = paint_yes_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    var layoutParams = paint_yes_image.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_yes_bottom_layer.layoutParams = layoutParams
-                    paint_yes_top_layer.layoutParams = layoutParams
+                    paint_yes_image.layoutParams = layoutParams
+                    paint_yes_image.layoutParams = layoutParams
 
                     // paint no
-                    layoutParams = paint_no_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = paint_no_image.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_no_bottom_layer.layoutParams = layoutParams
-                    paint_no_top_layer.layoutParams = layoutParams
+                    paint_no_image.layoutParams = layoutParams
+                    paint_no_image.layoutParams = layoutParams
 
                     // paint select accept
-                    layoutParams = paint_color_accept_image_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = paint_color_accept_image.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_color_accept_image_bottom_layer.layoutParams = layoutParams
-                    paint_color_accept_image_top_layer.layoutParams = layoutParams
+                    paint_color_accept_image.layoutParams = layoutParams
+                    paint_color_accept_image.layoutParams = layoutParams
 
                     // close paint panel
                     layoutParams = close_paint_panel_action.layoutParams as FrameLayout.LayoutParams
@@ -2439,41 +2414,36 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             close_paint_panel.color = panelThemeConfig.actionButtonColor
         }
 
-        paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
-
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.parseColor("#FF111111"))
             palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept.color = Color.BLACK
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
-            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_yes.color = Color.BLACK
+            paint_no.color = Color.BLACK
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_color_accept.color = Color.WHITE
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
 
-            paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            paint_yes.color = Color.WHITE
+            paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            paint_color_accept.color = Color.BLACK
         }
 
         if (panelThemeConfig.inversePaintEventInfo) {

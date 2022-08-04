@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
@@ -53,10 +54,6 @@ class PanelRecyclerViewAdapter(context: Context, panelResIds: MutableList<Int>):
 
     class PanelBackgroundViewHolder(v: View) : RecyclerView.ViewHolder(v) {
         var image: ClickableImageView = v.findViewById(R.id.panel_image)
-        var selectedIcon: ActionButtonView = v.findViewById(R.id.selected_icon)
-
-        init {
-            selectedIcon.type = ActionButtonView.Type.YES
-        }
+        var selectedIcon: ImageView = v.findViewById(R.id.selected_icon)
     }
 }
