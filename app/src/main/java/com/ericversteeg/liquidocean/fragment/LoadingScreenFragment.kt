@@ -129,67 +129,66 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }, 3000)
 
         // start connect
-        QueueSocket.instance.socketListener = this
-        QueueSocket.instance.startSocket(server)
-
-//        if (realmId == 2) {
-//            realm_art.jsonResId = R.raw.mc_tool_json
-//        }
-//        else {
-//            realm_art.jsonResId = R.raw.globe_json
-//        }
-
-        Glide.with(this).load("${server.serviceAltBaseUrl()}/canvas").into(realm_art)
-
-        timer.schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    if (lastDotsStr == "" || lastDotsStr == "." || lastDotsStr == "..") {
-                        lastDotsStr = "$lastDotsStr."
-                    } else {
-                        lastDotsStr = ""
-                    }
-                    dots_title?.text = lastDotsStr
-                }
-            }
-        }, 200, 200)
-
-        Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
-            override fun onViewLayout(view: View) {
-                if (SessionSettings.instance.tablet) {
-                    // contributors 1
-                    var layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_1.width, top_contributors_container_1.height)
-                    layoutParams.rightToLeft = realm_art.id
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
-                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-
-                    layoutParams.setMargins(Utils.dpToPx(context, 20), 0, Utils.dpToPx(context, 40), 0)
-
-                    top_contributors_container_1.layoutParams = layoutParams
-
-                    // contributors 2
-                    layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_2.width, top_contributors_container_2.height)
-                    layoutParams.leftToRight = realm_art.id
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
-                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-
-                    layoutParams.setMargins(Utils.dpToPx(context, 40), 0, Utils.dpToPx(context, 20), 0)
-
-                    top_contributors_container_2.layoutParams = layoutParams
-                }
-            }
-        })
-    }
-
-    private fun getCanvas() {
-        serverService.getServer("TEST1") { server ->
+        val accessKey = if (server.isAdmin) {
+            server.adminKey
+        }
+        else {
+            server.accessKey
+        }
+        serverService.getServer(accessKey) { server ->
             if (server == null) {
-                showConnectionErrorMessage(false)
+                showConnectionErrorMessage(authError = true)
                 return@getServer
             }
 
-            SessionSettings.instance.maxPaintAmt = server.maxPixels
+            QueueSocket.instance.socketListener = this
+            QueueSocket.instance.startSocket(server)
+
+            Glide.with(this).load("${server.serviceAltBaseUrl()}/canvas").into(realm_art)
+
+            timer.schedule(object : TimerTask() {
+                override fun run() {
+                    activity?.runOnUiThread {
+                        if (lastDotsStr == "" || lastDotsStr == "." || lastDotsStr == "..") {
+                            lastDotsStr = "$lastDotsStr."
+                        } else {
+                            lastDotsStr = ""
+                        }
+                        dots_title?.text = lastDotsStr
+                    }
+                }
+            }, 200, 200)
+
+            Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
+                override fun onViewLayout(view: View) {
+                    if (SessionSettings.instance.tablet) {
+                        // contributors 1
+                        var layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_1.width, top_contributors_container_1.height)
+                        layoutParams.rightToLeft = realm_art.id
+                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+                        layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+
+                        layoutParams.setMargins(Utils.dpToPx(context, 20), 0, Utils.dpToPx(context, 40), 0)
+
+                        top_contributors_container_1.layoutParams = layoutParams
+
+                        // contributors 2
+                        layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_2.width, top_contributors_container_2.height)
+                        layoutParams.leftToRight = realm_art.id
+                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+                        layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+
+                        layoutParams.setMargins(Utils.dpToPx(context, 40), 0, Utils.dpToPx(context, 20), 0)
+
+                        top_contributors_container_2.layoutParams = layoutParams
+                    }
+                }
+            })
         }
+    }
+
+    private fun getCanvas() {
+        SessionSettings.instance.maxPaintAmt = server.maxPixels
 
         getTopContributors()
 
@@ -484,15 +483,22 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         requestQueue.add(request)
     }
 
-    private fun showConnectionErrorMessage(socket: Boolean = false) {
+    private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false) {
         InteractiveCanvasSocket.instance.disconnect()
+
+        if (authError) {
+            SessionSettings.instance.removeServer(requireContext(), server)
+        }
 
         if (!showingError) {
             showingError = true
             (context as Activity?)?.runOnUiThread {
                 requestQueue.cancelAll("download")
 
-                val message = if (socket) {
+                val message = if (authError) {
+                    "Access key has changed"
+                }
+                else if (socket) {
                     "Pixel socket isn't responding"
                 }
                 else {
@@ -526,6 +532,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun updateNumLoaded() {
+        if (activity == null) return
+
         requireActivity().runOnUiThread {
             if (realmId == 2) {
                 status_text?.text = "Loading ${getNumLoaded()} / 4"

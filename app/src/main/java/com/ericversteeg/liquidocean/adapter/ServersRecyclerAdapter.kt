@@ -32,7 +32,12 @@ class ServersRecyclerAdapter(private val servers: List<Server>, val serverOnClic
         private val serverNameText: TextView = view.findViewById(R.id.text_server_name)
 
         fun bind(server: Server, onClick: (server: Server) -> Unit) {
-            serverNameText.text = server.name
+            if (server.isAdmin) {
+                serverNameText.text = "${server.name} (Admin)"
+            }
+            else {
+                serverNameText.text = server.name
+            }
 
             buttonFrame.setOnClickListener {
                 onClick.invoke(server)

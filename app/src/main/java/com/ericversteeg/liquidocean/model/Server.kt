@@ -18,6 +18,12 @@ class Server {
     @SerializedName("max_pixels")
     var maxPixels = -1
 
+    @SerializedName("access_key")
+    var accessKey = ""
+
+    @SerializedName("admin_key")
+    var adminKey = ""
+
     @SerializedName("is_admin")
     var isAdmin = false
 

@@ -2,19 +2,9 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Shader
-import android.os.Build
 import android.os.Bundle
-import android.text.TextPaint
-import android.util.Log
 import android.view.*
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.TextView
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ericversteeg.liquidocean.R
@@ -22,28 +12,14 @@ import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.adapter.ServersRecyclerAdapter
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
-import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.listener.MenuCardListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import com.ericversteeg.liquidocean.service.InteractiveCanvasService
-import com.ericversteeg.liquidocean.service.NoSSLv3SocketFactory
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.service.ServerService
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import com.google.android.gms.security.ProviderInstaller
-import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_menu.*
-import kotlinx.android.synthetic.main.fragment_menu.back_action
-import kotlinx.android.synthetic.main.fragment_menu.back_button
-import kotlinx.android.synthetic.main.fragment_options.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.*
-import javax.net.ssl.HttpsURLConnection
-import kotlin.collections.ArrayList
 
 class MenuFragment: Fragment() {
 
@@ -368,6 +344,12 @@ class MenuFragment: Fragment() {
             val accessKey = input_access_key.text.toString().trim().uppercase()
             if (accessKey.length == 5 || accessKey.length == 8) {
                 it.isEnabled = false
+
+                if (SessionSettings.instance.hasServer(accessKey)) {
+                    it.isEnabled = true
+                    return@setOnClickListener
+                }
+
                 service.getServer(accessKey) { server ->
                     it.isEnabled = true
 
@@ -375,7 +357,6 @@ class MenuFragment: Fragment() {
                         Toast.makeText(requireContext(), "Can't find server", Toast.LENGTH_LONG).show()
                         return@getServer
                     }
-
                     SessionSettings.instance.addServer(requireContext(), server)
                     showServerList()
                 }

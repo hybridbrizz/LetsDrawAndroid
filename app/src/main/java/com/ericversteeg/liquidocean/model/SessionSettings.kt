@@ -631,17 +631,36 @@ class SessionSettings {
     }
 
     fun addServer(context: Context, server: Server) {
-        val sp = getSharedPrefs(context)
-        val set = sp.getStringSet("servers_json", mutableSetOf())!!
-        val cp = mutableSetOf<String>().also { it.addAll(set) }
-
-        val str = gson.toJson(server, Server::class.java)
-        cp.add(str)
-
-        sp.edit().putStringSet("servers_json", cp).apply()
-
         servers.add(server)
+        saveServers(context)
+
         servers.sortBy { it.name }
+    }
+
+    fun removeServer(context: Context, server: Server) {
+        servers.remove(server)
+        saveServers(context)
+    }
+
+    private fun saveServers(context: Context) {
+        val set = mutableSetOf<String>()
+        servers.forEach { server ->
+            val str = gson.toJson(server, Server::class.java)
+            set.add(str)
+        }
+        getSharedPrefs(context)
+            .edit()
+            .putStringSet("servers_json", set)
+            .apply()
+    }
+
+    fun hasServer(accessKey: String): Boolean {
+        servers.forEach {
+            if (accessKey == it.adminKey || accessKey == it.accessKey) {
+                return true
+            }
+        }
+        return false
     }
 
     companion object {
