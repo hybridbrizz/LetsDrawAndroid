@@ -17,7 +17,7 @@
     <string name="client_id">454898966293-ii55sno355a2jvrr0qllcljgfe49u9rj.apps.googleusercontent.com</string>
 
     <string name="option_change_name_title">Display name</string>
-    <string name="option_paint_panel_texture_title">Background</string>
+    <string name="option_paint_panel_texture_title"><u>Background</u></string>
     <string name="option_canvas_lock_border_title">Canvas Lock Border</string>
     <string name="option_emitters_container_title">Particle Emitters</string>
     <string name="option_canvas_lock_color_title">Canvas Lock Color</string>
@@ -36,16 +36,16 @@
     <string name="option_canvas_background_secondary_color_title">Background color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
-    <string name="step1">It\'s easy to get started. Enter into the canvas then tap the three dot icon to bring up the color panel. From here you can choose a color and do many other things.
-        Tap and drag anywhere on the canvas to draw the currently selected color. Tap and drag back over any pixels that you want to remove. Finalize
-        by tapping the green checkmark, or to cancel tap the red x.</string>
-    <string name="step2">The first tool is the export tool. Tap the icon once (yellow) then select or drag around your drawing. A preview will appear with two export options in the upper right. The left icon is to
-    save your drawing locally to your device photos. The right icon is to share your drawing through text, email, social media, and other apps.</string>
-    <string name="step3">The second tool is the background tool. Tap the icon to switch between different canvas backgrounds.</string>
-    <string name="step4">The third tool is the grid line toggle tool. Tap the icon to turn on and off grid lines. Grid lines appear when zoomed into the canvas.</string>
-    <string name="step5">The fourth and final tool is the Canvas Summary tool. This shows a summary of all the pixels drawn onto the canvas.</string>
-    <string name="step6">The dot below all the tools is the toolbox toggle. Tap it to show and hide tools.</string>
-    <string name="step7">The dot on the opposite side of the toolbox toggle is the palette toggle. Tap it to show and hide the color palette.</string>
+    <string name="step1">This icon brings up the pixel panel. From here you can add pixels to the canvas.
+        The bar at the top represents the number of pixels you have and the color represents what color will be added.</string>
+    <string name="step2">Press this icon then drag around any group of pixels or tap a single pixel.
+        A preview of a picture will appear. You can resize to pixel size or screen size. There are two options in the upper right.
+        The left icon is to save the picture to your device photos. The right icon is to share the picture.</string>
+    <string name="step3">This tool cycles through different canvas backgrounds. You can set one custom two-tone background in settings.</string>
+    <string name="step4">This tool turns on and off grid lines. Grid lines only appear when zoomed in close to the canvas.</string>
+    <string name="step5">This tool shows a summary of the whole canvas and allows you to quickly navigate to different parts of the canvas.</string>
+    <string name="step6">Press this to show or hide tools.</string>
+    <string name="step7">This shows and hides recently used colors. Press any one of them to quickly switch to that color.</string>
     <string name="step8">The default color palette is the Recent Color palette. It is composed of all colors that you have drawn with recently. To add a new color palette
     tap on \"Recent Color\" in the draw panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
         tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the draw panel. Tap the + icon to add the

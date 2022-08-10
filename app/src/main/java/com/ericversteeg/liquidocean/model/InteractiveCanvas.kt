@@ -410,11 +410,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             receivePixel(data)
         }
 
-        socket?.on("canvas_error") {
-            Utils.showErrorDialog(context, "Who's was it? A pixel didn't save") {
-                (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
-            }
-        }
+//        socket?.on("canvas_error") {
+//            Utils.showErrorDialog(context, "Who's was it? A pixel didn't save") {
+//                (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
+//            }
+//        }
 
         socket?.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
@@ -423,7 +423,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("add_paint") {
             if (sessionSettings.dropsAmt < SessionSettings.instance.maxPaintAmt) {
-                sessionSettings.dropsAmt = 1
+                sessionSettings.dropsAmt += 1
             }
             SessionSettings.instance.timeSync = 60L * SessionSettings.instance.addPaintInterval
         }

@@ -1,12 +1,16 @@
 package com.ericversteeg.liquidocean.adapter
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
+import androidx.core.widget.ImageViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.ClickableImageView
@@ -28,11 +32,14 @@ class PanelRecyclerViewAdapter(context: Context, panelResIds: MutableList<Int>):
 
     override fun onBindViewHolder(holder: PanelBackgroundViewHolder, position: Int) {
         val resId = panelResIds[position]
-        holder.image.setImageDrawable(context.resources.getDrawable(resId))
+        val themeConfig = PanelThemeConfig.buildConfig(resId)
+
+        holder.image.setImageDrawable(ContextCompat.getDrawable(context, resId))
 
         holder.image.setOnClickListener {
             SessionSettings.instance.panelBackgroundResIndex = position
             holder.selectedIcon.visibility = View.VISIBLE
+            ImageViewCompat.setImageTintList(holder.selectedIcon, ColorStateList.valueOf(themeConfig.actionButtonColor))
 
             notifyItemChanged(selectedPos)
             selectedPos = position
@@ -41,6 +48,7 @@ class PanelRecyclerViewAdapter(context: Context, panelResIds: MutableList<Int>):
 
         if (SessionSettings.instance.panelBackgroundResIndex == position) {
             holder.selectedIcon.visibility = View.VISIBLE
+            ImageViewCompat.setImageTintList(holder.selectedIcon, ColorStateList.valueOf(themeConfig.actionButtonColor))
             selectedPos = position
         }
         else {

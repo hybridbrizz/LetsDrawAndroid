@@ -35,7 +35,7 @@ class RecentColorView: View {
             }
             drawRect(0F, 0F, width.toFloat(), height.toFloat(), colorPaint)
             val borderPaint = Paint()
-            borderPaint.strokeWidth = 0.5F
+            borderPaint.strokeWidth = 1F
             borderPaint.color = Color.parseColor("#333333")
             drawLine(0F, 0F, width.toFloat(), 0F, borderPaint)
             drawLine(0F, height.toFloat(), width.toFloat(), height.toFloat(), borderPaint)

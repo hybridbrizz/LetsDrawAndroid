@@ -22,6 +22,7 @@ import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.activity.SignInActivity
 import com.ericversteeg.liquidocean.adapter.PanelRecyclerViewAdapter
+import com.ericversteeg.liquidocean.colorpicker.HSBColorPicker
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.FragmentListener
@@ -232,29 +233,10 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_grid_line_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.canvasGridLineColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(true) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.canvasGridLineColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        it.setBackgroundColor(SessionSettings.instance.canvasGridLineColor)
-                    }
-                })
+            showColorPicker(SessionSettings.instance.canvasGridLineColor) { color ->
+                option_grid_line_color_button.setBackgroundColor(color)
+                SessionSettings.instance.canvasGridLineColor = color
+            }
         }
 
         // option canvas background primary color
@@ -271,34 +253,10 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_canvas_background_primary_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.canvasBackgroundPrimaryColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(false) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.canvasBackgroundPrimaryColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        if (SessionSettings.instance.canvasBackgroundPrimaryColor == 0) {
-                            it.setBackgroundColor(Color.WHITE)
-                        }
-                        else {
-                            it.setBackgroundColor(SessionSettings.instance.canvasBackgroundPrimaryColor)
-                        }
-                    }
-                })
+            showColorPicker(SessionSettings.instance.canvasBackgroundPrimaryColor) { color ->
+                option_canvas_background_primary_color_button.setBackgroundColor(color)
+                SessionSettings.instance.canvasBackgroundPrimaryColor = color
+            }
         }
 
         // option canvas background secondary color
@@ -315,34 +273,10 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_canvas_background_secondary_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.canvasBackgroundSecondaryColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(false) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.canvasBackgroundSecondaryColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        if (SessionSettings.instance.canvasBackgroundSecondaryColor == 0) {
-                            it.setBackgroundColor(Color.WHITE)
-                        }
-                        else {
-                            it.setBackgroundColor(SessionSettings.instance.canvasBackgroundSecondaryColor)
-                        }
-                    }
-                })
+            showColorPicker(SessionSettings.instance.canvasBackgroundSecondaryColor) { color ->
+                option_canvas_background_secondary_color_button.setBackgroundColor(color)
+                SessionSettings.instance.canvasBackgroundSecondaryColor = color
+            }
         }
 
         // option frame color
@@ -478,29 +412,10 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_close_paint_panel_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.closePaintBackButtonColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(true) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.closePaintBackButtonColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        it.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
-                    }
-                })
+            showColorPicker(SessionSettings.instance.closePaintBackButtonColor) { color ->
+                option_close_paint_panel_color_button.setBackgroundColor(color)
+                SessionSettings.instance.closePaintBackButtonColor = color
+            }
         }
 
         // option show paint bar
@@ -544,29 +459,10 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         // option grid line color
         option_paint_bar_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.paintBarColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(true) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.paintBarColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        it.setBackgroundColor(SessionSettings.instance.paintBarColor)
-                    }
-                })
+            showColorPicker(SessionSettings.instance.paintBarColor) { color ->
+                option_paint_bar_color_button.setBackgroundColor(color)
+                SessionSettings.instance.paintBarColor = color
+            }
         }
 
         // option right handed
@@ -795,5 +691,11 @@ class OptionsFragment: Fragment(), FragmentListener {
 
     private fun isFromInteractiveCanvas(): Boolean {
         return parentFragment != null && parentFragment is InteractiveCanvasFragment
+    }
+
+    private fun showColorPicker(initialColor: Int, onColorPicked: (color: Int) -> Unit) {
+        HSBColorPicker.showDialog(requireContext(), initialColor) { color ->
+            onColorPicked.invoke(color)
+        }
     }
 }

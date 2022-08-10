@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
@@ -46,6 +47,21 @@ class HowtoFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val stepTextViews = listOf(step1_text, step2_text, step3_text, step4_text, step5_text, step6_text,
+                                    step7_text, step8_text, step9_text, step10_text)
+
+        view.viewTreeObserver.addOnGlobalLayoutListener {
+            for (textView in stepTextViews) {
+                textView.measure(
+                    View.MeasureSpec.makeMeasureSpec(textView.width, View.MeasureSpec.AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+                )
+                textView.layoutParams = (textView.layoutParams as ConstraintLayout.LayoutParams).also {
+                    it.height = textView.measuredHeight
+                }
+            }
+        }
 
         howto_frame_action.isStatic = true
         howto_export_move_action.isStatic = true
