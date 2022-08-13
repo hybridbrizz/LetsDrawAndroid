@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.util.Log
 import androidx.collection.ArraySet
+import androidx.core.content.ContextCompat
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.annotation.Mockable
 import com.ericversteeg.liquidocean.helper.Utils
@@ -414,7 +415,7 @@ class SessionSettings {
         showPaintCircle = getSharedPrefs(context).getBoolean("show_paint_circle", false)
 
         paintBarColor =
-            getSharedPrefs(context).getInt("paint_bar_color", Color.parseColor("#FFAAAAAA"))
+            getSharedPrefs(context).getInt("paint_bar_color", ContextCompat.getColor(context, R.color.default_paint_qty_bar_color))
 
         rightHanded = getSharedPrefs(context).getBoolean("right_handed", false)
 

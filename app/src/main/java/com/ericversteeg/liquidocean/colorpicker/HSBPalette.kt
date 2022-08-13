@@ -5,7 +5,6 @@ import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -156,5 +155,21 @@ class HSBPalette: FrameLayout {
 
     fun listen(listener: ColorListener) {
         listeners.add(listener)
+    }
+
+    fun setColor(color: Int) {
+        val hsbValues = FloatArray(3)
+        Color.colorToHSV(color, hsbValues)
+
+        val sHue = hsbValues[0]
+        val sSaturation = hsbValues[1]
+        val sBrightness = hsbValues[2]
+
+        hsb[0] = hsbValues[0]
+        hsb[1] = hsbValues[1]
+        hsb[2] = hsbValues[2]
+
+        hPalette.setH(sHue)
+        sbPalette.setSB(sSaturation, sBrightness)
     }
 }

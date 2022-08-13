@@ -30,6 +30,7 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.bumptech.glide.signature.ObjectKey
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.colorpicker.HSBPalette
@@ -115,6 +116,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var paused = false
     var pauseTime = 0L
     private val maxBgTime = 60 * 60
+
+    private var lastCanvasSummaryImageTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -396,6 +399,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         hsb_palette.listen(object: HSBPalette.ColorListener {
             override fun onColor(color: Int) {
+                Log.i("Color", color.toString())
+
                 paint_indicator_view_bottom_layer.setPaintColor(color)
 
                 if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
@@ -1088,9 +1093,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
+        Log.i("On Resume", "Canvas resumed.")
+
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
         if (paused) {
+            reload_transparent.visibility = View.VISIBLE
+            reload_transparent.setOnClickListener { }
             resumeCanvas()
 
             paused = false
@@ -1816,8 +1825,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // interactive canvas listener
     override fun notifyPaintColorUpdate(color: Int) {
-        hsb_palette.init(color)
-        paint_indicator_view.setPaintColor(color)
+        hsb_palette.setColor(color)
     }
 
     override fun notifyPaintingStarted() {
@@ -2099,7 +2107,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun toggleCanvasSummary() {
         if (canvas_summary_container.visibility != View.VISIBLE) {
-            Glide.with(this).load("${server?.serviceAltBaseUrl()}/canvas").into(canvas_summary_view)
+            if (System.currentTimeMillis() - lastCanvasSummaryImageTime > 1000 * 60 * 10) {
+                Log.i("Canvas Summary", "Reloading canvas image")
+                Glide.with(this)
+                    .load("${server.serviceAltBaseUrl()}/canvas")
+                    .signature(ObjectKey(System.currentTimeMillis().toString()))
+                    .into(canvas_summary_view)
+
+                lastCanvasSummaryImageTime = System.currentTimeMillis()
+            }
 
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
 
@@ -2372,6 +2388,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 for (element in it) {
                     val pixelInfo = element.asString
                     surface_view.interactiveCanvas.receivePixel(pixelInfo)
+                    reload_transparent.visibility = View.GONE
                 }
             }
         }
@@ -2382,6 +2399,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val paintQty = it.get("paint_qty").asInt
                     Log.i("Canvas Service", "Paint qty = $paintQty")
                     SessionSettings.instance.dropsAmt = paintQty
+                    reload_transparent.visibility = View.GONE
                 }
             }
         }

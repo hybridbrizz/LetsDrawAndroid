@@ -11,6 +11,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -453,7 +454,7 @@ class OptionsFragment: Fragment(), FragmentListener {
         // option paint bar color
         option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
         option_paint_bar_color_reset_button.setOnClickListener {
-            SessionSettings.instance.paintBarColor = Color.parseColor("#FFAAAAAA")
+            SessionSettings.instance.paintBarColor = ContextCompat.getColor(requireContext(), R.color.default_paint_qty_bar_color)
             option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
         }
 
