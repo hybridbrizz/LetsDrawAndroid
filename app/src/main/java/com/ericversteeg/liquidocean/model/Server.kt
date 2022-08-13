@@ -46,4 +46,11 @@ class Server {
     private fun buildUrl(baseUrl: String, port: Int): String {
         return String.format("%s:%d/", baseUrl, port)
     }
+
+    override fun equals(other: Any?): Boolean {
+        return other != null &&
+                other is Server &&
+                (!other.isAdmin && !isAdmin && other.accessKey == accessKey ||
+                 other.isAdmin && isAdmin && other.adminKey == adminKey)
+    }
 }

@@ -490,9 +490,10 @@ class OptionsFragment: Fragment(), FragmentListener {
             Animator.animateTitleFromTop(back_button)
             Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
             Animator.animateHorizontalViewEnter(panel_recycler_view, true)
-            Animator.animateHorizontalViewEnter(option_right_handed, false)
-            Animator.animateHorizontalViewEnter(option_canvas_lock_container, true)
-            Animator.animateHorizontalViewEnter(option_canvas_lock_color_container, false)
+            Animator.animateHorizontalViewEnter(option_grid_line_color_container, true)
+            Animator.animateHorizontalViewEnter(option_paint_bar_color_container, true)
+            Animator.animateHorizontalViewEnter(option_canvas_background_primary_color_container, true)
+            Animator.animateHorizontalViewEnter(option_canvas_background_secondary_color_container, true)
         }
     }
 

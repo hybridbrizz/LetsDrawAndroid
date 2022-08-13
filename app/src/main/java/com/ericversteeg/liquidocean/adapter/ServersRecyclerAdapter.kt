@@ -1,5 +1,9 @@
 package com.ericversteeg.liquidocean.adapter
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,9 +11,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.Server
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ButtonFrame
 
-class ServersRecyclerAdapter(private val servers: List<Server>, val serverOnClick: (server: Server) -> Unit): RecyclerView.Adapter<ServersRecyclerAdapter.ServerViewHolder>() {
+class ServersRecyclerAdapter(private val context: Context, private val servers: List<Server>, val serverOnClick: (server: Server) -> Unit): RecyclerView.Adapter<ServersRecyclerAdapter.ServerViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ServerViewHolder {
         return ServerViewHolder(
@@ -18,9 +23,11 @@ class ServersRecyclerAdapter(private val servers: List<Server>, val serverOnClic
     }
 
     override fun onBindViewHolder(holder: ServerViewHolder, position: Int) {
-        holder.bind(servers[position]) { server ->
+        holder.bind(servers[position], { server ->
             serverOnClick.invoke(server)
-        }
+        }, {
+            showDeleteDialog(it)
+        })
     }
 
     override fun getItemCount(): Int {
@@ -31,7 +38,7 @@ class ServersRecyclerAdapter(private val servers: List<Server>, val serverOnClic
         private val buttonFrame: ButtonFrame = view.findViewById(R.id.button_frame)
         private val serverNameText: TextView = view.findViewById(R.id.text_server_name)
 
-        fun bind(server: Server, onClick: (server: Server) -> Unit) {
+        fun bind(server: Server, onClick: (server: Server) -> Unit, onLongClick: (server: Server) -> Unit) {
             if (server.isAdmin) {
                 serverNameText.text = "${server.name} (Admin)"
             }
@@ -42,6 +49,22 @@ class ServersRecyclerAdapter(private val servers: List<Server>, val serverOnClic
             buttonFrame.setOnClickListener {
                 onClick.invoke(server)
             }
+
+            buttonFrame.setOnLongClickListener {
+                onLongClick.invoke(server)
+                return@setOnLongClickListener false
+            }
         }
+    }
+
+    private fun showDeleteDialog(server: Server) {
+        AlertDialog.Builder(context, R.style.AlertDialogTheme)
+            .setMessage("Remove ${server.name} from your list of servers?")
+            .setPositiveButton("Yes") { _, _ ->
+                SessionSettings.instance.removeServer(context, server)
+                notifyDataSetChanged()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

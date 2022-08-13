@@ -473,6 +473,9 @@ class SessionSettings {
         hsbTextVisible = getSharedPrefs(context).getBoolean("hsb_text_visible", true)
 
         initServerList(context)
+
+        //val lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", 0)
+        //lastVisitedServer = servers[lastVisitedServerIndex]
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -661,6 +664,21 @@ class SessionSettings {
             }
         }
         return false
+    }
+
+    fun saveLastVisitedIndex(context: Context) {
+        val index = servers.indexOf(lastVisitedServer)
+        getSharedPrefs(context)
+            .edit()
+            .putInt("last_visited_server_index", index)
+            .apply()
+    }
+
+    fun saveBackground(context: Context) {
+        getSharedPrefs(context)
+            .edit()
+            .putInt("background_colors_index", backgroundColorsIndex)
+            .apply()
     }
 
     companion object {

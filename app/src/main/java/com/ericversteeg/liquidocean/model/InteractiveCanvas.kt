@@ -83,7 +83,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var receivedPaintRecently = false
 
-    val numBackgrounds = 7
+    val numBackgrounds = 5
 
     var numConnect = 0
     lateinit var connectingTimer: Timer
@@ -134,9 +134,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         const val BACKGROUND_WHITE = 1
         const val BACKGROUND_GRAY_THIRDS = 2
         const val BACKGROUND_PHOTOSHOP = 3
-        const val BACKGROUND_CLASSIC = 4
-        const val BACKGROUND_CHESS = 5
-        const val BACKGROUND_CUSTOM = 6
+        const val BACKGROUND_CUSTOM = 4
 
         fun importCanvasFromJson(context: Context, jsonString: String): Boolean {
             try {
@@ -213,6 +211,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }
                 .doOnComplete {
                     interactiveCanvasDrawer?.notifyRedraw()
+                    interactiveCanvasListener?.notifyPixelsReady()
                 }
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -571,8 +570,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             BACKGROUND_WHITE -> return Color.BLACK
             BACKGROUND_GRAY_THIRDS -> return Color.WHITE
             BACKGROUND_PHOTOSHOP -> return Color.BLACK
-            BACKGROUND_CLASSIC -> return Color.WHITE
-            BACKGROUND_CHESS -> return Color.WHITE
             BACKGROUND_CUSTOM -> return Color.WHITE
         }
 
@@ -585,8 +582,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             BACKGROUND_WHITE -> return listOf(Color.WHITE, Color.WHITE)
             BACKGROUND_GRAY_THIRDS -> return listOf(ActionButtonView.thirdGray.color, ActionButtonView.twoThirdGray.color)
             BACKGROUND_PHOTOSHOP -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.photoshopGray.color)
-            BACKGROUND_CLASSIC ->  return listOf(ActionButtonView.manila.color, ActionButtonView.classicGrayDark.color)
-            BACKGROUND_CHESS -> return listOf(ActionButtonView.whitePaint.color, ActionButtonView.blackPaint.color)
             BACKGROUND_CUSTOM -> return listOf(SessionSettings.instance.canvasBackgroundPrimaryColor,
                 SessionSettings.instance.canvasBackgroundSecondaryColor)
         }

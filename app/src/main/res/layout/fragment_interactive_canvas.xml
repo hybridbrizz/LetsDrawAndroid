@@ -13,6 +13,7 @@
 
     <com.ericversteeg.liquidocean.view.ButtonFrame
             android:id="@+id/paint_panel_button"
+            android:visibility="gone"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -471,6 +472,7 @@
 
     <com.ericversteeg.liquidocean.view.ButtonFrame
             android:id="@+id/recent_colors_button"
+            android:visibility="gone"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -759,6 +761,7 @@
 
     <com.ericversteeg.liquidocean.view.ButtonFrame
             android:id="@+id/menu_button"
+            android:visibility="gone"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -880,6 +883,7 @@
 
     <com.ericversteeg.liquidocean.view.ButtonFrame
             android:id="@+id/open_tools_button"
+            android:visibility="gone"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintBottom_toBottomOf="parent"

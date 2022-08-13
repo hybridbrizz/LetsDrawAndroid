@@ -16,10 +16,25 @@
         <item name="android:windowBackground">@null</item>
         <item name="metaButtonBarStyle">?android:attr/buttonBarStyle</item>
         <item name="metaButtonBarButtonStyle">?android:attr/buttonBarButtonStyle</item>
+        <item name="alertDialogStyle">@style/AlertDialogTheme</item>
     </style>
 
     <style name="FullscreenActionBarStyle" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorAccent</item>
+        <item name="android:windowBackground">#000</item>
+    </style>
+
+    <style name="AlertDialogNegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">#000</item>
+    </style>
+
+    <style name="AlertDialogPositiveButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
+        <item name="android:textColor">#000</item>
     </style>
 
 </resources>

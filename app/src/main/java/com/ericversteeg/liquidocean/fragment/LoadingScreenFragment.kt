@@ -135,11 +135,18 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         else {
             server.accessKey
         }
-        serverService.getServer(accessKey) { server ->
-            if (server == null) {
+        serverService.getServer(accessKey) { code, server ->
+            if (server == null && code == 403) {
                 showConnectionErrorMessage(authError = true)
                 return@getServer
             }
+            else if (server == null) {
+                showConnectionErrorMessage(socket = false)
+                return@getServer
+            }
+
+            SessionSettings.instance.lastVisitedServer = server
+            SessionSettings.instance.saveLastVisitedIndex(requireContext())
 
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)

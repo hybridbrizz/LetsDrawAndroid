@@ -27,10 +27,10 @@
     <string name="alert_message_palette_remove_color">Remove this color from %s?</string>
     <string name="no_pixel_history">No data</string>
     <string name="option_num_recent_color_title">Palette size</string>
-    <string name="option_paint_indicator_width_title">Selected color size</string>
-    <string name="option_paint_indicator_fill_circle">Circle selected color</string>
-    <string name="option_paint_indicator_square">Square selected color</string>
-    <string name="option_paint_indicator_outline_title">Selected color outline</string>
+    <string name="option_paint_indicator_width_title">Current color size</string>
+    <string name="option_paint_indicator_fill_circle">Circle current color</string>
+    <string name="option_paint_indicator_square">Square current color</string>
+    <string name="option_paint_indicator_outline_title">Current color outline</string>
     <string name="option_grid_line_color_title">Grid line color</string>
     <string name="option_canvas_background_primary_color_title">Background color</string>
     <string name="option_canvas_background_secondary_color_title">Background color (2)</string>

@@ -19,14 +19,14 @@ class ServerService {
 
     private val key0 = "MYCEJUCNZ6AVZAVDZBHKJJYM6OIWQVDOC1OU7RZP"
 
-    fun getServer(accessKey: String, completionHandler: (server: Server?) -> Unit) {
+    fun getServer(accessKey: String, completionHandler: (statusCode: Int, server: Server?) -> Unit) {
         service.getServer(key0, accessKey).enqueue(object: Callback<Server> {
             override fun onResponse(call: Call<Server>, response: Response<Server>) {
-                completionHandler.invoke(response.body())
+                completionHandler.invoke(response.code(), response.body())
             }
 
             override fun onFailure(call: Call<Server>, t: Throwable) {
-                completionHandler.invoke(null)
+                completionHandler.invoke(0, null)
             }
         })
     }

@@ -76,7 +76,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var bottomLeftParticleSystem: ParticleSystem? = null
     var bottomRightParticleSystem: ParticleSystem? = null
 
-    var server: Server? = null
+    lateinit var server: Server
     var world = false
     var realmId = 0
 
@@ -127,10 +127,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         return view
     }
 
+    override fun notifyPixelsReady() {
+        requireActivity().runOnUiThread {
+            paint_panel_button.visibility = View.VISIBLE
+            open_tools_button.visibility = View.VISIBLE
+            recent_colors_button.visibility = View.VISIBLE
+            menu_button.visibility = View.VISIBLE
+
+            togglePaintPanel(SessionSettings.instance.paintPanelOpen)
+
+            // open toolbox
+            toggleTools(SessionSettings.instance.toolboxOpen)
+        }
+    }
+
     // setup views
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (savedInstanceState != null) {
+            //SessionSettings.instance.load(requireContext())
+            (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
+            return
+        }
 
         SessionSettings.instance.canvasOpen = true
 
@@ -138,12 +158,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             SessionSettings.instance.tablet = Utils.isTablet(this)
         }
 
-        if (server != null) {
-            SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
-            canvasService = CanvasService(server!!)
+        server = SessionSettings.instance.lastVisitedServer!!
 
-            SessionSettings.instance.lastVisitedServer = server
-        }
+        SessionSettings.instance.addPaintInterval = server.pixelInterval / 60
+        canvasService = CanvasService(server)
 
         // must call before darkIcons
         if (surface_view == null) {
@@ -151,7 +169,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             return
         }
 
-        surface_view.interactiveCanvas.server = server!!
+        surface_view.interactiveCanvas.server = server
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
@@ -273,11 +291,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
 
-        togglePaintPanel(SessionSettings.instance.paintPanelOpen)
-
-        // open toolbox
-        toggleTools(SessionSettings.instance.toolboxOpen)
-
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
         }
@@ -301,6 +314,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
             paint_yes.color = Color.BLACK
+            paint_no.color = Color.BLACK
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
@@ -313,6 +327,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
 
             paint_yes.color = Color.WHITE
+            paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -514,13 +529,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 close_paint_panel_container.visibility = View.GONE
                 paint_no_container.visibility = View.VISIBLE
 
-                if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_no.color = Color.BLACK
-                }
-                else {
-                    paint_no.color = Color.WHITE
-                }
-
                 //recent_colors_button.visibility = View.GONE
                 //recent_colors_container.visibility = View.GONE
 
@@ -561,7 +569,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         // to stop click-through to the canvas behind
         color_picker_frame.setOnClickListener {
-            
+
         }
 
         // recent colors
@@ -663,7 +671,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
             recolorVisibleActionViews()
 
-            if (SessionSettings.instance.backgroundColorsIndex == 6 && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
+            if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1
+                && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
                 SessionSettings.instance.backgroundColorsIndex = 0
             }
 
@@ -674,6 +683,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+            SessionSettings.instance.saveBackground(requireContext())
         }
 
         // grid lines toggle button
@@ -2440,10 +2451,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
-        }
-
-        if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept.color = Color.BLACK
         }
 
         if (panelThemeConfig.inversePaintEventInfo) {

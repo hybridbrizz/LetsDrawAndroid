@@ -350,7 +350,7 @@ class MenuFragment: Fragment() {
                     return@setOnClickListener
                 }
 
-                service.getServer(accessKey) { server ->
+                service.getServer(accessKey) { _, server ->
                     it.isEnabled = true
 
                     if (server == null) {
@@ -386,7 +386,7 @@ class MenuFragment: Fragment() {
 
         with (recycler_view_servers) {
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-            adapter = ServersRecyclerAdapter(SessionSettings.instance.servers) { server ->
+            adapter = ServersRecyclerAdapter(requireContext(), SessionSettings.instance.servers) { server ->
                 menuButtonListener?.onServerSelected(server)
             }
         }

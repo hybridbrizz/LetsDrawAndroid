@@ -1,6 +1,8 @@
 package com.ericversteeg.liquidocean.listener
 
 interface InteractiveCanvasListener {
+    fun notifyPixelsReady()
+
     fun notifyPaintColorUpdate(color: Int)
 
     fun notifyPaintActionStarted()
