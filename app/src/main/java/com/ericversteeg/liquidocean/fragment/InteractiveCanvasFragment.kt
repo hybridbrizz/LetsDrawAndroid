@@ -135,9 +135,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             menu_button.visibility = View.VISIBLE
 
             togglePaintPanel(SessionSettings.instance.paintPanelOpen)
-
-            // open toolbox
             toggleTools(SessionSettings.instance.toolboxOpen)
+
+            progress_circular.visibility = View.GONE
         }
     }
 

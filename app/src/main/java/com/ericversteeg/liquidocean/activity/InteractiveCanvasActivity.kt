@@ -59,8 +59,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         R.drawable.gradient_2,
         R.drawable.gradient_3,
         R.drawable.gradient_4,
-        R.drawable.gradient_5,
-        R.drawable.gradient_6,
         R.drawable.gradient_8,
         R.drawable.gradient_9,
         R.drawable.gradient_10

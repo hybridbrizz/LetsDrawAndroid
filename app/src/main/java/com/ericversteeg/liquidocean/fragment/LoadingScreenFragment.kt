@@ -68,14 +68,13 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     var timer = Timer()
 
     val gameTips = arrayOf(
-        "You can turn several features on / off in the Options menu.",
-        "All drawings can be exported to PNG files. Simply choose the object selector in the toolbox, tap an object, then select the share or save feature.",
-        "Anything you create on the world canvas is automatically saved and shared with others.",
-        "Like your level, paint, and other stats? Back your account up and sync across multiple devices with an access pincode.",
-        "Tap on any pixel on the world canvas to view a history of edits for that position.",
-        "No racism, harassment, or hate speech is allowed on the world canvas.",
-        "Anyone can get started painting on the world canvas in 5 minutes or less. Simply wait for the next Paint Cycle.",
-        "Tap the bottom corner of the screen while drawing to bring up many recently used colors."
+        "You can customize canvas background colors and other various things in Settings.",
+        "All drawings can be exported. Simply choose the export tool, tap on an object, then select share or save.",
+        "Anything you draw on the canvas is shared in real time with others.",
+        "Tap on any pixel on the canvas to view a history of edits.",
+        "No harassment, racism, or hate symbols are allowed on the canvas.",
+        "Anyone can get pixels to draw on the canvas in 3 minutes or less! Simply wait for the next paint cycle.",
+        "Tap the palette icon to show and select from recently used colors."
     )
 
     var showingError = false
