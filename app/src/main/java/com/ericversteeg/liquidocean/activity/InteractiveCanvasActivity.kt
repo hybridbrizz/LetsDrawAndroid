@@ -85,7 +85,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         var rIndex = (Math.random() * backgrounds.size).toInt()
 
         if (SessionSettings.instance.firstLaunch) {
-            rIndex = 7
+            rIndex = 5
         }
 
         SessionSettings.instance.menuBackgroundResId = backgrounds[rIndex]
@@ -154,12 +154,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showOptionsFragment() {
+    fun showOptionsFragment(canvasFragment: InteractiveCanvasFragment? = null) {
         optionsFragment = OptionsFragment()
         optionsFragment?.optionsListener = this
 
         if (canvasFragment != null) {
-            canvasFragment!!.childFragmentManager
+            canvasFragment.childFragmentManager
                 .beginTransaction()
                 .replace(R.id.options_container, optionsFragment!!)
                 .commit()

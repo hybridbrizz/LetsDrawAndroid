@@ -168,13 +168,19 @@ class MenuFragment: Fragment() {
             }
         }*/
 
+        menu_button.setOnClickListener {
+            showServerList()
+        }
+
         connect_button.setOnClickListener {
             //menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
             if (SessionSettings.instance.servers.isEmpty()) {
                 showConnectInput()
             }
             else {
-                showServerList()
+                SessionSettings.instance.lastVisitedServer?.also {
+                    menuButtonListener?.onServerSelected(it)
+                } ?: showServerList()
             }
         }
 
@@ -328,6 +334,8 @@ class MenuFragment: Fragment() {
     private fun showMenuOptions() {
         resetMenu()
 
+        menu_button.visibility = View.VISIBLE
+
         connect_button.visibility = View.VISIBLE
         options_button.visibility = View.VISIBLE
         howto_button.visibility = View.VISIBLE
@@ -339,6 +347,7 @@ class MenuFragment: Fragment() {
         resetMenu()
 
         back_button.visibility = View.VISIBLE
+        menu_button.visibility = View.GONE
 
         button_add_server.setOnClickListener {
             val accessKey = input_access_key.text.toString().trim().uppercase()
@@ -369,6 +378,7 @@ class MenuFragment: Fragment() {
     }
 
     private fun showServerList() {
+        menu_button.visibility = View.GONE
         back_button.visibility = View.VISIBLE
         add_button.visibility = View.VISIBLE
 
@@ -546,6 +556,8 @@ class MenuFragment: Fragment() {
 
     private fun resetMenu() {
         //draw_button_container.visibility = View.VISIBLE
+
+        connect_button.visibility = View.GONE
 
         options_button.visibility = View.GONE
 

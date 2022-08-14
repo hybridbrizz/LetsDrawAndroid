@@ -111,7 +111,12 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         if (realmId == 2) {
             connecting_title.text = "Connecting to dev server"
         }
-        connecting_title.text = String.format("Connecting to %s", server.name)
+        if (server.isAdmin) {
+            connecting_title.text = "Connecting to ${server.name} (Admin)"
+        }
+        else {
+            connecting_title.text = "Connecting to ${server.name}"
+        }
 
         val rIndex = (Math.random() * gameTips.size).toInt()
         game_tip_text.text = "Tip: ${gameTips[rIndex]}"

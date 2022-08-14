@@ -193,7 +193,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     surface_view.interactiveCanvas.getGridLineColor()
                 )
 
-                setupPaintEventTimer()
+                //setupPaintEventTimer()
             }
             else {
                 SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
@@ -626,7 +626,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 toggleTerminal(false)
             }
             else {
-                toggleMenu(menu_container.visibility != View.VISIBLE)
+                (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this)
+                //toggleMenu(menu_container.visibility != View.VISIBLE)
             }
         }
 

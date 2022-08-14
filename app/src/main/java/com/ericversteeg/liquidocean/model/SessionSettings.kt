@@ -211,6 +211,7 @@ class SessionSettings {
 
     var servers = LinkedList<Server>()
     var lastVisitedServer: Server? = null
+    var lastVisitedServerIndex = -1
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -475,8 +476,10 @@ class SessionSettings {
 
         initServerList(context)
 
-        //val lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", 0)
-        //lastVisitedServer = servers[lastVisitedServerIndex]
+        lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", -1)
+        if (lastVisitedServerIndex >= 0) {
+            lastVisitedServer = servers[lastVisitedServerIndex]
+        }
     }
 
     fun addShortTermPixels(pixels: List<InteractiveCanvas.ShortTermPixel>) {
@@ -642,6 +645,11 @@ class SessionSettings {
     }
 
     fun removeServer(context: Context, server: Server) {
+        if (servers.indexOf(server) == lastVisitedServerIndex) {
+            lastVisitedServerIndex = -1
+            lastVisitedServer = null
+            getSharedPrefs(context).edit().putInt("last_visited_server_index", lastVisitedServerIndex).apply()
+        }
         servers.remove(server)
         saveServers(context)
     }
