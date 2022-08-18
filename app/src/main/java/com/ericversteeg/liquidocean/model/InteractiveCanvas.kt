@@ -19,6 +19,7 @@ import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.view.ActionButtonView
+import com.google.gson.JsonArray
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
@@ -507,17 +508,15 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 2 -> sessionSettings.chunk2
                 3 -> sessionSettings.chunk3
                 4 -> sessionSettings.chunk4
-                else -> ""
+                else -> JsonArray()
             }
-
-            val chunkJsonArr = JSONArray(chunk)
 
             val offset = (c - 1) * rows / 4
 
-            for (i in 0 until chunkJsonArr.length()) {
-                val chunkInnerJsonArr = chunkJsonArr.getJSONArray(i)
-                for (j in 0 until chunkInnerJsonArr.length()) {
-                    arr[i + offset][j] = chunkInnerJsonArr.getInt(j)
+            for (i in 0 until chunk.size()) {
+                val chunkInnerJsonArr = chunk.get(i).asJsonArray
+                for (j in 0 until chunkInnerJsonArr.size()) {
+                    arr[i + offset][j] = chunkInnerJsonArr.get(j).asInt
 
                     val color = arr[i][j]
 

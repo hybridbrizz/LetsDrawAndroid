@@ -27,6 +27,9 @@ class Server {
     @SerializedName("is_admin")
     var isAdmin = false
 
+    @SerializedName("uuid")
+    var uuid: String = ""
+
     fun serviceBaseUrl(): String {
         return buildUrl(baseUrl, 5000)
     }

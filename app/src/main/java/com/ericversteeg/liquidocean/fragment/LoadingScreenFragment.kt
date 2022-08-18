@@ -2,12 +2,7 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -30,19 +25,18 @@ import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.listener.SocketConnectCallback
 import com.ericversteeg.liquidocean.model.*
+import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.service.ServerService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
-import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
 
 class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConnectCallback {
 
+    lateinit var canvasService: CanvasService
     private var serverService = ServerService()
 
     var doneLoadingPixels = false
@@ -149,7 +143,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 return@getServer
             }
 
-            SessionSettings.instance.lastVisitedServer = server
+            this.server = server.also { it.uuid = this.server.uuid }
+            SessionSettings.instance.lastVisitedServer = this.server
             SessionSettings.instance.saveLastVisitedIndex(requireContext())
 
             QueueSocket.instance.socketListener = this
@@ -203,12 +198,12 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         getTopContributors()
 
-        // sync paint qty or register device
-        if (SessionSettings.instance.sentUniqueId) {
-            getDeviceInfo()
+        // register device or sync paint qty
+        if (server.uuid == "") {
+            sendDeviceId(server)
         }
         else {
-            sendDeviceId()
+            getDeviceInfo(server)
         }
 
         if (realmId == 2) {
@@ -225,39 +220,22 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun downloadChunkPixels(chunk: Int) {
-        val jsonObjRequest: StringRequest = object : StringRequest(
-            Method.GET,
-            server.serviceBaseUrl() + "api/v1/canvas/${server.id}/pixels/${chunk}",
-            Response.Listener { response ->
-                when(chunk) {
-                    1 -> SessionSettings.instance.chunk1 = response
-                    2 -> SessionSettings.instance.chunk2 = response
-                    3 -> SessionSettings.instance.chunk3 = response
-                    4 -> SessionSettings.instance.chunk4 = response
-                }
-
-                doneLoadingChunkCount += 1
-                downloadFinished()
-            },
-            Response.ErrorListener { error ->
+        canvasService.getChunkPixels(chunk) { response ->
+            if (response == null) {
                 showConnectionErrorMessage()
-                error.message?.apply {
-                    Log.i("Error", this)
-                }
-            }) {
-
-            override fun getHeaders(): MutableMap<String, String> {
-                val headers = HashMap<String, String>()
-                headers["Content-Type"] = "application/json"
-                headers["key1"] = Utils.key1
-                return headers
+                return@getChunkPixels
             }
+
+            when(chunk) {
+                1 -> SessionSettings.instance.chunk1 = response
+                2 -> SessionSettings.instance.chunk2 = response
+                3 -> SessionSettings.instance.chunk3 = response
+                4 -> SessionSettings.instance.chunk4 = response
+            }
+
+            doneLoadingChunkCount += 1
+            downloadFinished()
         }
-
-        //jsonObjRequest.retryPolicy = DefaultRetryPolicy(30000, 2, 1.0f)
-
-        jsonObjRequest.tag = "download"
-        dataRequestQueue.add(jsonObjRequest)
     }
 
 //    private fun processChunk(chunk: Int) {
@@ -297,6 +275,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 //    }
 
     private fun downloadCanvasPixels() {
+
+
         val jsonObjRequest: StringRequest = object : StringRequest(
             Method.GET,
             server.serviceBaseUrl() + "api/v1/canvas/${realmId}/pixels",
@@ -327,24 +307,23 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         dataRequestQueue.add(jsonObjRequest)
     }
 
-    private fun sendDeviceId() {
-        val uniqueId = SessionSettings.instance.uniqueId
+    private fun sendDeviceId(server: Server) {
+        val uniqueId = UUID.randomUUID().toString()
 
         val requestParams = HashMap<String, String>()
-
-        if (uniqueId == null) {
-            return
-        }
 
         requestParams["uuid"] = uniqueId
 
         val paramsJson = JSONObject(requestParams as Map<String, String>)
 
         val request = object : JsonObjectRequest(
-            Request.Method.POST,
+            Method.POST,
             server.serviceBaseUrl() + "api/v1/devices/register",
             paramsJson,
             { response ->
+                server.uuid = uniqueId
+                SessionSettings.instance.saveServers(requireContext())
+
                 SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                 SessionSettings.instance.sentUniqueId = true
@@ -368,11 +347,11 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         requestQueue.add(request)
     }
 
-    private fun getDeviceInfo() {
-        val uniqueId = SessionSettings.instance.uniqueId
+    private fun getDeviceInfo(server: Server) {
+        val uniqueId = server.uuid
 
         val request = object: JsonObjectRequest(
-            Request.Method.GET,
+            Method.GET,
             server.serviceBaseUrl() + "api/v1/devices/$uniqueId/info",
             null,
             { response ->
@@ -407,7 +386,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     private fun getTopContributors() {
         val request = object: JsonObjectRequest(
-            Request.Method.GET,
+            Method.GET,
             server.serviceBaseUrl() + "api/v1/top/contributors",
             null,
             { response ->

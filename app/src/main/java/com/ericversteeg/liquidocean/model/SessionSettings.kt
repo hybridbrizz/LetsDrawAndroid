@@ -123,10 +123,10 @@ class SessionSettings {
 
     var arrJsonStr = ""
 
-    lateinit var chunk1: String
-    lateinit var chunk2: String
-    lateinit var chunk3: String
-    lateinit var chunk4: String
+    lateinit var chunk1: JsonArray
+    lateinit var chunk2: JsonArray
+    lateinit var chunk3: JsonArray
+    lateinit var chunk4: JsonArray
 
     var firstContributorName = ""
     var secondContributorName = ""
@@ -654,7 +654,7 @@ class SessionSettings {
         saveServers(context)
     }
 
-    private fun saveServers(context: Context) {
+    fun saveServers(context: Context) {
         val set = mutableSetOf<String>()
         servers.forEach { server ->
             val str = gson.toJson(server, Server::class.java)

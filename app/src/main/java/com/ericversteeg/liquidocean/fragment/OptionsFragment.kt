@@ -31,6 +31,8 @@ import com.ericversteeg.liquidocean.listener.OptionsListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.*
+import kotlinx.android.synthetic.main.fragment_options.back_button
+import kotlinx.android.synthetic.main.fragment_signin.*
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -69,6 +71,9 @@ class OptionsFragment: Fragment(), FragmentListener {
             option_num_recent_colors.visibility = View.GONE
             option_show_paint_bar_container.visibility = View.GONE
             option_show_paint_circle_container.visibility = View.GONE
+        }
+        else {
+            change_name_container.visibility = View.GONE
         }
 
         back_button.setOnClickListener {
@@ -661,8 +666,8 @@ class OptionsFragment: Fragment(), FragmentListener {
         val paramsJson = JSONObject(requestParams as Map<String, String>)
 
         val request = object: JsonObjectRequest(
-            Request.Method.POST,
-            SessionSettings.instance.lastVisitedServer!!.serviceBaseUrl() + "api/v1/devices/${SessionSettings.instance.uniqueId}",
+            Method.POST,
+            SessionSettings.instance.lastVisitedServer!!.serviceBaseUrl() + "api/v1/devices/${SessionSettings.instance.lastVisitedServer!!.uuid}",
             paramsJson,
             { response ->
                 SessionSettings.instance.displayName = response.getString("name")

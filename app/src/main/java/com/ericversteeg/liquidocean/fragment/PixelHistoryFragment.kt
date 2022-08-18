@@ -14,7 +14,7 @@ import org.json.JSONArray
 
 class PixelHistoryFragment: Fragment() {
 
-    lateinit var pixelHistoryJson: JSONArray
+    var pixelHistoryJson: JSONArray? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -31,7 +31,7 @@ class PixelHistoryFragment: Fragment() {
         super.onResume()
 
         context?.apply {
-            if (pixelHistoryJson.length() > 0) {
+            if (pixelHistoryJson != null && pixelHistoryJson!!.length() > 0) {
                 // setup recycler view
                 pixel_history_recycler_view.layoutManager = LinearLayoutManager(
                     this,
@@ -39,7 +39,7 @@ class PixelHistoryFragment: Fragment() {
                     false
                 )
                 pixel_history_recycler_view.adapter = PixelHistoryRecyclerViewAdapter(
-                    this, pixelHistoryJson
+                    this, pixelHistoryJson!!
                 )
 
                 pixel_history_recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))

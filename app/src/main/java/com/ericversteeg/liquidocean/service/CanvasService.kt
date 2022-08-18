@@ -42,4 +42,16 @@ class CanvasService(server: Server) {
             }
         })
     }
+
+    fun getChunkPixels(chunkId: Int, completionHandler: (string: JsonArray?) -> Unit) {
+        service.getChunkPixels(Utils.key1, chunkId).enqueue(object: Callback<JsonArray> {
+            override fun onResponse(call: Call<JsonArray>, response: Response<JsonArray>) {
+                completionHandler.invoke(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonArray>, t: Throwable) {
+                completionHandler.invoke(null)
+            }
+        })
+    }
 }

@@ -15,4 +15,6 @@ interface CanvasRetrofitService {
     @GET("api/v1/device/paintqty/{uuid}")
     fun getPaintQty(@Header("key1") key1: String, @Path("uuid") uuid: String): Call<JsonObject>
 
+    @GET("api/v1/canvas/1/pixels/{chunk_id}")
+    fun getChunkPixels(@Header("key1") key1: String, @Path("chunk_id") chunkId: Int): Call<JsonArray>
 }

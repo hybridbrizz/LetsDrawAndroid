@@ -19,6 +19,7 @@ import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.Server
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
+import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 import org.json.JSONObject
@@ -199,6 +200,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         frag.dataLoadingCallback = this
         frag.world = true
         frag.server = server
+        frag.canvasService = CanvasService(server)
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
