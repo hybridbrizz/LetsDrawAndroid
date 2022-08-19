@@ -147,6 +147,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             SessionSettings.instance.lastVisitedServer = this.server
             SessionSettings.instance.saveLastVisitedIndex(requireContext())
 
+            SessionSettings.instance.maxPaintAmt = server.maxPixels
+            SessionSettings.instance.addPaintInterval = server.pixelInterval
+
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
 

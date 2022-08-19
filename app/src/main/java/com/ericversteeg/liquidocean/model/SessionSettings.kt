@@ -112,7 +112,7 @@ class SessionSettings {
 
     var nextPaintTime = 0L
 
-    var addPaintInterval = 3
+    var addPaintInterval = 0L
 
     var displayName = ""
 

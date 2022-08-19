@@ -13,10 +13,13 @@ class Server {
     var baseUrl = ""
 
     @SerializedName("pixel_interval")
-    var pixelInterval = -1
+    var pixelInterval = -1L
 
     @SerializedName("max_pixels")
     var maxPixels = -1
+
+    @SerializedName("pixels_amt")
+    var pixelsAmt = -1
 
     @SerializedName("access_key")
     var accessKey = ""
