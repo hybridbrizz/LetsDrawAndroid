@@ -134,16 +134,26 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             server.accessKey
         }
         serverService.getServer(accessKey) { code, server ->
-            if (server == null && code == 403) {
+            val storeduuid = this.server.uuid
+            SessionSettings.instance.removeServer(requireContext(), this.server)
+
+            if (server == null && code >= 400 && code < 500) {
                 showConnectionErrorMessage(authError = true)
                 return@getServer
             }
             else if (server == null) {
                 showConnectionErrorMessage(socket = false)
+                SessionSettings.instance.addServer(requireContext(), this.server)
                 return@getServer
             }
 
-            this.server = server.also { it.uuid = this.server.uuid }
+            this.server = server.also {
+                it.uuid = storeduuid
+            }
+
+            SessionSettings.instance.addServer(requireContext(), this.server)
+
+            SessionSettings.instance.uniqueId = this.server.uuid
             SessionSettings.instance.lastVisitedServer = this.server
             SessionSettings.instance.saveLastVisitedIndex(requireContext())
 
@@ -329,6 +339,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
                 SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                SessionSettings.instance.displayName = ""
                 SessionSettings.instance.sentUniqueId = true
 
                 doneSendingDeviceId = true
@@ -360,6 +371,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             { response ->
                 SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
+                SessionSettings.instance.displayName = response.getString("name")
                 SessionSettings.instance.xp = response.getInt("xp")
 
                 StatTracker.instance.numPixelsPaintedWorld = response.getInt("wt")
@@ -479,26 +491,22 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false) {
         InteractiveCanvasSocket.instance.disconnect()
 
-        if (authError) {
-            SessionSettings.instance.removeServer(requireContext(), server)
-        }
-
         if (!showingError) {
             showingError = true
             (context as Activity?)?.runOnUiThread {
                 requestQueue.cancelAll("download")
 
                 val message = if (authError) {
-                    "Access key has changed"
+                    "Access key has changed."
                 }
                 else if (socket) {
-                    "Pixel socket isn't responding"
+                    "Socket error."
                 }
                 else {
-                    "No connection to server can be established"
+                    "Server error."
                 }
 
-                AlertDialog.Builder(context)
+                AlertDialog.Builder(context, R.style.AlertDialogTheme)
                     .setMessage(message)
                     // The dialog is automatically dismissed when a dialog button is clicked.
                     .setPositiveButton(

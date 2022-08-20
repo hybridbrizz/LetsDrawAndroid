@@ -102,6 +102,7 @@ class PaintQuantityCircle : View, PaintQtyListener, PaintActionListener {
 
             canvas.drawRect(0F, 0F, width.toFloat(), height.toFloat(), backgroundPaint)
 
+            primaryPaint.color = SessionSettings.instance.paintBarColor
             canvas.drawRect(0F, (1 - relQty) * height, width.toFloat(), height.toFloat(), primaryPaint)
 
             it.restore()

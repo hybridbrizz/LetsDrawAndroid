@@ -209,6 +209,10 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         val qtyPer = 1F / numPixels
         var curProg = 0F
 
+        if (parent is ViewGroup) {
+            (parent as ViewGroup).clipChildren = true
+        }
+
         canvas.apply {
             val backgroundPaint = Paint()
             backgroundPaint.color = ActionButtonView.blackPaint.color

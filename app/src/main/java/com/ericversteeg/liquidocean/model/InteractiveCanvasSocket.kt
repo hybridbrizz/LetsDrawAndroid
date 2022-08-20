@@ -42,13 +42,14 @@ class InteractiveCanvasSocket {
         socket?.on(Socket.EVENT_CONNECT_ERROR) {
             //Log.i("Socket", "Socket connect error!")
 
+            socketConnectCallback?.onSocketDisconnect(true)
             socket?.disconnect()
         }
 
         socket?.on(Socket.EVENT_DISCONNECT) {
             Log.i("Socket", "Socket disconnected!")
 
-            socketConnectCallback?.onSocketDisconnect(true)
+            socketConnectCallback?.onSocketDisconnect(!manualDisconnect)
 
             manualDisconnect = false
         }

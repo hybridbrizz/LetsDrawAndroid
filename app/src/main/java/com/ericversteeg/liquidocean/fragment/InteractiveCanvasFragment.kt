@@ -157,6 +157,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         SessionSettings.instance.canvasOpen = true
 
+        InteractiveCanvasSocket.instance.socketConnectCallback = this
+
         context?.apply {
             SessionSettings.instance.tablet = Utils.isTablet(this)
         }
@@ -2389,7 +2391,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 for (element in it) {
                     val pixelInfo = element.asString
                     surface_view.interactiveCanvas.receivePixel(pixelInfo)
-                    reload_transparent.visibility = View.GONE
                 }
             }
         }
@@ -2416,7 +2417,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         showNoSocket()
 
         if (error) {
-            //scheduleReconnect()
+            activity?.runOnUiThread {
+                (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
+            }
         }
     }
 
@@ -2521,10 +2524,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun showNoSocket(show: Boolean = true) {
         activity?.runOnUiThread {
             if (show) {
-                image_no_socket.visibility = View.VISIBLE
+                image_no_socket?.visibility = View.VISIBLE
             }
             else {
-                image_no_socket.visibility = View.GONE
+                image_no_socket?.visibility = View.GONE
             }
         }
     }
