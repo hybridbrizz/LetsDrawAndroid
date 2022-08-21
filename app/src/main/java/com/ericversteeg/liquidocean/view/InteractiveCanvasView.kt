@@ -229,7 +229,12 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                         if (unitPoint != null && interactiveCanvas.unitInBounds(unitPoint)) {
                             if (mode == Mode.EXPORTING) {
-                                interactiveCanvas.exportSelection(unitPoint)
+                                if (interactiveCanvas.server.isAdmin) {
+                                    interactiveCanvas.erasePixels(unitPoint, unitPoint)
+                                }
+                                else {
+                                    interactiveCanvas.exportSelection(unitPoint)
+                                }
                             }
                             else if (mode == Mode.OBJECT_MOVE_SELECTION) {
                                 val valid = interactiveCanvas.startMoveSelection(unitPoint)
@@ -252,7 +257,12 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                         if (interactiveCanvas.unitInBounds(startUnit) && interactiveCanvas.unitInBounds(endUnit)) {
                             if (mode == Mode.EXPORTING) {
-                                interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                                if (interactiveCanvas.server.isAdmin) {
+                                    interactiveCanvas.erasePixels(Point(minX, minY), Point(maxX, maxY))
+                                }
+                                else {
+                                    interactiveCanvas.exportSelection(Point(minX, minY), Point(maxX, maxY))
+                                }
                             }
                             else if (mode == Mode.OBJECT_MOVE_SELECTION) {
                                 val valid = interactiveCanvas.startMoveSelection(Point(minX, minY), Point(maxX, maxY))

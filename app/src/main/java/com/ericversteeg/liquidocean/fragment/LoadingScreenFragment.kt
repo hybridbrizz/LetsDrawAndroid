@@ -44,6 +44,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     var doneSendingDeviceId = false
     var doneLoadingChunkCount = 0
     var doneLoadingTopContributors = false
+    var doneCheckingIp = false
 
     var doneConnectingQueue = false
     var doneConnectingSocket = false
@@ -344,6 +345,24 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
                 doneSendingDeviceId = true
                 downloadFinished()
+
+                if (!server.isAdmin) {
+                    canvasService.logIp(uniqueId) { res ->
+                        if (res == null) {
+                            showConnectionErrorMessage(socket = false)
+                            return@logIp
+                        }
+                        else if (!res.get("success").asBoolean) {
+                            showConnectionErrorMessage(banError = true)
+                            return@logIp
+                        }
+
+                        doneCheckingIp = true
+                    }
+                }
+                else {
+                    doneCheckingIp = true
+                }
             },
             { error ->
                 showConnectionErrorMessage()
@@ -380,8 +399,31 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 StatTracker.instance.numPixelOverwritesIn = response.getInt("oi")
                 StatTracker.instance.numPixelOverwritesOut = response.getInt("oo")
 
-                doneLoadingPaintQty = true
-                downloadFinished()
+                if (response.getInt("banned") != 0) {
+                    showConnectionErrorMessage(banError = true)
+                }
+                else {
+                    doneLoadingPaintQty = true
+                    downloadFinished()
+                }
+
+                if (!server.isAdmin) {
+                    canvasService.logIp(uniqueId) { res ->
+                        if (res == null) {
+                            showConnectionErrorMessage(socket = false)
+                            return@logIp
+                        }
+                        else if (!res.get("success").asBoolean) {
+                            showConnectionErrorMessage(banError = true)
+                            return@logIp
+                        }
+
+                        doneCheckingIp = true
+                    }
+                }
+                else {
+                    doneCheckingIp = true
+                }
             },
             { error ->
                 showConnectionErrorMessage()
@@ -488,7 +530,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         requestQueue.add(request)
     }
 
-    private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false) {
+    private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false, banError: Boolean = false) {
         InteractiveCanvasSocket.instance.disconnect()
 
         if (!showingError) {
@@ -498,6 +540,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
                 val message = if (authError) {
                     "Access key has changed."
+                }
+                else if (banError) {
+                    "You are banned."
                 }
                 else if (socket) {
                     "Socket error."
@@ -553,7 +598,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         else if (world) {
             return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
                     doneLoadingChunkCount == 4 &&
-                    doneConnectingQueue && doneConnectingSocket
+                    doneConnectingQueue && doneConnectingSocket && doneCheckingIp
         }
         return false
     }

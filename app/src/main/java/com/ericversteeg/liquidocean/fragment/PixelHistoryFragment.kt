@@ -9,10 +9,13 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.adapter.PixelHistoryRecyclerViewAdapter
+import com.ericversteeg.liquidocean.model.Server
 import kotlinx.android.synthetic.main.fragment_pixel_history.*
 import org.json.JSONArray
 
 class PixelHistoryFragment: Fragment() {
+
+    lateinit var server: Server
 
     var pixelHistoryJson: JSONArray? = null
 
@@ -39,7 +42,7 @@ class PixelHistoryFragment: Fragment() {
                     false
                 )
                 pixel_history_recycler_view.adapter = PixelHistoryRecyclerViewAdapter(
-                    this, pixelHistoryJson!!
+                    this, server, pixelHistoryJson!!
                 )
 
                 pixel_history_recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
@@ -47,6 +50,14 @@ class PixelHistoryFragment: Fragment() {
             else {
                 no_history_text.visibility = View.VISIBLE
             }
+        }
+    }
+
+    companion object {
+        fun create(server: Server): PixelHistoryFragment {
+            val fragment = PixelHistoryFragment()
+            fragment.server = server
+            return fragment
         }
     }
 }

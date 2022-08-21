@@ -2,11 +2,12 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.DialogInterface
+import android.content.*
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
@@ -118,6 +119,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private val maxBgTime = 60 * 60
 
     private var lastCanvasSummaryImageTime = 0L
+
+    private var wifiStateReceiver: BroadcastReceiver? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -1105,6 +1108,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             reload_transparent.setOnClickListener { }
             resumeCanvas()
 
+//            canvasService.logIp(SessionSettings.instance.uniqueId!!) { response ->
+//                if (response == null || !response.get("success").asBoolean) {
+//                    activity?.runOnUiThread {
+//                        (activity as? InteractiveCanvasActivity)?.showMenuFragment()
+//                    }
+//                    return@logIp
+//                }
+//            }
+
             paused = false
         }
     }
@@ -1595,7 +1607,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                                     ).toFloat()
                             }
 
-                            val fragment = PixelHistoryFragment()
+                            val fragment = PixelHistoryFragment.create(server)
                             fragment.pixelHistoryJson = historyJson
 
                             beginTransaction().replace(
@@ -2390,7 +2402,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             pixels?.also {
                 for (element in it) {
                     val pixelInfo = element.asString
-                    surface_view.interactiveCanvas.receivePixel(pixelInfo)
+                    surface_view?.interactiveCanvas?.receivePixel(pixelInfo)
                 }
             }
         }
@@ -2401,7 +2413,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val paintQty = it.get("paint_qty").asInt
                     Log.i("Canvas Service", "Paint qty = $paintQty")
                     SessionSettings.instance.dropsAmt = paintQty
-                    reload_transparent.visibility = View.GONE
+                    reload_transparent?.visibility = View.GONE
                 }
             }
         }
@@ -2418,13 +2430,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         if (error) {
             activity?.runOnUiThread {
-                (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
+                (activity as? InteractiveCanvasActivity)?.showMenuFragment()
             }
         }
     }
 
     private fun reconnectToSocket() {
-        InteractiveCanvasSocket.instance.startSocket(server!!)
+        InteractiveCanvasSocket.instance.startSocket(server)
     }
 
     private fun scheduleReconnect() {

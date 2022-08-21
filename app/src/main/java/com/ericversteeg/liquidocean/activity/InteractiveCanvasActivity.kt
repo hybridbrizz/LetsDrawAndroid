@@ -5,14 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.fragment.*
-import com.ericversteeg.liquidocean.helper.DataManager.Companion.getDeviceInfo
-import com.ericversteeg.liquidocean.helper.DataManager.Companion.sendDeviceId
-import com.ericversteeg.liquidocean.helper.TrustAllSSLCertsDebug
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
@@ -22,9 +16,7 @@ import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.service.CanvasService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
-import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.

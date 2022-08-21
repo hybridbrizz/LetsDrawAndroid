@@ -12,12 +12,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class CanvasService(server: Server) {
 
-    private val retrofit = Retrofit.Builder()
+    private var retrofit = Retrofit.Builder()
         .baseUrl(server.serviceBaseUrl())
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
+    private var retrofitAlt = Retrofit.Builder()
+        .baseUrl(server.serviceAltBaseUrl())
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
     private val service = retrofit.create(CanvasRetrofitService::class.java)
+    private val serviceAlt = retrofitAlt.create(CanvasRetrofitServiceAlt::class.java)
 
     fun getRecentPixels(since: Long, completionHandler: (jsonArray: JsonArray?) -> Unit) {
         service.getRecentPixels(Utils.key1, since).enqueue(object: Callback<JsonArray> {
@@ -50,6 +56,30 @@ class CanvasService(server: Server) {
             }
 
             override fun onFailure(call: Call<JsonArray>, t: Throwable) {
+                completionHandler.invoke(null)
+            }
+        })
+    }
+
+    fun logIp(uuid: String, completionHandler: (jsonObj: JsonObject?) -> Unit) {
+        serviceAlt.logIp(Utils.key1, uuid).enqueue(object: Callback<JsonObject> {
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                completionHandler.invoke(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
+                completionHandler.invoke(null)
+            }
+        })
+    }
+
+    fun banDeviceIps(deviceId: Int, completionHandler: (jsonObj: JsonObject?) -> Unit) {
+        serviceAlt.banDeviceIps(Utils.key1, deviceId).enqueue(object: Callback<JsonObject> {
+            override fun onResponse(call: Call<JsonObject>, response: Response<JsonObject>) {
+                completionHandler.invoke(response.body())
+            }
+
+            override fun onFailure(call: Call<JsonObject>, t: Throwable) {
                 completionHandler.invoke(null)
             }
         })

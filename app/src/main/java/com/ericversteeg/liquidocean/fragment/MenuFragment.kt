@@ -21,6 +21,7 @@ import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.util.*
 
+
 class MenuFragment: Fragment() {
 
     var canvasFragment: InteractiveCanvasFragment? = null
@@ -66,6 +67,8 @@ class MenuFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         SessionSettings.instance.canvasOpen = false
 

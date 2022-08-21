@@ -1,20 +1,27 @@
 package com.ericversteeg.liquidocean.adapter
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.model.Server
 import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.service.CanvasService
+import com.google.android.material.snackbar.Snackbar
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONArray): RecyclerView.Adapter<PixelHistoryRecyclerViewAdapter.PaintHistoryViewHolder>() {
+class PixelHistoryRecyclerViewAdapter(context: Context, val server: Server, pixelHistoryJson: JSONArray): RecyclerView.Adapter<PixelHistoryRecyclerViewAdapter.PaintHistoryViewHolder>() {
+
+    private val canvasService = CanvasService(server)
 
     private var pixelHistoryJson: JSONArray = pixelHistoryJson
     var selectedItems = BooleanArray(pixelHistoryJson.length())
@@ -35,6 +42,35 @@ class PixelHistoryRecyclerViewAdapter(context: Context, pixelHistoryJson: JSONAr
             selectedItems[position] = !selectedItems[position]
 
             setupViewHolder(holder, position)
+        }
+
+        if (server.isAdmin) {
+            val jsonObj = pixelHistoryJson.getJSONObject(pixelHistoryJson.length() - 1 - position)
+
+            holder.backgroundView.setOnLongClickListener {
+                AlertDialog.Builder(context, R.style.AlertDialogTheme)
+                    .setMessage("Ban ${jsonObj.getString("name")}?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        AlertDialog.Builder(context, R.style.AlertDialogTheme)
+                            .setMessage("Confirm ban on ${jsonObj.getString("name")}?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                canvasService.banDeviceIps(jsonObj.getInt("device_id")) { response ->
+                                    if (response == null) {
+                                        Toast.makeText(context, "Ban failed (server error).", Toast.LENGTH_LONG).show()
+                                        return@banDeviceIps
+                                    }
+
+                                    Toast.makeText(context, "Banned ${jsonObj.getString("name")} (${response.get("ips").asInt} IPs).", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                            .setNegativeButton("Cancel", null)
+                            .show()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+
+                false
+            }
         }
 
         setupViewHolder(holder, position)

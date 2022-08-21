@@ -1,6 +1,7 @@
 package com.ericversteeg.liquidocean.model
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Point
@@ -14,6 +15,7 @@ import androidx.annotation.RequiresApi
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.fragment.InteractiveCanvasFragment
 import com.ericversteeg.liquidocean.helper.Utils
@@ -463,6 +465,22 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         interactiveCanvasDrawer?.notifyRedraw()
 
         Log.i("Receive Pixel", pixelInfo)
+    }
+
+    fun erasePixels(startUnit: Point, endUnit: Point) {
+        val left = startUnit.x
+        val top = startUnit.y
+        val right = endUnit.x
+        val bottom = endUnit.y
+
+        AlertDialog.Builder(context, R.style.AlertDialogTheme)
+            .setMessage("Erase selected pixels?")
+            .setPositiveButton("Yes") { _, _ ->
+                val message = "${server.adminKey}&$left&$top&$right&$bottom"
+                InteractiveCanvasSocket.instance.requireSocket().emit("5ypq8062qs", message)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     /*fun showConnectingAttempts() {
