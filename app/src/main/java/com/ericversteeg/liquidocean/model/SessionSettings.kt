@@ -213,6 +213,8 @@ class SessionSettings {
     var lastVisitedServer: Server? = null
     var lastVisitedServerIndex = -1
 
+    var agreedToTermOfService = false
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -474,6 +476,8 @@ class SessionSettings {
 
         hsbTextVisible = getSharedPrefs(context).getBoolean("hsb_text_visible", true)
 
+        agreedToTermOfService = getSharedPrefs(context).getBoolean("agreed_to_terms", agreedToTermOfService)
+
         initServerList(context)
 
         lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", -1)
@@ -688,6 +692,10 @@ class SessionSettings {
             .edit()
             .putInt("background_colors_index", backgroundColorsIndex)
             .apply()
+    }
+
+    fun saveAgreeToTerms(context: Context) {
+        getSharedPrefs(context).edit().putBoolean("agreed_to_terms", agreedToTermOfService).apply()
     }
 
     companion object {

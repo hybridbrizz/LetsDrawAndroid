@@ -211,12 +211,18 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showInteractiveCanvasFragment(server: Server) {
+    fun showInteractiveCanvasFragment(server: Server) {
         val frag = InteractiveCanvasFragment()
         frag.server = server
         frag.world = true
         frag.interactiveCanvasFragmentListener = this
 
+        supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
+    }
+
+    private fun showTermsOfServiceFragment(server: Server) {
+        val frag = TermsOfServiceFragment()
+        frag.server = server
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
@@ -227,6 +233,10 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     override fun onDataLoaded(server: Server) {
+        if (!SessionSettings.instance.agreedToTermOfService) {
+            showTermsOfServiceFragment(server)
+            return
+        }
         SessionSettings.instance.save(this)
         showInteractiveCanvasFragment(server)
     }
