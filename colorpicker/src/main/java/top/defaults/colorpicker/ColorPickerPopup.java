@@ -28,6 +28,8 @@ public class ColorPickerPopup {
     private String cancelTitle;
     private boolean showIndicator;
     private boolean showValue;
+    private int backgroundColor;
+    private int foregroundColor;
     private boolean onlyUpdateOnTouchEventUp;
 
     private ColorPickerPopup(Builder builder) {
@@ -39,6 +41,8 @@ public class ColorPickerPopup {
         this.cancelTitle = builder.cancelTitle;
         this.showIndicator = builder.showIndicator;
         this.showValue = builder.showValue;
+        this.backgroundColor = builder.backgroundColor;
+        this.foregroundColor = builder.foregroundColor;
         this.onlyUpdateOnTouchEventUp = builder.onlyUpdateOnTouchEventUp;
     }
 
@@ -55,8 +59,8 @@ public class ColorPickerPopup {
         final ColorPickerView colorPickerView = layout.findViewById(R.id.colorPickerView);
         popupWindow = new PopupWindow(layout, ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
-        popupWindow.setOutsideTouchable(true);
+        popupWindow.setBackgroundDrawable(new ColorDrawable(backgroundColor));
+        popupWindow.setOutsideTouchable(false);
         colorPickerView.setInitialColor(initialColor);
         colorPickerView.setEnabledBrightness(enableBrightness);
         colorPickerView.setEnabledAlpha(enableAlpha);
@@ -64,6 +68,7 @@ public class ColorPickerPopup {
         colorPickerView.subscribe(observer);
         TextView cancel = layout.findViewById(R.id.cancel);
         cancel.setText(cancelTitle);
+        cancel.setTextColor(foregroundColor);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,6 +80,7 @@ public class ColorPickerPopup {
         });
         TextView ok = layout.findViewById(R.id.ok);
         ok.setText(okTitle);
+        ok.setTextColor(foregroundColor);
         ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,6 +142,8 @@ public class ColorPickerPopup {
         private boolean showIndicator = true;
         private boolean showValue = true;
         private boolean onlyUpdateOnTouchEventUp = false;
+        private int backgroundColor = -1;
+        private int foregroundColor = 0;
 
         public Builder(Context context) {
             this.context = context;
@@ -174,6 +182,16 @@ public class ColorPickerPopup {
 
         public Builder showValue(boolean show) {
             showValue = show;
+            return this;
+        }
+
+        public Builder backgroundColor(int color) {
+            backgroundColor = color;
+            return this;
+        }
+
+        public Builder foregroundColor(int color) {
+            foregroundColor = color;
             return this;
         }
 

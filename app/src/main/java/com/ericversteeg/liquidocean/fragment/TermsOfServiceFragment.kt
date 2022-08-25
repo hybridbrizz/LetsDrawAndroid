@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.fragment.app.Fragment
 import com.ericversteeg.liquidocean.R
@@ -62,10 +63,13 @@ class TermsOfServiceFragment: Fragment() {
         termsText.text = termsOfService
 
         val scrollView = view.findViewById<ScrollView>(R.id.scroll_view_terms_of_service)
-        scrollView.viewTreeObserver.addOnScrollChangedListener {
-            if (scrollView.getChildAt(0).bottom <= scrollView.height + scrollView.scrollY) {
-                scrolledToBottom = true
+        scrollView.viewTreeObserver.addOnScrollChangedListener(object: ViewTreeObserver.OnScrollChangedListener {
+            override fun onScrollChanged() {
+                if (scrollView.getChildAt(0).bottom <= scrollView.height + scrollView.scrollY) {
+                    scrolledToBottom = true
+                    scrollView.viewTreeObserver.removeOnScrollChangedListener(this)
+                }
             }
-        }
+        })
     }
 }

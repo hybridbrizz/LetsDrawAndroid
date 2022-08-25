@@ -81,11 +81,11 @@
     <string name="import_canvas_button_title">IMPORT CANVAS</string>
     <string name="draw_menu_title">CANVAS</string>
     <string name="connect_menu_title">CONNECT</string>
-    <string name="options_menu_title">SETTINGS</string>
+    <string name="options_menu_title">STYLES</string>
     <string name="how_to_menu_title">HELP</string>
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
-    <string name="options_title">Settings</string>
+    <string name="options_title">Styles</string>
     <string name="howto_title">Help</string>
     <string name="howto_step2_title">Export and Share</string>
     <string name="howto_step3_title">Change Background</string>

@@ -19,6 +19,7 @@ public class ColorWheelPalette extends View {
 
     private Paint huePaint;
     private Paint saturationPaint;
+    private Paint borderPaint;
 
     public ColorWheelPalette(Context context) {
         this(context, null);
@@ -32,6 +33,10 @@ public class ColorWheelPalette extends View {
         super(context, attrs, defStyleAttr);
         huePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         saturationPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        borderPaint.setStrokeWidth(2);
+        borderPaint.setStyle(Paint.Style.STROKE);
+        borderPaint.setColor(Color.WHITE);
     }
 
     @Override
@@ -57,5 +62,6 @@ public class ColorWheelPalette extends View {
     protected void onDraw(Canvas canvas) {
         canvas.drawCircle(centerX, centerY, radius, huePaint);
         canvas.drawCircle(centerX, centerY, radius, saturationPaint);
+        canvas.drawCircle(centerX, centerY, radius, borderPaint);
     }
 }

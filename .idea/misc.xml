@@ -55,6 +55,7 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/drawable/white_border_background.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/activity_fullscreen.xml" value="0.25833333333333336" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/activity_launch.xml" value="0.25833333333333336" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/activity_signin.xml" value="0.24635416666666668" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/adapter_server.xml" value="0.21614583333333334" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/color_picker.xml" value="0.36666666666666664" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/color_picker_layout.xml" value="0.2390625" />
@@ -75,6 +76,7 @@
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/palette_header_view.xml" value="0.23125" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/layout/panel_adapter_view.xml" value="0.22395833333333334" />
         <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/app/src/main/res/mipmap-anydpi-v26/ic_new_icon.xml" value="0.23489583333333333" />
+        <entry key="..\:/Users/Eric/AndroidStudioProjects/LiquidOcean/colorpicker/src/main/res/layout/top_defaults_view_color_picker_popup.xml" value="0.36666666666666664" />
       </map>
     </option>
   </component>

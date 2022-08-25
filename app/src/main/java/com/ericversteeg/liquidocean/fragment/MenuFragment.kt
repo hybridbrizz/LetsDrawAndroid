@@ -68,8 +68,6 @@ class MenuFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
         SessionSettings.instance.canvasOpen = false
 
         view.setBackgroundColor(Color.BLACK)
@@ -172,7 +170,12 @@ class MenuFragment: Fragment() {
         }*/
 
         menu_button.setOnClickListener {
-            showServerList()
+            if (SessionSettings.instance.servers.isEmpty()) {
+                showConnectInput()
+            }
+            else {
+                showServerList()
+            }
         }
 
         connect_button.setOnClickListener {
@@ -327,6 +330,8 @@ class MenuFragment: Fragment() {
 
     private fun selectHand() {
         if (!SessionSettings.instance.selectedHand) {
+            menu_button.visibility = View.INVISIBLE
+
             lefty_button.visibility = View.VISIBLE
             righty_button.visibility = View.VISIBLE
 

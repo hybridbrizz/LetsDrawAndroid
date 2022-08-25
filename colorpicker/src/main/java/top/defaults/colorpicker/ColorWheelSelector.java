@@ -36,10 +36,10 @@ public class ColorWheelSelector extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawLine(currentPoint.x - selectorRadiusPx, currentPoint.y,
-                currentPoint.x + selectorRadiusPx, currentPoint.y, selectorPaint);
-        canvas.drawLine(currentPoint.x, currentPoint.y - selectorRadiusPx,
-                currentPoint.x, currentPoint.y + selectorRadiusPx, selectorPaint);
+        //canvas.drawLine(currentPoint.x - selectorRadiusPx, currentPoint.y,
+                //currentPoint.x + selectorRadiusPx, currentPoint.y, selectorPaint);
+        //canvas.drawLine(currentPoint.x, currentPoint.y - selectorRadiusPx,
+                //currentPoint.x, currentPoint.y + selectorRadiusPx, selectorPaint);
         canvas.drawCircle(currentPoint.x, currentPoint.y, selectorRadiusPx * 0.66f, selectorPaint);
     }
 

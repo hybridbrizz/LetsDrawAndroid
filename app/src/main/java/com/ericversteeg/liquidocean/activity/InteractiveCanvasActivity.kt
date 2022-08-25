@@ -281,16 +281,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                 SessionSettings.instance.selectedHand = true
 
                 SessionSettings.instance.toolboxOpen = true
-
-                if (route == MenuFragment.singleMenuIndex) {
-                    showInteractiveCanvasFragment(false, 0)
-                }
-                else if (route == MenuFragment.worldMenuIndex) {
-                    showLoadingFragment(true, 1)
-                }
-                else if (route == MenuFragment.devMenuIndex) {
-                    showLoadingFragment(true, 2)
-                }
             }
         }
     }

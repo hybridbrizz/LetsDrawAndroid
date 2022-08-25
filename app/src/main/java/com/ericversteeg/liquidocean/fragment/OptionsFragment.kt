@@ -239,7 +239,7 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_grid_line_color_button.setOnClickListener {
-            showColorPicker(SessionSettings.instance.canvasGridLineColor) { color ->
+            showColorPicker(option_grid_line_color_button, SessionSettings.instance.canvasGridLineColor) { color ->
                 option_grid_line_color_button.setBackgroundColor(color)
                 SessionSettings.instance.canvasGridLineColor = color
             }
@@ -259,7 +259,7 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_canvas_background_primary_color_button.setOnClickListener {
-            showColorPicker(SessionSettings.instance.canvasBackgroundPrimaryColor) { color ->
+            showColorPicker(option_canvas_background_primary_color_button, SessionSettings.instance.canvasBackgroundPrimaryColor) { color ->
                 option_canvas_background_primary_color_button.setBackgroundColor(color)
                 SessionSettings.instance.canvasBackgroundPrimaryColor = color
             }
@@ -279,7 +279,7 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_canvas_background_secondary_color_button.setOnClickListener {
-            showColorPicker(SessionSettings.instance.canvasBackgroundSecondaryColor) { color ->
+            showColorPicker(option_canvas_background_secondary_color_button, SessionSettings.instance.canvasBackgroundSecondaryColor) { color ->
                 option_canvas_background_secondary_color_button.setBackgroundColor(color)
                 SessionSettings.instance.canvasBackgroundSecondaryColor = color
             }
@@ -297,7 +297,7 @@ class OptionsFragment: Fragment(), FragmentListener {
             ColorPickerPopup.Builder(activity)
                 .initialColor(SessionSettings.instance.frameColor) // Set initial color
                 .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(true) // Enable alpha slider or not
+                .enableAlpha(false) // Enable alpha slider or not
                 .okTitle("Choose")
                 .cancelTitle("Cancel")
                 .showIndicator(false)
@@ -418,7 +418,7 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         option_close_paint_panel_color_button.setOnClickListener {
-            showColorPicker(SessionSettings.instance.closePaintBackButtonColor) { color ->
+            showColorPicker(option_close_paint_panel_color_button, SessionSettings.instance.closePaintBackButtonColor) { color ->
                 option_close_paint_panel_color_button.setBackgroundColor(color)
                 SessionSettings.instance.closePaintBackButtonColor = color
             }
@@ -465,7 +465,7 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         // option grid line color
         option_paint_bar_color_button.setOnClickListener {
-            showColorPicker(SessionSettings.instance.paintBarColor) { color ->
+            showColorPicker(option_paint_bar_color_button, SessionSettings.instance.paintBarColor) { color ->
                 option_paint_bar_color_button.setBackgroundColor(color)
                 SessionSettings.instance.paintBarColor = color
             }
@@ -700,9 +700,43 @@ class OptionsFragment: Fragment(), FragmentListener {
         return parentFragment != null && parentFragment is InteractiveCanvasFragment
     }
 
-    private fun showColorPicker(initialColor: Int, onColorPicked: (color: Int) -> Unit) {
-        HSBColorPicker.showDialog(requireContext(), initialColor) { color ->
-            onColorPicked.invoke(color)
+    private fun showColorPicker(colorView: View, initialColor: Int, onColorPicked: (color: Int) -> Unit) {
+        val initialOrWhite = if (initialColor == Color.TRANSPARENT) {
+            Color.WHITE
         }
+        else {
+            initialColor
+        }
+
+        ColorPickerPopup.Builder(activity)
+            .initialColor(initialOrWhite) // Set initial color
+            .enableBrightness(true) // Enable brightness slider or not
+            .enableAlpha(false) // Enable alpha slider or not
+            .okTitle("Choose")
+            .cancelTitle("Cancel")
+            .showIndicator(false)
+            .showValue(false)
+            .backgroundColor(Color.BLACK)
+            .foregroundColor(Color.WHITE)
+            .build()
+            .show(colorView, object : ColorPickerObserver() {
+                override fun onColorPicked(color: Int) {
+                    colorView.setBackgroundColor(color)
+                    onColorPicked.invoke(color)
+                }
+
+                override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
+                    colorView.setBackgroundColor(color)
+                }
+
+                override fun onColorCancel() {
+                    if (initialColor == Color.TRANSPARENT) {
+                        colorView.setBackgroundColor(Color.WHITE)
+                    }
+                    else {
+                        colorView.setBackgroundColor(initialColor)
+                    }
+                }
+            })
     }
 }

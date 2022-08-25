@@ -39,10 +39,10 @@ public abstract class ColorSliderView extends View implements ColorObservable, U
         colorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         borderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         borderPaint.setStyle(Paint.Style.STROKE);
-        borderPaint.setStrokeWidth(0);
-        borderPaint.setColor(Color.BLACK);
+        borderPaint.setStrokeWidth(2);
+        borderPaint.setColor(Color.WHITE);
         selectorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        selectorPaint.setColor(Color.BLACK);
+        selectorPaint.setColor(Color.WHITE);
         selectorPath = new Path();
         selectorPath.setFillType(Path.FillType.WINDING);
     }
