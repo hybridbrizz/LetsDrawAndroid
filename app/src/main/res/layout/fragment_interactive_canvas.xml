@@ -1078,6 +1078,41 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:indeterminate="true" />
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+            android:id="@+id/stream_banner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:background="@drawable/info_banner_background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="10dp">
+
+        <ImageView
+                android:id="@+id/banner_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/twitch_icon" />
+
+        <TextView
+                android:id="@+id/banner_text"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:fontFamily="@font/inter_semibold"
+                android:textSize="14dp"
+                android:textColor="#FFF"
+                android:text="Banner text" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
     <FrameLayout
             android:id="@+id/reload_transparent"
             android:visibility="gone"

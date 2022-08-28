@@ -1,31 +1,20 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.app.Activity
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.HowtoFragmentListener
-import com.ericversteeg.liquidocean.listener.StatsFragmentListener
 import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_howto.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_button
 import java.util.*
 
 class HowtoFragment: Fragment() {

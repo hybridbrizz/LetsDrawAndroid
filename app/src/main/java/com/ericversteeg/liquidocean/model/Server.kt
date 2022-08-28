@@ -12,6 +12,15 @@ class Server {
     @SerializedName("base_url")
     var baseUrl = ""
 
+    @SerializedName("icon_url")
+    var iconUrl = ""
+
+    @SerializedName("icon_link")
+    var iconLink = ""
+
+    @SerializedName("banner_text")
+    var bannerText = ""
+
     @SerializedName("pixel_interval")
     var pixelInterval = -1L
 

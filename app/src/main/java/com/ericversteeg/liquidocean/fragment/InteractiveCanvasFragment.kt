@@ -6,7 +6,9 @@ import android.content.*
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +33,10 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
@@ -190,6 +196,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             invalidateButtons()
         }
+
+        setupStreamBanner()
 
         context?.apply {
             if (world) {
@@ -963,8 +971,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
                         layoutParams.rightToRight = -1
                         layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                        layoutParams.leftMargin = Utils.dpToPx(context, 6)
+                        //layoutParams.leftMargin = Utils.dpToPx(context, 6)
                         button.layoutParams = layoutParams
+                    }
+
+                    val toolboxImages = arrayOf(export_action, background_action, grid_lines_action, canvas_summary_action)
+
+                    for (image in toolboxImages) {
+                        image.layoutParams = (image.layoutParams as FrameLayout.LayoutParams).also {
+                            it.gravity = Gravity.START or Gravity.TOP
+                        }
                     }
 
                     // recent colors button
@@ -1068,21 +1084,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paintEventTimer?.cancel()
 
-        if (world) {
-            //InteractiveCanvasSocket.instance.socket?.disconnect()
-        }
-        else {
-            context?.apply {
-                val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+        context?.apply {
+            val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
 
-                SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
-                SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
+            SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
+            SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
 
-                SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+            SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
 
-                SessionSettings.instance.save(this)
-                StatTracker.instance.save(this)
-            }
+            SessionSettings.instance.save(this)
+            //StatTracker.instance.save(this)
         }
 
         pauseCanvas()
@@ -2542,5 +2553,50 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 image_no_socket?.visibility = View.GONE
             }
         }
+    }
+
+    private fun setupStreamBanner() {
+        stream_banner.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+            startActivity(intent)
+        }
+
+        banner_text.text = server.bannerText
+
+        Glide.with(this)
+            .load(server.iconUrl)
+            .listener(object: RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    stream_banner.animate().setDuration(200).alpha(1F).start()
+                    return false
+                }
+            })
+            .circleCrop()
+            .into(banner_icon)
+
+        Timer().schedule(object: TimerTask() {
+            override fun run() {
+                activity?.runOnUiThread {
+                    stream_banner.animate().setDuration(500).alpha(0F).withEndAction {
+                        stream_banner.visibility = View.GONE
+                    }.start()
+                }
+            }
+        }, 3000)
     }
 }

@@ -2,7 +2,10 @@ package com.ericversteeg.liquidocean.fragment
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,13 +15,16 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
@@ -33,6 +39,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONObject
 import java.util.*
+
 
 class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConnectCallback {
 
@@ -164,7 +171,59 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
 
-            Glide.with(this).load("${server.serviceAltBaseUrl()}/canvas").into(realm_art)
+            Glide.with(this)
+                .load(server.iconUrl)
+                .listener(object: RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        server_icon.alpha = 0F
+                        server_icon.animate().setDuration(300).alpha(1F).start()
+                        return false
+                    }
+                })
+                .circleCrop()
+                .into(server_icon)
+
+            Glide.with(this)
+                .load("${server.serviceAltBaseUrl()}/canvas")
+                .centerCrop()
+                .listener(object: RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Drawable?,
+                        model: Any?,
+                        target: Target<Drawable>?,
+                        dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        realm_art.alpha = 0F
+                        realm_art.animate().setDuration(1000).alpha(1F).start()
+                        return false
+                    }
+                })
+                .into(realm_art)
 
             timer.schedule(object : TimerTask() {
                 override fun run() {
