@@ -14,9 +14,9 @@
 
     <application
             android:allowBackup="true"
-            android:icon="@mipmap/ic_pixel_icon_2"
+            android:icon="@mipmap/ic_radio_frost_2"
             android:label="@string/app_name"
-            android:roundIcon="@mipmap/ic_pixel_icon_2_round"
+            android:roundIcon="@mipmap/ic_radio_frost_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
 

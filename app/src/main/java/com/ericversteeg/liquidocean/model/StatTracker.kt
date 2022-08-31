@@ -301,19 +301,19 @@ class StatTracker {
     }
 
     private fun enqueueAchievement(eventType: EventType, threshold: Int, thresholdsPassed: Int) {
-        val map = HashMap<String, Any>()
-        map["event_type"] = eventType
-        map["threshold"] = threshold
-        map["thresholds_passed"] = thresholdsPassed
-
-        achievementQueue.add(map)
-
-        if (eventType == EventType.WORLD_XP || eventType == EventType.PIXEL_PAINTED_WORLD ||
-            eventType == EventType.PIXEL_PAINTED_SINGLE) {
-            activity?.apply {
-                displayAchievements(this)
-            }
-        }
+//        val map = HashMap<String, Any>()
+//        map["event_type"] = eventType
+//        map["threshold"] = threshold
+//        map["thresholds_passed"] = thresholdsPassed
+//
+//        achievementQueue.add(map)
+//
+//        if (eventType == EventType.WORLD_XP || eventType == EventType.PIXEL_PAINTED_WORLD ||
+//            eventType == EventType.PIXEL_PAINTED_SINGLE) {
+//            activity?.apply {
+//                displayAchievements(this)
+//            }
+//        }
     }
 
     fun displayAchievements(activity: Activity) {
