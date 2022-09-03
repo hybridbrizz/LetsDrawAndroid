@@ -30,6 +30,7 @@ import io.socket.client.Socket
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
+import java.lang.Math.min
 import java.net.URISyntaxException
 import java.util.*
 import kotlin.collections.ArrayList
@@ -90,6 +91,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var numConnect = 0
     lateinit var connectingTimer: Timer
+
+    private var isShowingCanvasError = false
 
     var summary: MutableList<RestorePoint> = ArrayList()
 
@@ -412,11 +415,15 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             receivePixel(data)
         }
 
-//        socket?.on("canvas_error") {
-//            Utils.showErrorDialog(context, "Who's was it? A pixel didn't save") {
-//                (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
-//            }
-//        }
+        socket?.on("canvas_error") {
+            if (!isShowingCanvasError) {
+                Utils.showErrorDialog(context, "Unfortunately one or more of the pixels you just placed didn't make it to the database.") {
+                    (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
+                }
+
+                isShowingCanvasError = true
+            }
+        }
 
         socket?.on("paint_qty") {
             val deviceJsonObject = it[0] as JSONObject
@@ -425,9 +432,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("add_paint") {
             val amt = it[0] as Int
-            if (sessionSettings.dropsAmt < SessionSettings.instance.maxPaintAmt) {
-                sessionSettings.dropsAmt += amt
-            }
+            sessionSettings.dropsAmt = (sessionSettings.dropsAmt + amt).coerceAtMost(SessionSettings.instance.maxPaintAmt)
             SessionSettings.instance.timeSync = SessionSettings.instance.addPaintInterval
         }
 
@@ -845,7 +850,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val offsetX = (x - left) * ppu
             val offsetY = (y - top) * ppu
 
-            return RectF(offsetX, offsetY, offsetX + ppu, offsetY + ppu)
+            return RectF(offsetX, offsetY, offsetX + ppu + Utils.dpToPx(context, 1), offsetY + ppu + Utils.dpToPx(context, 1))
         }
 
         return RectF(0F, 0F, 0F, 0F)

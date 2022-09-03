@@ -163,8 +163,8 @@ class SessionSettings {
 
     var shortTermPixels: MutableList<InteractiveCanvas.ShortTermPixel> = ArrayList()
 
-    var rightHanded = false
-    var selectedHand = false
+    var rightHanded = true
+    var selectedHand = true
 
     var smallActionButtons = false
 
@@ -420,9 +420,9 @@ class SessionSettings {
         paintBarColor =
             getSharedPrefs(context).getInt("paint_bar_color", ContextCompat.getColor(context, R.color.default_paint_qty_bar_color))
 
-        rightHanded = getSharedPrefs(context).getBoolean("right_handed", false)
+        rightHanded = getSharedPrefs(context).getBoolean("right_handed", rightHanded)
 
-        selectedHand = getSharedPrefs(context).getBoolean("selected_hand", false)
+        selectedHand = getSharedPrefs(context).getBoolean("selected_hand", selectedHand)
 
         smallActionButtons = getSharedPrefs(context).getBoolean("small_action_buttons", false)
 

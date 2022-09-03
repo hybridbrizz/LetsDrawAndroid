@@ -7,4 +7,6 @@
     <color name="black_overlay">#66000000</color>
 
     <color name="default_paint_qty_bar_color">#FFF</color>
+
+    <color name="frost">#34F7EA</color>
 </resources>
