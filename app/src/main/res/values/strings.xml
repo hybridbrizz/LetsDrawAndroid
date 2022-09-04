@@ -36,13 +36,13 @@
     <string name="option_canvas_background_secondary_color_title">Background color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
-    <string name="step1">Welcome to this quick guide. This guide will help you get all setup and tell you what you need to know about getting started. First, you can connect to the test canvas by going to Connect then entering \'TEST1\'. Once connected you will start to gain a certain amount of pixels that you can use to draw pixel art.</string>
-    <string name="step2">It\'s worth mentioning that you get a certain amount of pixels over time from each canvas you have connected to. You will get pixels even if you aren\'t online, up to a maximum amount. It\'s limited so that no one person has too much control over a canvas. You can easily export and share pixels that you see. Just use this icon and select what you want.</string>
-    <string name="step3">The canvas is interactive so as you draw, everyone can see what you are doing. Finally each pixel keeps a history of edits. Now onto tools… There are a few basic tools. The first lets you change the canvas background to different colors.</string>
-    <string name="step4">The next one lets you turn on and off canvas grid lines. When you are close to the canvas, grid lines are always toggled off.</string>
+    <string name="step1">Welcome to this quick guide. This guide will help you get all setup and tell you what you need to know to get started. First, you can connect to the public canvas by going to Connect then entering \'PUB12\'. Once connected you will automatically start to gain a certain amount of pixels that you can use to draw pixel art.</string>
+    <string name="step2">It\'s worth mentioning that you get a certain amount of pixels over time from each canvas you have connected to. You will get pixels even if you aren\'t online, up to a maximum amount. It\'s limited so that no one person has too much control over a canvas. You can easily export and share pixel art that you see. Just use this icon and select what you want.</string>
+    <string name="step3">The canvas is interactive so as you draw, everyone can see what you\'re doing. Finally each pixel keeps a history of edits. Now onto tools… There are a few basic tools. The first lets you change the canvas background to different colors.</string>
+    <string name="step4">The next one allows you to turn on and off canvas grid lines. When you are far from the canvas, grid lines are always toggled off.</string>
     <string name="step5">This shows you an overview of the canvas.</string>
-    <string name="step6">Use this to show and hide the toolbox.</string>
-    <string name="step7">Finally this shows and hides your recently used colors. And that\'s all there is to getting started. Can\'t wait to see what you create on the canvas.</string>
+    <string name="step6">Use this to show and hide the toolbox. If your camera punch-out is here, simply click right next to the punch-out.</string>
+    <string name="step7">Finally this shows and hides your recently used colors. And that\'s all there is to getting started.</string>
     <string name="step8">The default color palette is the Recent Color palette. It is composed of all colors that you have drawn with recently. To add a new color palette
     tap on \"Recent Color\" in the draw panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
         tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the draw panel. Tap the + icon to add the
@@ -83,8 +83,8 @@
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
     <string name="options_title">Styles</string>
-    <string name="howto_title">Help</string>
-    <string name="howto_step2_title">Export and Share</string>
+    <string name="howto_title">Getting Started</string>
+    <string name="howto_step2_title">Share</string>
     <string name="howto_step3_title">Change Background</string>
     <string name="howto_step4_title">Grid Lines</string>
     <string name="howto_step5_title">Canvas Summary</string>

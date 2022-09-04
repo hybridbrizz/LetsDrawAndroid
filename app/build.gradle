@@ -18,8 +18,8 @@ android {
         applicationId "com.ericversteeg.liquidocean"
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 25
-        versionName "1.0.11"
+        versionCode 1
+        versionName "1.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
