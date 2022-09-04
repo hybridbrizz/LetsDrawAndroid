@@ -18,8 +18,14 @@ class Server {
     @SerializedName("icon_link")
     var iconLink = ""
 
+    @SerializedName("color")
+    var color = 0
+
     @SerializedName("banner_text")
     var bannerText = ""
+
+    @SerializedName("show_banner")
+    var showBanner = false
 
     @SerializedName("pixel_interval")
     var pixelInterval = -1L

@@ -36,6 +36,7 @@ import com.ericversteeg.liquidocean.service.ServerService
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.android.synthetic.main.adapter_server.*
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONObject
 import java.util.*
@@ -110,6 +111,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         updateNumLoaded()
 
+        if (server.color != 0) {
+            connecting_title.setTextColor(server.color)
+        }
+
         if (realmId == 2) {
             connecting_title.text = "Connecting to dev server"
         }
@@ -170,6 +175,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
+
+            connecting_title.setTextColor(server.color)
 
             Glide.with(this)
                 .load(server.iconUrl)

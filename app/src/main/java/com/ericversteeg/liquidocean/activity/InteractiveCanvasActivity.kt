@@ -78,7 +78,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         var rIndex = (Math.random() * backgrounds.size).toInt()
 
         if (SessionSettings.instance.firstLaunch) {
-            rIndex = 5
+            rIndex = 2
         }
 
         SessionSettings.instance.menuBackgroundResId = backgrounds[rIndex]

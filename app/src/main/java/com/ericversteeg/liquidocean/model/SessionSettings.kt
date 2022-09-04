@@ -371,7 +371,7 @@ class SessionSettings {
 
         googleAuth = getSharedPrefs(context).getBoolean("google_auth", false)
 
-        panelBackgroundResIndex = getSharedPrefs(context).getInt("panel_texture_index", 25)
+        panelBackgroundResIndex = getSharedPrefs(context).getInt("panel_texture_index", 28)
 
         emittersEnabled = getSharedPrefs(context).getBoolean("emitters", false)
 

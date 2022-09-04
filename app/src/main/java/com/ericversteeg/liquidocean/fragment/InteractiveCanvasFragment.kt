@@ -621,6 +621,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 surface_view.endExport()
 
                 toggleExportBorder(false)
+                export_button.toggleState = ButtonFrame.ToggleState.NONE
 
                 // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
@@ -663,6 +664,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 surface_view.endExport()
                 if (world) {
                     toggleExportBorder(false)
+                    export_button.toggleState = ButtonFrame.ToggleState.NONE
                 }
                 else {
                     surface_view.startObjectMove()
@@ -1492,32 +1494,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun toggleExportBorder(show: Boolean, double: Boolean = false) {
-        var color = ActionButtonView.lightYellowSemiPaint.color
-        if (double) {
-            color = ActionButtonView.lightGreenPaint.color
-        }
-        if (show) {
-            context?.apply {
-                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
-                drawable.setStroke(
-                    Utils.dpToPx(this, 2),
-                    color
-                ) // set stroke width and stroke color
-            }
-            export_border_view.visibility = View.VISIBLE
-        }
-        else {
-            export_border_view.visibility = View.GONE
-
-            if (double) {
-                export_button.toggleState = ButtonFrame.ToggleState.SINGLE
-            }
-            else {
-                export_button.toggleState = ButtonFrame.ToggleState.NONE
-            }
-
-            export_action.invalidate()
-        }
+//        var color = ActionButtonView.lightYellowSemiPaint.color
+//        if (double) {
+//            color = ActionButtonView.lightGreenPaint.color
+//        }
+//        if (show) {
+//            context?.apply {
+//                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
+//                drawable.setStroke(
+//                    Utils.dpToPx(this, 2),
+//                    color
+//                ) // set stroke width and stroke color
+//            }
+//            export_border_view.visibility = View.VISIBLE
+//        }
+//        else {
+//            export_border_view.visibility = View.GONE
+//
+//            if (double) {
+//                export_button.toggleState = ButtonFrame.ToggleState.SINGLE
+//            }
+//            else {
+//                export_button.toggleState = ButtonFrame.ToggleState.NONE
+//            }
+//
+//            export_action.invalidate()
+//        }
+        export_button.select(show)
+        export_button.invalidate()
     }
 
     private fun toggleMenu(open: Boolean) {
@@ -2029,6 +2033,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun onObjectSelectionEnded() {
         object_selection_view.visibility = View.GONE
+        toggleExportBorder(false)
+        export_button.toggleState = ButtonFrame.ToggleState.NONE
     }
 
     // art export listener
@@ -2556,6 +2562,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun setupStreamBanner() {
+        if (!server.showBanner) return
+
         stream_banner.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
             startActivity(intent)
