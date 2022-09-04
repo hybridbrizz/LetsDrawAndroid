@@ -48,6 +48,8 @@ class TermsOfServiceFragment: Fragment() {
             field = value
         }
 
+    private var viewDestroyed = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,11 +67,29 @@ class TermsOfServiceFragment: Fragment() {
         val scrollView = view.findViewById<ScrollView>(R.id.scroll_view_terms_of_service)
         scrollView.viewTreeObserver.addOnScrollChangedListener(object: ViewTreeObserver.OnScrollChangedListener {
             override fun onScrollChanged() {
+                if (viewDestroyed) return
+
                 if (scrollView.getChildAt(0).bottom <= scrollView.height + scrollView.scrollY) {
                     scrolledToBottom = true
                     scrollView.viewTreeObserver.removeOnScrollChangedListener(this)
                 }
             }
         })
+
+        scrollView.viewTreeObserver.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                if (viewDestroyed) return
+
+                if (scrollView.getChildAt(0).bottom <= scrollView.height + scrollView.scrollY) {
+                    scrolledToBottom = true
+                    scrollView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            }
+        })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewDestroyed = true
     }
 }

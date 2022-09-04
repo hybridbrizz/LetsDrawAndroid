@@ -389,7 +389,7 @@
             android:layout_width="250dp"
             android:layout_height="match_parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            android:background="#CC000000">
+            android:background="#ff1b1b1b">
 
         <LinearLayout
                 android:id="@+id/color_picker_action_layout"
