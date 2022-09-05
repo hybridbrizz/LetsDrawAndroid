@@ -9,12 +9,12 @@
             android:orientation="vertical"
             android:background="#000">
 
-        <com.ericversteeg.liquidocean.colorpicker.SBPalette
+        <com.ericversteeg.radiofrost.colorpicker.SBPalette
                 android:id="@+id/sb_palette"
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />
 
-        <com.ericversteeg.liquidocean.colorpicker.HPalette
+        <com.ericversteeg.radiofrost.colorpicker.HPalette
                 android:id="@+id/h_palette"
                 android:layout_width="match_parent"
                 android:layout_height="15dp"
@@ -78,12 +78,12 @@
 
     </LinearLayout>
 
-    <com.ericversteeg.liquidocean.colorpicker.SBIndicator
+    <com.ericversteeg.radiofrost.colorpicker.SBIndicator
             android:id="@+id/sb_indicator"
             android:layout_width="20dp"
             android:layout_height="20dp" />
 
-    <com.ericversteeg.liquidocean.colorpicker.HIndicator
+    <com.ericversteeg.radiofrost.colorpicker.HIndicator
             android:id="@+id/h_indicator"
             android:layout_width="3dp"
             android:layout_height="15dp" />

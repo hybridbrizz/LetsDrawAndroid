@@ -15,11 +15,12 @@ android {
     }
     compileSdkVersion 31
     defaultConfig {
-        applicationId "com.ericversteeg.liquidocean"
+        applicationId "com.ericversteeg.radiofrost"
         minSdkVersion 19
         targetSdkVersion 31
         versionCode 1
         versionName "1.0.0"
+        multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,6 +46,8 @@ dependencies {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
     }
+
+    implementation 'com.android.support:multidex:1.0.3'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 

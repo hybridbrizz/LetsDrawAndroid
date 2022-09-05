@@ -87,20 +87,20 @@
 
     </ScrollView>
 
-    <com.ericversteeg.liquidocean.view.ActionButtonFrame
+    <com.ericversteeg.radiofrost.view.ActionButtonFrame
             android:id="@+id/back_button_canvas_export"
             android:layout_width="80dp"
             android:layout_height="80dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
-        <com.ericversteeg.liquidocean.view.ActionButtonView
+        <com.ericversteeg.radiofrost.view.ActionButtonView
                 android:id="@+id/back_action_canvas_export"
                 android:layout_width="35dp"
                 android:layout_height="25dp"
                 android:layout_margin="10dp"
                 android:layout_gravity="start|top" />
 
-    </com.ericversteeg.liquidocean.view.ActionButtonFrame>
+    </com.ericversteeg.radiofrost.view.ActionButtonFrame>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
