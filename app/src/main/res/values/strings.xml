@@ -36,7 +36,7 @@
     <string name="option_canvas_background_secondary_color_title">Background color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
-    <string name="step1">Welcome to this quick guide. This guide will help you get all setup and tell you what you need to know to get started. First, you can connect to the public canvas by going to Connect then entering \'PUB12\'. Once connected you will automatically start to gain a certain amount of pixels that you can use to draw pixel art.</string>
+    <string name="step1">Welcome to this quick guide. This guide will help you get setup and fill you in on what you need to know to get started. First, you can connect to the public canvas by going to Connect then entering \'PIXEL\'. Once connected you will automatically start to gain a certain amount of pixels that you can use to draw pixel art.</string>
     <string name="step2">It\'s worth mentioning that you get a certain amount of pixels over time from each canvas you have connected to. You will get pixels even if you aren\'t online, up to a maximum amount. It\'s limited so that no one person has too much control over a canvas. You can easily export and share pixel art that you see. Just use this icon and select what you want.</string>
     <string name="step3">The canvas is interactive so as you draw, everyone can see what you\'re doing. Finally each pixel keeps a history of edits. Now onto tools… There are a few basic tools. The first lets you change the canvas background to different colors.</string>
     <string name="step4">The next one allows you to turn on and off canvas grid lines. When you are far from the canvas, grid lines are always toggled off.</string>
@@ -79,7 +79,7 @@
     <string name="draw_menu_title">CANVAS</string>
     <string name="connect_menu_title">CONNECT</string>
     <string name="options_menu_title">STYLES</string>
-    <string name="how_to_menu_title">HELP</string>
+    <string name="how_to_menu_title">INFO</string>
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
     <string name="options_title">Styles</string>
