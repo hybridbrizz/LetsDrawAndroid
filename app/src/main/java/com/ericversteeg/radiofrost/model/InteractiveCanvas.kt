@@ -641,7 +641,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
-            if (restorePoint == null && (sessionSettings.dropsAmt > 0 || !world)) {
+            if (restorePoint == null && (sessionSettings.dropsAmt > 0 && restorePoints.size < 10 || !world)) {
                 if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
                     val unitColor = arr[unitPoint.y][unitPoint.x]
 

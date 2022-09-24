@@ -23,6 +23,7 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.signature.ObjectKey
 import com.ericversteeg.radiofrost.R
 import com.ericversteeg.radiofrost.helper.Animator
 import com.ericversteeg.radiofrost.helper.Utils
@@ -34,7 +35,6 @@ import com.ericversteeg.radiofrost.service.ServerService
 import com.ericversteeg.radiofrost.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.android.synthetic.main.adapter_server.*
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONObject
 import java.util.*
@@ -212,6 +212,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
             Glide.with(this)
                 .load("${server.serviceAltBaseUrl()}/canvas")
+                .signature(ObjectKey(System.currentTimeMillis().toString()))
                 .centerCrop()
                 .listener(object: RequestListener<Drawable> {
                     override fun onLoadFailed(

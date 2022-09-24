@@ -18,7 +18,7 @@ android {
         applicationId "com.ericversteeg.radiofrost"
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 2
+        versionCode 3
         versionName "1.0.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
