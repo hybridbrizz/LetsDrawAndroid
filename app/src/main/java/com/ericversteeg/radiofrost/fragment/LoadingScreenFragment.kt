@@ -176,6 +176,13 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
             connecting_title.setTextColor(server.color)
 
+            if (server.isAdmin) {
+                connecting_title.text = "Connecting to ${server.name} (Admin)"
+            }
+            else {
+                connecting_title.text = "Connecting to ${server.name}"
+            }
+
             Glide.with(this)
                 .load(server.iconUrl)
                 .listener(object: RequestListener<Drawable> {
