@@ -11,11 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupWindow;
 import android.widget.TextView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.util.Locale;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+
+import com.github.duanhong169.R;
 
 public class ColorPickerPopup {
 

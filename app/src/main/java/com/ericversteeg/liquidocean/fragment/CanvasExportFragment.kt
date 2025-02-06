@@ -5,15 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentCanvasExportBinding
 import com.ericversteeg.liquidocean.helper.AppDataExporter
 import com.ericversteeg.liquidocean.listener.FragmentListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_canvas_export.*
-
 
 class CanvasExportFragment: Fragment() {
+
+    private var _binding: FragmentCanvasExportBinding? = null
+    private val binding get() = _binding!!
 
     var fragmentListener: FragmentListener? = null
 
@@ -21,28 +22,26 @@ class CanvasExportFragment: Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_canvas_export, container, false)
+        _binding = FragmentCanvasExportBinding.inflate(inflater, container, false)
 
-        // setup views here
-
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button_canvas_export.actionBtnView = back_action_canvas_export
-        back_action_canvas_export.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButtonCanvasExport.actionBtnView = binding.backActionCanvasExport
+        binding.backActionCanvasExport.type = ActionButtonView.Type.BACK_SOLID
 
-        back_button_canvas_export.setOnClickListener {
+        binding.backButtonCanvasExport.setOnClickListener {
             fragmentManager?.apply {
                 beginTransaction().remove(this@CanvasExportFragment).commit()
                 fragmentListener?.onFragmentRemoved()
             }
         }
 
-        canvas_export_button.setOnClickListener {
-            val emailStr = email_input.text.trim()
+        binding.canvasExportButton.setOnClickListener {
+            val emailStr = binding.emailInput.text.trim()
             if (emailStr.length < 50) {
                 if (emailStr.matches(Regex("^[\\d\\w]+@[\\d\\w]+\\.[\\w]+$"))) {
                     context?.apply {
@@ -65,9 +64,14 @@ class CanvasExportFragment: Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun showStatusText(text: String, color: Int = ActionButtonView.yellowPaint.color) {
-        status_text.visibility = View.VISIBLE
-        status_text.setTextColor(color)
-        status_text.text = text
+        binding.statusText.visibility = View.VISIBLE
+        binding.statusText.setTextColor(color)
+        binding.statusText.text = text
     }
 }

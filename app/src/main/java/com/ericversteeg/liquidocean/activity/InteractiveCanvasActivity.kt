@@ -5,20 +5,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.ActivityFullscreenBinding
 import com.ericversteeg.liquidocean.fragment.*
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.*
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.activity_fullscreen.*
-import org.json.JSONObject
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -33,7 +28,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         // Note that some of these constants are new as of API 16 (Jelly Bean)
         // and API 19 (KitKat). It is safe to use them, as they are inlined
         // at compile-time and do nothing on earlier devices.
-        fullscreen_content.systemUiVisibility =
+        binding.fullscreenContent.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LOW_PROFILE or
                     View.SYSTEM_UI_FLAG_FULLSCREEN or
                     View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -44,7 +39,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     private val mShowPart2Runnable = Runnable {
         // Delayed display of UI elements
         supportActionBar?.show()
-        fullscreen_content_controls.visibility = View.VISIBLE
+        binding.fullscreenContentControls.visibility = View.VISIBLE
     }
     private var mVisible: Boolean = false
     private val mHideRunnable = Runnable { hide() }
@@ -64,6 +59,8 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     var optionsFragment: OptionsFragment? = null
     var howtoFragment: HowtoFragment? = null
 
+    private lateinit var binding: ActivityFullscreenBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,7 +68,9 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
             requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         }
 
-        setContentView(R.layout.activity_fullscreen)
+        binding = ActivityFullscreenBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         // load session settings
@@ -292,40 +291,40 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
         when (eventType) {
             StatTracker.EventType.PAINT_RECEIVED -> {
-                achievement_name.text = "Total Paint Accrued"
+                binding.achievementName.text = "Total Paint Accrued"
             }
             StatTracker.EventType.PIXEL_OVERWRITE_IN -> {
-                achievement_name.text = "Pixels Overwritten By Others"
+                binding.achievementName.text = "Pixels Overwritten By Others"
             }
             StatTracker.EventType.PIXEL_OVERWRITE_OUT -> {
-                achievement_name.text = "Pixels Overwritten By Me"
+                binding.achievementName.text = "Pixels Overwritten By Me"
             }
             StatTracker.EventType.PIXEL_PAINTED_WORLD -> {
-                achievement_name.text = "Pixels Painted World"
+                binding.achievementName.text = "Pixels Painted World"
             }
             StatTracker.EventType.PIXEL_PAINTED_SINGLE -> {
-                achievement_name.text = "Pixels Painted Single"
+                binding.achievementName.text = "Pixels Painted Single"
             }
             StatTracker.EventType.WORLD_XP -> {
-                achievement_name.text = "World XP"
+                binding.achievementName.text = "World XP"
             }
         }
 
         if (eventType != StatTracker.EventType.WORLD_XP) {
-            achievement_desc.text = "Passed the ${value} threshold"
+            binding.achievementDesc.text = "Passed the ${value} threshold"
         }
         else {
-            achievement_desc.text = "Congrats on reaching level ${StatTracker.instance.getWorldLevel()}!"
+            binding.achievementDesc.text = "Congrats on reaching level ${StatTracker.instance.getWorldLevel()}!"
         }
 
-        achievement_icon.setType(eventType, thresholdsPassed)
+        binding.achievementIcon.setType(eventType, thresholdsPassed)
 
-        achievement_banner.visibility = View.VISIBLE
+        binding.achievementBanner.visibility = View.VISIBLE
 
         Timer().schedule(object: TimerTask() {
             override fun run() {
                 runOnUiThread {
-                    achievement_banner.visibility = View.GONE
+                    binding.achievementBanner.visibility = View.GONE
                 }
             }
 
@@ -335,7 +334,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     private fun hide() {
         // Hide UI first
         supportActionBar?.hide()
-        fullscreen_content_controls.visibility = View.GONE
+        binding.fullscreenContentControls.visibility = View.GONE
         mVisible = false
 
         // Schedule a runnable to remove the status and navigation bar after a delay

@@ -3,21 +3,14 @@ package com.ericversteeg.liquidocean.adapter
 import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.model.Palette
 import com.ericversteeg.liquidocean.model.SessionSettings
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import kotlinx.android.synthetic.main.palette_header_view.view.*
-import org.json.JSONArray
-import java.text.SimpleDateFormat
-import java.util.*
 
 class PalettesRecyclerViewAdapter(val context: Context?, private val palettes: MutableList<Palette>, private val panelThemeConfig: PanelThemeConfig): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 

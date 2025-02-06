@@ -1,22 +1,19 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentDrawFrameConfigBinding
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DrawFrameConfigFragmentListener
 import com.ericversteeg.liquidocean.model.SessionSettings
-import kotlinx.android.synthetic.main.fragment_draw_frame_config.*
 
 
 class DrawFrameConfigFragment: Fragment() {
@@ -27,45 +24,45 @@ class DrawFrameConfigFragment: Fragment() {
     var centerY = 0
 
     lateinit var panelThemeConfig: PanelThemeConfig
+    
+    private var _binding: FragmentDrawFrameConfigBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_draw_frame_config, container, false)
-
-        // setup views here
-
-        return view
+        _binding = FragmentDrawFrameConfigBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            title_text.setTextColor(Color.parseColor("#FF111111"))
-            title_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
+            binding.titleText.setTextColor(Color.parseColor("#FF111111"))
+            binding.titleText.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
-            width_title_text.setTextColor(Color.BLACK)
-            width_input.setTextColor(Color.BLACK)
-            width_input.setHintTextColor(Color.parseColor("#99000000"))
+            binding.widthTitleText.setTextColor(Color.BLACK)
+            binding.widthInput.setTextColor(Color.BLACK)
+            binding.widthInput.setHintTextColor(Color.parseColor("#99000000"))
 
-            height_title_text.setTextColor(Color.BLACK)
-            height_input.setTextColor(Color.BLACK)
-            height_input.setHintTextColor(Color.parseColor("#99000000"))
+            binding.heightTitleText.setTextColor(Color.BLACK)
+            binding.heightInput.setTextColor(Color.BLACK)
+            binding.heightInput.setHintTextColor(Color.parseColor("#99000000"))
         }
 
         if (SessionSettings.instance.lastDrawFrameWidth > 0) {
-            width_input.setText(SessionSettings.instance.lastDrawFrameWidth.toString())
-            height_input.setText(SessionSettings.instance.lastDrawFrameHeight.toString())
+            binding.widthInput.setText(SessionSettings.instance.lastDrawFrameWidth.toString())
+            binding.heightInput.setText(SessionSettings.instance.lastDrawFrameHeight.toString())
         }
 
-        done_button.setOnClickListener {
-            if (width_input.text.toString().matches(Regex("\\d{1,3}")) &&
-                height_input.text.toString().matches(Regex("\\d{1,3}"))) {
+        binding.doneButton.setOnClickListener {
+            if (binding.widthInput.text.toString().matches(Regex("\\d{1,3}")) &&
+                binding.heightInput.text.toString().matches(Regex("\\d{1,3}"))) {
 
-                val width = width_input.text.toString().toInt()
-                val height = height_input.text.toString().toInt()
+                val width = binding.widthInput.text.toString().toInt()
+                val height = binding.heightInput.text.toString().toInt()
 
                 if (width > 0 && height > 0) {
                     SessionSettings.instance.lastDrawFrameWidth = width
@@ -81,6 +78,11 @@ class DrawFrameConfigFragment: Fragment() {
                 setBackground(view)
             }
         })
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun setBackground(view: View) {

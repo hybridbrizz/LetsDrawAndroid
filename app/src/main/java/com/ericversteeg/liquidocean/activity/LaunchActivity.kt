@@ -3,18 +3,21 @@ package com.ericversteeg.liquidocean.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.ericversteeg.liquidocean.R
-import kotlinx.android.synthetic.main.activity_launch.*
+import com.ericversteeg.liquidocean.databinding.ActivityLaunchBinding
 
 class LaunchActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityLaunchBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_launch)
+        binding = ActivityLaunchBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
         supportActionBar?.hide()
 
-        launch_image.animate().setDuration(1000).rotationBy(90F).withEndAction {
+        binding.launchImage.animate().setDuration(1000).rotationBy(90F).withEndAction {
             startActivity(Intent(this, InteractiveCanvasActivity::class.java))
         }.start()
     }

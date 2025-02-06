@@ -9,53 +9,45 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.VolleyError
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.helper.AppDataExporter
-import com.ericversteeg.liquidocean.helper.Utils
+import com.ericversteeg.liquidocean.databinding.FragmentCanvasImportBinding
 import com.ericversteeg.liquidocean.listener.FragmentListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
-import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_canvas_import.*
 
 
 class CanvasImportFragment: Fragment() {
 
     var fragmentListener: FragmentListener? = null
+    
+    private var _binding: FragmentCanvasImportBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_canvas_import, container, false)
-
-        // setup views here
-
-        return view
+        _binding = FragmentCanvasImportBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButton.actionBtnView = binding.backAction
+        binding.backAction.type = ActionButtonView.Type.BACK_SOLID
 
-        back_button.setOnClickListener {
+        binding.backButton.setOnClickListener {
             fragmentManager?.apply {
                 beginTransaction().remove(this@CanvasImportFragment).commit()
                 fragmentListener?.onFragmentRemoved()
             }
         }
 
-        canvas_import_button.setOnClickListener {
-            val urlStr = data_url_input.text.trim().toString()
+        binding.canvasImportButton.setOnClickListener {
+            val urlStr = binding.dataUrlInput.text.trim().toString()
             if (urlStr.isEmpty()) {
                 showStatusText("Please enter a Pastebin url.")
             }
@@ -81,10 +73,15 @@ class CanvasImportFragment: Fragment() {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun showStatusText(text: String, color: Int = ActionButtonView.yellowPaint.color) {
-        status_text.visibility = View.VISIBLE
-        status_text.setTextColor(color)
-        status_text.text = text
+        binding.statusText.visibility = View.VISIBLE
+        binding.statusText.setTextColor(color)
+        binding.statusText.text = text
     }
 
     private fun importCanvasData(context: Context, jsonStr: String) {

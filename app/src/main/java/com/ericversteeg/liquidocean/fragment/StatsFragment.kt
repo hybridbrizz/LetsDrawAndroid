@@ -1,7 +1,5 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentStatsBinding
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.StatsFragmentListener
@@ -17,24 +15,26 @@ import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.AchievementIcon
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import kotlinx.android.synthetic.main.fragment_options.*
-import kotlinx.android.synthetic.main.fragment_stats.*
 import java.text.NumberFormat
 
 class StatsFragment: Fragment() {
 
     var statsFragmentListener: StatsFragmentListener? = null
+    
+    private var _binding: FragmentStatsBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_stats, container, false)
+    ): View {
+        _binding = FragmentStatsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,77 +43,77 @@ class StatsFragment: Fragment() {
         //back_button.actionBtnView = back_action
         //back_action.type = ActionButtonView.Type.BACK_SOLID
 
-        stats_image.type = ActionButtonView.Type.STATS
-        stats_image.isStatic = true
-        stats_image.representingColor = ActionButtonView.whitePaint.color
+        binding.statsImage.type = ActionButtonView.Type.STATS
+        binding.statsImage.isStatic = true
+        binding.statsImage.representingColor = ActionButtonView.whitePaint.color
 
-        achievements_image.type = ActionButtonView.Type.ACHIEVEMENTS
-        achievements_image.isStatic = true
+        binding.achievementsImage.type = ActionButtonView.Type.ACHIEVEMENTS
+        binding.achievementsImage.isStatic = true
 
         /*back_button.setOnClickListener {
             statsFragmentListener?.onStatsBack()
         }*/
 
-        stat_num_pixels_painted_single.text = NumberFormat.getIntegerInstance().format(
+        binding.statNumPixelsPaintedSingle.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(
                 StatTracker.instance.numPixelsPaintedSingleKey
             )
         )
-        stat_num_pixels_painted_world.text = NumberFormat.getIntegerInstance().format(
+        binding.statNumPixelsPaintedWorld.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(
                 StatTracker.instance.numPixelsPaintedWorldKey
             )
         )
-        stat_num_pixel_overwrites_in.text = NumberFormat.getIntegerInstance().format(
+        binding.statNumPixelOverwritesIn.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(
                 StatTracker.instance.numPixelOverwritesInKey
             )
         )
-        stat_num_pixel_overwrites_out.text = NumberFormat.getIntegerInstance().format(
+        binding.statNumPixelOverwritesOut.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(
                 StatTracker.instance.numPixelOverwritesOutKey
             )
         )
-        stat_paint_accrued.text = NumberFormat.getIntegerInstance().format(
+        binding.statPaintAccrued.text = NumberFormat.getIntegerInstance().format(
             StatTracker.instance.getStatValue(
                 StatTracker.instance.totalPaintAccruedKey
             )
         )
-        stat_world_xp.text = StatTracker.instance.getWorldLevel().toString()
+        binding.statWorldXp.text = StatTracker.instance.getWorldLevel().toString()
 
-        achievement_progress_text_single.text = StatTracker.instance.getAchievementProgressString(
+        binding.achievementProgressTextSingle.text = StatTracker.instance.getAchievementProgressString(
             StatTracker.EventType.PIXEL_PAINTED_SINGLE
         )
-        achievement_progress_text_world.text = StatTracker.instance.getAchievementProgressString(
+        binding.achievementProgressTextWorld.text = StatTracker.instance.getAchievementProgressString(
             StatTracker.EventType.PIXEL_PAINTED_WORLD
         )
-        achievement_progress_text_overwrite_in.text = StatTracker.instance.getAchievementProgressString(
+        binding.achievementProgressTextOverwriteIn.text = StatTracker.instance.getAchievementProgressString(
             StatTracker.EventType.PIXEL_OVERWRITE_IN
         )
-        achievement_progress_text_overwrite_out.text = StatTracker.instance.getAchievementProgressString(
+        binding.achievementProgressTextOverwriteOut.text = StatTracker.instance.getAchievementProgressString(
             StatTracker.EventType.PIXEL_OVERWRITE_OUT
         )
-        achievement_progress_text_paint.text = StatTracker.instance.getAchievementProgressString(
+        binding.achievementProgressTextPaint.text = StatTracker.instance.getAchievementProgressString(
             StatTracker.EventType.PAINT_RECEIVED
         )
 
         if (!SessionSettings.instance.tablet) {
-            Animator.animateTitleFromTop(stats_image)
+            Animator.animateTitleFromTop(binding.statsImage)
 
-            Animator.animateHorizontalViewEnter(stat_num_pixels_painted_single_num_container, true)
-            Animator.animateHorizontalViewEnter(stat_num_pixels_painted_world_num_container, false)
-            Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_in_num_container, true)
-            Animator.animateHorizontalViewEnter(stat_num_pixel_overwrites_out_num_container, false)
-            Animator.animateHorizontalViewEnter(stat_paint_accrued_num_container, true)
-            Animator.animateHorizontalViewEnter(stat_world_xp_container, false)
+            Animator.animateHorizontalViewEnter(binding.statNumPixelsPaintedSingleNumContainer, true)
+            Animator.animateHorizontalViewEnter(binding.statNumPixelsPaintedWorldNumContainer, false)
+            Animator.animateHorizontalViewEnter(binding.statNumPixelOverwritesInNumContainer, true)
+            Animator.animateHorizontalViewEnter(binding.statNumPixelOverwritesOutNumContainer, false)
+            Animator.animateHorizontalViewEnter(binding.statPaintAccruedNumContainer, true)
+            Animator.animateHorizontalViewEnter(binding.statWorldXpContainer, false)
         }
 
         val statContainers = arrayOf(
-            stat_num_pixels_painted_single_container,
-            stat_num_pixels_painted_world_container,
-            stat_num_pixel_overwrites_in_container,
-            stat_num_pixel_overwrites_out_container,
-            stat_paint_accrued_container
+            binding.statNumPixelsPaintedSingleContainer,
+            binding.statNumPixelsPaintedWorldContainer,
+            binding.statNumPixelOverwritesInContainer,
+            binding.statNumPixelOverwritesOutContainer,
+            binding.statPaintAccruedContainer
         )
 
         val eventTypes = arrayOf(
@@ -135,9 +135,9 @@ class StatsFragment: Fragment() {
                     60
                 )
 
-                val cLayoutParams = achievement_icon_container.layoutParams as ConstraintLayout.LayoutParams
+                val cLayoutParams = binding.achievementIconContainer.layoutParams as ConstraintLayout.LayoutParams
                 cLayoutParams.height = cHeight
-                achievement_icon_container.layoutParams = cLayoutParams
+                binding.achievementIconContainer.layoutParams = cLayoutParams
 
                 context?.apply {
                     for (t in 0 until thresholdsPassed) {
@@ -163,16 +163,16 @@ class StatsFragment: Fragment() {
 
                         icon.setType(eventType, t + 1)
 
-                        achievement_icon_container.addView(icon)
+                        binding.achievementIconContainer.addView(icon)
                     }
                 }
 
-                achievement_icon_background.visibility = View.VISIBLE
+                binding.achievementIconBackground.visibility = View.VISIBLE
             }
         }
 
-        achievement_icon_background.setOnClickListener {
-            achievement_icon_container.removeAllViews()
+        binding.achievementIconBackground.setOnClickListener {
+            binding.achievementIconContainer.removeAllViews()
 
             it.visibility = View.INVISIBLE
         }

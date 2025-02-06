@@ -1,82 +1,70 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.app.Activity
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
-import androidx.annotation.RequiresApi
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentHowtoBinding
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.HowtoFragmentListener
-import com.ericversteeg.liquidocean.listener.StatsFragmentListener
 import com.ericversteeg.liquidocean.model.SessionSettings
-import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_howto.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_button
-import java.util.*
+import java.util.Timer
 
 class HowtoFragment: Fragment() {
 
     var listener: HowtoFragmentListener? = null
 
     var paintEventTimer: Timer? = null
+    
+    private var _binding: FragmentHowtoBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_howto, container, false)
-
-        // setup views here
-
-        return view
+    ): View {
+        _binding = FragmentHowtoBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButton.actionBtnView = binding.backAction
+        binding.backAction.type = ActionButtonView.Type.BACK_SOLID
 
-        paint_action.isStatic = true
-        share_action.isStatic = true
-        howto_background_action.isStatic = true
-        howto_grid_line_action.isStatic = true
-        howto_summary_action.isStatic = true
-        howto_dot_action_1.isStatic = true
-        howto_dot_action_2.isStatic = true
-        howto_dot_action_3.isStatic = true
-        howto_frame_action.isStatic = true
-        howto_export_move_action.isStatic = true
+        binding.paintAction.isStatic = true
+        binding.shareAction.isStatic = true
+        binding.howtoBackgroundAction.isStatic = true
+        binding.howtoGridLineAction.isStatic = true
+        binding.howtoSummaryAction.isStatic = true
+        binding.howtoDotAction1.isStatic = true
+        binding.howtoDotAction2.isStatic = true
+        binding.howtoDotAction3.isStatic = true
+        binding.howtoFrameAction.isStatic = true
+        binding.howtoExportMoveAction.isStatic = true
 
-        paint_action.type = ActionButtonView.Type.PAINT
-        share_action.type = ActionButtonView.Type.EXPORT
-        howto_background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-        howto_grid_line_action.type = ActionButtonView.Type.GRID_LINES
-        howto_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-        howto_dot_action_1.type = ActionButtonView.Type.DOT
-        howto_dot_action_2.type = ActionButtonView.Type.DOT
-        howto_dot_action_3.type = ActionButtonView.Type.DOT
-        howto_frame_action.type = ActionButtonView.Type.FRAME
-        howto_export_move_action.type = ActionButtonView.Type.EXPORT
+        binding.paintAction.type = ActionButtonView.Type.PAINT
+        binding.shareAction.type = ActionButtonView.Type.EXPORT
+        binding.howtoBackgroundAction.type = ActionButtonView.Type.CHANGE_BACKGROUND
+        binding.howtoGridLineAction.type = ActionButtonView.Type.GRID_LINES
+        binding.howtoSummaryAction.type = ActionButtonView.Type.CANVAS_SUMMARY
+        binding.howtoDotAction1.type = ActionButtonView.Type.DOT
+        binding.howtoDotAction2.type = ActionButtonView.Type.DOT
+        binding.howtoDotAction3.type = ActionButtonView.Type.DOT
+        binding.howtoFrameAction.type = ActionButtonView.Type.FRAME
+        binding.howtoExportMoveAction.type = ActionButtonView.Type.EXPORT
 
         val colorStrs = arrayOf("#000000", "#222034", "#45283C", "#663931", "#8F563B", "#DF7126", "#D9A066", "#EEC39A",
                                 "#FBF236", "#99E550", "#6ABE30", "#37946E", "#4B692F", "#524B24", "#323C39", "#3F3F74")
 
         var i = 0
-        for (v in recent_colors_container.children) {
+        for (v in binding.recentColorsContainer.children) {
             (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
             v.representingColor = Color.parseColor(colorStrs[i])
             v.semiGloss = true
@@ -85,18 +73,18 @@ class HowtoFragment: Fragment() {
             i++
         }
 
-        back_button.setOnClickListener {
+        binding.backButton.setOnClickListener {
             listener?.onHowtoBack()
         }
 
         if (!SessionSettings.instance.tablet) {
-            Animator.animateTitleFromTop(title_text)
+            Animator.animateTitleFromTop(binding.titleText)
 
-            Animator.animateHorizontalViewEnter(step1_text, true)
-            Animator.animateHorizontalViewEnter(paint_action, true)
+            Animator.animateHorizontalViewEnter(binding.step1Text, true)
+            Animator.animateHorizontalViewEnter(binding.paintAction, true)
 
-            Animator.animateHorizontalViewEnter(step2_text, false)
-            Animator.animateHorizontalViewEnter(share_action, false)
+            Animator.animateHorizontalViewEnter(binding.step2Text, false)
+            Animator.animateHorizontalViewEnter(binding.shareAction, false)
 
             //Animator.animateHorizontalViewEnter(static_image_1, true)
         }
@@ -105,10 +93,10 @@ class HowtoFragment: Fragment() {
 
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
-                if (step1_text.height < 250) {
-                    val layoutParams = step1_text.layoutParams
+                if (binding.step1Text.height < 250) {
+                    val layoutParams = binding.step1Text.layoutParams
                     layoutParams.height = 250
-                    step1_text.layoutParams = layoutParams
+                    binding.step1Text.layoutParams = layoutParams
                 }
             }
         })
@@ -126,6 +114,11 @@ class HowtoFragment: Fragment() {
         super.onPause()
 
         paintEventTimer?.cancel()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     /*private fun getPaintTimerInfo() {

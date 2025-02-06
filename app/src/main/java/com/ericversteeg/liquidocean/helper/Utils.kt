@@ -5,9 +5,6 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Point
 import android.graphics.Shader
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.os.Build
 import android.text.TextPaint
 import android.util.TypedValue
 import android.view.View
@@ -16,9 +13,8 @@ import android.widget.TextView
 import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.InteractiveCanvasView
-import kotlinx.android.synthetic.main.fragment_menu.*
-import java.io.*
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.math.min
 
 class Utils {

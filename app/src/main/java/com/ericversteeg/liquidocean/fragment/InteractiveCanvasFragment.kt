@@ -4,7 +4,11 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.res.Configuration
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.Point
+import android.graphics.PointF
+import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -12,7 +16,10 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -29,25 +36,44 @@ import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.activity.InteractiveCanvasActivity
+import com.ericversteeg.liquidocean.databinding.FragmentInteractiveCanvasBinding
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.PanelThemeConfig
 import com.ericversteeg.liquidocean.helper.Utils
-import com.ericversteeg.liquidocean.listener.*
-import com.ericversteeg.liquidocean.model.*
+import com.ericversteeg.liquidocean.listener.ArtExportFragmentListener
+import com.ericversteeg.liquidocean.listener.ArtExportListener
+import com.ericversteeg.liquidocean.listener.CanvasEdgeTouchListener
+import com.ericversteeg.liquidocean.listener.DeviceCanvasViewportResetListener
+import com.ericversteeg.liquidocean.listener.DrawFrameConfigFragmentListener
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasFragmentListener
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasGestureListener
+import com.ericversteeg.liquidocean.listener.InteractiveCanvasListener
+import com.ericversteeg.liquidocean.listener.LongPressListener
+import com.ericversteeg.liquidocean.listener.MenuCardListener
+import com.ericversteeg.liquidocean.listener.ObjectSelectionListener
+import com.ericversteeg.liquidocean.listener.PaintBarActionListener
+import com.ericversteeg.liquidocean.listener.PaintQtyListener
+import com.ericversteeg.liquidocean.listener.PalettesFragmentListener
+import com.ericversteeg.liquidocean.listener.PixelHistoryCallback
+import com.ericversteeg.liquidocean.listener.PixelHistoryListener
+import com.ericversteeg.liquidocean.listener.RecentColorsListener
+import com.ericversteeg.liquidocean.listener.SelectedObjectMoveView
+import com.ericversteeg.liquidocean.listener.SelectedObjectView
+import com.ericversteeg.liquidocean.listener.SocketStatusCallback
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
+import com.ericversteeg.liquidocean.model.Palette
+import com.ericversteeg.liquidocean.model.SessionSettings
+import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
 import com.ericversteeg.liquidocean.view.PaintColorIndicator
 import com.google.android.material.snackbar.Snackbar
-import com.plattysoft.leonids.ParticleSystem
-import com.plattysoft.leonids.modifiers.AlphaModifier
-import kotlinx.android.synthetic.main.fragment_art_export.*
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
-import kotlinx.android.synthetic.main.palette_adapter_view.*
 import org.json.JSONArray
 import top.defaults.colorpicker.ColorObserver
-import java.lang.Exception
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
 import kotlin.math.max
 
 
@@ -58,11 +84,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener {
 
     var initalColor = 0
-
-    var topLeftParticleSystem: ParticleSystem? = null
-    var topRightParticleSystem: ParticleSystem? = null
-    var bottomLeftParticleSystem: ParticleSystem? = null
-    var bottomRightParticleSystem: ParticleSystem? = null
 
     var world = false
     var realmId = 0
@@ -96,16 +117,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var terminalFragment: TerminalFragment? = null
 
     lateinit var visibleActionViews: Array<ActionButtonView>
+    
+    private var _binding: FragmentInteractiveCanvasBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_interactive_canvas, container, false)
+    ): View {
+        _binding = FragmentInteractiveCanvasBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     // setup views
@@ -120,8 +146,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         // must call before darkIcons
-        surface_view.interactiveCanvas.realmId = realmId
-        surface_view.interactiveCanvas.world = world
+        binding.surfaceView.interactiveCanvas.realmId = realmId
+        binding.surfaceView.interactiveCanvas.world = world
 
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
 
@@ -137,13 +163,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (world) {
                 SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
                     "last_world_paint_color",
-                    surface_view.interactiveCanvas.getGridLineColor()
+                    binding.surfaceView.interactiveCanvas.getGridLineColor()
                 )
             }
             else {
                 SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
                     "last_single_paint_color",
-                    surface_view.interactiveCanvas.getGridLineColor()
+                    binding.surfaceView.interactiveCanvas.getGridLineColor()
                 )
             }
         }
@@ -151,34 +177,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
         // listeners
-        surface_view.pixelHistoryListener = this
-        surface_view.gestureListener = this
-        surface_view.objectSelectionListener = this
-        surface_view.selectedObjectMoveView = this
-        surface_view.selectedObjectView = this
-        surface_view.canvasEdgeTouchListener = this
+        binding.surfaceView.pixelHistoryListener = this
+        binding.surfaceView.gestureListener = this
+        binding.surfaceView.objectSelectionListener = this
+        binding.surfaceView.selectedObjectMoveView = this
+        binding.surfaceView.selectedObjectView = this
+        binding.surfaceView.canvasEdgeTouchListener = this
 
-        surface_view.interactiveCanvas.interactiveCanvasListener = this
-        surface_view.interactiveCanvas.recentColorsListener = this
-        surface_view.interactiveCanvas.artExportListener = this
-        surface_view.interactiveCanvas.deviceCanvasViewportResetListener = this
+        binding.surfaceView.interactiveCanvas.interactiveCanvasListener = this
+        binding.surfaceView.interactiveCanvas.recentColorsListener = this
+        binding.surfaceView.interactiveCanvas.artExportListener = this
+        binding.surfaceView.interactiveCanvas.deviceCanvasViewportResetListener = this
 
         InteractiveCanvasSocket.instance.socketStatusCallback = this
 
-        paint_qty_bar.actionListener = this
-        paint_qty_circle.actionListener = this
+        binding.paintQtyBar.actionListener = this
+        binding.paintQtyCircle.actionListener = this
 
         // palette
-        palette_name_text.setOnClickListener {
+        binding.paletteNameText.setOnClickListener {
             showPalettesFragmentPopover()
         }
 
-        palette_name_text.text = SessionSettings.instance.palette.name
+        binding.paletteNameText.text = SessionSettings.instance.palette.name
 
-        palette_add_color_action.type = ActionButtonView.Type.ADD
-        palette_add_color_button.actionBtnView = palette_add_color_action
+        binding.paletteAddColorAction.type = ActionButtonView.Type.ADD
+        binding.paletteAddColorButton.actionBtnView = binding.paletteAddColorAction
 
-        palette_add_color_button.setOnClickListener {
+        binding.paletteAddColorButton.setOnClickListener {
             if (SessionSettings.instance.palette.colors.size < Palette.maxColors) {
                 SessionSettings.instance.palette.addColor(SessionSettings.instance.paintColor)
                 syncPaletteAndColor()
@@ -188,224 +214,224 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        palette_remove_color_action.type = ActionButtonView.Type.REMOVE
-        palette_remove_color_button.actionBtnView = palette_remove_color_action
+        binding.paletteRemoveColorAction.type = ActionButtonView.Type.REMOVE
+        binding.paletteRemoveColorButton.actionBtnView = binding.paletteRemoveColorAction
 
-        palette_remove_color_button.setOnClickListener {
+        binding.paletteRemoveColorButton.setOnClickListener {
             showPaletteColorRemovePrompt(SessionSettings.instance.paintColor)
         }
 
         syncPaletteAndColor()
 
         if (SessionSettings.instance.showPaintBar) {
-            surface_view.paintActionListener = paint_qty_bar
-            SessionSettings.instance.paintQtyListeners.add(paint_qty_bar)
+            binding.surfaceView.paintActionListener = binding.paintQtyBar
+            SessionSettings.instance.paintQtyListeners.add(binding.paintQtyBar)
 
-            paint_qty_circle.visibility = View.GONE
+            binding.paintQtyCircle.visibility = View.GONE
         }
         else if (SessionSettings.instance.showPaintCircle) {
-            surface_view.paintActionListener = paint_qty_circle
-            SessionSettings.instance.paintQtyListeners.add(paint_qty_circle)
+            binding.surfaceView.paintActionListener = binding.paintQtyCircle
+            SessionSettings.instance.paintQtyListeners.add(binding.paintQtyCircle)
 
-            paint_qty_bar.visibility = View.GONE
+            binding.paintQtyBar.visibility = View.GONE
         }
         else {
-            paint_qty_bar.visibility = View.GONE
-            paint_qty_circle.visibility = View.GONE
+            binding.paintQtyBar.visibility = View.GONE
+            binding.paintQtyCircle.visibility = View.GONE
         }
 
         if (!world) {
-            paint_qty_bar.visibility = View.GONE
-            paint_qty_circle.visibility = View.GONE
+            binding.paintQtyBar.visibility = View.GONE
+            binding.paintQtyCircle.visibility = View.GONE
         }
 
-        // paint_qty_bar.world = world
+        // binding.paintQtyBar.world = world
 
-        pixel_history_fragment_container.x = 0F
-        pixel_history_fragment_container.y = 0F
+        binding.pixelHistoryFragmentContainer.x = 0F
+        binding.pixelHistoryFragmentContainer.y = 0F
 
-        menu_button.actionBtnView = menu_action
-        menu_action.type = ActionButtonView.Type.MENU
+        binding.menuButton.actionBtnView = binding.menuAction
+        binding.menuAction.type = ActionButtonView.Type.MENU
 
         // paint panel
-        paint_amt_info.text = SessionSettings.instance.dropsAmt.toString()
+        binding.paintAmtInfo.text = SessionSettings.instance.dropsAmt.toString()
 
-        paint_panel_button.actionBtnView = paint_panel_action_view
-        paint_panel_action_view.type = ActionButtonView.Type.PAINT
+        binding.paintPanelButton.actionBtnView = binding.paintPanelActionView
+        binding.paintPanelActionView.type = ActionButtonView.Type.PAINT
 
-        paint_yes_bottom_layer.isStatic = true
-        paint_yes_bottom_layer.type = ActionButtonView.Type.YES
-        paint_yes_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.paintYesBottomLayer.isStatic = true
+        binding.paintYesBottomLayer.type = ActionButtonView.Type.YES
+        binding.paintYesBottomLayer.colorMode = ActionButtonView.ColorMode.COLOR
 
-        paint_yes_top_layer.type = ActionButtonView.Type.YES
-        paint_yes_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        paint_yes_top_layer.topLayer = true
+        binding.paintYesTopLayer.type = ActionButtonView.Type.YES
+        binding.paintYesTopLayer.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.paintYesTopLayer.topLayer = true
 
-        paint_yes.actionBtnView = paint_yes_top_layer
+        binding.paintYes.actionBtnView = binding.paintYesTopLayer
 
-        paint_no_bottom_layer.isStatic = true
-        paint_no_bottom_layer.type = ActionButtonView.Type.NO
-        paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.paintNoBottomLayer.isStatic = true
+        binding.paintNoBottomLayer.type = ActionButtonView.Type.NO
+        binding.paintNoBottomLayer.colorMode = ActionButtonView.ColorMode.COLOR
 
-        paint_no_top_layer.type = ActionButtonView.Type.NO
-        paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
-        paint_no_top_layer.topLayer = true
+        binding.paintNoTopLayer.type = ActionButtonView.Type.NO
+        binding.paintNoTopLayer.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.paintNoTopLayer.topLayer = true
 
-        paint_no.actionBtnView = paint_no_top_layer
+        binding.paintNo.actionBtnView = binding.paintNoTopLayer
 
-        close_paint_panel_bottom_layer.isStatic = true
-        close_paint_panel_bottom_layer.type = ActionButtonView.Type.PAINT_CLOSE
+        binding.closePaintPanelBottomLayer.isStatic = true
+        binding.closePaintPanelBottomLayer.type = ActionButtonView.Type.PAINT_CLOSE
 
-        close_paint_panel_top_layer.type = ActionButtonView.Type.PAINT_CLOSE
-        close_paint_panel_top_layer.topLayer = true
+        binding.closePaintPanelTopLayer.type = ActionButtonView.Type.PAINT_CLOSE
+        binding.closePaintPanelTopLayer.topLayer = true
 
-        close_paint_panel.actionBtnView = close_paint_panel_top_layer
+        binding.closePaintPanel.actionBtnView = binding.closePaintPanelTopLayer
 
         if (SessionSettings.instance.lockPaintPanel) {
-            lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
+            binding.lockPaintPanelAction.type = ActionButtonView.Type.LOCK_CLOSE
         }
         else {
-            lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
+            binding.lockPaintPanelAction.type = ActionButtonView.Type.LOCK_OPEN
         }
-        lock_paint_panel.actionBtnView = lock_paint_panel_action
+        binding.lockPaintPanel.actionBtnView = binding.lockPaintPanelAction
 
-        paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.topLayer = true
+        binding.paintIndicatorViewBottomLayer.panelThemeConfig = panelThemeConfig
+        binding.paintIndicatorView.topLayer = true
 
-        paint_color_accept.actionBtnView = paint_color_accept_image_top_layer
+        binding.paintColorAccept.actionBtnView = binding.paintColorAcceptImageTopLayer
 
-        paint_color_accept_image_bottom_layer.type = paint_color_accept_image_top_layer.type
-        paint_color_accept_image_bottom_layer.isStatic = true
+        binding.paintColorAcceptImageBottomLayer.type = binding.paintColorAcceptImageTopLayer.type
+        binding.paintColorAcceptImageBottomLayer.isStatic = true
 
-        paint_color_accept_image_top_layer.topLayer = true
-        paint_color_accept_image_top_layer.touchStateListener = paint_indicator_view
-        paint_color_accept_image_top_layer.hideOnTouchEnd = true
+        binding.paintColorAcceptImageTopLayer.topLayer = true
+        binding.paintColorAcceptImageTopLayer.touchStateListener = binding.paintIndicatorView
+        binding.paintColorAcceptImageTopLayer.hideOnTouchEnd = true
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
 
         // toolbox
-        export_action.type = ActionButtonView.Type.EXPORT
-        export_button.actionBtnView = export_action
+        binding.exportAction.type = ActionButtonView.Type.EXPORT
+        binding.exportButton.actionBtnView = binding.exportAction
 
-        background_action.type = ActionButtonView.Type.CHANGE_BACKGROUND
-        background_button.actionBtnView = background_action
+        binding.backgroundAction.type = ActionButtonView.Type.CHANGE_BACKGROUND
+        binding.backgroundButton.actionBtnView = binding.backgroundAction
 
-        grid_lines_action.type = ActionButtonView.Type.GRID_LINES
-        grid_lines_button.actionBtnView = grid_lines_action
+        binding.gridLinesAction.type = ActionButtonView.Type.GRID_LINES
+        binding.gridLinesButton.actionBtnView = binding.gridLinesAction
 
-        canvas_summary_action.type = ActionButtonView.Type.CANVAS_SUMMARY
-        canvas_summary_button.actionBtnView = canvas_summary_action
+        binding.canvasSummaryAction.type = ActionButtonView.Type.CANVAS_SUMMARY
+        binding.canvasSummaryButton.actionBtnView = binding.canvasSummaryAction
 
-        open_tools_action.type = ActionButtonView.Type.DOT
-        open_tools_button.actionBtnView = open_tools_action
+        binding.openToolsAction.type = ActionButtonView.Type.DOT
+        binding.openToolsButton.actionBtnView = binding.openToolsAction
 
         // open toolbox
         toggleTools(SessionSettings.instance.toolboxOpen)
 
         // recent colors
-        recent_colors_action.type = ActionButtonView.Type.DOT
-        recent_colors_button.actionBtnView = recent_colors_action
+        binding.recentColorsAction.type = ActionButtonView.Type.DOT
+        binding.recentColorsButton.actionBtnView = binding.recentColorsAction
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+            setupColorPalette(binding.surfaceView.interactiveCanvas.recentColorsList.toTypedArray())
         }
 
         // bold action buttons
         if (SessionSettings.instance.boldActionButtons) {
-            menu_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            paint_panel_action_view.toggleState = ActionButtonView.ToggleState.SINGLE
-            export_action.exportBold = true
-            background_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            grid_lines_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            canvas_summary_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            open_tools_action.toggleState = ActionButtonView.ToggleState.SINGLE
-            recent_colors_action.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.menuAction.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.paintPanelActionView.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.exportAction.exportBold = true
+            binding.backgroundAction.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.gridLinesAction.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.canvasSummaryAction.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.openToolsAction.toggleState = ActionButtonView.ToggleState.SINGLE
+            binding.recentColorsAction.toggleState = ActionButtonView.ToggleState.SINGLE
         }
 
         // panel theme config
-        visibleActionViews = arrayOf(menu_action, paint_panel_action_view, export_action, background_action,
-        grid_lines_action, canvas_summary_action, open_tools_action, recent_colors_action)
+        visibleActionViews = arrayOf(binding.menuAction, binding.paintPanelActionView, binding.exportAction, binding.backgroundAction,
+        binding.gridLinesAction, binding.canvasSummaryAction, binding.openToolsAction, binding.recentColorsAction)
 
-        menu_action.autoInvalidate = false
-        paint_panel_action_view.autoInvalidate = false
-        export_action.autoInvalidate = false
-        background_action.autoInvalidate = false
-        grid_lines_action.autoInvalidate = false
-        canvas_summary_action.autoInvalidate = false
-        open_tools_action.autoInvalidate = false
-        recent_colors_action.autoInvalidate = false
+        binding.menuAction.autoInvalidate = false
+        binding.paintPanelActionView.autoInvalidate = false
+        binding.exportAction.autoInvalidate = false
+        binding.backgroundAction.autoInvalidate = false
+        binding.gridLinesAction.autoInvalidate = false
+        binding.canvasSummaryAction.autoInvalidate = false
+        binding.openToolsAction.autoInvalidate = false
+        binding.recentColorsAction.autoInvalidate = false
 
         recolorVisibleActionViews()
 
         if (SessionSettings.instance.closePaintBackButtonColor != -1) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
+            binding.closePaintPanelBottomLayer.colorMode = ActionButtonView.ColorMode.COLOR
+            binding.closePaintPanelTopLayer.colorMode = ActionButtonView.ColorMode.COLOR
         }
         else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.closePaintPanelBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.closePaintPanelTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
-            close_paint_panel_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            close_paint_panel_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.closePaintPanelBottomLayer.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.closePaintPanelTopLayer.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
-        paint_color_accept_image_top_layer.type = ActionButtonView.Type.YES
+        binding.paintColorAcceptImageTopLayer.type = ActionButtonView.Type.YES
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-            palette_name_text.setTextColor(Color.parseColor("#FF111111"))
-            palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
+            binding.paletteNameText.setTextColor(Color.parseColor("#FF111111"))
+            binding.paletteNameText.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
 
-            palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
-            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paletteAddColorAction.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paletteRemoveColorAction.colorMode = ActionButtonView.ColorMode.BLACK
 
-            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.lockPaintPanelAction.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
-            palette_name_text.setTextColor(Color.WHITE)
+            binding.paletteNameText.setTextColor(Color.WHITE)
 
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.WHITE
 
-            palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
-            palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.paletteAddColorAction.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.paletteRemoveColorAction.colorMode = ActionButtonView.ColorMode.WHITE
 
-            lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
+            binding.lockPaintPanelAction.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-            paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
+            binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
         }
 
         if (panelThemeConfig.inversePaintEventInfo) {
-            paint_time_info_container.setBackgroundResource(R.drawable.timer_text_background_inverse)
-            paint_time_info.setTextColor(ActionButtonView.blackPaint.color)
-            paint_amt_info.setTextColor(ActionButtonView.blackPaint.color)
+            binding.paintTimeInfoContainer.setBackgroundResource(R.drawable.timer_text_background_inverse)
+            binding.paintTimeInfo.setTextColor(ActionButtonView.blackPaint.color)
+            binding.paintAmtInfo.setTextColor(ActionButtonView.blackPaint.color)
         }
 
-        paint_qty_bar.panelThemeConfig = panelThemeConfig
-        paint_qty_circle.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.panelThemeConfig = panelThemeConfig
+        binding.paintQtyBar.panelThemeConfig = panelThemeConfig
+        binding.paintQtyCircle.panelThemeConfig = panelThemeConfig
+        binding.paintIndicatorView.panelThemeConfig = panelThemeConfig
 
         // color picker view
-        color_picker_view.setSelectorColor(Color.WHITE)
+        binding.colorPickerView.setSelectorColor(Color.WHITE)
 
-        default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
-        default_black_color_button.actionBtnView = default_black_color_action
+        binding.defaultBlackColorAction.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
+        binding.defaultBlackColorButton.actionBtnView = binding.defaultBlackColorAction
 
-        default_black_color_button.setOnClickListener {
-            color_picker_view.setInitialColor(ActionButtonView.blackPaint.color)
+        binding.defaultBlackColorButton.setOnClickListener {
+            binding.colorPickerView.setInitialColor(ActionButtonView.blackPaint.color)
         }
 
-        default_white_color_action.type = ActionButtonView.Type.WHITE_COLOR_DEFAULT
-        default_white_color_button.actionBtnView = default_white_color_action
+        binding.defaultWhiteColorAction.type = ActionButtonView.Type.WHITE_COLOR_DEFAULT
+        binding.defaultWhiteColorButton.actionBtnView = binding.defaultWhiteColorAction
 
-        default_white_color_button.setOnClickListener {
-            color_picker_view.setInitialColor(ActionButtonView.whitePaint.color)
+        binding.defaultWhiteColorButton.setOnClickListener {
+            binding.colorPickerView.setInitialColor(ActionButtonView.whitePaint.color)
         }
 
         val textChangeListener = object: TextWatcher {
@@ -416,7 +442,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 try {
                     val color = Color.parseColor("#$s")
-                    color_picker_view.setInitialColor(color)
+                    binding.colorPickerView.setInitialColor(color)
 
                     hideKeyboard()
                 }
@@ -430,44 +456,44 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        color_hex_string_input.addTextChangedListener(textChangeListener)
+        binding.colorHexStringInput.addTextChangedListener(textChangeListener)
 
-        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+        binding.colorHexStringInput.setOnEditorActionListener { textView, actionId, keyEvent ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 hideKeyboard()
             }
             true
         }
 
-        color_picker_view.setEnabledAlpha(false)
+        binding.colorPickerView.setEnabledAlpha(false)
 
-        color_picker_view.subscribe(object : ColorObserver {
+        binding.colorPickerView.subscribe(object : ColorObserver {
             override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                paint_indicator_view_bottom_layer.setPaintColor(color)
+                binding.paintIndicatorViewBottomLayer.setPaintColor(color)
 
                 if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
                 else if (PaintColorIndicator.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept_image_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_color_accept_image_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintColorAcceptImageTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintColorAcceptImageBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
 
-                color_hex_string_input.removeTextChangedListener(textChangeListener)
+                binding.colorHexStringInput.removeTextChangedListener(textChangeListener)
 
                 val hexColor = java.lang.String.format("%06X", 0xFFFFFF and color)
-                color_hex_string_input.setText(hexColor)
+                binding.colorHexStringInput.setText(hexColor)
 
-                color_hex_string_input.addTextChangedListener(textChangeListener)
+                binding.colorHexStringInput.addTextChangedListener(textChangeListener)
 
                 // palette color actions
                 syncPaletteAndColor()
@@ -475,179 +501,173 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         })
 
         // button clicks
-        paint_panel.setOnClickListener {
+        binding.paintPanel.setOnClickListener {
             closePopoverFragment()
         }
 
         // paint buttons
-        paint_panel_button.setOnClickListener {
+        binding.paintPanelButton.setOnClickListener {
             togglePaintPanel(true)
         }
 
-        paint_yes.setOnClickListener {
-            surface_view.endPainting(true)
+        binding.paintYes.setOnClickListener {
+            binding.surfaceView.endPainting(true)
 
-            paint_yes_container.visibility = View.GONE
-            paint_no_container.visibility = View.GONE
-            close_paint_panel_container.visibility = View.VISIBLE
+            binding.paintYesContainer.visibility = View.GONE
+            binding.paintNoContainer.visibility = View.GONE
+            binding.closePaintPanelContainer.visibility = View.VISIBLE
 
-            paint_yes_top_layer.touchState = ActionButtonView.TouchState.INACTIVE
-            paint_yes.invalidate()
+            binding.paintYesTopLayer.touchState = ActionButtonView.TouchState.INACTIVE
+            binding.paintYes.invalidate()
 
-            surface_view.startPainting()
+            binding.surfaceView.startPainting()
         }
 
-        paint_no.setOnClickListener {
-            if (color_picker_frame.visibility == View.VISIBLE) {
-                paint_indicator_view_bottom_layer.setPaintColor(initalColor)
+        binding.paintNo.setOnClickListener {
+            if (binding.colorPickerFrame.visibility == View.VISIBLE) {
+                binding.paintIndicatorViewBottomLayer.setPaintColor(initalColor)
                 syncPaletteAndColor()
 
-                color_picker_frame.visibility = View.GONE
+                binding.colorPickerFrame.visibility = View.GONE
 
                 if (SessionSettings.instance.canvasLockBorder) {
-                    paint_warning_frame.visibility = View.VISIBLE
+                    binding.paintWarningFrame.visibility = View.VISIBLE
                 }
 
-                paint_yes.visibility = View.VISIBLE
+                binding.paintYes.visibility = View.VISIBLE
 
-                paint_color_accept.visibility = View.GONE
+                binding.paintColorAccept.visibility = View.GONE
 
-                //recent_colors_button.visibility = View.VISIBLE
-                //recent_colors_container.visibility = View.GONE
+                //binding.recentColorsButton.visibility = View.VISIBLE
+                //binding.recentColorsContainer.visibility = View.GONE
 
-                surface_view.endPaintSelection()
+                binding.surfaceView.endPaintSelection()
 
-                paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-                paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
+                binding.paintNoBottomLayer.colorMode = ActionButtonView.ColorMode.COLOR
+                binding.paintNoTopLayer.colorMode = ActionButtonView.ColorMode.COLOR
 
-                if (surface_view.interactiveCanvas.restorePoints.size == 0) {
-                    paint_yes_container.visibility = View.GONE
-                    paint_no_container.visibility = View.GONE
-                    close_paint_panel_container.visibility = View.VISIBLE
+                if (binding.surfaceView.interactiveCanvas.restorePoints.size == 0) {
+                    binding.paintYesContainer.visibility = View.GONE
+                    binding.paintNoContainer.visibility = View.GONE
+                    binding.closePaintPanelContainer.visibility = View.VISIBLE
                 }
                 else {
-                    paint_yes_container.visibility = View.VISIBLE
-                    paint_no_container.visibility = View.VISIBLE
-                    close_paint_panel_container.visibility = View.GONE
+                    binding.paintYesContainer.visibility = View.VISIBLE
+                    binding.paintNoContainer.visibility = View.VISIBLE
+                    binding.closePaintPanelContainer.visibility = View.GONE
                 }
-
-                startParticleEmitters()
             }
             else {
-                surface_view.endPainting(false)
+                binding.surfaceView.endPainting(false)
 
-                paint_yes_container.visibility = View.GONE
-                paint_no_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.VISIBLE
+                binding.paintYesContainer.visibility = View.GONE
+                binding.paintNoContainer.visibility = View.GONE
+                binding.closePaintPanelContainer.visibility = View.VISIBLE
 
-                //recent_colors_button.visibility = View.VISIBLE
-                //recent_colors_container.visibility = View.GONE
+                //binding.recentColorsButton.visibility = View.VISIBLE
+                //binding.recentColorsContainer.visibility = View.GONE
 
-                surface_view.startPainting()
+                binding.surfaceView.startPainting()
             }
         }
 
-        close_paint_panel.setOnClickListener {
+        binding.closePaintPanel.setOnClickListener {
             togglePaintPanel(false)
             closePopoverFragment()
         }
 
-        lock_paint_panel.setOnClickListener {
+        binding.lockPaintPanel.setOnClickListener {
             SessionSettings.instance.lockPaintPanel = !SessionSettings.instance.lockPaintPanel
 
             if (SessionSettings.instance.lockPaintPanel) {
-                lock_paint_panel_action.type = ActionButtonView.Type.LOCK_CLOSE
+                binding.lockPaintPanelAction.type = ActionButtonView.Type.LOCK_CLOSE
             }
             else {
-                lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
+                binding.lockPaintPanelAction.type = ActionButtonView.Type.LOCK_OPEN
             }
         }
 
-        paint_indicator_view.setOnClickListener {
+        binding.paintIndicatorView.setOnClickListener {
             // start color selection mode
-            if (color_picker_frame.visibility != View.VISIBLE) {
-                color_picker_frame.visibility = View.VISIBLE
+            if (binding.colorPickerFrame.visibility != View.VISIBLE) {
+                binding.colorPickerFrame.visibility = View.VISIBLE
                 initalColor = SessionSettings.instance.paintColor
-                color_picker_view.setInitialColor(initalColor)
+                binding.colorPickerView.setInitialColor(initalColor)
 
-                paint_warning_frame.visibility = View.GONE
+                binding.paintWarningFrame.visibility = View.GONE
 
-                paint_color_accept.visibility = View.VISIBLE
+                binding.paintColorAccept.visibility = View.VISIBLE
 
-                paint_yes_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.GONE
-                paint_no_container.visibility = View.VISIBLE
+                binding.paintYesContainer.visibility = View.GONE
+                binding.closePaintPanelContainer.visibility = View.GONE
+                binding.paintNoContainer.visibility = View.VISIBLE
 
                 if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.BLACK
-                    paint_no_top_layer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintNoBottomLayer.colorMode = ActionButtonView.ColorMode.BLACK
+                    binding.paintNoTopLayer.colorMode = ActionButtonView.ColorMode.BLACK
                 }
                 else {
-                    paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.WHITE
-                    paint_no_top_layer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintNoBottomLayer.colorMode = ActionButtonView.ColorMode.WHITE
+                    binding.paintNoTopLayer.colorMode = ActionButtonView.ColorMode.WHITE
                 }
 
-                //recent_colors_button.visibility = View.GONE
-                //recent_colors_container.visibility = View.GONE
+                //binding.recentColorsButton.visibility = View.GONE
+                //binding.recentColorsContainer.visibility = View.GONE
 
-                surface_view.startPaintSelection()
-
-                stopEmittingParticles()
+                binding.surfaceView.startPaintSelection()
             }
         }
 
-        paint_color_accept.setOnClickListener {
-            color_picker_frame.visibility = View.GONE
+        binding.paintColorAccept.setOnClickListener {
+            binding.colorPickerFrame.visibility = View.GONE
 
             if (SessionSettings.instance.canvasLockBorder) {
-                paint_warning_frame.visibility = View.VISIBLE
+                binding.paintWarningFrame.visibility = View.VISIBLE
             }
 
-            paint_yes.visibility = View.VISIBLE
+            binding.paintYes.visibility = View.VISIBLE
 
-            paint_color_accept.visibility = View.GONE
+            binding.paintColorAccept.visibility = View.GONE
 
-            surface_view.endPaintSelection()
+            binding.surfaceView.endPaintSelection()
 
-            paint_no_bottom_layer.colorMode = ActionButtonView.ColorMode.COLOR
-            paint_no_top_layer.colorMode = ActionButtonView.ColorMode.COLOR
+            binding.paintNoBottomLayer.colorMode = ActionButtonView.ColorMode.COLOR
+            binding.paintNoTopLayer.colorMode = ActionButtonView.ColorMode.COLOR
 
-            if (surface_view.interactiveCanvas.restorePoints.size == 0) {
-                paint_yes_container.visibility = View.GONE
-                paint_no_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.VISIBLE
+            if (binding.surfaceView.interactiveCanvas.restorePoints.size == 0) {
+                binding.paintYesContainer.visibility = View.GONE
+                binding.paintNoContainer.visibility = View.GONE
+                binding.closePaintPanelContainer.visibility = View.VISIBLE
             }
             else {
-                paint_yes_container.visibility = View.VISIBLE
-                paint_no_container.visibility = View.VISIBLE
-                close_paint_panel_container.visibility = View.GONE
+                binding.paintYesContainer.visibility = View.VISIBLE
+                binding.paintNoContainer.visibility = View.VISIBLE
+                binding.closePaintPanelContainer.visibility = View.GONE
             }
-
-            startParticleEmitters()
         }
 
         // to stop click-through to the canvas behind
-        color_picker_frame.setOnClickListener {
+        binding.colorPickerFrame.setOnClickListener {
             
         }
 
         // recent colors
-        recent_colors_button.setOnClickListener {
-            if (recent_colors_container.visibility != View.VISIBLE) {
-                recent_colors_container.visibility = View.VISIBLE
-                recent_colors_action.visibility = View.INVISIBLE
+        binding.recentColorsButton.setOnClickListener {
+            if (binding.recentColorsContainer.visibility != View.VISIBLE) {
+                binding.recentColorsContainer.visibility = View.VISIBLE
+                binding.recentColorsAction.visibility = View.INVISIBLE
 
-                if (paint_panel.visibility != View.VISIBLE) {
+                if (binding.paintPanel.visibility != View.VISIBLE) {
                     togglePaintPanel(true)
                 }
 
-                if (canvas_summary_view.visibility == View.VISIBLE) {
-                    canvas_summary_container.visibility = View.INVISIBLE
+                if (binding.canvasSummaryView.visibility == View.VISIBLE) {
+                    binding.canvasSummaryContainer.visibility = View.INVISIBLE
                 }
             }
             else {
-                recent_colors_container.visibility = View.GONE
-                recent_colors_action.visibility = View.VISIBLE
+                binding.recentColorsContainer.visibility = View.GONE
+                binding.recentColorsAction.visibility = View.VISIBLE
             }
         }
 
@@ -656,36 +676,36 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             toggleMenu(true)
         }
 
-        menu_button.setOnClickListener {
-            if (surface_view.isExporting()) {
-                export_fragment_container.visibility = View.INVISIBLE
-                surface_view.endExport()
+        binding.menuButton.setOnClickListener {
+            if (binding.surfaceView.isExporting()) {
+                binding.exportFragmentContainer.visibility = View.INVISIBLE
+                binding.surfaceView.endExport()
 
                 toggleExportBorder(false)
 
-                // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+                // binding.exportButton.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
             }
-            else if (surface_view.isObjectMoveSelection()) {
-                surface_view.interactiveCanvas.cancelMoveSelectedObject()
+            else if (binding.surfaceView.isObjectMoveSelection()) {
+                binding.surfaceView.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false, double = true)
 
-                surface_view.startExport()
+                binding.surfaceView.startExport()
                 toggleExportBorder(true)
             }
-            else if (surface_view.isObjectMoving()) {
-                surface_view.interactiveCanvas.cancelMoveSelectedObject()
+            else if (binding.surfaceView.isObjectMoving()) {
+                binding.surfaceView.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
-            else if (terminal_container.visibility == View.VISIBLE) {
+            else if (binding.terminalContainer.visibility == View.VISIBLE) {
                 toggleTerminal(false)
             }
             else {
-                toggleMenu(menu_container.visibility != View.VISIBLE)
+                toggleMenu(binding.menuContainer.visibility != View.VISIBLE)
             }
         }
 
         activity?.apply {
-            menu_button.setLongPressActionListener(this, object: LongPressListener {
+            binding.menuButton.setLongPressActionListener(this, object: LongPressListener {
                 override fun onLongPress() {
                     toggleTerminal(true)
                 }
@@ -693,20 +713,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         // export button
-        export_button.setOnClickListener {
-            if (export_action.toggleState == ActionButtonView.ToggleState.NONE) {
-                surface_view.startExport()
-                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+        binding.exportButton.setOnClickListener {
+            if (binding.exportAction.toggleState == ActionButtonView.ToggleState.NONE) {
+                binding.surfaceView.startExport()
+                binding.exportAction.toggleState = ActionButtonView.ToggleState.SINGLE
                 toggleExportBorder(true)
             }
-            else if (export_action.toggleState == ActionButtonView.ToggleState.SINGLE) {
-                surface_view.endExport()
-                surface_view.startObjectMove()
-                export_action.toggleState = ActionButtonView.ToggleState.DOUBLE
+            else if (binding.exportAction.toggleState == ActionButtonView.ToggleState.SINGLE) {
+                binding.surfaceView.endExport()
+                binding.surfaceView.startObjectMove()
+                binding.exportAction.toggleState = ActionButtonView.ToggleState.DOUBLE
                 toggleExportBorder(true, double = true)
             }
-            else if (export_action.toggleState == ActionButtonView.ToggleState.DOUBLE) {
-                surface_view.interactiveCanvas.cancelMoveSelectedObject()
+            else if (binding.exportAction.toggleState == ActionButtonView.ToggleState.DOUBLE) {
+                binding.surfaceView.interactiveCanvas.cancelMoveSelectedObject()
                 toggleExportBorder(false)
             }
         }
@@ -714,8 +734,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         Log.i("Panel size", SessionSettings.instance.panelResIds.size.toString())
 
         // background button
-        background_button.setOnClickListener {
-            if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
+        binding.backgroundButton.setOnClickListener {
+            if (SessionSettings.instance.backgroundColorsIndex == binding.surfaceView.interactiveCanvas.numBackgrounds - 1) {
                 SessionSettings.instance.backgroundColorsIndex = 0
             }
             else {
@@ -731,31 +751,31 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             invalidateButtons()
 
-            if (canvas_summary_container.visibility == View.VISIBLE) {
-                canvas_summary_view.invalidate()
+            if (binding.canvasSummaryContainer.visibility == View.VISIBLE) {
+                binding.canvasSummaryView.invalidate()
             }
 
-            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+            binding.surfaceView.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
         }
 
         // grid lines toggle button
-        grid_lines_button.setOnClickListener {
+        binding.gridLinesButton.setOnClickListener {
             SessionSettings.instance.gridLineMode += 1
 
             if (SessionSettings.instance.gridLineMode > 1) {
                 SessionSettings.instance.gridLineMode = 0
             }
 
-            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+            binding.surfaceView.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
         }
 
         // canvas summary toggle button
-        canvas_summary_button.setOnClickListener {
+        binding.canvasSummaryButton.setOnClickListener {
             toggleCanvasSummary()
         }
 
         // open tools button
-        open_tools_button.setOnClickListener {
+        binding.openToolsButton.setOnClickListener {
             if (toolboxOpen) {
                 toggleTools(false)
             }
@@ -765,7 +785,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         // recent colors background
-        recent_colors_container.setOnClickListener {
+        binding.recentColorsContainer.setOnClickListener {
 
         }
 
@@ -782,40 +802,40 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
 
-                    color_picker_frame.layoutParams = layoutParams
+                    binding.colorPickerFrame.layoutParams = layoutParams
 
-                    color_hex_string_input.textSize = 28F
+                    binding.colorHexStringInput.textSize = 28F
                     var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), LinearLayout.LayoutParams.MATCH_PARENT)
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
                     linearLayoutParams.gravity = Gravity.BOTTOM
 
-                    color_hex_string_input.layoutParams = linearLayoutParams
+                    binding.colorHexStringInput.layoutParams = linearLayoutParams
 
-                    color_hex_string_input.gravity = Gravity.BOTTOM
+                    binding.colorHexStringInput.gravity = Gravity.BOTTOM
 
                     // default color buttons size
-                    var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
-                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                    var frameLayoutParams = (binding.defaultBlackColorAction.layoutParams as FrameLayout.LayoutParams)
+                    frameLayoutParams.width = (binding.colorPickerFrame.layoutParams.width * 0.16).toInt()
                     frameLayoutParams.height = frameLayoutParams.width
 
-                    default_black_color_action.layoutParams = frameLayoutParams
+                    binding.defaultBlackColorAction.layoutParams = frameLayoutParams
 
-                    frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
-                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                    frameLayoutParams = (binding.defaultWhiteColorAction.layoutParams as FrameLayout.LayoutParams)
+                    frameLayoutParams.width = (binding.colorPickerFrame.layoutParams.width * 0.16).toInt()
                     frameLayoutParams.height = frameLayoutParams.width
 
-                    default_white_color_action.layoutParams = frameLayoutParams
+                    binding.defaultWhiteColorAction.layoutParams = frameLayoutParams
 
-                    linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
+                    linearLayoutParams = (binding.defaultWhiteColorButton.layoutParams as LinearLayout.LayoutParams)
 
-                    if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+                    if (binding.defaultWhiteColorAction.layoutParams.width <= Utils.dpToPx(context, 40)) {
                         linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
                     }
                     else {
                         linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
                     }
 
-                    default_white_color_button.layoutParams = linearLayoutParams
+                    binding.defaultWhiteColorButton.layoutParams = linearLayoutParams
 
                     // paint panel
                     layoutParams = ConstraintLayout.LayoutParams(
@@ -824,16 +844,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     )
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
-                    paint_panel.layoutParams = layoutParams
+                    binding.paintPanel.layoutParams = layoutParams
 
-                    linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
-                    if (paint_panel.layoutParams.width < 288) {
+                    linearLayoutParams = (binding.paintYesContainer.layoutParams as LinearLayout.LayoutParams)
+                    if (binding.paintPanel.layoutParams.width < 288) {
                         linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
                     }
                     else {
                         linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
                     }
-                    paint_yes_container.layoutParams = linearLayoutParams
+                    binding.paintYesContainer.layoutParams = linearLayoutParams
 
                     // paint indicator size
                     val frameWidth = ((150 / 1000F) * view.width).toInt()
@@ -846,14 +866,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
-                    paint_indicator_view_bottom_layer.layoutParams = layoutParams
-                    paint_indicator_view.layoutParams = layoutParams
+                    binding.paintIndicatorViewBottomLayer.layoutParams = layoutParams
+                    binding.paintIndicatorView.layoutParams = layoutParams
 
                     if (SessionSettings.instance.showPaintBar) {
                         // paint quantity bar size
                         /*layoutParams = ConstraintLayout.LayoutParams(
-                            (paint_qty_bar.width * 1.25).toInt(),
-                            (paint_qty_bar.height * 1.25).toInt()
+                            (binding.paintQtyBar.width * 1.25).toInt(),
+                            (binding.paintQtyBar.height * 1.25).toInt()
                         )
                         layoutParams.topToTop = ConstraintSet.PARENT_ID
                         layoutParams.leftToLeft = ConstraintSet.PARENT_ID
@@ -861,13 +881,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                         layoutParams.topMargin = Utils.dpToPx(context, 15)
 
-                        paint_qty_bar.layoutParams = layoutParams*/
+                        binding.paintQtyBar.layoutParams = layoutParams*/
                     }
                     else if (SessionSettings.instance.showPaintCircle) {
                         // paint quantity circle size
                         layoutParams = ConstraintLayout.LayoutParams(
-                            (paint_qty_circle.width * 1.25).toInt(),
-                            (paint_qty_circle.height * 1.25).toInt()
+                            (binding.paintQtyCircle.width * 1.25).toInt(),
+                            (binding.paintQtyCircle.height * 1.25).toInt()
                         )
                         layoutParams.topToTop = ConstraintSet.PARENT_ID
                         layoutParams.leftToLeft = ConstraintSet.PARENT_ID
@@ -875,81 +895,81 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                         layoutParams.topMargin = Utils.dpToPx(context, 15)
 
-                        paint_qty_circle.layoutParams = layoutParams
+                        binding.paintQtyCircle.layoutParams = layoutParams
                     }
 
                     //layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
-                    palette_name_text.textSize = 28F
+                    binding.paletteNameText.textSize = 28F
 
                     var actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
                     actionButtonLayoutParams.gravity = Gravity.CENTER
-                    palette_add_color_action.layoutParams = actionButtonLayoutParams
+                    binding.paletteAddColorAction.layoutParams = actionButtonLayoutParams
 
                     actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 4))
                     actionButtonLayoutParams.gravity = Gravity.CENTER
-                    palette_remove_color_action.layoutParams = actionButtonLayoutParams
+                    binding.paletteRemoveColorAction.layoutParams = actionButtonLayoutParams
 
                     actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 27), Utils.dpToPx(context, 30))
                     actionButtonLayoutParams.gravity = Gravity.CENTER
-                    lock_paint_panel_action.layoutParams = actionButtonLayoutParams
+                    binding.lockPaintPanelAction.layoutParams = actionButtonLayoutParams
 
                     layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
                     layoutParams.startToStart = ConstraintSet.PARENT_ID
                     layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
+                    layoutParams.topToBottom = binding.paletteNameText.id
                     layoutParams.topMargin = Utils.dpToPx(context, 10)
 
-                    color_action_button_menu.layoutParams = layoutParams
+                    binding.colorActionButtonMenu.layoutParams = layoutParams
 
                     /*layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
                     layoutParams.topMargin = Utils.dpToPx(context, 20)
                     layoutParams.bottomMargin = Utils.dpToPx(context, 50)
                     layoutParams.topToTop = ConstraintSet.PARENT_ID
 
-                    palette_name_text.layoutParams = layoutParams*/
+                    binding.paletteNameText.layoutParams = layoutParams*/
 
                     /*layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
                     layoutParams.topMargin = Utils.dpToPx(context, 20)
                     layoutParams.startToStart = ConstraintSet.PARENT_ID
                     layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
+                    layoutParams.topToBottom = binding.paletteNameText.id
 
-                    palette_add_color_button.layoutParams = layoutParams
+                    binding.paletteAddColorButton.layoutParams = layoutParams
 
                     layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
                     layoutParams.topMargin = Utils.dpToPx(context, 20)
                     layoutParams.startToStart = ConstraintSet.PARENT_ID
                     layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
+                    layoutParams.topToBottom = binding.paletteNameText.id
 
-                    palette_remove_color_button.layoutParams = layoutParams
+                    binding.paletteRemoveColorButton.layoutParams = layoutParams
 
                     frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
                     frameLayoutParams.topMargin = Utils.dpToPx(context, 5)
                     frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
 
-                    palette_add_color_action.layoutParams = frameLayoutParams
+                    binding.paletteAddColorAction.layoutParams = frameLayoutParams
 
                     frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 6))
                     frameLayoutParams.topMargin = Utils.dpToPx(context, 17)
                     frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
 
-                    palette_remove_color_action.layoutParams = frameLayoutParams*/
+                    binding.paletteRemoveColorAction.layoutParams = frameLayoutParams*/
                 }
 
                 // paint text info placement
                 if (SessionSettings.instance.showPaintBar) {
-                    val layoutParams = ConstraintLayout.LayoutParams(paint_time_info_container.width, paint_time_info_container.height)
-                    layoutParams.topToBottom = paint_qty_bar.id
+                    val layoutParams = ConstraintLayout.LayoutParams(binding.paintTimeInfoContainer.width, binding.paintTimeInfoContainer.height)
+                    layoutParams.topToBottom = binding.paintQtyBar.id
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
                     layoutParams.topMargin = Utils.dpToPx(context, 0)
 
-                    paint_time_info_container.layoutParams = layoutParams
+                    binding.paintTimeInfoContainer.layoutParams = layoutParams
                 }
                 else if (SessionSettings.instance.showPaintCircle) {
-                    paint_time_info_container.setBackgroundColor(Color.TRANSPARENT)
+                    binding.paintTimeInfoContainer.setBackgroundColor(Color.TRANSPARENT)
                 }
 
                 // background texture scaling
@@ -958,50 +978,50 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 // right-handed
                 if (SessionSettings.instance.rightHanded) {
                     // paint panel
-                    var layoutParams = paint_panel.layoutParams as ConstraintLayout.LayoutParams
+                    var layoutParams = binding.paintPanel.layoutParams as ConstraintLayout.LayoutParams
                     layoutParams.rightToRight = -1
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
 
-                    paint_panel.layoutParams = layoutParams
+                    binding.paintPanel.layoutParams = layoutParams
 
-                    paint_panel.invalidate()
+                    binding.paintPanel.invalidate()
 
                     // canvas lock border
-                    layoutParams = paint_warning_frame.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams = binding.paintWarningFrame.layoutParams as ConstraintLayout.LayoutParams
 
                     layoutParams.leftToLeft = -1
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
                     layoutParams.rightToLeft = -1
-                    layoutParams.leftToRight = paint_panel.id
-                    paint_warning_frame.layoutParams = layoutParams
+                    layoutParams.leftToRight = binding.paintPanel.id
+                    binding.paintWarningFrame.layoutParams = layoutParams
 
                     // close paint panel button
-                    close_paint_panel_bottom_layer.rotation = 180F
-                    close_paint_panel_top_layer.rotation = 180F
+                    binding.closePaintPanelBottomLayer.rotation = 180F
+                    binding.closePaintPanelTopLayer.rotation = 180F
 
                     // color picker
-                    layoutParams = color_picker_frame.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams = binding.colorPickerFrame.layoutParams as ConstraintLayout.LayoutParams
 
                     layoutParams.leftToLeft = -1
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
-                    color_picker_frame.layoutParams = layoutParams
+                    binding.colorPickerFrame.layoutParams = layoutParams
 
                     // paint meter bar
-                    paint_qty_bar.rotation = 180F
+                    binding.paintQtyBar.rotation = 180F
 
                     // toolbox
-                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams = binding.openToolsButton.layoutParams as ConstraintLayout.LayoutParams
 
                     layoutParams.rightToRight = -1
                     layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                    open_tools_button.layoutParams = layoutParams
+                    binding.openToolsButton.layoutParams = layoutParams
 
-                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
+                    var layoutParams3 = binding.openToolsAction.layoutParams as FrameLayout.LayoutParams
                     layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
-                    open_tools_action.layoutParams = layoutParams3
+                    binding.openToolsAction.layoutParams = layoutParams3
 
                     // toolbox buttons
-                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
+                    val toolboxButtons = arrayOf(binding.exportButton, binding.backgroundButton, binding.gridLinesButton, binding.canvasSummaryButton)
 
                     for (button in toolboxButtons) {
                         layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
@@ -1015,80 +1035,80 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
 
                     layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-                    layoutParams.rightToLeft = color_picker_frame.id
+                    layoutParams.rightToLeft = binding.colorPickerFrame.id
 
-                    recent_colors_button.layoutParams = layoutParams
+                    binding.recentColorsButton.layoutParams = layoutParams
 
                     // recent colors action
-                    layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
+                    layoutParams3 = binding.recentColorsAction.layoutParams as FrameLayout.LayoutParams
                     layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
-                    recent_colors_action.layoutParams = layoutParams3
+                    binding.recentColorsAction.layoutParams = layoutParams3
 
                     // recent colors container
-                    layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams = binding.recentColorsContainer.layoutParams as ConstraintLayout.LayoutParams
 
                     layoutParams.leftToRight = -1
-                    layoutParams.rightToLeft = color_picker_frame.id
-                    recent_colors_container.layoutParams = layoutParams
+                    layoutParams.rightToLeft = binding.colorPickerFrame.id
+                    binding.recentColorsContainer.layoutParams = layoutParams
 
-                    layoutParams = canvas_summary_container.layoutParams as ConstraintLayout.LayoutParams
+                    layoutParams = binding.canvasSummaryContainer.layoutParams as ConstraintLayout.LayoutParams
 
                     layoutParams.startToStart = -1
                     layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    canvas_summary_container.layoutParams = layoutParams
+                    binding.canvasSummaryContainer.layoutParams = layoutParams
 
-                    //open_tools_button.layoutParams = layoutParams
+                    //binding.openToolsButton.layoutParams = layoutParams
 
                     // paint yes
-                    /*var layoutParams2 = paint_yes_container.layoutParams as LinearLayout.LayoutParams
+                    /*var layoutParams2 = binding.paintYes_container.layoutParams as LinearLayout.LayoutParams
                     layoutParams2.rightMargin = 0
-                    paint_yes_container.layoutParams = layoutParams2
+                    binding.paintYes_container.layoutParams = layoutParams2
 
                     // paint no
-                    layoutParams2 = paint_no_container.layoutParams as LinearLayout.LayoutParams
+                    layoutParams2 = binding.paintNo_container.layoutParams as LinearLayout.LayoutParams
                     layoutParams2.rightMargin = Utils.dpToPx(context, 30)
-                    paint_no_container.layoutParams = layoutParams2
+                    binding.paintNo_container.layoutParams = layoutParams2
 
                     paint_action_button_container.removeViewAt(0)
-                    paint_action_button_container.addView(paint_yes_container)*/
+                    paint_action_button_container.addView(binding.paintYes_container)*/
                 }
 
                 // small action buttons
                 if (SessionSettings.instance.smallActionButtons) {
                     // paint yes
-                    var layoutParams = paint_yes_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    var layoutParams = binding.paintYesBottomLayer.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_yes_bottom_layer.layoutParams = layoutParams
-                    paint_yes_top_layer.layoutParams = layoutParams
+                    binding.paintYesBottomLayer.layoutParams = layoutParams
+                    binding.paintYesTopLayer.layoutParams = layoutParams
 
                     // paint no
-                    layoutParams = paint_no_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = binding.paintNoBottomLayer.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_no_bottom_layer.layoutParams = layoutParams
-                    paint_no_top_layer.layoutParams = layoutParams
+                    binding.paintNoBottomLayer.layoutParams = layoutParams
+                    binding.paintNoTopLayer.layoutParams = layoutParams
 
                     // paint select accept
-                    layoutParams = paint_color_accept_image_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = binding.paintColorAcceptImageBottomLayer.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_color_accept_image_bottom_layer.layoutParams = layoutParams
-                    paint_color_accept_image_top_layer.layoutParams = layoutParams
+                    binding.paintColorAcceptImageBottomLayer.layoutParams = layoutParams
+                    binding.paintColorAcceptImageTopLayer.layoutParams = layoutParams
 
                     // close paint panel
-                    layoutParams = close_paint_panel_bottom_layer.layoutParams as FrameLayout.LayoutParams
+                    layoutParams = binding.closePaintPanelBottomLayer.layoutParams as FrameLayout.LayoutParams
 
                     layoutParams.width = (layoutParams.width * 0.833).toInt()
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    close_paint_panel_bottom_layer.layoutParams = layoutParams
-                    close_paint_panel_top_layer.layoutParams = layoutParams
+                    binding.closePaintPanelBottomLayer.layoutParams = layoutParams
+                    binding.closePaintPanelTopLayer.layoutParams = layoutParams
                 }
 
-                surface_view.setInitialPositionAndScale()
+                binding.surfaceView.setInitialPositionAndScale()
             }
         })
     }
@@ -1096,14 +1116,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onPause() {
         super.onPause()
 
-        stopEmittingParticles()
-
         // unregister listeners
         SessionSettings.instance.paintQtyListeners.remove(this)
 
         context?.apply {
-            surface_view.interactiveCanvas.saveUnits(this)
-            surface_view.interactiveCanvas.interactiveCanvasListener = null
+            binding.surfaceView.interactiveCanvas.saveUnits(this)
+            binding.surfaceView.interactiveCanvas.interactiveCanvasListener = null
 
             SessionSettings.instance.saveLastPaintColor(this, world)
         }
@@ -1115,12 +1133,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         else {
             context?.apply {
-                val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+                val deviceViewport = binding.surfaceView.interactiveCanvas.deviceViewport!!
 
                 SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
                 SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
 
-                SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+                SessionSettings.instance.restoreCanvasScaleFactor = binding.surfaceView.interactiveCanvas.lastScaleFactor
 
                 SessionSettings.instance.save(this)
                 StatTracker.instance.save(this)
@@ -1150,7 +1168,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             getPaintTimerInfo()
         }*/
 
-        surface_view.interactiveCanvas.interactiveCanvasListener = this
+        binding.surfaceView.interactiveCanvas.interactiveCanvasListener = this
 
         if (world) {
             InteractiveCanvasSocket.instance.socket?.apply {
@@ -1169,13 +1187,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             return
         }
 
-        paint_panel.background = null
+        binding.paintPanel.background = null
 
         Utils.setViewLayoutListener(view!!, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 // interactive canvas
-                surface_view.interactiveCanvas.deviceViewport?.apply {
-                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
+                binding.surfaceView.interactiveCanvas.deviceViewport?.apply {
+                    binding.surfaceView.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.context!!)
                 }
 
                 // color picker frame width
@@ -1184,51 +1202,51 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     ConstraintLayout.LayoutParams.MATCH_PARENT
                 )
 
-                layoutParams.leftToLeft = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+                layoutParams.leftToLeft = (binding.colorPickerFrame.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (binding.colorPickerFrame.layoutParams as ConstraintLayout.LayoutParams).rightToRight
 
-                color_picker_frame.layoutParams = layoutParams
+                binding.colorPickerFrame.layoutParams = layoutParams
 
                 // color picker default color buttons
-                var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
-                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                var frameLayoutParams = (binding.defaultBlackColorAction.layoutParams as FrameLayout.LayoutParams)
+                frameLayoutParams.width = (binding.colorPickerFrame.layoutParams.width * 0.16).toInt()
                 frameLayoutParams.height = frameLayoutParams.width
 
-                default_black_color_action.layoutParams = frameLayoutParams
+                binding.defaultBlackColorAction.layoutParams = frameLayoutParams
 
-                frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
-                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+                frameLayoutParams = (binding.defaultWhiteColorAction.layoutParams as FrameLayout.LayoutParams)
+                frameLayoutParams.width = (binding.colorPickerFrame.layoutParams.width * 0.16).toInt()
                 frameLayoutParams.height = frameLayoutParams.width
 
-                default_white_color_action.layoutParams = frameLayoutParams
+                binding.defaultWhiteColorAction.layoutParams = frameLayoutParams
 
-                var linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
-                if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+                var linearLayoutParams = (binding.defaultWhiteColorButton.layoutParams as LinearLayout.LayoutParams)
+                if (binding.defaultWhiteColorAction.layoutParams.width <= Utils.dpToPx(context, 40)) {
                     linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
                 }
                 else {
                     linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
                 }
-                default_white_color_button.layoutParams = linearLayoutParams
+                binding.defaultWhiteColorButton.layoutParams = linearLayoutParams
 
                 // paint panel
                 layoutParams = ConstraintLayout.LayoutParams(
                     ((150 / 1000F) * view.width).toInt(),
                     ConstraintLayout.LayoutParams.MATCH_PARENT
                 )
-                layoutParams.leftToLeft = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+                layoutParams.leftToLeft = (binding.paintPanel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (binding.paintPanel.layoutParams as ConstraintLayout.LayoutParams).rightToRight
 
-                paint_panel.layoutParams = layoutParams
+                binding.paintPanel.layoutParams = layoutParams
 
-                linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
-                if (paint_panel.layoutParams.width < 288) {
+                linearLayoutParams = (binding.paintYesContainer.layoutParams as LinearLayout.LayoutParams)
+                if (binding.paintPanel.layoutParams.width < 288) {
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
                 }
                 else {
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
                 }
-                paint_yes_container.layoutParams = linearLayoutParams
+                binding.paintYesContainer.layoutParams = linearLayoutParams
 
                 // paint indicator size
                 val frameWidth = ((150 / 1000F) * view.width).toInt()
@@ -1236,15 +1254,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 val indicatorWidth = frameWidth - indicatorMargin
 
                 layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
-                layoutParams.topToTop = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).topToTop
-                layoutParams.bottomToBottom = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).bottomToBottom
-                layoutParams.leftToLeft = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+                layoutParams.topToTop = (binding.paintIndicatorView.layoutParams as ConstraintLayout.LayoutParams).topToTop
+                layoutParams.bottomToBottom = (binding.paintIndicatorView.layoutParams as ConstraintLayout.LayoutParams).bottomToBottom
+                layoutParams.leftToLeft = (binding.paintIndicatorView.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+                layoutParams.rightToRight = (binding.paintIndicatorView.layoutParams as ConstraintLayout.LayoutParams).rightToRight
 
-                paint_indicator_view_bottom_layer.layoutParams = layoutParams
-                paint_indicator_view.layoutParams = layoutParams
+                binding.paintIndicatorViewBottomLayer.layoutParams = layoutParams
+                binding.paintIndicatorView.layoutParams = layoutParams
 
-                device_canvas_viewport_view.updateDeviceViewport()
+                binding.deviceCanvasViewportView.updateDeviceViewport()
 
                 setPanelBackground()
             }
@@ -1257,7 +1275,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             val backgroundDrawable = ContextCompat.getDrawable(this, SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex]) as BitmapDrawable
 
             if (SessionSettings.instance.tablet) {
-                paint_panel.clipChildren = false
+                binding.paintPanel.clipChildren = false
 
                 val scale = view!!.height / backgroundDrawable.bitmap.height.toFloat()
 
@@ -1267,15 +1285,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     newHeight, false)
                 val scaledBitmapDrawable = BitmapDrawable(resources, newBitmap)
 
-                val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - paint_panel.layoutParams.width / 2), 0, paint_panel.layoutParams.width, scaledBitmapDrawable.bitmap.height)
+                val resizedBitmap = Bitmap.createBitmap(scaledBitmapDrawable.bitmap, max(0, scaledBitmapDrawable.bitmap.width / 2 - binding.paintPanel.layoutParams.width / 2), 0, binding.paintPanel.layoutParams.width, scaledBitmapDrawable.bitmap.height)
                 val resizedBitmapDrawable = BitmapDrawable(resizedBitmap)
 
                 scaledBitmapDrawable.gravity = Gravity.CENTER
 
-                paint_panel.setBackgroundDrawable(resizedBitmapDrawable)
+                binding.paintPanel.setBackgroundDrawable(resizedBitmapDrawable)
             }
             else {
-                paint_panel.setBackgroundDrawable(backgroundDrawable)
+                binding.paintPanel.setBackgroundDrawable(backgroundDrawable)
             }
         }
     }
@@ -1303,7 +1321,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun setupColorPalette(colors: Array<Int>?) {
         if (colors != null) {
             var i = 0
-            for (v in recent_colors_container.children) {
+            for (v in binding.recentColorsContainer.children) {
                 (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
 
                 if (i < colors.size) {
@@ -1319,8 +1337,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         SessionSettings.instance.paintColor = this
                         notifyPaintColorUpdate(SessionSettings.instance.paintColor)
 
-                        //recent_colors_container.visibility = View.GONE
-                        //recent_colors_action.visibility = View.VISIBLE
+                        //binding.recentColorsContainer.visibility = View.GONE
+                        //binding.recentColorsAction.visibility = View.VISIBLE
                     }
                 }
 
@@ -1336,125 +1354,121 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             // fixes issue where with no colors on the color palette the paint panel won't open
             if (colors.isEmpty()) {
-                recent1.visibility = View.VISIBLE
-                recent1.type = ActionButtonView.Type.NONE
+                binding.recent1.visibility = View.VISIBLE
+                binding.recent1.type = ActionButtonView.Type.NONE
             }
         }
         else {
-            for (v in recent_colors_container.children) {
+            for (v in binding.recentColorsContainer.children) {
                 (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
             }
         }
     }
 
     private fun invalidateButtons() {
-        menu_action.invalidate()
-        paint_panel_action_view.invalidate()
-        export_action.invalidate()
-        background_action.invalidate()
-        grid_lines_action.invalidate()
-        canvas_summary_action.invalidate()
-        recent_colors_action.invalidate()
-        open_tools_action.invalidate()
-        object_move_up_action.invalidate()
-        object_move_down_action.invalidate()
-        object_move_left_action.invalidate()
-        object_move_right_action.invalidate()
+        binding.menuAction.invalidate()
+        binding.paintPanelActionView.invalidate()
+        binding.exportAction.invalidate()
+        binding.backgroundAction.invalidate()
+        binding.gridLinesAction.invalidate()
+        binding.canvasSummaryAction.invalidate()
+        binding.recentColorsAction.invalidate()
+        binding.openToolsAction.invalidate()
+        binding.objectMoveUpAction.invalidate()
+        binding.objectMoveDownAction.invalidate()
+        binding.objectMoveLeftAction.invalidate()
+        binding.objectMoveRightAction.invalidate()
     }
 
     // view toggles
     private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
         if (show) {
-            paint_panel.visibility = View.VISIBLE
-            paint_panel_button.visibility = View.GONE
+            binding.paintPanel.visibility = View.VISIBLE
+            binding.paintPanelButton.visibility = View.GONE
 
-            export_button.visibility = View.INVISIBLE
-            background_button.visibility = View.INVISIBLE
+            binding.exportButton.visibility = View.INVISIBLE
+            binding.backgroundButton.visibility = View.INVISIBLE
 
-            open_tools_button.visibility = View.INVISIBLE
+            binding.openToolsButton.visibility = View.INVISIBLE
 
             toggleTools(false)
 
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
+            if (binding.pixelHistoryFragmentContainer.visibility == View.VISIBLE) {
+                binding.pixelHistoryFragmentContainer.visibility = View.GONE
             }
 
-            if (canvas_summary_view.visibility == View.VISIBLE) {
-                canvas_summary_container.visibility = View.INVISIBLE
+            if (binding.canvasSummaryView.visibility == View.VISIBLE) {
+                binding.canvasSummaryContainer.visibility = View.INVISIBLE
             }
 
-            var startLoc = paint_panel.width.toFloat() * 0.99F
+            var startLoc = binding.paintPanel.width.toFloat() * 0.99F
             if (SessionSettings.instance.rightHanded) {
                 startLoc = -startLoc
             }
 
-            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
-                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
+            binding.paintPanel.animate().translationX(startLoc).setDuration(0).withEndAction {
+                binding.paintPanel.animate().translationX(0F).setDuration(50).setInterpolator(
                     AccelerateDecelerateInterpolator()
                 ).withEndAction {
 
-                    startParticleEmitters()
-
-                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
-                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
+                    Log.i("ICF", "paint panel width is ${binding.paintPanel.width}")
+                    Log.i("ICF", "paint panel height is ${binding.paintPanel.height}")
 
                 }.start()
 
                 if (SessionSettings.instance.canvasLockBorder) {
                     context?.apply {
-                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
+                        val drawable: GradientDrawable = binding.paintWarningFrame.background as GradientDrawable
                         drawable.setStroke(
                             Utils.dpToPx(this, 4),
                             SessionSettings.instance.canvasLockBorderColor
                         ) // set stroke width and stroke color
                     }
 
-                    paint_warning_frame.visibility = View.VISIBLE
-                    paint_warning_frame.alpha = 0F
-                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+                    binding.paintWarningFrame.visibility = View.VISIBLE
+                    binding.paintWarningFrame.alpha = 0F
+                    binding.paintWarningFrame.animate().alpha(1F).setDuration(50).start()
                 }
             }.start()
 
-            surface_view.startPainting()
+            binding.surfaceView.startPainting()
 
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
+            if (binding.pixelHistoryFragmentContainer.visibility == View.VISIBLE) {
+                binding.pixelHistoryFragmentContainer.visibility = View.GONE
             }
 
-            menu_button.visibility = View.GONE
-            menu_container.visibility = View.GONE
+            binding.menuButton.visibility = View.GONE
+            binding.menuContainer.visibility = View.GONE
 
             SessionSettings.instance.paintPanelOpen = true
         }
         else if (softHide) {
-            paint_panel.visibility = View.GONE
+            binding.paintPanel.visibility = View.GONE
 
             toggleTools(false)
         }
         else {
-            surface_view.endPainting(false)
+            binding.surfaceView.endPainting(false)
 
-            paint_panel.visibility = View.GONE
-            paint_warning_frame.visibility = View.GONE
+            binding.paintPanel.visibility = View.GONE
+            binding.paintWarningFrame.visibility = View.GONE
 
-            paint_panel_button.visibility = View.VISIBLE
+            binding.paintPanelButton.visibility = View.VISIBLE
 
-            //recent_colors_action.visibility = View.VISIBLE
-            //recent_colors_container.visibility = View.GONE
+            //binding.recentColorsAction.visibility = View.VISIBLE
+            //binding.recentColorsContainer.visibility = View.GONE
 
             if (toolboxOpen) {
-                export_button.visibility = View.VISIBLE
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
+                binding.exportButton.visibility = View.VISIBLE
+                binding.backgroundButton.visibility = View.VISIBLE
+                binding.gridLinesButton.visibility = View.VISIBLE
             }
 
-            menu_button.visibility = View.VISIBLE
+            binding.menuButton.visibility = View.VISIBLE
 
-            open_tools_button.visibility = View.VISIBLE
+            binding.openToolsButton.visibility = View.VISIBLE
 
             toggleExportBorder(false)
-
-            stopEmittingParticles()
 
             SessionSettings.instance.paintPanelOpen = false
         }
@@ -1465,16 +1479,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (show && !toolboxOpen) {
                 animatingTools = true
 
-                export_button.visibility = View.VISIBLE
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
-                canvas_summary_button.visibility = View.VISIBLE
+                binding.exportButton.visibility = View.VISIBLE
+                binding.backgroundButton.visibility = View.VISIBLE
+                binding.gridLinesButton.visibility = View.VISIBLE
+                binding.canvasSummaryButton.visibility = View.VISIBLE
 
                 Animator.animateMenuItems(
                     listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        ), listOf(canvas_summary_button)
+                        listOf(binding.exportButton), listOf(binding.backgroundButton), listOf(
+                            binding.gridLinesButton
+                        ), listOf(binding.canvasSummaryButton)
                     ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -1492,9 +1506,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 Animator.animateMenuItems(
                     listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        ), listOf(canvas_summary_button)
+                        listOf(binding.exportButton), listOf(binding.backgroundButton), listOf(
+                            binding.gridLinesButton
+                        ), listOf(binding.canvasSummaryButton)
                     ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -1517,25 +1531,25 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         if (show) {
             context?.apply {
-                val drawable: GradientDrawable = export_border_view.background as GradientDrawable
+                val drawable: GradientDrawable = binding.exportBorderView.background as GradientDrawable
                 drawable.setStroke(
                     Utils.dpToPx(this, 2),
                     color
                 ) // set stroke width and stroke color
             }
-            export_border_view.visibility = View.VISIBLE
+            binding.exportBorderView.visibility = View.VISIBLE
         }
         else {
-            export_border_view.visibility = View.GONE
+            binding.exportBorderView.visibility = View.GONE
 
             if (double) {
-                export_action.toggleState = ActionButtonView.ToggleState.SINGLE
+                binding.exportAction.toggleState = ActionButtonView.ToggleState.SINGLE
             }
             else {
-                export_action.toggleState = ActionButtonView.ToggleState.NONE
+                binding.exportAction.toggleState = ActionButtonView.ToggleState.NONE
             }
 
-            export_action.invalidate()
+            binding.exportAction.invalidate()
         }
     }
 
@@ -1547,10 +1561,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             menuFragment?.menuCardListener = this
 
             fragmentManager?.apply {
-                beginTransaction().replace(menu_container.id, menuFragment!!).commit()
+                beginTransaction().replace(binding.menuContainer.id, menuFragment!!).commit()
 
-                menu_container.alpha = 0F
-                menu_container.animate().alpha(1f).setDuration(250).withEndAction {
+                binding.menuContainer.alpha = 0F
+                binding.menuContainer.animate().alpha(1f).setDuration(250).withEndAction {
 
                 }.start()
                 //interactiveCanvasFragmentListener?.onInteractiveCanvasBack()
@@ -1560,10 +1574,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             menuFragment!!.clearMenuTextHighlights()
         }
         if (open) {
-            menu_container.visibility = View.VISIBLE
+            binding.menuContainer.visibility = View.VISIBLE
         }
         else {
-            menu_container.visibility = View.GONE
+            binding.menuContainer.visibility = View.GONE
         }
     }
 
@@ -1571,18 +1585,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         if (terminalFragment == null) {
             terminalFragment = TerminalFragment()
 
-            terminalFragment?.interactiveCanvas = surface_view.interactiveCanvas
+            terminalFragment?.interactiveCanvas = binding.surfaceView.interactiveCanvas
 
             fragmentManager?.apply {
-                beginTransaction().replace(terminal_container.id, terminalFragment!!).commit()
+                beginTransaction().replace(binding.terminalContainer.id, terminalFragment!!).commit()
             }
         }
 
         if (open) {
-            terminal_container.visibility = View.VISIBLE
+            binding.terminalContainer.visibility = View.VISIBLE
         }
         else {
-            terminal_container.visibility = View.GONE
+            binding.terminalContainer.visibility = View.GONE
         }
     }
 
@@ -1590,24 +1604,24 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // pixel history listener
     override fun showPixelHistoryFragmentPopover(screenPoint: Point) {
         fragmentManager?.apply {
-            surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
-                surface_view.interactiveCanvas.lastSelectedUnitPoint
+            binding.surfaceView.interactiveCanvas.getPixelHistory(binding.surfaceView.interactiveCanvas.pixelIdForUnitPoint(
+                binding.surfaceView.interactiveCanvas.lastSelectedUnitPoint
             ), object : PixelHistoryCallback {
                 override fun onHistoryJsonResponse(historyJson: JSONArray) {
                     // set bottom-left of view to screenPoint
 
-                    pixel_history_fragment_container?.apply {
+                    binding.pixelHistoryFragmentContainer?.apply {
                         val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
                         val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
                             context,
                             10
                         )).toFloat()
 
-                        pixel_history_fragment_container.x = dX
-                        pixel_history_fragment_container.y = dY
+                        binding.pixelHistoryFragmentContainer.x = dX
+                        binding.pixelHistoryFragmentContainer.y = dY
 
                         if (firstInfoTap) {
-                            pixel_history_fragment_container.y -= Utils.dpToPx(
+                            binding.pixelHistoryFragmentContainer.y -= Utils.dpToPx(
                                 context,
                                 firstInfoTapFixYOffset
                             )
@@ -1615,21 +1629,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         }
 
                         view?.apply {
-                            if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                            } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x =
-                                    width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                            if (binding.pixelHistoryFragmentContainer.x < Utils.dpToPx(context, 20).toFloat()) {
+                                binding.pixelHistoryFragmentContainer.x = Utils.dpToPx(context, 20).toFloat()
+                            } else if (binding.pixelHistoryFragmentContainer.x + binding.pixelHistoryFragmentContainer.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                                binding.pixelHistoryFragmentContainer.x =
+                                    width - binding.pixelHistoryFragmentContainer.width.toFloat() - Utils.dpToPx(
                                         context,
                                         20
                                     ).toFloat()
                             }
 
-                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                            } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y =
-                                    height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                            if (binding.pixelHistoryFragmentContainer.y < Utils.dpToPx(context, 20).toFloat()) {
+                                binding.pixelHistoryFragmentContainer.y = Utils.dpToPx(context, 20).toFloat()
+                            } else if (binding.pixelHistoryFragmentContainer.y + binding.pixelHistoryFragmentContainer.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                                binding.pixelHistoryFragmentContainer.y =
+                                    height - binding.pixelHistoryFragmentContainer.height.toFloat() - Utils.dpToPx(
                                         context,
                                         20
                                     ).toFloat()
@@ -1643,7 +1657,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                                 fragment
                             ).commit()
 
-                            pixel_history_fragment_container.visibility = View.VISIBLE
+                            binding.pixelHistoryFragmentContainer.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -1651,30 +1665,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
-    // Palette and Canvas Frame fragments also use pixel_history_fragment_container
+    // Palette and Canvas Frame fragments also use binding.pixelHistoryFragmentContainer
     override fun showDrawFrameConfigFragmentPopover(screenPoint: Point) {
-        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
+        if (binding.pixelHistoryFragmentContainer.visibility == View.VISIBLE) {
             closePopoverFragment()
             return
         }
 
-        if (canvas_summary_view.visibility == View.VISIBLE) {
-            canvas_summary_container.visibility = View.INVISIBLE
+        if (binding.canvasSummaryView.visibility == View.VISIBLE) {
+            binding.canvasSummaryContainer.visibility = View.INVISIBLE
         }
 
         fragmentManager?.apply {
-            pixel_history_fragment_container?.apply {
+            binding.pixelHistoryFragmentContainer?.apply {
                 val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
                 val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
                     context,
                     10
                 )).toFloat()
 
-                pixel_history_fragment_container.x = dX
-                pixel_history_fragment_container.y = dY
+                binding.pixelHistoryFragmentContainer.x = dX
+                binding.pixelHistoryFragmentContainer.y = dY
 
                 if (firstInfoTap) {
-                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                    binding.pixelHistoryFragmentContainer.y -= Utils.dpToPx(
                         context,
                         firstInfoTapFixYOffset
                     )
@@ -1682,21 +1696,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
 
                 view?.apply {
-                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x =
-                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                    if (binding.pixelHistoryFragmentContainer.x < Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (binding.pixelHistoryFragmentContainer.x + binding.pixelHistoryFragmentContainer.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.x =
+                            width - binding.pixelHistoryFragmentContainer.width.toFloat() - Utils.dpToPx(
                                 context,
                                 20
                             ).toFloat()
                     }
 
-                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y =
-                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                    if (binding.pixelHistoryFragmentContainer.y < Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (binding.pixelHistoryFragmentContainer.y + binding.pixelHistoryFragmentContainer.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.y =
+                            height - binding.pixelHistoryFragmentContainer.height.toFloat() - Utils.dpToPx(
                                 context,
                                 20
                             ).toFloat()
@@ -1707,22 +1721,22 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     fragment.panelThemeConfig = panelThemeConfig
 
-                    fragment.centerX = surface_view.interactiveCanvas.lastSelectedUnitPoint.x
-                    fragment.centerY = surface_view.interactiveCanvas.lastSelectedUnitPoint.y
+                    fragment.centerX = binding.surfaceView.interactiveCanvas.lastSelectedUnitPoint.x
+                    fragment.centerY = binding.surfaceView.interactiveCanvas.lastSelectedUnitPoint.y
 
                     beginTransaction().replace(
                         R.id.pixel_history_fragment_container,
                         fragment
                     ).commit()
 
-                    pixel_history_fragment_container.visibility = View.VISIBLE
+                    binding.pixelHistoryFragmentContainer.visibility = View.VISIBLE
                 }
             }
         }
     }
 
     private fun showPalettesFragmentPopover() {
-        var screenPoint = Point(surface_view.width, 0)
+        var screenPoint = Point(binding.surfaceView.width, 0)
         if (SessionSettings.instance.rightHanded) {
             screenPoint = Point(0, 0)
         }
@@ -1730,18 +1744,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         fragmentManager?.apply {
             // set bottom-left of view to screenPoint
 
-            pixel_history_fragment_container?.apply {
+            binding.pixelHistoryFragmentContainer?.apply {
                 val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
                 val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
                     context,
                     10
                 )).toFloat()
 
-                pixel_history_fragment_container.x = dX
-                pixel_history_fragment_container.y = dY
+                binding.pixelHistoryFragmentContainer.x = dX
+                binding.pixelHistoryFragmentContainer.y = dY
 
                 if (firstInfoTap) {
-                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                    binding.pixelHistoryFragmentContainer.y -= Utils.dpToPx(
                         context,
                         firstInfoTapFixYOffset
                     )
@@ -1749,21 +1763,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
 
                 view?.apply {
-                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.x =
-                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                    if (binding.pixelHistoryFragmentContainer.x < Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (binding.pixelHistoryFragmentContainer.x + binding.pixelHistoryFragmentContainer.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.x =
+                            width - binding.pixelHistoryFragmentContainer.width.toFloat() - Utils.dpToPx(
                                 context,
                                 20
                             ).toFloat()
                     }
 
-                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
-                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                        pixel_history_fragment_container.y =
-                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                    if (binding.pixelHistoryFragmentContainer.y < Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.y = Utils.dpToPx(context, 20).toFloat()
+                    } else if (binding.pixelHistoryFragmentContainer.y + binding.pixelHistoryFragmentContainer.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        binding.pixelHistoryFragmentContainer.y =
+                            height - binding.pixelHistoryFragmentContainer.height.toFloat() - Utils.dpToPx(
                                 context,
                                 20
                             ).toFloat()
@@ -1780,51 +1794,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         fragment
                     ).commit()
 
-                    pixel_history_fragment_container.visibility = View.VISIBLE
+                    binding.pixelHistoryFragmentContainer.visibility = View.VISIBLE
                 }
             }
-        }
-    }
-
-    // particle emitters
-    private fun startParticleEmitters() {
-        if (SessionSettings.instance.emittersEnabled) {
-            topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            topLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
-            topLeftParticleSystem?.setRotationSpeed(144f)
-            topLeftParticleSystem?.setAcceleration(0.00005f, 90)
-            topLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            topLeftParticleSystem?.emit(top_left_anchor, 16)
-
-            topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            topRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
-            topRightParticleSystem?.setRotationSpeed(144f)
-            topRightParticleSystem?.setAcceleration(0.00005f, 90)
-            topRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            topRightParticleSystem?.emit(top_right_anchor, 16)
-
-            bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            bottomLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
-            bottomLeftParticleSystem?.setRotationSpeed(144f)
-            bottomLeftParticleSystem?.setAcceleration(0.00005f, 90)
-            bottomLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            bottomLeftParticleSystem?.emit(bottom_left_anchor, 16)
-
-            bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            bottomRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
-            bottomRightParticleSystem?.setRotationSpeed(144f)
-            bottomRightParticleSystem?.setAcceleration(0.00005f, 90)
-            bottomRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            bottomRightParticleSystem?.emit(bottom_right_anchor, 16)
-        }
-    }
-
-    private fun stopEmittingParticles() {
-        if (SessionSettings.instance.emittersEnabled) {
-            topLeftParticleSystem?.stopEmitting()
-            topRightParticleSystem?.stopEmitting()
-            bottomLeftParticleSystem?.stopEmitting()
-            bottomRightParticleSystem?.stopEmitting()
         }
     }
 
@@ -1868,25 +1840,25 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // interactive canvas listener
     override fun notifyPaintColorUpdate(color: Int) {
-        color_picker_view.setInitialColor(color)
-        paint_indicator_view.setPaintColor(color)
+        binding.colorPickerView.setInitialColor(color)
+        binding.paintIndicatorView.setPaintColor(color)
     }
 
     override fun notifyPaintingStarted() {
-        close_paint_panel_container.visibility = View.GONE
-        paint_yes_container.visibility = View.VISIBLE
-        paint_no_container.visibility = View.VISIBLE
+        binding.closePaintPanelContainer.visibility = View.GONE
+        binding.paintYesContainer.visibility = View.VISIBLE
+        binding.paintNoContainer.visibility = View.VISIBLE
     }
 
     override fun notifyPaintingEnded() {
-        close_paint_panel_container.visibility = View.VISIBLE
-        paint_yes_container.visibility = View.GONE
-        paint_no_container.visibility = View.GONE
+        binding.closePaintPanelContainer.visibility = View.VISIBLE
+        binding.paintYesContainer.visibility = View.GONE
+        binding.paintNoContainer.visibility = View.GONE
     }
 
     override fun notifyPaintActionStarted() {
-        //recent_colors_action.visibility = View.VISIBLE
-        //recent_colors_container.visibility = View.GONE
+        //binding.recentColorsAction.visibility = View.VISIBLE
+        //binding.recentColorsContainer.visibility = View.GONE
 
         if (!SessionSettings.instance.lockPaintPanel) {
             togglePaintPanel(show = false, softHide = true)
@@ -1898,23 +1870,23 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun isPaletteFragmentOpen(): Boolean {
-        return pixel_history_fragment_container.visibility == View.VISIBLE
+        return binding.pixelHistoryFragmentContainer.visibility == View.VISIBLE
     }
 
     override fun notifyDeviceViewportUpdate() {
-        if (device_canvas_viewport_view.visibility == View.VISIBLE) {
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        if (binding.deviceCanvasViewportView.visibility == View.VISIBLE) {
+            binding.deviceCanvasViewportView.updateDeviceViewport(binding.surfaceView.interactiveCanvas)
         }
     }
 
     override fun notifyUpdateCanvasSummary() {
-        if (canvas_summary_container.visibility == View.VISIBLE) {
-            canvas_summary_view.invalidate()
+        if (binding.canvasSummaryContainer.visibility == View.VISIBLE) {
+            binding.canvasSummaryView.invalidate()
         }
     }
 
     override fun onDeviceViewportUpdate() {
-        val canvasBounds = surface_view.interactiveCanvas.canvasScreenBounds()
+        val canvasBounds = binding.surfaceView.interactiveCanvas.canvasScreenBounds()
         //Log.v("canvas bounds", canvasBounds.toString())
 
         for (actionView in visibleActionViews) {
@@ -1964,18 +1936,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // interactive canvas gesture listener
     override fun onInteractiveCanvasPan() {
-        pixel_history_fragment_container.visibility = View.GONE
+        binding.pixelHistoryFragmentContainer.visibility = View.GONE
 
-        /*if (device_canvas_viewport_view.visibility == View.VISIBLE) {
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        /*if (binding.deviceCanvasViewportView.visibility == View.VISIBLE) {
+            binding.deviceCanvasViewportView.updateDeviceViewport(binding.surfaceView.interactiveCanvas)
         }*/
     }
 
     override fun onInteractiveCanvasScale() {
-        pixel_history_fragment_container.visibility = View.GONE
+        binding.pixelHistoryFragmentContainer.visibility = View.GONE
 
-        /*if (device_canvas_viewport_view.visibility == View.VISIBLE) {
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+        /*if (binding.deviceCanvasViewportView.visibility == View.VISIBLE) {
+            binding.deviceCanvasViewportView.updateDeviceViewport(binding.surfaceView.interactiveCanvas)
         }*/
     }
 
@@ -1983,7 +1955,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun paintQtyChanged(qty: Int) {
         //drops_amt_text.text = qty.toString()
         activity?.runOnUiThread {
-            paint_amt_info.text = qty.toString()
+            binding.paintAmtInfo.text = qty.toString()
         }
     }
 
@@ -2003,54 +1975,54 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             if (paintTextMode == paintTextModeTime) {
-                paint_time_info.visibility = View.VISIBLE
-                paint_time_info_container.visibility = View.VISIBLE
+                binding.paintTimeInfo.visibility = View.VISIBLE
+                binding.paintTimeInfoContainer.visibility = View.VISIBLE
 
-                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = max((paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt(), Utils.dpToPx(context, 30))
+                val layoutParams = binding.paintTimeInfoContainer.layoutParams as ConstraintLayout.LayoutParams
+                layoutParams.width = max((binding.paintTimeInfo.paint.measureText(binding.paintTimeInfo.text.toString()) + Utils.dpToPx(context, 10)).toInt(), Utils.dpToPx(context, 30))
 
-                paint_time_info_container.layoutParams = layoutParams
+                binding.paintTimeInfoContainer.layoutParams = layoutParams
 
-                paint_amt_info.visibility = View.INVISIBLE
+                binding.paintAmtInfo.visibility = View.INVISIBLE
             }
             else if (paintTextMode == paintTextModeAmt) {
-                paint_amt_info.visibility = View.VISIBLE
-                paint_time_info_container.visibility = View.VISIBLE
+                binding.paintAmtInfo.visibility = View.VISIBLE
+                binding.paintTimeInfoContainer.visibility = View.VISIBLE
 
-                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                layoutParams.width = max((paint_amt_info.paint.measureText(paint_amt_info.text.toString()) + Utils.dpToPx(context, 20)).toInt(), Utils.dpToPx(context, 30))
+                val layoutParams = binding.paintTimeInfoContainer.layoutParams as ConstraintLayout.LayoutParams
+                layoutParams.width = max((binding.paintAmtInfo.paint.measureText(binding.paintAmtInfo.text.toString()) + Utils.dpToPx(context, 20)).toInt(), Utils.dpToPx(context, 30))
 
-                paint_time_info_container.layoutParams = layoutParams
+                binding.paintTimeInfoContainer.layoutParams = layoutParams
 
-                paint_time_info.visibility = View.INVISIBLE
+                binding.paintTimeInfo.visibility = View.INVISIBLE
             }
             else if (paintTextMode == paintTextModeHide) {
-                paint_time_info.visibility = View.INVISIBLE
-                paint_time_info_container.visibility = View.INVISIBLE
-                paint_amt_info.visibility = View.INVISIBLE
+                binding.paintTimeInfo.visibility = View.INVISIBLE
+                binding.paintTimeInfoContainer.visibility = View.INVISIBLE
+                binding.paintAmtInfo.visibility = View.INVISIBLE
             }
         }
     }
 
     // object selection listener
     override fun onObjectSelectionBoundsChanged(startPoint: PointF, endPoint: PointF) {
-        object_selection_view.visibility = View.VISIBLE
+        binding.objectSelectionView.visibility = View.VISIBLE
 
         if (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3) {
-            object_selection_view.setBackgroundResource(R.drawable.object_selection_background_darkgray)
+            binding.objectSelectionView.setBackgroundResource(R.drawable.object_selection_background_darkgray)
         }
         else {
-            object_selection_view.setBackgroundResource(R.drawable.object_selection_background_white)
+            binding.objectSelectionView.setBackgroundResource(R.drawable.object_selection_background_white)
         }
 
-        object_selection_view.layoutParams = ConstraintLayout.LayoutParams((endPoint.x - startPoint.x).toInt(), (endPoint.y - startPoint.y).toInt())
+        binding.objectSelectionView.layoutParams = ConstraintLayout.LayoutParams((endPoint.x - startPoint.x).toInt(), (endPoint.y - startPoint.y).toInt())
 
-        object_selection_view.x = startPoint.x
-        object_selection_view.y = startPoint.y
+        binding.objectSelectionView.x = startPoint.x
+        binding.objectSelectionView.y = startPoint.y
     }
 
     override fun onObjectSelectionEnded() {
-        object_selection_view.visibility = View.GONE
+        binding.objectSelectionView.visibility = View.GONE
     }
 
     // art export listener
@@ -2062,12 +2034,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         fragment.listener = this
 
         fragmentManager?.apply {
-            // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+            // binding.exportButton.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
 
             beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
 
-            export_fragment_container.visibility = View.VISIBLE
-            export_fragment_container.setOnClickListener {
+            binding.exportFragmentContainer.visibility = View.VISIBLE
+            binding.exportFragmentContainer.setOnClickListener {
 
             }
         }
@@ -2077,26 +2049,26 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onArtExportBack() {
         fragmentManager?.popBackStack()
 
-        export_fragment_container.visibility = View.GONE
-        surface_view.endExport()
+        binding.exportFragmentContainer.visibility = View.GONE
+        binding.surfaceView.endExport()
 
-        export_action.touchState = ActionButtonView.TouchState.INACTIVE
+        binding.exportAction.touchState = ActionButtonView.TouchState.INACTIVE
     }
 
     // palettes fragment listener
     override fun onPaletteSelected(palette: Palette, index: Int) {
-        palette_name_text.text = palette.name
+        binding.paletteNameText.text = palette.name
 
-        pixel_history_fragment_container.visibility = View.GONE
+        binding.pixelHistoryFragmentContainer.visibility = View.GONE
 
         syncPaletteAndColor()
     }
 
     override fun onPaletteDeleted(palette: Palette) {
         showPaletteUndoSnackbar(palette)
-        if (palette.name == palette_name_text.text) {
+        if (palette.name == binding.paletteNameText.text) {
             if (SessionSettings.instance.palettes.size > 0) {
-                palette_name_text.text = SessionSettings.instance.palettes[0].name
+                binding.paletteNameText.text = SessionSettings.instance.palettes[0].name
             }
         }
     }
@@ -2107,7 +2079,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             val snackbar = Snackbar.make(view!!, "Deleted ${palette.name} palette", Snackbar.LENGTH_LONG)
             snackbar.setAction("Undo") {
                 undoDelete()
-                this@InteractiveCanvasFragment.palette_name_text.text = SessionSettings.instance.palette.name
+                this@InteractiveCanvasFragment.binding.paletteNameText.text = SessionSettings.instance.palette.name
             }
             snackbar.show()
         }
@@ -2128,20 +2100,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     fun syncPaletteAndColor() {
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
-            palette_add_color_button.visibility = View.GONE
-            palette_remove_color_button.visibility = View.GONE
+            binding.paletteAddColorButton.visibility = View.GONE
+            binding.paletteRemoveColorButton.visibility = View.GONE
 
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+            setupColorPalette(binding.surfaceView.interactiveCanvas.recentColorsList.toTypedArray())
         }
         else {
             if (SessionSettings.instance.palette.colors.contains(SessionSettings.instance.paintColor)) {
-                palette_add_color_button.visibility = View.GONE
-                palette_remove_color_button.visibility = View.VISIBLE
+                binding.paletteAddColorButton.visibility = View.GONE
+                binding.paletteRemoveColorButton.visibility = View.VISIBLE
 
             }
             else {
-                palette_add_color_button.visibility = View.VISIBLE
-                palette_remove_color_button.visibility = View.GONE
+                binding.paletteAddColorButton.visibility = View.VISIBLE
+                binding.paletteRemoveColorButton.visibility = View.GONE
             }
 
             setupColorPalette(SessionSettings.instance.palette.colors.toTypedArray())
@@ -2150,22 +2122,22 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // draw frame config listener
     override fun createDrawFrame(centerX: Int, centerY: Int, width: Int, height: Int, color: Int) {
-        surface_view.createDrawFrame(centerX, centerY, width, height, color)
+        binding.surfaceView.createDrawFrame(centerX, centerY, width, height, color)
 
         closePopoverFragment()
     }
 
     private fun toggleCanvasSummary() {
-        if (canvas_summary_container.visibility != View.VISIBLE) {
-            canvas_summary_view.drawBackground = false
-            canvas_summary_view.interactiveCanvas = surface_view.interactiveCanvas
+        if (binding.canvasSummaryContainer.visibility != View.VISIBLE) {
+            binding.canvasSummaryView.drawBackground = false
+            binding.canvasSummaryView.interactiveCanvas = binding.surfaceView.interactiveCanvas
 
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+            binding.deviceCanvasViewportView.updateDeviceViewport(binding.surfaceView.interactiveCanvas)
 
-            canvas_summary_container.visibility = View.VISIBLE
+            binding.canvasSummaryContainer.visibility = View.VISIBLE
         }
         else {
-            canvas_summary_container.visibility = View.INVISIBLE
+            binding.canvasSummaryContainer.visibility = View.INVISIBLE
         }
     }
 
@@ -2177,50 +2149,50 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // device canvas viewport reset listener
     override fun resetDeviceCanvasViewport() {
         context?.apply {
-            surface_view.interactiveCanvas.lastScaleFactor = surface_view.interactiveCanvas.startScaleFactor
-            surface_view.scaleFactor = surface_view.interactiveCanvas.lastScaleFactor
-            surface_view.interactiveCanvas.ppu = (surface_view.interactiveCanvas.basePpu * surface_view.scaleFactor ).toInt()
+            binding.surfaceView.interactiveCanvas.lastScaleFactor = binding.surfaceView.interactiveCanvas.startScaleFactor
+            binding.surfaceView.scaleFactor = binding.surfaceView.interactiveCanvas.lastScaleFactor
+            binding.surfaceView.interactiveCanvas.ppu = (binding.surfaceView.interactiveCanvas.basePpu * binding.surfaceView.scaleFactor ).toInt()
 
-            surface_view.interactiveCanvas.updateDeviceViewport(
+            binding.surfaceView.interactiveCanvas.updateDeviceViewport(
                 this,
-                surface_view.interactiveCanvas.rows / 2F, surface_view.interactiveCanvas.cols / 2F
+                binding.surfaceView.interactiveCanvas.rows / 2F, binding.surfaceView.interactiveCanvas.cols / 2F
             )
         }
     }
 
     private fun closePopoverFragment() {
-        if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-            pixel_history_fragment_container.visibility = View.GONE
+        if (binding.pixelHistoryFragmentContainer.visibility == View.VISIBLE) {
+            binding.pixelHistoryFragmentContainer.visibility = View.GONE
         }
     }
 
     // selected object view
     override fun showSelectedObjectYesAndNoButtons(screenPoint: Point) {
-        selected_object_yes_button.actionBtnView = selected_object_yes_action
-        selected_object_no_button.actionBtnView = selected_object_no_action
+        binding.selectedObjectYesButton.actionBtnView = binding.selectedObjectYesAction
+        binding.selectedObjectNoButton.actionBtnView = binding.selectedObjectNoAction
 
-        selected_object_yes_action.type = ActionButtonView.Type.YES
-        selected_object_yes_action.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.selectedObjectYesAction.type = ActionButtonView.Type.YES
+        binding.selectedObjectYesAction.colorMode = ActionButtonView.ColorMode.COLOR
 
-        selected_object_no_action.type = ActionButtonView.Type.NO
-        selected_object_no_action.colorMode = ActionButtonView.ColorMode.COLOR
+        binding.selectedObjectNoAction.type = ActionButtonView.Type.NO
+        binding.selectedObjectNoAction.colorMode = ActionButtonView.ColorMode.COLOR
 
-        selected_object_yes_no_container.x = (screenPoint.x - selected_object_yes_button.layoutParams.width - Utils.dpToPx(context, 5)).toFloat()
-        selected_object_yes_no_container.y = (screenPoint.y - selected_object_yes_button.layoutParams.height / 2 - Utils.dpToPx(context, 5)).toFloat()
+        binding.selectedObjectYesNoContainer.x = (screenPoint.x - binding.selectedObjectYesButton.layoutParams.width - Utils.dpToPx(context, 5)).toFloat()
+        binding.selectedObjectYesNoContainer.y = (screenPoint.y - binding.selectedObjectYesButton.layoutParams.height / 2 - Utils.dpToPx(context, 5)).toFloat()
 
-        selected_object_yes_button.setOnClickListener {
-            surface_view.interactiveCanvas.endMoveSelection(true)
+        binding.selectedObjectYesButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.endMoveSelection(true)
         }
 
-        selected_object_no_button.setOnClickListener {
-            surface_view.interactiveCanvas.endMoveSelection(false)
+        binding.selectedObjectNoButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.endMoveSelection(false)
         }
 
-        selected_object_yes_no_container.visibility = View.VISIBLE
+        binding.selectedObjectYesNoContainer.visibility = View.VISIBLE
     }
 
     override fun hideSelectedObjectYesAndNoButtons() {
-        selected_object_yes_no_container.visibility = View.GONE
+        binding.selectedObjectYesNoContainer.visibility = View.GONE
     }
 
     override fun selectedObjectEnded() {
@@ -2229,75 +2201,75 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // selected object move view
     override fun showSelectedObjectMoveButtons(bounds: Rect) {
-        object_move_up_button.actionBtnView = object_move_up_action
-        object_move_up_action.type = ActionButtonView.Type.SOLID
-        object_move_up_button.visibility = View.VISIBLE
+        binding.objectMoveUpButton.actionBtnView = binding.objectMoveUpAction
+        binding.objectMoveUpAction.type = ActionButtonView.Type.SOLID
+        binding.objectMoveUpButton.visibility = View.VISIBLE
 
-        object_move_down_button.actionBtnView = object_move_down_action
-        object_move_down_action.type = ActionButtonView.Type.SOLID
-        object_move_down_button.visibility = View.VISIBLE
+        binding.objectMoveDownButton.actionBtnView = binding.objectMoveDownAction
+        binding.objectMoveDownAction.type = ActionButtonView.Type.SOLID
+        binding.objectMoveDownButton.visibility = View.VISIBLE
 
-        object_move_left_button.actionBtnView = object_move_left_action
-        object_move_left_action.type = ActionButtonView.Type.SOLID
-        object_move_left_button.visibility = View.VISIBLE
+        binding.objectMoveLeftButton.actionBtnView = binding.objectMoveLeftAction
+        binding.objectMoveLeftAction.type = ActionButtonView.Type.SOLID
+        binding.objectMoveLeftButton.visibility = View.VISIBLE
 
-        object_move_right_button.actionBtnView = object_move_right_action
-        object_move_right_action.type = ActionButtonView.Type.SOLID
-        object_move_right_button.visibility = View.VISIBLE
+        binding.objectMoveRightButton.actionBtnView = binding.objectMoveRightAction
+        binding.objectMoveRightAction.type = ActionButtonView.Type.SOLID
+        binding.objectMoveRightButton.visibility = View.VISIBLE
 
-        object_move_up_button.setOnClickListener {
-            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.UP)
+        binding.objectMoveUpButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.UP)
         }
-        object_move_down_button.setOnClickListener {
-            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.DOWN)
+        binding.objectMoveDownButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.DOWN)
         }
-        object_move_left_button.setOnClickListener {
-            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.LEFT)
+        binding.objectMoveLeftButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.LEFT)
         }
-        object_move_right_button.setOnClickListener {
-            surface_view.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.RIGHT)
+        binding.objectMoveRightButton.setOnClickListener {
+            binding.surfaceView.interactiveCanvas.moveSelection(InteractiveCanvas.Direction.RIGHT)
         }
 
         val cX = (bounds.right + bounds.left) / 2
         val cY = (bounds.bottom + bounds.top) / 2
 
-        object_move_up_button.x = (cX - object_move_up_button.layoutParams.width / 2).toFloat()
-        object_move_up_button.y = (bounds.top - object_move_up_button.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveUpButton.x = (cX - binding.objectMoveUpButton.layoutParams.width / 2).toFloat()
+        binding.objectMoveUpButton.y = (bounds.top - binding.objectMoveUpButton.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
 
-        object_move_down_button.x = (cX - object_move_down_button.layoutParams.width / 2).toFloat()
-        object_move_down_button.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveDownButton.x = (cX - binding.objectMoveDownButton.layoutParams.width / 2).toFloat()
+        binding.objectMoveDownButton.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
 
-        object_move_left_button.x = (bounds.left - Utils.dpToPx(context, 20) - object_move_left_button.layoutParams.width).toFloat()
-        object_move_left_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+        binding.objectMoveLeftButton.x = (bounds.left - Utils.dpToPx(context, 20) - binding.objectMoveLeftButton.layoutParams.width).toFloat()
+        binding.objectMoveLeftButton.y = (cY - binding.objectMoveLeftButton.layoutParams.height / 2).toFloat()
 
-        object_move_right_button.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
-        object_move_right_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+        binding.objectMoveRightButton.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveRightButton.y = (cY - binding.objectMoveLeftButton.layoutParams.height / 2).toFloat()
     }
 
     override fun updateSelectedObjectMoveButtons(bounds: Rect) {
         val cX = (bounds.right + bounds.left) / 2
         val cY = (bounds.bottom + bounds.top) / 2
 
-        object_move_up_button.x = (cX - object_move_up_button.layoutParams.width / 2).toFloat()
-        object_move_up_button.y = (bounds.top - object_move_up_button.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveUpButton.x = (cX - binding.objectMoveUpButton.layoutParams.width / 2).toFloat()
+        binding.objectMoveUpButton.y = (bounds.top - binding.objectMoveUpButton.layoutParams.height - Utils.dpToPx(context, 20)).toFloat()
 
-        object_move_down_button.x = (cX - object_move_down_button.layoutParams.width / 2).toFloat()
-        object_move_down_button.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveDownButton.x = (cX - binding.objectMoveDownButton.layoutParams.width / 2).toFloat()
+        binding.objectMoveDownButton.y = (bounds.bottom + Utils.dpToPx(context, 20)).toFloat()
 
-        object_move_left_button.x = (bounds.left - Utils.dpToPx(context, 20) - object_move_left_button.layoutParams.width).toFloat()
-        object_move_left_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+        binding.objectMoveLeftButton.x = (bounds.left - Utils.dpToPx(context, 20) - binding.objectMoveLeftButton.layoutParams.width).toFloat()
+        binding.objectMoveLeftButton.y = (cY - binding.objectMoveLeftButton.layoutParams.height / 2).toFloat()
 
-        object_move_right_button.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
-        object_move_right_button.y = (cY - object_move_left_button.layoutParams.height / 2).toFloat()
+        binding.objectMoveRightButton.x = (bounds.right + Utils.dpToPx(context, 20)).toFloat()
+        binding.objectMoveRightButton.y = (cY - binding.objectMoveLeftButton.layoutParams.height / 2).toFloat()
     }
 
     override fun hideSelectedObjectMoveButtons() {
-        object_move_up_button.visibility = View.GONE
-        object_move_down_button.visibility = View.GONE
-        object_move_left_button.visibility = View.GONE
-        object_move_right_button.visibility = View.GONE
+        binding.objectMoveUpButton.visibility = View.GONE
+        binding.objectMoveDownButton.visibility = View.GONE
+        binding.objectMoveLeftButton.visibility = View.GONE
+        binding.objectMoveRightButton.visibility = View.GONE
 
-        selected_object_yes_no_container.visibility = View.GONE
+        binding.selectedObjectYesNoContainer.visibility = View.GONE
     }
 
     override fun selectedObjectMoveEnded() {
@@ -2306,27 +2278,27 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // menu card listener
     override fun moveMenuCardBy(x: Float, y: Float) {
-        menu_container.x += x
-        menu_container.y += y
+        binding.menuContainer.x += x
+        binding.menuContainer.y += y
 
         view?.apply {
-            if (menu_container.x + menu_container.width > width) {
-                menu_container.x = (width - menu_container.width).toFloat()
+            if (binding.menuContainer.x + binding.menuContainer.width > width) {
+                binding.menuContainer.x = (width - binding.menuContainer.width).toFloat()
             }
-            if (menu_container.x < 0) {
-                menu_container.x = 0F
+            if (binding.menuContainer.x < 0) {
+                binding.menuContainer.x = 0F
             }
-            if (menu_container.y + menu_container.height > height) {
-                menu_container.y = (height - menu_container.height).toFloat()
+            if (binding.menuContainer.y + binding.menuContainer.height > height) {
+                binding.menuContainer.y = (height - binding.menuContainer.height).toFloat()
             }
-            if (menu_container.y < 0) {
-                menu_container.y = 0F
+            if (binding.menuContainer.y < 0) {
+                binding.menuContainer.y = 0F
             }
         }
     }
 
     override fun closeMenu() {
-        menu_container.visibility = View.GONE
+        binding.menuContainer.visibility = View.GONE
     }
 
     // world API
@@ -2399,7 +2371,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val timeUntil = response.getInt("s").toLong()
 
                     if (timeUntil < 0) {
-                        paint_time_info.text = "???"
+                        binding.paintTimeInfo.text = "???"
                     } else {
                         SessionSettings.instance.timeSync = timeUntil
                         setupPaintEventTimer()
@@ -2440,19 +2412,19 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     if (m == 0L) {
                         try {
-                            paint_time_info.text = s.toString()
+                            binding.paintTimeInfo.text = s.toString()
                         } catch (ex: IllegalStateException) {
 
                         }
                     } else {
                         try {
-                            paint_time_info.text = String.format("%02d:%02d", m, s)
+                            binding.paintTimeInfo.text = String.format("%02d:%02d", m, s)
 
-                            if (paint_time_info.visibility == View.VISIBLE) {
-                                val layoutParams = paint_time_info_container.layoutParams as ConstraintLayout.LayoutParams
-                                layoutParams.width = (paint_time_info.paint.measureText(paint_time_info.text.toString()) + Utils.dpToPx(context, 10)).toInt()
+                            if (binding.paintTimeInfo.visibility == View.VISIBLE) {
+                                val layoutParams = binding.paintTimeInfoContainer.layoutParams as ConstraintLayout.LayoutParams
+                                layoutParams.width = (binding.paintTimeInfo.paint.measureText(binding.paintTimeInfo.text.toString()) + Utils.dpToPx(context, 10)).toInt()
 
-                                paint_time_info_container.layoutParams = layoutParams
+                                binding.paintTimeInfoContainer.layoutParams = layoutParams
                             }
 
                         } catch (ex: IllegalStateException) {

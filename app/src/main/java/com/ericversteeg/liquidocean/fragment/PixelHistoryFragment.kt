@@ -7,24 +7,28 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ericversteeg.liquidocean.R
 import com.ericversteeg.liquidocean.adapter.PixelHistoryRecyclerViewAdapter
-import kotlinx.android.synthetic.main.fragment_pixel_history.*
+import com.ericversteeg.liquidocean.databinding.FragmentPixelHistoryBinding
 import org.json.JSONArray
 
 class PixelHistoryFragment: Fragment() {
 
     lateinit var pixelHistoryJson: JSONArray
+    
+    private var _binding: FragmentPixelHistoryBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_pixel_history, container, false)
+    ): View {
+        _binding = FragmentPixelHistoryBinding.inflate(layoutInflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onResume() {
@@ -33,19 +37,19 @@ class PixelHistoryFragment: Fragment() {
         context?.apply {
             if (pixelHistoryJson.length() > 0) {
                 // setup recycler view
-                pixel_history_recycler_view.layoutManager = LinearLayoutManager(
+                binding.pixelHistoryRecyclerView.layoutManager = LinearLayoutManager(
                     this,
                     LinearLayoutManager.VERTICAL,
                     false
                 )
-                pixel_history_recycler_view.adapter = PixelHistoryRecyclerViewAdapter(
+                binding.pixelHistoryRecyclerView.adapter = PixelHistoryRecyclerViewAdapter(
                     this, pixelHistoryJson
                 )
 
-                pixel_history_recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+                binding.pixelHistoryRecyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
             }
             else {
-                no_history_text.visibility = View.VISIBLE
+                binding.noHistoryText.visibility = View.VISIBLE
             }
         }
     }

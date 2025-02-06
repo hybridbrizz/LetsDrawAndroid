@@ -9,12 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.R
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.databinding.FragmentTerminalBinding
 import com.ericversteeg.liquidocean.model.Command
+import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.SessionSettings
-import kotlinx.android.synthetic.main.fragment_terminal.*
-import java.lang.Exception
 
 class TerminalFragment: Fragment() {
 
@@ -35,39 +33,48 @@ class TerminalFragment: Fragment() {
     lateinit var interactiveCanvas: InteractiveCanvas
 
     var lastText = ""
+    
+    private var _binding: FragmentTerminalBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_terminal, container, false)
+    ): View {
+        _binding = FragmentTerminalBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        terminal_input.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
+        binding.terminalInput.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
 
-        terminal_input.addTextChangedListener {
+        binding.terminalInput.addTextChangedListener {
             it?.apply {
                 var text = toString()
 
                 // send command
                 if (text.isNotEmpty()) {
                     if (text.toCharArray()[text.length - 1] == '\n') {
-                        autoCompleteView.visibility = View.INVISIBLE
+                        binding.autoCompleteView.visibility = View.INVISIBLE
                         sendCommand(text.substring(0, text.length - 1))
                         text = ""
-                        terminal_input.setText(text)
+                        binding.terminalInput.setText(text)
                     }
                 }
 
                 // only 1 white space at the end
                 if (text.endsWith("  ")) {
                     text = text.substring(0, text.length - 1)
-                    terminal_input.setText(text)
-                    terminal_input.setSelection(terminal_input.length())
+                    binding.terminalInput.setText(text)
+                    binding.terminalInput.setSelection(binding.terminalInput.length())
                 }
 
                 // auto complete
@@ -81,37 +88,37 @@ class TerminalFragment: Fragment() {
                         if (matchArgSyntax(command, inputArgsPrefix, true)) {
                             val replacedSyntax = command.replacedArgSyntax
 
-                            autoCompleteView.autoCompletedString = "${command.name} $replacedSyntax"
-                            autoCompleteView.prefixString = text
-                            autoCompleteView.textPaint = terminal_input.paint
-                            autoCompleteView.invalidate()
+                            binding.autoCompleteView.autoCompletedString = "${command.name} $replacedSyntax"
+                            binding.autoCompleteView.prefixString = text
+                            binding.autoCompleteView.textPaint = binding.terminalInput.paint
+                            binding.autoCompleteView.invalidate()
 
-                            autoCompleteView.visibility = View.VISIBLE
+                            binding.autoCompleteView.visibility = View.VISIBLE
                         }
                         else {
-                            autoCompleteView.visibility = View.INVISIBLE
+                            binding.autoCompleteView.visibility = View.INVISIBLE
                         }
                     }
                     else {
-                        autoCompleteView.visibility = View.INVISIBLE
+                        binding.autoCompleteView.visibility = View.INVISIBLE
                     }
                 }
 
                 lastText = text
 
                 /*val bounds = Rect()
-                terminal_input.paint.getTextBounds(text, 0, text.length, bounds)
+                binding.terminalInput.paint.getTextBounds(text, 0, text.length, bounds)
 
-                val shrinkBoundary = terminal_input.width - Utils.dpToPx(context, 20)
-                val growBoundary = terminal_input.width - Utils.dpToPx(context, 50)
+                val shrinkBoundary = binding.terminalInput.width - Utils.dpToPx(context, 20)
+                val growBoundary = binding.terminalInput.width - Utils.dpToPx(context, 50)
 
                 var numResizes = 0
                 if (bounds.width() > shrinkBoundary && textSize >= minimumTextSize) {
                     do {
                         textSize -= 1
-                        terminal_input.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
+                        binding.terminalInput.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
 
-                        terminal_input.paint.getTextBounds(text, 0, text.length, bounds)
+                        binding.terminalInput.paint.getTextBounds(text, 0, text.length, bounds)
 
                         numResizes++
                     }
@@ -120,9 +127,9 @@ class TerminalFragment: Fragment() {
                 else if (bounds.width() < growBoundary && textSize <= maximumTextSize) {
                     do {
                         textSize += 1
-                        terminal_input.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
+                        binding.terminalInput.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize)
 
-                        terminal_input.paint.getTextBounds(text, 0, text.length, bounds)
+                        binding.terminalInput.paint.getTextBounds(text, 0, text.length, bounds)
 
                         numResizes++
                     }

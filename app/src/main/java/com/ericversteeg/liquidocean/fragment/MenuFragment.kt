@@ -1,34 +1,24 @@
 package com.ericversteeg.liquidocean.fragment
 
 import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Shader
-import android.os.Build
 import android.os.Bundle
-import android.text.TextPaint
-import android.util.Log
-import android.view.*
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.children
+import android.view.GestureDetector
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.fragment.app.Fragment
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentMenuBinding
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
-import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.listener.MenuButtonListener
 import com.ericversteeg.liquidocean.listener.MenuCardListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
+import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_art_export.*
-import kotlinx.android.synthetic.main.fragment_menu.*
-import kotlinx.android.synthetic.main.fragment_menu.back_action
-import kotlinx.android.synthetic.main.fragment_menu.back_button
-import kotlinx.android.synthetic.main.fragment_options.*
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.Timer
+import java.util.TimerTask
 
 class MenuFragment: Fragment() {
 
@@ -51,16 +41,21 @@ class MenuFragment: Fragment() {
 
     var touchTotalX = 0F
     var touchTotalY = 0F
+    
+    private var _binding: FragmentMenuBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_menu, container, false)
+    ): View {
+        _binding = FragmentMenuBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,17 +65,17 @@ class MenuFragment: Fragment() {
 
         view.setBackgroundColor(Color.BLACK)
 
-        val allViews = listOf<View>(back_button, back_action,
-            options_menu_text, how_to_menu_text, menu_button_container)
+        val allViews = listOf<View>(binding.backButton, binding.backAction,
+            binding.optionsMenuText, binding.howToMenuText, binding.menuButtonContainer)
 
         //fadeInAllView(allViews)
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButton.actionBtnView = binding.backAction
+        binding.backAction.type = ActionButtonView.Type.BACK_SOLID
 
         view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
-        back_button.setOnClickListener {
+        binding.backButton.setOnClickListener {
             if (backCount == 1) {
                 resetMenu()
                 animateMenuButtons(0)
@@ -93,31 +88,31 @@ class MenuFragment: Fragment() {
             backCount--
         }
 
-        back_button.visibility = View.GONE
+        binding.backButton.visibility = View.GONE
 
-        stats_button.type = ActionButtonView.Type.STATS
-        stats_button.topLayer = true
-        stats_button_bottom_layer.type = ActionButtonView.Type.STATS
+        binding.statsButton.type = ActionButtonView.Type.STATS
+        binding.statsButton.topLayer = true
+        binding.statsButtonBottomLayer.type = ActionButtonView.Type.STATS
 
-        single_button.type = ActionButtonView.Type.SINGLE
-        single_button.topLayer = true
-        single_button_bottom_layer.type = ActionButtonView.Type.SINGLE
+        binding.singleButton.type = ActionButtonView.Type.SINGLE
+        binding.singleButton.topLayer = true
+        binding.singleButtonBottomLayer.type = ActionButtonView.Type.SINGLE
 
-        world_button.type = ActionButtonView.Type.WORLD
-        world_button.topLayer = true
-        world_button_bottom_layer.type = ActionButtonView.Type.WORLD
+        binding.worldButton.type = ActionButtonView.Type.WORLD
+        binding.worldButton.topLayer = true
+        binding.worldButtonBottomLayer.type = ActionButtonView.Type.WORLD
 
-        //dev_button.type = ActionButtonView.Type.DEV
-        //dev_button.topLayer = true
-        //dev_button_bottom_layer.type = ActionButtonView.Type.DEV
+        //binding.devButton.type = ActionButtonView.Type.DEV
+        //binding.devButton.topLayer = true
+        //binding.devButton_bottom_layer.type = ActionButtonView.Type.DEV
 
         /*val artShowcase = SessionSettings.instance.artShowcase
         if (artShowcase != null && artShowcase.size > 0) {
-            art_showcase.showBackground = false
-            art_showcase.art = artShowcase[0]
+            binding.artShowcase.showBackground = false
+            binding.artShowcase.art = artShowcase[0]
         }*/
 
-        val menuTextViews = listOf(options_menu_text, how_to_menu_text, lefty_menu_text, righty_menu_text)
+        val menuTextViews = listOf(binding.optionsMenuText, binding.howToMenuText, binding.leftyMenuText, binding.rightyMenuText)
         for (textView in menuTextViews) {
             textView.setOnTouchListener(object: View.OnTouchListener {
                 override fun onTouch(view: View?, ev: MotionEvent): Boolean {
@@ -139,36 +134,36 @@ class MenuFragment: Fragment() {
             /*// menuButtonListener?.onMenuButtonSelected(playMenuIndex)
             play_button_container.visibility = View.GONE
 
-            options_button_container.visibility = View.GONE
+            binding.optionsButtonContainer.visibility = View.GONE
 
-            stats_button_container.visibility = View.GONE
+            binding.statsButton_container.visibility = View.GONE
 
-            howto_button_container.visibility = View.GONE
+            binding.howtoButtonContainer.visibility = View.GONE
 
-            single_button_container.visibility = View.VISIBLE
+            binding.singleButtonContainer.visibility = View.VISIBLE
 
-            world_button_container.visibility = View.INVISIBLE
+            binding.worldButtonContainer.visibility = View.INVISIBLE
 
-            dev_button_container.visibility = View.VISIBLE
+            binding.devButtonContainer.visibility = View.VISIBLE
 
-            empty_button_2_container.visibility = View.VISIBLE
+            binding.emptyButton2Container.visibility = View.VISIBLE
 
-            back_button.visibility = View.VISIBLE
+            binding.backButton.visibility = View.VISIBLE
             backCount++
 
             animateMenuButtons(1)*/
 
             if (!SessionSettings.instance.selectedHand) {
                 draw_button_container.visibility = View.GONE
-                options_button_container.visibility = View.GONE
-                stats_button_container.visibility = View.GONE
-                howto_button_container.visibility = View.GONE
+                binding.optionsButtonContainer.visibility = View.GONE
+                binding.statsButton_container.visibility = View.GONE
+                binding.howtoButtonContainer.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
+                binding.leftyButtonContainer.visibility = View.VISIBLE
+                binding.rightyButtonContainer.visibility = View.VISIBLE
 
-                //empty_button_1_container.visibility = View.VISIBLE
-                //empty_button_2_container.visibility = View.VISIBLE
+                //binding.emptyButton1Container.visibility = View.VISIBLE
+                //binding.emptyButton2Container.visibility = View.VISIBLE
 
                 route = singleMenuIndex
 
@@ -181,34 +176,34 @@ class MenuFragment: Fragment() {
             }
         }*/
 
-        options_menu_text.setOnClickListener {
+        binding.optionsMenuText.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(optionsMenuIndex)
             menuCardListener?.closeMenu()
         }
 
-        stats_button.setOnClickListener {
+        binding.statsButton.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-        how_to_menu_text.setOnClickListener {
+        binding.howToMenuText.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
             menuCardListener?.closeMenu()
         }
 
-        single_button.setOnClickListener {
+        binding.singleButton.setOnClickListener {
 
         }
 
-        world_button.setOnClickListener {
+        binding.worldButton.setOnClickListener {
             if (!SessionSettings.instance.selectedHand) {
-                single_button_container.visibility = View.GONE
-                world_button_container.visibility = View.GONE
-                dev_button_container.visibility = View.GONE
+                binding.singleButtonContainer.visibility = View.GONE
+                binding.worldButtonContainer.visibility = View.GONE
+                binding.devButtonContainer.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
+                binding.leftyButtonContainer.visibility = View.VISIBLE
+                binding.rightyButtonContainer.visibility = View.VISIBLE
 
-                empty_button_1_container.visibility = View.VISIBLE
+                binding.emptyButton1Container.visibility = View.VISIBLE
 
                 route = worldMenuIndex
 
@@ -220,16 +215,16 @@ class MenuFragment: Fragment() {
             }
         }
 
-        dev_button.setOnClickListener {
+        binding.devButton.setOnClickListener {
             if (!SessionSettings.instance.selectedHand) {
-                single_button_container.visibility = View.GONE
-                world_button_container.visibility = View.GONE
-                dev_button_container.visibility = View.GONE
+                binding.singleButtonContainer.visibility = View.GONE
+                binding.worldButtonContainer.visibility = View.GONE
+                binding.devButtonContainer.visibility = View.GONE
 
-                lefty_button_container.visibility = View.VISIBLE
-                righty_button_container.visibility = View.VISIBLE
+                binding.leftyButtonContainer.visibility = View.VISIBLE
+                binding.rightyButtonContainer.visibility = View.VISIBLE
 
-                empty_button_1_container.visibility = View.VISIBLE
+                binding.emptyButton1Container.visibility = View.VISIBLE
 
                 route = devMenuIndex
 
@@ -241,21 +236,21 @@ class MenuFragment: Fragment() {
             }
         }
 
-        lefty_menu_text.setOnClickListener {
+        binding.leftyMenuText.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(leftyMenuIndex, singleMenuIndex)
         }
 
-        righty_menu_text.setOnClickListener {
+        binding.rightyMenuText.setOnClickListener {
             menuButtonListener?.onMenuButtonSelected(rightyMenuIndex, singleMenuIndex)
         }
 
-        menu_button_container.setOnClickListener {
+        binding.menuButtonContainer.setOnClickListener {
 
         }
 
         if (SessionSettings.instance.selectedHand) {
-            options_button_container.visibility = View.VISIBLE
-            howto_button_container.visibility = View.VISIBLE
+            binding.optionsButtonContainer.visibility = View.VISIBLE
+            binding.howtoButtonContainer.visibility = View.VISIBLE
 
             animateMenuButtons(0)
         }
@@ -268,21 +263,21 @@ class MenuFragment: Fragment() {
 
                 val safeViews: MutableList<View> = ArrayList()
 
-                if (art_showcase != null) {
-                    safeViews.add(art_showcase)
-                    safeViews.add(menu_button_container_horizontal_spacer)
+                if (binding.artShowcase != null) {
+                    safeViews.add(binding.artShowcase)
+                    safeViews.add(binding.menuButtonContainerHorizontalSpacer)
 
-                    Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView1, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView2, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView3, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView4, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView5, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView6, view, safeViews.toList())
+                    Animator.animatePixelColorEffect(binding.pixelView7, view, safeViews.toList())
                 }
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-                menuButtonContainerWidth = menu_button_container.width
+                menuButtonContainerWidth = binding.menuButtonContainer.width
             }
         })
 
@@ -294,10 +289,10 @@ class MenuFragment: Fragment() {
             }
         })
 
-        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(lefty_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(righty_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.optionsMenuText, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.howToMenuText, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.leftyMenuText, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.rightyMenuText, "#CCCCCC", "#DDDDDD")
 
         if (!SessionSettings.instance.selectedHand) {
             selectHand()
@@ -305,14 +300,14 @@ class MenuFragment: Fragment() {
     }
 
     fun clearMenuTextHighlights() {
-        Utils.colorizeTextView(options_menu_text, "#CCCCCC", "#DDDDDD")
-        Utils.colorizeTextView(how_to_menu_text, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.optionsMenuText, "#CCCCCC", "#DDDDDD")
+        Utils.colorizeTextView(binding.howToMenuText, "#CCCCCC", "#DDDDDD")
     }
 
     private fun selectHand() {
         if (!SessionSettings.instance.selectedHand) {
-            lefty_button_container.visibility = View.VISIBLE
-            righty_button_container.visibility = View.VISIBLE
+            binding.leftyButtonContainer.visibility = View.VISIBLE
+            binding.rightyButtonContainer.visibility = View.VISIBLE
 
             animateMenuButtons(2)
         }
@@ -354,8 +349,8 @@ class MenuFragment: Fragment() {
         if (!animatingMenu) {
             animatingMenu = true
             if (layer == 0) {
-                Animator.animateMenuItems(listOf(listOf(options_menu_text),
-                    listOf(stats_button_bottom_layer, stats_button), listOf(how_to_menu_text)), cascade = true, out = false, inverse = false,
+                Animator.animateMenuItems(listOf(listOf(binding.optionsMenuText),
+                    listOf(binding.statsButtonBottomLayer, binding.statsButton), listOf(binding.howToMenuText)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingMenu = false
@@ -364,8 +359,8 @@ class MenuFragment: Fragment() {
                 )
             }
             else if (layer == 1) {
-                Animator.animateMenuItems(listOf(listOf(single_button_bottom_layer, single_button), listOf(world_button_bottom_layer, world_button),
-                    listOf(dev_button_bottom_layer, dev_button)), cascade = true, out = false, inverse = false,
+                Animator.animateMenuItems(listOf(listOf(binding.singleButtonBottomLayer, binding.singleButton), listOf(binding.worldButtonBottomLayer, binding.worldButton),
+                    listOf(binding.devButtonBottomLayer, binding.devButton)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingMenu = false
@@ -374,7 +369,7 @@ class MenuFragment: Fragment() {
                 )
             }
             else if (layer == 2) {
-                Animator.animateMenuItems(listOf(listOf(lefty_menu_text), listOf(righty_menu_text)),
+                Animator.animateMenuItems(listOf(listOf(binding.leftyMenuText), listOf(binding.rightyMenuText)),
                     cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -423,17 +418,17 @@ class MenuFragment: Fragment() {
             override fun run() {
                 activity?.runOnUiThread {
                     SessionSettings.instance.artShowcase?.apply {
-                        if (art_showcase != null) {
-                            art_showcase.alpha = 0F
+                        if (binding.artShowcase != null) {
+                            binding.artShowcase.alpha = 0F
 
-                            art_showcase.showBackground = false
-                            art_showcase.art = getNextArtShowcase()
+                            binding.artShowcase.showBackground = false
+                            binding.artShowcase.art = getNextArtShowcase()
 
-                            art_showcase.animate().alpha(1F).setDuration(2500).withEndAction {
+                            binding.artShowcase.animate().alpha(1F).setDuration(2500).withEndAction {
                                 Timer().schedule(object: TimerTask() {
                                     override fun run() {
                                         activity?.runOnUiThread {
-                                            art_showcase.animate().alpha(0F).setDuration(1500).start()
+                                            binding.artShowcase.animate().alpha(0F).setDuration(1500).start()
                                         }
                                     }
 
@@ -450,43 +445,43 @@ class MenuFragment: Fragment() {
     private fun resetMenu() {
         //draw_button_container.visibility = View.VISIBLE
 
-        options_button_container.visibility = View.VISIBLE
+        binding.optionsButtonContainer.visibility = View.VISIBLE
 
-        stats_button_container.visibility = View.GONE
+        binding.statsButtonContainer.visibility = View.GONE
 
-        howto_button_container.visibility = View.VISIBLE
+        binding.howtoButtonContainer.visibility = View.VISIBLE
 
-        single_button_container.visibility = View.GONE
+        binding.singleButtonContainer.visibility = View.GONE
 
-        world_button_container.visibility = View.GONE
+        binding.worldButtonContainer.visibility = View.GONE
 
-        dev_button_container.visibility = View.GONE
+        binding.devButtonContainer.visibility = View.GONE
 
-        lefty_button_container.visibility = View.GONE
+        binding.leftyButtonContainer.visibility = View.GONE
 
-        righty_button_container.visibility = View.GONE
+        binding.rightyButtonContainer.visibility = View.GONE
 
-        empty_button_2_container.visibility = View.GONE
+        binding.emptyButton2Container.visibility = View.GONE
 
-        back_button.visibility = View.GONE
+        binding.backButton.visibility = View.GONE
     }
 
     private fun resetToPlayMode() {
-        single_button_container.visibility = View.VISIBLE
+        binding.singleButtonContainer.visibility = View.VISIBLE
 
-        world_button_container.visibility = View.VISIBLE
+        binding.worldButtonContainer.visibility = View.VISIBLE
 
-        dev_button_container.visibility = View.VISIBLE
+        binding.devButtonContainer.visibility = View.VISIBLE
 
-        empty_button_2_container.visibility = View.VISIBLE
+        binding.emptyButton2Container.visibility = View.VISIBLE
 
-        lefty_button_container.visibility = View.GONE
+        binding.leftyButtonContainer.visibility = View.GONE
 
-        righty_button_container.visibility = View.GONE
+        binding.rightyButtonContainer.visibility = View.GONE
 
-        empty_button_1_container.visibility = View.GONE
+        binding.emptyButton1Container.visibility = View.GONE
 
-        back_button.visibility = View.VISIBLE
+        binding.backButton.visibility = View.VISIBLE
     }
 
     companion object {

@@ -15,21 +15,12 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentSigninBinding
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.SignInListener
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import kotlinx.android.synthetic.main.fragment_options.*
-import kotlinx.android.synthetic.main.fragment_signin.*
-import kotlinx.android.synthetic.main.fragment_signin.back_action
-import kotlinx.android.synthetic.main.fragment_signin.back_button
 import org.json.JSONObject
 
 
@@ -49,16 +40,21 @@ class SignInFragment: Fragment() {
     // var googleAccount: GoogleSignInAccount? = null
 
     // val signInRequestCode = 1000
+    
+    private var _binding: FragmentSigninBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_signin, container, false)
+    ): View {
+        _binding = FragmentSigninBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -66,48 +62,48 @@ class SignInFragment: Fragment() {
 
         setModeViews()
 
-        status_text.setTextColor(ActionButtonView.altGreenPaint.color)
+        binding.statusText.setTextColor(ActionButtonView.altGreenPaint.color)
 
         if (mode == modeSignIn) {
-            status_text.visibility = View.INVISIBLE
+            binding.statusText.visibility = View.INVISIBLE
 
-            sign_in_title.type = ActionButtonView.Type.SIGNIN
+            binding.signInTitle.type = ActionButtonView.Type.SIGNIN
 
-            val layoutParams = sign_in_title.layoutParams as ConstraintLayout.LayoutParams
+            val layoutParams = binding.signInTitle.layoutParams as ConstraintLayout.LayoutParams
             layoutParams.width = Utils.dpToPx(context, 165)
 
-            sign_in_title.type = ActionButtonView.Type.SIGNIN
+            binding.signInTitle.type = ActionButtonView.Type.SIGNIN
         }
         else if (mode == modeSetPincode) {
-            status_text.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
+            binding.statusText.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
 
-            sign_in_title.type = ActionButtonView.Type.PINCODE
+            binding.signInTitle.type = ActionButtonView.Type.PINCODE
         }
         else if (mode == modeChangePincode) {
-            status_text.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
+            binding.statusText.text = "Here you can set an access pincode to gain access to your account from your other devices or upon app reinstallation."
 
-            pincode_title.text = "New 8-digit pincode"
-            pincode_2_title.text = "Repeat new 8-digit pincode"
+            binding.pincodeTitle.text = "New 8-digit pincode"
+            binding.pincode2Title.text = "Repeat new 8-digit pincode"
 
-            set_pincode_button.text = "Change Pincode"
+            binding.setPincodeButton.text = "Change Pincode"
 
-            val layoutParams = pincode_title.layoutParams as ConstraintLayout.LayoutParams
+            val layoutParams = binding.pincodeTitle.layoutParams as ConstraintLayout.LayoutParams
             layoutParams.topMargin = Utils.dpToPx(context, 40)
-            pincode_title.layoutParams = layoutParams
+            binding.pincodeTitle.layoutParams = layoutParams
 
-            sign_in_title.type = ActionButtonView.Type.PINCODE
+            binding.signInTitle.type = ActionButtonView.Type.PINCODE
         }
 
-        sign_in_title.isStatic = true
+        binding.signInTitle.isStatic = true
 
-        back_button.actionBtnView = back_action
-        back_action.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButton.actionBtnView = binding.backAction
+        binding.backAction.type = ActionButtonView.Type.BACK_SOLID
 
-        back_button.setOnClickListener {
+        binding.backButton.setOnClickListener {
             signInListener?.onSignInBack()
         }
 
-        set_pincode_button.setOnClickListener {
+        binding.setPincodeButton.setOnClickListener {
             if (mode == modeSetPincode) {
                 setPincode()
             }
@@ -116,17 +112,17 @@ class SignInFragment: Fragment() {
             }
         }
 
-        sign_in_button_2.setOnClickListener {
+        binding.signInButton2.setOnClickListener {
             signIn()
         }
 
-        old_pincode_input.addTextChangedListener(object: TextWatcher {
+        binding.oldPincodeInput.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                set_pincode_button.isEnabled = true
+                binding.setPincodeButton.isEnabled = true
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -134,13 +130,13 @@ class SignInFragment: Fragment() {
             }
         })
 
-        pincode_input.addTextChangedListener(object: TextWatcher {
+        binding.pincodeInput.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                set_pincode_button.isEnabled = true
+                binding.setPincodeButton.isEnabled = true
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -148,13 +144,13 @@ class SignInFragment: Fragment() {
             }
         })
 
-        pincode_2_input.addTextChangedListener(object: TextWatcher {
+        binding.pincode2Input.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                set_pincode_button.isEnabled = true
+                binding.setPincodeButton.isEnabled = true
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -162,13 +158,13 @@ class SignInFragment: Fragment() {
             }
         })
 
-        name_input.addTextChangedListener(object: TextWatcher {
+        binding.nameInput.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                sign_in_button_2.isEnabled = true
+                binding.signInButton2.isEnabled = true
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -176,13 +172,13 @@ class SignInFragment: Fragment() {
             }
         })
 
-        pincode_input_sign_in.addTextChangedListener(object: TextWatcher {
+        binding.pincodeInputSignIn.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                sign_in_button_2.isEnabled = true
+                binding.signInButton2.isEnabled = true
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -214,91 +210,91 @@ class SignInFragment: Fragment() {
     private fun toggleModeViews(mode: Int, show: Boolean) {
         if (mode == modeSignIn) {
             if (show) {
-                name_title.visibility = View.VISIBLE
+                binding.nameTitle.visibility = View.VISIBLE
             }
             else {
-                name_title.visibility = View.GONE
+                binding.nameTitle.visibility = View.GONE
             }
 
             if (show) {
-                name_input.visibility = View.VISIBLE
+                binding.nameInput.visibility = View.VISIBLE
             }
             else {
-                name_input.visibility = View.GONE
+                binding.nameInput.visibility = View.GONE
             }
 
             if (show) {
-                pincode_title_sign_in.visibility = View.VISIBLE
+                binding.pincodeTitleSignIn.visibility = View.VISIBLE
             }
             else {
-                pincode_title_sign_in.visibility = View.GONE
+                binding.pincodeTitleSignIn.visibility = View.GONE
             }
 
             if (show) {
-                pincode_input_sign_in.visibility = View.VISIBLE
+                binding.pincodeInputSignIn.visibility = View.VISIBLE
             }
             else {
-                pincode_input_sign_in.visibility = View.GONE
+                binding.pincodeInputSignIn.visibility = View.GONE
             }
 
             if (show) {
-                sign_in_button_2.visibility = View.VISIBLE
+                binding.signInButton2.visibility = View.VISIBLE
             }
             else {
-                sign_in_button_2.visibility = View.GONE
+                binding.signInButton2.visibility = View.GONE
             }
         }
         else if (mode == modeSetPincode) {
             if (show) {
-                pincode_title.visibility = View.VISIBLE
+                binding.pincodeTitle.visibility = View.VISIBLE
             }
             else {
-                pincode_title.visibility = View.GONE
+                binding.pincodeTitle.visibility = View.GONE
             }
 
             if (show) {
-                pincode_input.visibility = View.VISIBLE
+                binding.pincodeInput.visibility = View.VISIBLE
             }
             else {
-                pincode_input.visibility = View.GONE
+                binding.pincodeInput.visibility = View.GONE
             }
 
             if (show) {
-                pincode_2_title.visibility = View.VISIBLE
+                binding.pincode2Title.visibility = View.VISIBLE
             }
             else {
-                pincode_2_title.visibility = View.GONE
+                binding.pincode2Title.visibility = View.GONE
             }
 
             if (show) {
-                pincode_2_input.visibility = View.VISIBLE
+                binding.pincode2Input.visibility = View.VISIBLE
             }
             else {
-                pincode_2_input.visibility = View.GONE
+                binding.pincode2Input.visibility = View.GONE
             }
 
             if (show) {
-                set_pincode_button.visibility = View.VISIBLE
+                binding.setPincodeButton.visibility = View.VISIBLE
             }
             else {
-                set_pincode_button.visibility = View.GONE
+                binding.setPincodeButton.visibility = View.GONE
             }
         }
         else if (mode == modeChangePincode) {
             toggleModeViews(modeSignIn, show)
 
             if (show) {
-                old_pincode_title.visibility = View.VISIBLE
+                binding.pincodeTitle.visibility = View.VISIBLE
             }
             else {
-                old_pincode_title.visibility = View.GONE
+                binding.pincodeTitle.visibility = View.GONE
             }
 
             if (show) {
-                old_pincode_input.visibility = View.VISIBLE
+                binding.oldPincodeInput.visibility = View.VISIBLE
             }
             else {
-                old_pincode_input.visibility = View.GONE
+                binding.oldPincodeInput.visibility = View.GONE
             }
         }
     }
@@ -322,12 +318,12 @@ class SignInFragment: Fragment() {
             /*googleAccount = GoogleSignIn.getLastSignedInAccount(this)
 
             if (googleAccount != null || SessionSettings.instance.googleAuth) {
-                status_text.text = "Account synced with Google"
+                binding.statusText.text = "Account synced with Google"
                 google_sign_in_button.isEnabled = false
                 sendGoogleToken(googleAccount)
             }
             else {
-                status_text.text = "Sync account with Google"
+                binding.statusText.text = "Sync account with Google"
             }*/
         }
     }
@@ -344,33 +340,33 @@ class SignInFragment: Fragment() {
     }*/
 
     private fun setPincode() {
-        set_pincode_button.isEnabled = false
+        binding.setPincodeButton.isEnabled = false
 
         val requestQueue = Volley.newRequestQueue(context)
 
         val requestParams = HashMap<String, String>()
 
         if (SessionSettings.instance.displayName == "") {
-            status_text.text = "You must first set a display name in Options"
+            binding.statusText.text = "You must first set a display name in Options"
             return
         }
 
-        if (pincode_input.text.toString().isEmpty()) {
-            set_pincode_button.isEnabled = true
+        if (binding.pincodeInput.text.toString().isEmpty()) {
+            binding.setPincodeButton.isEnabled = true
             return
         }
 
-        if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
-            status_text.text = "Pincodes don't match"
+        if (binding.pincodeInput.text.toString() != binding.pincode2Input.text.toString()) {
+            binding.statusText.text = "Pincodes don't match"
             return
         }
 
-        if (pincode_input.text.toString().length != 8) {
-            status_text.text = "Pincode length is incorrect"
+        if (binding.pincodeInput.text.toString().length != 8) {
+            binding.statusText.text = "Pincode length is incorrect"
             return
         }
 
-        requestParams["pincode"] = pincode_input.text.toString()
+        requestParams["pincode"] = binding.pincodeInput.text.toString()
 
         val paramsJson = JSONObject(requestParams as Map<String, String>)
 
@@ -382,11 +378,11 @@ class SignInFragment: Fragment() {
                 SessionSettings.instance.pincodeSet = true
 
                 // update UI
-                status_text.text = "Pincode set. Go to Options -> Sign-in to access your account from any device."
+                binding.statusText.text = "Pincode set. Go to Options -> Sign-in to access your account from any device."
             },
             { error ->
                 Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                set_pincode_button.isEnabled = true
+                binding.setPincodeButton.isEnabled = true
             }) {
 
             override fun getHeaders(): MutableMap<String, String> {
@@ -401,44 +397,44 @@ class SignInFragment: Fragment() {
     }
 
     private fun changePincode() {
-        set_pincode_button.isEnabled = false
+        binding.setPincodeButton.isEnabled = false
 
         val requestQueue = Volley.newRequestQueue(context)
 
         val requestParams = HashMap<String, String>()
 
         if (SessionSettings.instance.displayName == "") {
-            status_text.text = "You must first set a display name in Options"
+            binding.statusText.text = "You must first set a display name in Options"
             return
         }
 
-        if (old_pincode_input.text.toString().isEmpty()) {
-            set_pincode_button.isEnabled = true
+        if (binding.oldPincodeInput.text.toString().isEmpty()) {
+            binding.setPincodeButton.isEnabled = true
             return
         }
 
-        if (old_pincode_input.text.toString().length != 8) {
-            status_text.text = "Old pincode length is incorrect"
+        if (binding.oldPincodeInput.text.toString().length != 8) {
+            binding.statusText.text = "Old pincode length is incorrect"
             return
         }
 
-        if (pincode_input.text.toString().isEmpty()) {
-            set_pincode_button.isEnabled = true
+        if (binding.pincodeInput.text.toString().isEmpty()) {
+            binding.setPincodeButton.isEnabled = true
             return
         }
 
-        if (pincode_input.text.toString() != pincode_2_input.text.toString()) {
-            status_text.text = "Pincodes don't match"
+        if (binding.pincodeInput.text.toString() != binding.pincode2Input.text.toString()) {
+            binding.statusText.text = "Pincodes don't match"
             return
         }
 
-        if (pincode_input.text.toString().length != 8) {
-            status_text.text = "Pincode length is incorrect"
+        if (binding.pincodeInput.text.toString().length != 8) {
+            binding.statusText.text = "Pincode length is incorrect"
             return
         }
 
-        requestParams["old_pincode"] = old_pincode_input.text.toString()
-        requestParams["pincode"] = pincode_input.text.toString()
+        requestParams["old_pincode"] = binding.oldPincodeInput.text.toString()
+        requestParams["pincode"] = binding.pincodeInput.text.toString()
 
         val paramsJson = JSONObject(requestParams as Map<String, String>)
 
@@ -448,19 +444,19 @@ class SignInFragment: Fragment() {
             paramsJson,
             { response ->
                 if (response.has("error")) {
-                    status_text.text = "The pincode you entered is incorrect"
+                    binding.statusText.text = "The pincode you entered is incorrect"
                 }
                 else {
                     SessionSettings.instance.pincodeSet = true
 
                     // update UI
-                    status_text.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
+                    binding.statusText.text = "Pincode changed. Go to Options -> Sign-in to access your account from any device."
                 }
 
             },
             { error ->
                 Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                set_pincode_button.isEnabled = true
+                binding.setPincodeButton.isEnabled = true
             }) {
 
             override fun getHeaders(): MutableMap<String, String> {
@@ -475,35 +471,35 @@ class SignInFragment: Fragment() {
     }
 
     private fun signIn() {
-        sign_in_button_2.isEnabled = false
+        binding.signInButton2.isEnabled = false
 
         val requestQueue = Volley.newRequestQueue(context)
 
         val requestParams = HashMap<String, String>()
 
-        var name = name_input.text.toString()
-        var pincode = pincode_input_sign_in.text.toString()
+        var name = binding.nameInput.text.toString()
+        var pincode = binding.pincodeInputSignIn.text.toString()
 
         if (name.length > 20) {
-            status_text.text = "Name length is incorrect"
-            status_text.visibility = View.VISIBLE
+            binding.statusText.text = "Name length is incorrect"
+            binding.statusText.visibility = View.VISIBLE
             return
         }
         else if (name.isEmpty()) {
-            status_text.text = "Please enter a display name"
-            status_text.visibility = View.VISIBLE
+            binding.statusText.text = "Please enter a display name"
+            binding.statusText.visibility = View.VISIBLE
             return
         }
 
         if (pincode.isEmpty()) {
-            status_text.text = "Please enter a pincode"
-            status_text.visibility = View.VISIBLE
+            binding.statusText.text = "Please enter a pincode"
+            binding.statusText.visibility = View.VISIBLE
             return
         }
 
         if (pincode.length != 8) {
-            status_text.text = "Pincode length is incorrect"
-            status_text.visibility = View.VISIBLE
+            binding.statusText.text = "Pincode length is incorrect"
+            binding.statusText.visibility = View.VISIBLE
             return
         }
 
@@ -518,7 +514,7 @@ class SignInFragment: Fragment() {
             paramsJson,
             { response ->
                 if (response.has("error")) {
-                    status_text.text = "Display name or password is incorrect"
+                    binding.statusText.text = "Display name or password is incorrect"
                 }
                 else {
                     SessionSettings.instance.pincodeSet = true
@@ -542,13 +538,13 @@ class SignInFragment: Fragment() {
                     }
 
                     // update UI
-                    status_text.text = "Successfully signed in"
+                    binding.statusText.text = "Successfully signed in"
                 }
-                status_text.visibility = View.VISIBLE
+                binding.statusText.visibility = View.VISIBLE
             },
             { error ->
                 Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()
-                sign_in_button_2.isEnabled = true
+                binding.signInButton2.isEnabled = true
             }) {
 
             override fun getHeaders(): MutableMap<String, String> {
@@ -605,7 +601,7 @@ class SignInFragment: Fragment() {
 
                             // update UI
                             google_sign_in_button.isEnabled = false
-                            status_text.text = "Signed in"
+                            binding.statusText.text = "Signed in"
                         },
                         { error ->
                             Toast.makeText(context, "Network error, please try again.", Toast.LENGTH_SHORT).show()

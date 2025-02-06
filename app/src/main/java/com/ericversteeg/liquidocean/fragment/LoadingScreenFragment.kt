@@ -24,20 +24,19 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentLoadingScreenBinding
 import com.ericversteeg.liquidocean.helper.Animator
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.DataLoadingCallback
 import com.ericversteeg.liquidocean.listener.SocketConnectCallback
-import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.InteractiveCanvasSocket
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.model.StatTracker
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_loading_screen.*
 import org.json.JSONArray
 import org.json.JSONObject
-import java.util.*
-import kotlin.collections.HashMap
+import java.util.Timer
+import java.util.TimerTask
 
 class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
@@ -76,16 +75,21 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     )
 
     var showingError = false
+    
+    private var _binding: FragmentLoadingScreenBinding? = null
+    val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_loading_screen, container, false)
+    ): View {
+        _binding = FragmentLoadingScreenBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        // setup views here
-
-        return view
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     override fun onPause() {
@@ -108,17 +112,17 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
         updateNumLoaded()
 
         if (realmId == 2) {
-            connecting_title.text = "Connecting to dev server"
+            binding.connectingTitle.text = "Connecting to dev server"
         }
 
         val rIndex = (Math.random() * gameTips.size).toInt()
-        game_tip_text.text = "Tip: ${gameTips[rIndex]}"
+        binding.gameTipText.text = "Tip: ${gameTips[rIndex]}"
 
         Timer().schedule(object : TimerTask() {
             override fun run() {
                 activity?.runOnUiThread {
-                    if (game_tip_text != null) {
-                        Animator.fadeInView(game_tip_text)
+                    if (binding.gameTipText != null) {
+                        Animator.fadeInView(binding.gameTipText)
                     }
                 }
             }
@@ -152,10 +156,10 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             SessionSettings.instance.updateShortTermPixels()
 
             if (realmId == 2) {
-                realm_art.jsonResId = R.raw.mc_tool_json
+                binding.realmArt.jsonResId = R.raw.mc_tool_json
             }
             else {
-                realm_art.jsonResId = R.raw.globe_json
+                binding.realmArt.jsonResId = R.raw.globe_json
             }
         }
 
@@ -167,7 +171,7 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                     } else {
                         lastDotsStr = ""
                     }
-                    dots_title?.text = lastDotsStr
+                    binding.dotsTitle?.text = lastDotsStr
                 }
             }
         }, 200, 200)
@@ -176,24 +180,24 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
             override fun onViewLayout(view: View) {
                 if (SessionSettings.instance.tablet) {
                     // contributors 1
-                    var layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_1.width, top_contributors_container_1.height)
-                    layoutParams.rightToLeft = realm_art.id
+                    var layoutParams = ConstraintLayout.LayoutParams(binding.topContributorsContainer1.width, binding.topContributorsContainer1.height)
+                    layoutParams.rightToLeft = binding.realmArt.id
                     layoutParams.topToTop = ConstraintSet.PARENT_ID
                     layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
 
                     layoutParams.setMargins(Utils.dpToPx(context, 20), 0, Utils.dpToPx(context, 40), 0)
 
-                    top_contributors_container_1.layoutParams = layoutParams
+                    binding.topContributorsContainer1.layoutParams = layoutParams
 
                     // contributors 2
-                    layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_2.width, top_contributors_container_2.height)
-                    layoutParams.leftToRight = realm_art.id
+                    layoutParams = ConstraintLayout.LayoutParams(binding.topContributorsContainer2.width, binding.topContributorsContainer2.height)
+                    layoutParams.leftToRight = binding.realmArt.id
                     layoutParams.topToTop = ConstraintSet.PARENT_ID
                     layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
 
                     layoutParams.setMargins(Utils.dpToPx(context, 40), 0, Utils.dpToPx(context, 20), 0)
 
-                    top_contributors_container_2.layoutParams = layoutParams
+                    binding.topContributorsContainer2.layoutParams = layoutParams
                 }
             }
         })
@@ -202,13 +206,13 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
     private fun drawWorldCanvas() {
         val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
         val bitmap: Bitmap = Bitmap.createBitmap(
-            world_canvas_preview.width,
-            world_canvas_preview.height,
+            binding.worldCanvasPreview.width,
+            binding.worldCanvasPreview.height,
             conf
         ) // this creates a MUTABLE bitmap
 
         val canvas = Canvas(bitmap)
-        val unitSize = world_canvas_preview.height.toFloat() / 512
+        val unitSize = binding.worldCanvasPreview.height.toFloat() / 512
 
         val paint = Paint()
 
@@ -399,23 +403,23 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
                 val topContributors = response.getJSONArray("data")
 
                 val topContributorNameViews1 = listOf(
-                    top_contributor_name_1, top_contributor_name_2,
-                    top_contributor_name_3, top_contributor_name_4, top_contributor_name_5
+                    binding.topContributorName1, binding.topContributorName2,
+                    binding.topContributorName3, binding.topContributorName4, binding.topContributorName5
                 )
 
                 val topContributorAmtViews1 = listOf(
-                    top_contributor_amt_1, top_contributor_amt_2,
-                    top_contributor_amt_3, top_contributor_amt_4, top_contributor_amt_5
+                    binding.topContributorAmt1, binding.topContributorAmt2,
+                    binding.topContributorAmt3, binding.topContributorAmt4, binding.topContributorAmt5
                 )
 
                 val topContributorNameViews2 = listOf(
-                    top_contributor_name_6, top_contributor_name_7,
-                    top_contributor_name_8, top_contributor_name_9, top_contributor_name_10
+                    binding.topContributorName6, binding.topContributorName7,
+                    binding.topContributorName8, binding.topContributorName9, binding.topContributorName10
                 )
 
                 val topContributorAmtViews2 = listOf(
-                    top_contributor_amt_6, top_contributor_amt_7,
-                    top_contributor_amt_8, top_contributor_amt_9, top_contributor_amt_10
+                    binding.topContributorAmt6, binding.topContributorAmt7,
+                    binding.topContributorAmt8, binding.topContributorAmt9, binding.topContributorAmt10
                 )
 
                 for (i in 0 until topContributors.length()) {
@@ -529,10 +533,10 @@ class LoadingScreenFragment : Fragment(), SocketConnectCallback {
 
     private fun updateNumLoaded() {
         if (realmId == 2) {
-            status_text?.text = "Loading ${getNumLoaded()} / 4"
+            binding.statusText.text = "Loading ${getNumLoaded()} / 4"
         }
         else if (realmId == 1) {
-            status_text?.text = "Loading ${getNumLoaded()} / 7"
+            binding.statusText.text = "Loading ${getNumLoaded()} / 7"
         }
     }
 

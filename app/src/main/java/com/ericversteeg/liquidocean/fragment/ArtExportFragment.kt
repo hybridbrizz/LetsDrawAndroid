@@ -1,24 +1,20 @@
 package com.ericversteeg.liquidocean.fragment
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import com.ericversteeg.liquidocean.R
+import com.ericversteeg.liquidocean.databinding.FragmentArtExportBinding
 import com.ericversteeg.liquidocean.helper.Utils
 import com.ericversteeg.liquidocean.listener.ArtExportFragmentListener
 import com.ericversteeg.liquidocean.model.InteractiveCanvas
 import com.ericversteeg.liquidocean.model.SessionSettings
 import com.ericversteeg.liquidocean.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_art_export.*
-import org.json.JSONArray
 import org.json.JSONObject
 
 class ArtExportFragment: Fragment() {
@@ -26,61 +22,63 @@ class ArtExportFragment: Fragment() {
     lateinit var art: List<InteractiveCanvas.RestorePoint>
 
     var listener: ArtExportFragmentListener? = null
+    
+    private var _binding: FragmentArtExportBinding? = null
+    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_art_export, container, false)
-
-        return view
+    ): View {
+        _binding = FragmentArtExportBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_action_export.type = ActionButtonView.Type.BACK_SOLID
-        back_button_export.actionBtnView = back_action_export
+        binding.backActionExport.type = ActionButtonView.Type.BACK_SOLID
+        binding.backButtonExport.actionBtnView = binding.backActionExport
 
-        share_action.type = ActionButtonView.Type.EXPORT_SOLID
-        share_button.actionBtnView = share_action
+        binding.shareAction.type = ActionButtonView.Type.EXPORT_SOLID
+        binding.shareButton.actionBtnView = binding.shareAction
 
-        save_action.type = ActionButtonView.Type.SAVE
-        save_button.actionBtnView = save_action
+        binding.saveAction.type = ActionButtonView.Type.SAVE
+        binding.saveButton.actionBtnView = binding.saveAction
 
-        back_button_export.setOnClickListener {
+        binding.backButtonExport.setOnClickListener {
             listener?.onArtExportBack()
         }
 
-        screen_size_switch.setOnCheckedChangeListener { _, isChecked ->
-            art_view.actualSize = isChecked
+        binding.screenSizeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            binding.artView.actualSize = isChecked
 
             if (isChecked) {
-                actual_size_text.visibility = View.VISIBLE
-                screen_size_text.visibility = View.INVISIBLE
+                binding.actualSizeText.visibility = View.VISIBLE
+                binding.screenSizeText.visibility = View.INVISIBLE
             }
             else {
-                actual_size_text.visibility = View.INVISIBLE
-                screen_size_text.visibility = View.VISIBLE
+                binding.actualSizeText.visibility = View.INVISIBLE
+                binding.screenSizeText.visibility = View.VISIBLE
             }
         }
 
-        actual_size_text.setOnClickListener {
-            screen_size_switch.isChecked = !screen_size_switch.isChecked
-            actual_size_text.visibility = View.INVISIBLE
+        binding.actualSizeText.setOnClickListener {
+            binding.screenSizeSwitch.isChecked = !binding.screenSizeSwitch.isChecked
+            binding.actualSizeText.visibility = View.INVISIBLE
         }
 
-        screen_size_text.setOnClickListener {
-            screen_size_switch.isChecked = !screen_size_switch.isChecked
-            screen_size_text.visibility = View.INVISIBLE
+        binding.screenSizeText.setOnClickListener {
+            binding.screenSizeSwitch.isChecked = !binding.screenSizeSwitch.isChecked
+            binding.screenSizeText.visibility = View.INVISIBLE
         }
 
-        actual_size_text.visibility = View.INVISIBLE
+        binding.actualSizeText.visibility = View.INVISIBLE
 
-        art_view.showBackground = true
-        art_view.art = art
+        binding.artView.showBackground = true
+        binding.artView.art = art
 
-        art_view.setOnClickListener {
+        binding.artView.setOnClickListener {
 
         }
 
@@ -88,15 +86,15 @@ class ArtExportFragment: Fragment() {
             SessionSettings.instance.addToShowcase(art)
         }
 
-        share_button.setOnClickListener {
+        binding.shareButton.setOnClickListener {
             context?.apply {
-                art_view.shareArt(this)
+                binding.artView.shareArt(this)
             }
         }
 
-        save_button.setOnClickListener {
+        binding.saveButton.setOnClickListener {
             context?.apply {
-                art_view.saveArt(this)
+                binding.artView.saveArt(this)
             }
         }
 
@@ -105,22 +103,27 @@ class ArtExportFragment: Fragment() {
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 if (SessionSettings.instance.tablet) {
-                    val layoutParams = (art_view.layoutParams as ConstraintLayout.LayoutParams)
+                    val layoutParams = (binding.artView.layoutParams as ConstraintLayout.LayoutParams)
 
                     layoutParams.topMargin = Utils.dpToPx(context, 80)
 
-                    art_view.layoutParams = layoutParams
+                    binding.artView.layoutParams = layoutParams
                 }
             }
         })
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     /*override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        Utils.setViewLayoutListener(art_view, object: Utils.ViewLayoutListener {
+        Utils.setViewLayoutListener(binding.artView, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
-                art_view.invalidate()
+                binding.artView.invalidate()
             }
         })
     }*/

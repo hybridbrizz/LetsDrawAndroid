@@ -5,8 +5,6 @@ import android.graphics.Color
 import android.graphics.Point
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
-import kotlinx.android.synthetic.main.fragment_menu.*
-import kotlinx.android.synthetic.main.fragment_stats.*
 
 class Animator {
     interface CompletionHandler {
