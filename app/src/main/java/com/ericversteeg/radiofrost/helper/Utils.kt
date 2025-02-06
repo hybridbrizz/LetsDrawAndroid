@@ -29,7 +29,7 @@ class Utils {
     }
 
     companion object {
-        val baseServersUrl = "https://ericversteeg.com:5050/"
+        val baseServersUrl = "https://matrixwarez.com:5050/"
 
         //val baseUrlApi = "https://192.168.200.69:5000"
         //val baseUrlApi = "https://ericversteeg.com:5000"

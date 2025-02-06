@@ -11,8 +11,6 @@ import android.widget.LinearLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import top.defaults.logger.Logger;
-
 public class ColorPickerView extends LinearLayout implements ColorObservable {
 
     private ColorWheelView colorWheelView;
@@ -69,9 +67,6 @@ public class ColorPickerView extends LinearLayout implements ColorObservable {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
         int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
-        if (BuildConfig.DEBUG) {
-            Logger.d("maxWidth: %d, maxHeight: %d", maxWidth, maxHeight);
-        }
 
         int desiredWidth = maxHeight - (getPaddingTop() + getPaddingBottom()) + (getPaddingLeft() + getPaddingRight());
         if (brightnessSliderView != null) {
@@ -79,10 +74,6 @@ public class ColorPickerView extends LinearLayout implements ColorObservable {
         }
         if (alphaSliderView != null){
             desiredWidth -= (sliderMargin + sliderHeight);
-        }
-
-        if (BuildConfig.DEBUG) {
-            Logger.d("desiredWidth: %d", desiredWidth);
         }
 
         int width = Math.min(maxWidth, desiredWidth);
@@ -94,9 +85,6 @@ public class ColorPickerView extends LinearLayout implements ColorObservable {
             height += (sliderMargin + sliderHeight);
         }
 
-        if (BuildConfig.DEBUG) {
-            Logger.d("width: %d, height: %d", width, height);
-        }
         super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.getMode(widthMeasureSpec)),
                 MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec)));
     }

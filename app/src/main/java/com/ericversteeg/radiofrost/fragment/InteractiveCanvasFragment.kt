@@ -51,8 +51,6 @@ import com.ericversteeg.radiofrost.view.ButtonFrame
 import com.ericversteeg.radiofrost.view.PaintColorIndicator
 import com.ericversteeg.radiofrost.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
-import com.plattysoft.leonids.ParticleSystem
-import com.plattysoft.leonids.modifiers.AlphaModifier
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
@@ -76,11 +74,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback {
 
     var initalColor = 0
-
-    var topLeftParticleSystem: ParticleSystem? = null
-    var topRightParticleSystem: ParticleSystem? = null
-    var bottomLeftParticleSystem: ParticleSystem? = null
-    var bottomRightParticleSystem: ParticleSystem? = null
 
     lateinit var server: Server
     var world = false
@@ -493,8 +486,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_no_container.visibility = View.VISIBLE
                     close_paint_panel_container.visibility = View.GONE
                 }
-
-                startParticleEmitters()
             }
             else {
                 surface_view.endPainting(false)
@@ -549,8 +540,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 //recent_colors_container.visibility = View.GONE
 
                 surface_view.startPaintSelection()
-
-                stopEmittingParticles()
             }
         }
 
@@ -577,8 +566,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_no_container.visibility = View.VISIBLE
                 close_paint_panel_container.visibility = View.GONE
             }
-
-            startParticleEmitters()
 
             SessionSettings.instance.saveColor(requireContext())
         }
@@ -1070,8 +1057,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onPause() {
         super.onPause()
 
-        stopEmittingParticles()
-
         // unregister listeners
         SessionSettings.instance.paintQtyListeners.remove(this)
 
@@ -1374,8 +1359,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     AccelerateDecelerateInterpolator()
                 ).withEndAction {
 
-                    startParticleEmitters()
-
                     Log.i("ICF", "paint panel width is ${paint_panel.width}")
                     Log.i("ICF", "paint panel height is ${paint_panel.height}")
 
@@ -1434,8 +1417,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             open_tools_button.visibility = View.VISIBLE
 
             toggleExportBorder(false)
-
-            stopEmittingParticles()
 
             SessionSettings.instance.paintPanelOpen = false
         }
@@ -1768,48 +1749,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     pixel_history_fragment_container.visibility = View.VISIBLE
                 }
             }
-        }
-    }
-
-    // particle emitters
-    private fun startParticleEmitters() {
-        if (SessionSettings.instance.emittersEnabled) {
-            topLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            topLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 345, 45)
-            topLeftParticleSystem?.setRotationSpeed(144f)
-            topLeftParticleSystem?.setAcceleration(0.00005f, 90)
-            topLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            topLeftParticleSystem?.emit(top_left_anchor, 16)
-
-            topRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            topRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 135, 195)
-            topRightParticleSystem?.setRotationSpeed(144f)
-            topRightParticleSystem?.setAcceleration(0.00005f, 90)
-            topRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            topRightParticleSystem?.emit(top_right_anchor, 16)
-
-            bottomLeftParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            bottomLeftParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 315, 0)
-            bottomLeftParticleSystem?.setRotationSpeed(144f)
-            bottomLeftParticleSystem?.setAcceleration(0.00005f, 90)
-            bottomLeftParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            bottomLeftParticleSystem?.emit(bottom_left_anchor, 16)
-
-            bottomRightParticleSystem = ParticleSystem(activity, 80, R.drawable.particle_semi, 1000)
-            bottomRightParticleSystem?.setSpeedModuleAndAngleRange(0f, 0.1f, 180, 225)
-            bottomRightParticleSystem?.setRotationSpeed(144f)
-            bottomRightParticleSystem?.setAcceleration(0.00005f, 90)
-            bottomRightParticleSystem?.addModifier(AlphaModifier(0, 255, 0, 1000))
-            bottomRightParticleSystem?.emit(bottom_right_anchor, 16)
-        }
-    }
-
-    private fun stopEmittingParticles() {
-        if (SessionSettings.instance.emittersEnabled) {
-            topLeftParticleSystem?.stopEmitting()
-            topRightParticleSystem?.stopEmitting()
-            bottomLeftParticleSystem?.stopEmitting()
-            bottomRightParticleSystem?.stopEmitting()
         }
     }
 

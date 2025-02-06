@@ -5,9 +5,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
+    namespace "com.ericversteeg.radiofrost"
+
     signingConfigs {
         debug {
-            storeFile file('C:\\Users\\Eric\\Desktop\\keystore\\LetsDraw\\keystore_debug.jks')
+            storeFile file('C:\\Users\\erver\\OneDrive\\Documents\\keystore\\keystore_debug.jks.old')
             storePassword 'java123'
             keyAlias 'key0'
             keyPassword 'java123'
@@ -51,7 +53,6 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.plattysoft.leonids:LeonidsLib:1.3.2'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
