@@ -427,7 +427,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         socket?.on("add_paint") {
-            val amt = it[0] as Int
+            val data = it[0] as JSONObject
+            val amt = data.getInt("value")
             sessionSettings.dropsAmt = (sessionSettings.dropsAmt + amt).coerceAtMost(SessionSettings.instance.maxPaintAmt)
             SessionSettings.instance.timeSync = SessionSettings.instance.addPaintInterval
         }
