@@ -476,7 +476,7 @@ class SessionSettings {
         initServerList(context)
 
         lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", -1)
-        if (lastVisitedServerIndex >= 0) {
+        if (lastVisitedServerIndex in servers.indices) {
             lastVisitedServer = servers[lastVisitedServerIndex]
         }
     }

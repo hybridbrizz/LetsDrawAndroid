@@ -48,20 +48,32 @@ class Server {
     @SerializedName("uuid")
     var uuid: String = ""
 
+    @SerializedName("api_port")
+    var apiPort = 0
+
+    @SerializedName("alt_port")
+    var altPort = 0
+
+    @SerializedName("socket_port")
+    var socketPort = 0
+
+    @SerializedName("queue_port")
+    var queuePort = 0
+
     fun serviceBaseUrl(): String {
-        return buildUrl(baseUrl, 5000)
+        return buildUrl(baseUrl, apiPort)
     }
 
     fun canvasSocketUrl(): String {
-        return buildUrl(baseUrl, 5010)
+        return buildUrl(baseUrl, socketPort)
     }
 
     fun queueSocketUrl(): String {
-        return buildUrl(baseUrl, 5020)
+        return buildUrl(baseUrl, queuePort)
     }
 
     fun serviceAltBaseUrl(): String {
-        return buildUrl(baseUrl, 5030)
+        return buildUrl(baseUrl, altPort)
     }
 
     private fun buildUrl(baseUrl: String, port: Int): String {

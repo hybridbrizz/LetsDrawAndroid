@@ -184,9 +184,10 @@ class MenuFragment: Fragment() {
                 showConnectInput()
             }
             else {
-                SessionSettings.instance.lastVisitedServer?.also {
-                    menuButtonListener?.onServerSelected(it)
-                } ?: showServerList()
+                showServerList()
+//                SessionSettings.instance.lastVisitedServer?.also {
+//                    menuButtonListener?.onServerSelected(it)
+//                } ?: showServerList()
             }
         }
 

@@ -119,6 +119,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var wifiStateReceiver: BroadcastReceiver? = null
 
+    private var saveViewportTimer: Timer? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -1068,16 +1070,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         paintEventTimer?.cancel()
+        saveViewportTimer?.cancel()
 
         context?.apply {
-            val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
 
-            SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
-            SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
-
-            SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
-
-            SessionSettings.instance.save(this)
             //StatTracker.instance.save(this)
         }
 
@@ -1092,8 +1088,26 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         pauseTime = System.currentTimeMillis() / 1000
     }
 
+    private fun saveDeviceViewport() {
+        val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+
+        SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
+        SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
+
+        SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+
+        SessionSettings.instance.save(this@InteractiveCanvasFragment.requireContext())
+    }
+
     override fun onResume() {
         super.onResume()
+
+        saveViewportTimer = Timer()
+        saveViewportTimer?.schedule(object: TimerTask() {
+            override fun run() {
+                saveDeviceViewport()
+            }
+        }, 2000L, 2000L)
 
         Log.i("On Resume", "Canvas resumed.")
 
