@@ -566,10 +566,10 @@ class OptionsFragment: Fragment(), FragmentListener {
             ed.remove("arr_canvas")
             ed.apply()
 
-            SessionSettings.instance.restoreDeviceViewportLeft = 0F
-            SessionSettings.instance.restoreDeviceViewportTop = 0F
-            SessionSettings.instance.restoreDeviceViewportRight = 0F
-            SessionSettings.instance.restoreDeviceViewportBottom = 0F
+            //SessionSettings.instance.restoreDeviceViewportLeft = 0F
+            //SessionSettings.instance.restoreDeviceViewportTop = 0F
+            //SessionSettings.instance.restoreDeviceViewportRight = 0F
+            //SessionSettings.instance.restoreDeviceViewportBottom = 0F
 
             SessionSettings.instance.restoreCanvasScaleFactor = 0F
 

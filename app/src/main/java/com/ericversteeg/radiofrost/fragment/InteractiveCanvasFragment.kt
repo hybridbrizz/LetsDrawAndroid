@@ -1096,7 +1096,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
 
-        SessionSettings.instance.save(this@InteractiveCanvasFragment.requireContext())
+        SessionSettings.instance.saveViewportInfo(this@InteractiveCanvasFragment.requireContext())
     }
 
     override fun onResume() {

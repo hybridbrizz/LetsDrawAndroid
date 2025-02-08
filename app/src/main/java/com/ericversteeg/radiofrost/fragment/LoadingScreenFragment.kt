@@ -146,7 +146,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }
         serverService.getServer(accessKey) { code, server ->
             val storeduuid = this.server.uuid
-            SessionSettings.instance.removeServer(requireContext(), this.server)
+            SessionSettings.instance.removeServer(requireContext(), this.server, false)
 
             if (server == null && code >= 400 && code < 500) {
                 showConnectionErrorMessage(authError = true)

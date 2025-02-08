@@ -59,7 +59,7 @@ class ServersRecyclerAdapter(private val context: Context, private val servers: 
         AlertDialog.Builder(context, R.style.AlertDialogTheme)
             .setMessage("Remove ${server.name} from your list of servers?")
             .setPositiveButton("Yes") { _, _ ->
-                SessionSettings.instance.removeServer(context, server)
+                SessionSettings.instance.removeServer(context, server, true)
                 notifyDataSetChanged()
             }
             .setNegativeButton("Cancel", null)

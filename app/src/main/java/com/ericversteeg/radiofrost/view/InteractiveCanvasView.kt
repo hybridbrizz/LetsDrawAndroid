@@ -103,6 +103,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     fun setInitialPositionAndScale() {
+        SessionSettings.instance.loadViewportInfo(context)
+
         // scale
         if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
             interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor

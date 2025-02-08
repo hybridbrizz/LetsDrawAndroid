@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Point
+import android.util.Log
 import androidx.collection.ArraySet
 import androidx.core.content.ContextCompat
 import com.ericversteeg.radiofrost.R
@@ -183,10 +184,10 @@ class SessionSettings {
     var lastDrawFrameWidth = 0
     var lastDrawFrameHeight = 0
 
-    var restoreDeviceViewportLeft = 0F
-    var restoreDeviceViewportTop = 0F
-    var restoreDeviceViewportRight = 0F
-    var restoreDeviceViewportBottom = 0F
+    //var restoreDeviceViewportLeft = 0F
+    //var restoreDeviceViewportTop = 0F
+    //var restoreDeviceViewportRight = 0F
+    //var restoreDeviceViewportBottom = 0F
 
     var restoreCanvasScaleFactor = 0F
 
@@ -299,19 +300,19 @@ class SessionSettings {
 
         ed.putInt("selected_palette_index", selectedPaletteIndex)
 
-        ed.putFloat("restore_device_viewport_left", restoreDeviceViewportLeft)
+        //ed.putFloat("restore_device_viewport_left", restoreDeviceViewportLeft)
 
-        ed.putFloat("restore_device_viewport_top", restoreDeviceViewportTop)
+        //ed.putFloat("restore_device_viewport_top", restoreDeviceViewportTop)
 
-        ed.putFloat("restore_device_viewport_right", restoreDeviceViewportRight)
+        //ed.putFloat("restore_device_viewport_right", restoreDeviceViewportRight)
 
-        ed.putFloat("restore_device_viewport_bottom", restoreDeviceViewportBottom)
+        //ed.putFloat("restore_device_viewport_bottom", restoreDeviceViewportBottom)
 
-        ed.putFloat("restore_canvas_scale_factor", restoreCanvasScaleFactor)
-
-        ed.putFloat("restore_device_viewport_center_x", restoreDeviceViewportCenterX)
-
-        ed.putFloat("restore_device_viewport_center_y", restoreDeviceViewportCenterY)
+//        ed.putFloat("restore_canvas_scale_factor", restoreCanvasScaleFactor)
+//
+//        ed.putFloat("restore_device_viewport_center_x", restoreDeviceViewportCenterX)
+//
+//        ed.putFloat("restore_device_viewport_center_y", restoreDeviceViewportCenterY)
 
         ed.putBoolean("toolbox_open", toolboxOpen)
 
@@ -349,6 +350,34 @@ class SessionSettings {
             ed.putInt("last_single_paint_color", paintColor)
         }
         ed.apply()
+    }
+
+    fun saveViewportInfo(context: Context) {
+        if (lastVisitedServer == null) return
+
+        val jsonStr = getSharedPrefs(context).getString("viewport_json", "{\"items\": []}")!!
+        val infos = gson.fromJson(jsonStr, ViewportInfo::class.java)
+
+        var item = infos.items.firstOrNull { it.serverId == (lastVisitedServer?.id ?: -1) }
+        if (item == null) {
+            item = ViewportInfoItem()
+            infos.items.add(item)
+            Log.d("Viewport Info", "Save: Adding new viewport info server_id(${(lastVisitedServer?.id ?: -1)}).")
+        }
+        else {
+            Log.d("Viewport Info", "Save: Viewport info with server_id(${(lastVisitedServer?.id ?: -1)}) found.")
+        }
+        item.serverId = lastVisitedServer?.id ?: -1
+        item.scaleFactor = restoreCanvasScaleFactor
+        item.centerX = restoreDeviceViewportCenterX
+        item.centerY = restoreDeviceViewportCenterY
+
+        val ed = getSharedPrefs(context).edit()
+        ed.putString("viewport_json", gson.toJson(infos))
+        ed.apply()
+
+        val serverIds = infos.items.map { it.serverId }.joinToString(",")
+        Log.d("Viewport Info", "Save: Wrote viewport infos for serverIds($serverIds)")
     }
 
     fun load(context: Context) {
@@ -449,15 +478,15 @@ class SessionSettings {
 
         palettes.add(palette2)*/
 
-        restoreDeviceViewportLeft = getSharedPrefs(context).getFloat("restore_device_viewport_left", 0F)
-        restoreDeviceViewportTop = getSharedPrefs(context).getFloat("restore_device_viewport_top", 0F)
-        restoreDeviceViewportRight = getSharedPrefs(context).getFloat("restore_device_viewport_right", 0F)
-        restoreDeviceViewportBottom = getSharedPrefs(context).getFloat("restore_device_viewport_bottom", 0F)
+        //restoreDeviceViewportLeft = getSharedPrefs(context).getFloat("restore_device_viewport_left", 0F)
+        //restoreDeviceViewportTop = getSharedPrefs(context).getFloat("restore_device_viewport_top", 0F)
+        //restoreDeviceViewportRight = getSharedPrefs(context).getFloat("restore_device_viewport_right", 0F)
+        //restoreDeviceViewportBottom = getSharedPrefs(context).getFloat("restore_device_viewport_bottom", 0F)
 
-        restoreDeviceViewportCenterX = getSharedPrefs(context).getFloat("restore_device_viewport_center_x", 0F)
-        restoreDeviceViewportCenterY = getSharedPrefs(context).getFloat("restore_device_viewport_center_y", 0F)
+        //restoreDeviceViewportCenterX = getSharedPrefs(context).getFloat("restore_device_viewport_center_x", 0F)
+        //restoreDeviceViewportCenterY = getSharedPrefs(context).getFloat("restore_device_viewport_center_y", 0F)
 
-        restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
+        //restoreCanvasScaleFactor = getSharedPrefs(context).getFloat("restore_canvas_scale_factor", 0F)
 
         toolboxOpen = getSharedPrefs(context).getBoolean("toolbox_open", false)
 
@@ -478,6 +507,29 @@ class SessionSettings {
         lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", -1)
         if (lastVisitedServerIndex in servers.indices) {
             lastVisitedServer = servers[lastVisitedServerIndex]
+        }
+    }
+
+    fun loadViewportInfo(context: Context) {
+        if (lastVisitedServer == null) return
+
+        val jsonStr = getSharedPrefs(context).getString("viewport_json", "{\"items\": []}")!!
+        val infos = gson.fromJson(jsonStr, ViewportInfo::class.java)
+
+        Log.d("Viewport Info", "Load: Looking for viewport info item with server_id(${(lastVisitedServer?.id ?: -1)}).")
+        val item = infos.items.firstOrNull { it.serverId == (lastVisitedServer?.id ?: -1) }
+        item?.let {
+            Log.d("Viewport Info", "Load: Item with server_id(${(lastVisitedServer?.id ?: -1)}) found.")
+            restoreCanvasScaleFactor = item.scaleFactor
+            restoreDeviceViewportCenterX = item.centerX
+            restoreDeviceViewportCenterY = item.centerY
+        }
+
+        if (item == null) {
+            restoreCanvasScaleFactor = 0f
+            restoreDeviceViewportCenterX = 0f
+            restoreDeviceViewportCenterY = 0f
+            Log.d("Viewport Info", "Load: Item with server_id(${(lastVisitedServer?.id ?: -1)}) not found.")
         }
     }
 
@@ -628,6 +680,8 @@ class SessionSettings {
         val sp = getSharedPrefs(context)
         val set = sp.getStringSet("servers_json", mutableSetOf())!!
 
+        servers = LinkedList()
+
         for (jsonStr in set) {
             val server = gson.fromJson(jsonStr, Server::class.java)
             servers.add(server)
@@ -643,7 +697,7 @@ class SessionSettings {
         servers.sortBy { it.name }
     }
 
-    fun removeServer(context: Context, server: Server) {
+    fun removeServer(context: Context, server: Server, removeViewportInfo: Boolean) {
         if (servers.indexOf(server) == lastVisitedServerIndex) {
             lastVisitedServerIndex = -1
             lastVisitedServer = null
@@ -651,6 +705,10 @@ class SessionSettings {
         }
         servers.remove(server)
         saveServers(context)
+
+        if (removeViewportInfo) {
+            removeServerViewportInfo(context, server)
+        }
     }
 
     fun saveServers(context: Context) {
@@ -680,6 +738,25 @@ class SessionSettings {
             .edit()
             .putInt("last_visited_server_index", index)
             .apply()
+    }
+
+    private fun removeServerViewportInfo(context: Context, server: Server) {
+        val jsonStr = getSharedPrefs(context).getString("viewport_json", "{\"items\": []}")!!
+        val infos = gson.fromJson(jsonStr, ViewportInfo::class.java)
+
+        Log.d("Viewport Info", "Remove: Looking for item with server_id(${server.id}).")
+        val item = infos.items.firstOrNull { it.serverId == server.id }
+        item?.let {
+            Log.d("Viewport Info", "Remove: Item with server_id(${server.id}) found, removing...")
+            infos.items.remove(item)
+        }
+
+        val ed = getSharedPrefs(context).edit()
+        ed.putString("viewport_json", gson.toJson(infos))
+        ed.apply()
+
+        val serverIds = infos.items.map { it.serverId }.joinToString(",")
+        Log.d("Viewport Info", "Remove: Wrote viewport infos for serverIds(${serverIds}).")
     }
 
     fun saveBackground(context: Context) {
