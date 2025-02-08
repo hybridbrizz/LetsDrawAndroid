@@ -174,7 +174,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
 
-            connecting_title.setTextColor(server.color)
+            if (server.color != 0) {
+                connecting_title.setTextColor(server.color)
+            }
 
             if (server.isAdmin) {
                 connecting_title.text = "Connecting to ${server.name} (Admin)"
