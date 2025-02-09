@@ -207,7 +207,7 @@ class SessionSettings {
 
     var servers = LinkedList<Server>()
     var lastVisitedServer: Server? = null
-    var lastVisitedServerIndex = -1
+    var lastVisitedServerId = -1
 
     var agreedToTermOfService = false
 
@@ -504,10 +504,8 @@ class SessionSettings {
 
         initServerList(context)
 
-        lastVisitedServerIndex = getSharedPrefs(context).getInt("last_visited_server_index", -1)
-        if (lastVisitedServerIndex in servers.indices) {
-            lastVisitedServer = servers[lastVisitedServerIndex]
-        }
+        lastVisitedServerId = getSharedPrefs(context).getInt("last_visited_server_id", -1)
+        lastVisitedServer = servers.firstOrNull { it.id == lastVisitedServerId }
     }
 
     fun loadViewportInfo(context: Context) {
@@ -698,10 +696,10 @@ class SessionSettings {
     }
 
     fun removeServer(context: Context, server: Server, removeViewportInfo: Boolean) {
-        if (servers.indexOf(server) == lastVisitedServerIndex) {
-            lastVisitedServerIndex = -1
+        if (server.id == lastVisitedServerId) {
+            lastVisitedServerId = -1
             lastVisitedServer = null
-            getSharedPrefs(context).edit().putInt("last_visited_server_index", lastVisitedServerIndex).apply()
+            getSharedPrefs(context).edit().putInt("last_visited_server_id", lastVisitedServerId).apply()
         }
         servers.remove(server)
         saveServers(context)
