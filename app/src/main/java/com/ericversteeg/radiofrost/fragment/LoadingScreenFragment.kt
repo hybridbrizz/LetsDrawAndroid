@@ -171,6 +171,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             SessionSettings.instance.maxPaintAmt = server.maxPixels
             SessionSettings.instance.addPaintInterval = server.pixelInterval
 
+            Log.d("Connection", "Got server info, starting queue socket connect.")
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
 
@@ -294,25 +295,24 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             getDeviceInfo(server)
         }
 
-        if (realmId == 2) {
-            downloadCanvasPixels()
-        }
-        else if (world) {
-            Observable.fromRunnable<Void> {
-                downloadChunkPixels(1)
-                downloadChunkPixels(2)
-                downloadChunkPixels(3)
-                downloadChunkPixels(4)
-            }.subscribeOn(Schedulers.io()).subscribe()
-        }
+        Observable.fromRunnable<Void> {
+            downloadChunkPixels(1)
+            downloadChunkPixels(2)
+            downloadChunkPixels(3)
+            downloadChunkPixels(4)
+        }.subscribeOn(Schedulers.io()).subscribe()
     }
 
     private fun downloadChunkPixels(chunk: Int) {
+        Log.d("Connection", "Downloading canvas chunk $chunk.")
+
         canvasService.getChunkPixels(chunk) { response ->
             if (response == null) {
                 showConnectionErrorMessage()
                 return@getChunkPixels
             }
+
+            Log.d("Connection", "Got canvas chunk $chunk.")
 
             when(chunk) {
                 1 -> SessionSettings.instance.chunk1 = response
@@ -409,6 +409,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             server.serviceBaseUrl() + "api/v1/devices/register",
             paramsJson,
             { response ->
+                Log.d("Connection", "Successfully sent device info.")
+
                 server.uuid = uniqueId
                 SessionSettings.instance.saveServers(requireContext())
 
@@ -452,6 +454,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         request.tag = "download"
         requestQueue.add(request)
+        Log.d("Connection", "Sending device info.")
     }
 
     private fun getDeviceInfo(server: Server) {
@@ -462,6 +465,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             server.serviceBaseUrl() + "api/v1/devices/$uniqueId/info",
             null,
             { response ->
+                Log.d("Connection", "Successfully got device info.")
+
                 SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")
                 SessionSettings.instance.displayName = response.getString("name")
@@ -513,6 +518,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         request.tag = "download"
         requestQueue.add(request)
+        Log.d("Connection", "Getting device info.")
     }
 
     private fun getTopContributors() {
@@ -721,6 +727,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     // queue socket listener
     override fun onQueueConnect() {
+        Log.d("Connection", "Connected to queue.")
         doneConnectingQueue = true
         updateNumLoaded()
     }
@@ -731,6 +738,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     override fun onAddedToQueue(pos: Int) {
+        Log.d("Connection", "Added to queue.")
         queuePos = pos
         updateQueuePos(true)
 
@@ -753,6 +761,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     override fun onServiceReady() {
+        Log.d("Connection", "Canvas socket ready, disconnecting from queue.")
+
         QueueSocket.instance.socketListener = null
         QueueSocket.instance.socket?.disconnect()
 
@@ -762,6 +772,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     // canvas socket listener
     override fun onSocketConnect() {
+        Log.d("Connection", "Connected to canvas socket.")
         Log.i("Canvas Socket", "Socket connected!")
 
         doneConnectingSocket = true
