@@ -313,7 +313,7 @@ class MenuFragment: Fragment() {
         })
 
         view.setOnTouchListener(object: View.OnTouchListener {
-            override fun onTouch(vw: View?, ev: MotionEvent?): Boolean {
+            override fun onTouch(vw: View, ev: MotionEvent): Boolean {
                 mPanDetector.onTouchEvent(ev)
 
                 return true

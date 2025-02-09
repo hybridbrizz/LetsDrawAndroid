@@ -14,13 +14,19 @@ android {
             keyAlias 'key0'
             keyPassword 'java123'
         }
+        release {
+            storeFile file('../_keystore/liquidocean.jks')
+            storePassword 'cYhq36!67'
+            keyAlias 'key0'
+            keyPassword 'cYhq36!67'
+        }
     }
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.ericversteeg.radiofrost"
         minSdkVersion 19
-        targetSdkVersion 31
-        versionCode 3
+        targetSdkVersion 33
+        versionCode 4
         versionName "1.0.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,6 +35,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     kotlinOptions {

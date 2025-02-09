@@ -350,8 +350,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     // pixel tap & long press
     private val mTapListener = object : GestureDetector.SimpleOnGestureListener() {
 
-        override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            e?.apply {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            e.apply {
                 if (System.currentTimeMillis() - lastPanOrScaleTime > 100) {
                     val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
 
@@ -368,8 +368,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             return true
         }
 
-        override fun onLongPress(e: MotionEvent?) {
-            e?.apply {
+        override fun onLongPress(e: MotionEvent) {
+            e.apply {
                 if (System.currentTimeMillis() - lastPanOrScaleTime > 500) {
                     val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
 
