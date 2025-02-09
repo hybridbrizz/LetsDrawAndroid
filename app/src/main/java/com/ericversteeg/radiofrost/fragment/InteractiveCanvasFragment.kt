@@ -113,7 +113,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var paused = false
     var pauseTime = 0L
-    private val maxBgTime = 60 * 60
+    private val maxBgTime = 60 * 5
 
     private var lastCanvasSummaryImageTime = 0L
 

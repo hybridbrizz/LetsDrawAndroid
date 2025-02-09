@@ -186,32 +186,32 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 connecting_title.text = "Connecting to ${server.name}"
             }
 
-            Glide.with(this)
-                .load(server.iconUrl)
-                .listener(object: RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Drawable?,
-                        model: Any?,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource?,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        server_icon.alpha = 0F
-                        server_icon.animate().setDuration(300).alpha(1F).start()
-                        return false
-                    }
-                })
-                .circleCrop()
-                .into(server_icon)
+//            Glide.with(this)
+//                .load(server.iconUrl)
+//                .listener(object: RequestListener<Drawable> {
+//                    override fun onLoadFailed(
+//                        e: GlideException?,
+//                        model: Any?,
+//                        target: Target<Drawable>?,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        return false
+//                    }
+//
+//                    override fun onResourceReady(
+//                        resource: Drawable?,
+//                        model: Any?,
+//                        target: Target<Drawable>?,
+//                        dataSource: DataSource?,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        server_icon.alpha = 0F
+//                        server_icon.animate().setDuration(300).alpha(1F).start()
+//                        return false
+//                    }
+//                })
+//                .circleCrop()
+//                .into(server_icon)
 
             Glide.with(this)
                 .load("${server.serviceAltBaseUrl()}/canvas")
