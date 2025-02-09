@@ -1,4 +1,4 @@
-package com.ericversteeg.radiofrost.model
+package com.matrixwarez.pt.model
 
 import android.content.Context
 import android.graphics.Color

@@ -1,4 +1,4 @@
-package com.ericversteeg.radiofrost
+package com.matrixwarez.pt
 
 import org.junit.Test
 

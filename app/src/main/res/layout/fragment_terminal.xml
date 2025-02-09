@@ -18,7 +18,7 @@
             android:imeOptions="actionDone"
             app:layout_constraintTop_toTopOf="parent" />
 
-    <com.ericversteeg.radiofrost.view.AutoCompleteView
+    <com.matrixwarez.pt.view.AutoCompleteView
             android:id="@+id/autoCompleteView"
             android:visibility="invisible"
             android:layout_width="match_parent"

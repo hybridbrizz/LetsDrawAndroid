@@ -525,16 +525,16 @@
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
 
-                <com.ericversteeg.radiofrost.view.ActionButtonFrame
+                <com.matrixwarez.pt.view.ActionButtonFrame
                         android:id="@+id/option_paint_indicator_width_button_minus"
                         android:layout_width="40dp"
                         android:layout_height="40dp">
-                    <com.ericversteeg.radiofrost.view.ActionButtonView
+                    <com.matrixwarez.pt.view.ActionButtonView
                             android:id="@+id/option_paint_indicator_width_action_minus"
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center" />
-                </com.ericversteeg.radiofrost.view.ActionButtonFrame>
+                </com.matrixwarez.pt.view.ActionButtonFrame>
 
                 <TextView
                         android:id="@+id/option_paint_indicator_width_value"
@@ -547,16 +547,16 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp" />
 
-                <com.ericversteeg.radiofrost.view.ActionButtonFrame
+                <com.matrixwarez.pt.view.ActionButtonFrame
                         android:id="@+id/option_paint_indicator_width_button_plus"
                         android:layout_width="40dp"
                         android:layout_height="40dp">
-                    <com.ericversteeg.radiofrost.view.ActionButtonView
+                    <com.matrixwarez.pt.view.ActionButtonView
                             android:id="@+id/option_paint_indicator_width_action_plus"
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center" />
-                </com.ericversteeg.radiofrost.view.ActionButtonFrame>
+                </com.matrixwarez.pt.view.ActionButtonFrame>
 
             </LinearLayout>
 
@@ -712,16 +712,16 @@
                         android:layout_marginLeft="20dp"
                         android:layout_weight="1" />
 
-                <com.ericversteeg.radiofrost.view.ActionButtonFrame
+                <com.matrixwarez.pt.view.ActionButtonFrame
                         android:id="@+id/option_color_palette_size_button_minus"
                         android:layout_width="40dp"
                         android:layout_height="40dp">
-                    <com.ericversteeg.radiofrost.view.ActionButtonView
+                    <com.matrixwarez.pt.view.ActionButtonView
                             android:id="@+id/option_color_palette_size_action_minus"
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center" />
-                </com.ericversteeg.radiofrost.view.ActionButtonFrame>
+                </com.matrixwarez.pt.view.ActionButtonFrame>
 
                 <TextView
                         android:id="@+id/option_color_palette_size_value"
@@ -734,16 +734,16 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp" />
 
-                <com.ericversteeg.radiofrost.view.ActionButtonFrame
+                <com.matrixwarez.pt.view.ActionButtonFrame
                         android:id="@+id/option_color_palette_size_button_plus"
                         android:layout_width="40dp"
                         android:layout_height="40dp">
-                    <com.ericversteeg.radiofrost.view.ActionButtonView
+                    <com.matrixwarez.pt.view.ActionButtonView
                             android:id="@+id/option_color_palette_size_action_plus"
                             android:layout_width="10dp"
                             android:layout_height="10dp"
                             android:layout_gravity="center" />
-                </com.ericversteeg.radiofrost.view.ActionButtonFrame>
+                </com.matrixwarez.pt.view.ActionButtonFrame>
 
             </LinearLayout>
 
@@ -1089,7 +1089,7 @@
 
     </ScrollView>
 
-    <com.ericversteeg.radiofrost.view.ButtonFrame
+    <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/back_button"
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -1104,7 +1104,7 @@
                 android:layout_gravity="start|top"
                 android:src="@drawable/ic_back" />
 
-    </com.ericversteeg.radiofrost.view.ButtonFrame>
+    </com.matrixwarez.pt.view.ButtonFrame>
 
     <FrameLayout
             android:id="@+id/fragment_container"

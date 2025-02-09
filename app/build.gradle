@@ -5,7 +5,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    namespace "com.ericversteeg.radiofrost"
+    namespace "com.matrixwarez.pt"
 
     signingConfigs {
         debug {
@@ -23,8 +23,8 @@ android {
     }
     compileSdkVersion 33
     defaultConfig {
-        applicationId "com.ericversteeg.radiofrost"
-        minSdkVersion 19
+        applicationId "com.matrixwarez.pt"
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode 4
         versionName "1.0.0"

@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:background="@android:color/transparent">
 
-    <com.ericversteeg.radiofrost.view.ButtonFrame
+    <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/back_button_export"
             android:layout_width="80dp"
             android:layout_height="80dp"
@@ -20,9 +20,9 @@
                 android:layout_gravity="start|top"
                 android:src="@drawable/ic_back" />
 
-    </com.ericversteeg.radiofrost.view.ButtonFrame>
+    </com.matrixwarez.pt.view.ButtonFrame>
 
-    <com.ericversteeg.radiofrost.view.ArtView
+    <com.matrixwarez.pt.view.ArtView
             android:id="@+id/art_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -71,7 +71,7 @@
 
     </LinearLayout>
 
-    <com.ericversteeg.radiofrost.view.ButtonFrame
+    <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/share_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
@@ -86,9 +86,9 @@
                 android:layout_gravity="top|end"
                 android:src="@drawable/ic_share" />
 
-    </com.ericversteeg.radiofrost.view.ButtonFrame>
+    </com.matrixwarez.pt.view.ButtonFrame>
 
-    <com.ericversteeg.radiofrost.view.ButtonFrame
+    <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/save_button"
             android:layout_width="60dp"
             android:layout_height="60dp"
@@ -103,6 +103,6 @@
                 android:layout_gravity="top|end"
                 android:src="@drawable/ic_save" />
 
-    </com.ericversteeg.radiofrost.view.ButtonFrame>
+    </com.matrixwarez.pt.view.ButtonFrame>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

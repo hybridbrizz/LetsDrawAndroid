@@ -9,12 +9,12 @@
             android:orientation="vertical"
             android:background="#000">
 
-        <com.ericversteeg.radiofrost.colorpicker.SBPalette
+        <com.matrixwarez.pt.colorpicker.SBPalette
                 android:id="@+id/sb_palette"
                 android:layout_width="match_parent"
                 android:layout_height="200dp" />
 
-        <com.ericversteeg.radiofrost.colorpicker.HPalette
+        <com.matrixwarez.pt.colorpicker.HPalette
                 android:id="@+id/h_palette"
                 android:layout_width="match_parent"
                 android:layout_height="15dp"
@@ -78,12 +78,12 @@
 
     </LinearLayout>
 
-    <com.ericversteeg.radiofrost.colorpicker.SBIndicator
+    <com.matrixwarez.pt.colorpicker.SBIndicator
             android:id="@+id/sb_indicator"
             android:layout_width="20dp"
             android:layout_height="20dp" />
 
-    <com.ericversteeg.radiofrost.colorpicker.HIndicator
+    <com.matrixwarez.pt.colorpicker.HIndicator
             android:id="@+id/h_indicator"
             android:layout_width="3dp"
             android:layout_height="15dp" />

@@ -1,4 +1,4 @@
-package com.ericversteeg.radiofrost
+package com.matrixwarez.pt
 
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4

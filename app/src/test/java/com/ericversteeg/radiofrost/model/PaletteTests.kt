@@ -1,4 +1,4 @@
-package com.ericversteeg.radiofrost.model
+package com.matrixwarez.pt.model
 
 import android.graphics.Color
 import org.junit.Test

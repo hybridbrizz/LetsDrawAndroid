@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    <com.ericversteeg.radiofrost.view.ButtonFrame
+    <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/button_frame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,6 +30,6 @@
                 android:shadowDy="3"
                 android:shadowRadius="4" />
 
-    </com.ericversteeg.radiofrost.view.ButtonFrame>
+    </com.matrixwarez.pt.view.ButtonFrame>
 
 </FrameLayout>
