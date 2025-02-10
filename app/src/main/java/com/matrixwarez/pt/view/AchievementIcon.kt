@@ -629,13 +629,13 @@ class AchievementIcon: View {
         bluePaint.color = Color.parseColor("#ff1a1ed7")
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         pxWidth = width / 5
         pxHeight = height / 5
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             if (thresholds != 0) {

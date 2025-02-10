@@ -35,10 +35,10 @@ class SBIndicator: View {
         paint.isAntiAlias = true
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             drawIndicator(canvas)

@@ -106,7 +106,7 @@ class DeviceCanvasViewportView: View {
 
     private val mScaleDetector = ScaleGestureDetector(context, scaleListener)
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         drawToCanvas(canvas)

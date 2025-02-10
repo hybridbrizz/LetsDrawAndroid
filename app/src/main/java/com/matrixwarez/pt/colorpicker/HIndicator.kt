@@ -33,10 +33,10 @@ class HIndicator: View {
         paint.style = Paint.Style.FILL
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             drawIndicator(canvas)

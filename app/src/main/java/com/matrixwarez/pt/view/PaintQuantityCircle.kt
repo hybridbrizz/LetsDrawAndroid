@@ -66,12 +66,12 @@ class PaintQuantityCircle : View, PaintQtyListener, PaintActionListener {
         }
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         primaryPaint.color = SessionSettings.instance.paintBarColor
 
-        canvas?.let {
+        canvas.let {
             it.save()
 
             var relQty = SessionSettings.instance.dropsAmt / SessionSettings.instance.maxPaintAmt.toFloat()

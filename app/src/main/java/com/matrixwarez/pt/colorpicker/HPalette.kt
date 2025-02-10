@@ -74,12 +74,12 @@ class HPalette: View {
         indicatorCallback?.indicatorStartPosition(hue / maxHue * width)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         val sTime = System.currentTimeMillis()
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             if (w > 0) {

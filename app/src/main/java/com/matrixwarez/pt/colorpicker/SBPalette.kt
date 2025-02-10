@@ -91,12 +91,12 @@ class SBPalette: View {
         hue = h
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         val sTime = System.currentTimeMillis()
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             drawSBSquare(hue, canvas)

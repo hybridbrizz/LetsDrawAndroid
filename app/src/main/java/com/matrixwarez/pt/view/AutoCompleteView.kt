@@ -46,10 +46,10 @@ class AutoCompleteView: View {
 
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             autoCompletedString?.apply {

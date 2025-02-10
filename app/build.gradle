@@ -21,12 +21,12 @@ android {
             keyPassword 'cYhq36!67'
         }
     }
-    compileSdkVersion 33
+    compileSdkVersion 34
     defaultConfig {
         applicationId "com.matrixwarez.pt"
         minSdkVersion 21
-        targetSdkVersion 33
-        versionCode 4
+        targetSdkVersion 34
+        versionCode 5
         versionName "1.0.0"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

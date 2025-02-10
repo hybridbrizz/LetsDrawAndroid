@@ -22,10 +22,10 @@ class RecentColorView: View {
 
     var color: Int? = null
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             val colorPaint = Paint()
             if (color != null) {
                 colorPaint.color = color!!

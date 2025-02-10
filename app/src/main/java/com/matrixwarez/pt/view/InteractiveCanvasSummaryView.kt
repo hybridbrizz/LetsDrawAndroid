@@ -48,14 +48,14 @@ class InteractiveCanvasSummaryView: View {
 
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         drawToCanvas(canvas)
     }
 
-    private fun drawToCanvas(canvas: Canvas?) {
-        canvas?.apply {
+    private fun drawToCanvas(canvas: Canvas) {
+        canvas.apply {
             save()
 
             val gridPpu = 20F

@@ -88,7 +88,7 @@ open class ArtView: View {
         this.art = art
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         drawToCanvas(canvas, drawBackground = showBackground, actualSize = actualSize, export = false)

@@ -88,10 +88,10 @@ class AchievementProgressBar: View, PaintQtyListener, PaintActionListener {
         return super.onTouchEvent(event)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             drawPixelBorder(this)

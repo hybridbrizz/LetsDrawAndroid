@@ -260,10 +260,10 @@ class ActionButtonView: View {
         }
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             if (type == Type.PAINT_CLOSE) {

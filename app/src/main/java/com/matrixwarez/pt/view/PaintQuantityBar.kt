@@ -115,12 +115,12 @@ class PaintQuantityBar: View, PaintQtyListener, PaintActionListener {
         return super.onTouchEvent(event)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         paintBarPaint.color = SessionSettings.instance.paintBarColor
 
-        canvas?.apply {
+        canvas.apply {
             save()
 
             //drawPixelBorder(this)
