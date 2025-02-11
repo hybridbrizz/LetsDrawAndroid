@@ -18,7 +18,7 @@ class TermsOfServiceFragment: Fragment() {
     lateinit var server: Server
 
     private val termsOfService = "Terms of Service\n\n" +
-            "Radio Frost (\"software\", \"service\" or \"app\") is provided by Matrix Warez Ltd. (\"developer\", \"publisher\") as is, whereby any feature, bug or issue with the app is not the responsibility of the developers or publishers of the service to withhold or upkeep. You must be at least 13 years of age to use this service.\n\n" +
+            "Pixels: Together (\"software\", \"service\" or \"app\") is provided by Matrix Warez Ltd. (\"developer\", \"publisher\") as is, whereby any feature, bug or issue with the app is not the responsibility of the developers or publishers of the service to withhold or upkeep. You must be at least 13 years of age to use this service.\n\n" +
             "(1) User Generated Content\n" +
             "Any pixel(s) written onto any canvas are the sole responsibility of the person who places the pixels. There is a chance on occasion that a person or number of persons may place pixels onto a canvas with this app that may be seen or flagged as copyrighted content. If you have a copyright complaint please send an email to matrixwarez@gmail.com citing what content you would like removed (erased) from a canvas and which canvas you are referring to plus full proof of ownership and delegation over the content. Please allow up to (4) weeks from the date the notice is received for the content to be fully removed.\n\n" +
             "(2) Speech and Symbols\n" +

@@ -9,6 +9,12 @@ class Server {
     @SerializedName("name")
     var name = ""
 
+    @SerializedName("size")
+    var size = 0
+
+    @SerializedName("max_send")
+    var maxSend = 10
+
     @SerializedName("base_url")
     var baseUrl = ""
 

@@ -38,8 +38,8 @@ import kotlin.math.max
 
 class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettings) {
 
-    var rows = 1024
-    var cols = 1024
+    var rows = 0
+    var cols = 0
 
     lateinit var arr: Array<IntArray>
 
@@ -126,8 +126,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     companion object {
-        var rows = 1024
-        var cols = 1024
+        var rows = 0
+        var cols = 0
 
         const val GRID_LINE_MODE_ON = 0
         const val GRID_LINE_MODE_OFF = 1
@@ -205,8 +205,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             // world
             else {
                 Observable.fromRunnable<Void> {
-                    rows = 1024
-                    cols = 1024
+                    rows = SessionSettings.instance.canvasSize
+                    cols = rows
                     arr = Array(rows) { IntArray(cols) }
 
                     initChunkPixelsFromMemory()
@@ -460,8 +460,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val deviceId = t[1].toInt()
         val color = t[2].toInt()
 
-        val x = pixelId % 1024
-        val y = pixelId / 1024
+        val x = pixelId % cols
+        val y = pixelId / rows
 
         arr[y][x] = color
         interactiveCanvasDrawer?.notifyRedraw()
@@ -642,7 +642,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
-            if (restorePoint == null && (sessionSettings.dropsAmt > 0 && restorePoints.size < 10 || !world)) {
+            if (restorePoint == null && (sessionSettings.dropsAmt > 0 && restorePoints.size < SessionSettings.instance.maxSend || !world)) {
                 if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
                     val unitColor = arr[unitPoint.y][unitPoint.x]
 

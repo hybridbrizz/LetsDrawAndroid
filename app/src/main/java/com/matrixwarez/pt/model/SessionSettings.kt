@@ -124,6 +124,9 @@ class SessionSettings {
     lateinit var chunk3: JsonArray
     lateinit var chunk4: JsonArray
 
+    var canvasSize = 0
+    var maxSend = 10
+
     var firstContributorName = ""
     var secondContributorName = ""
     var thirdContributorName = ""

@@ -171,6 +171,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             SessionSettings.instance.maxPaintAmt = server.maxPixels
             SessionSettings.instance.addPaintInterval = server.pixelInterval
 
+            SessionSettings.instance.canvasSize = server.size
+            SessionSettings.instance.maxSend = server.maxSend
+
             Log.d("Connection", "Got server info, starting queue socket connect.")
             QueueSocket.instance.socketListener = this
             QueueSocket.instance.startSocket(server)
