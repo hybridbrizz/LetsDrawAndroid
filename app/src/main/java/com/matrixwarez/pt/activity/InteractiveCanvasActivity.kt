@@ -3,6 +3,7 @@ package com.matrixwarez.pt.activity
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.matrixwarez.pt.R
@@ -233,6 +234,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     override fun onDataLoaded(server: Server) {
+        Log.d("On Data Loaded", "Callback")
         if (!SessionSettings.instance.agreedToTermOfService) {
             showTermsOfServiceFragment(server)
             return

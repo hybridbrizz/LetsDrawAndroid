@@ -36,6 +36,10 @@ import com.matrixwarez.pt.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.android.synthetic.main.fragment_loading_screen.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.*
 
@@ -490,21 +494,25 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 }
 
                 if (!server.isAdmin) {
-                    canvasService.logIp(uniqueId) { res ->
-                        if (res == null) {
-                            showConnectionErrorMessage(socket = false)
-                            return@logIp
-                        }
-                        else if (!res.get("success").asBoolean) {
-                            showConnectionErrorMessage(banError = true)
-                            return@logIp
-                        }
+                    CoroutineScope(Dispatchers.Main.immediate).launch {
+                        canvasService.logIp(uniqueId) { res ->
+                            if (res == null) {
+                                showConnectionErrorMessage(socket = false)
+                                return@logIp
+                            }
+                            else if (!res.get("success").asBoolean) {
+                                showConnectionErrorMessage(banError = true)
+                                return@logIp
+                            }
 
-                        doneCheckingIp = true
+                            doneCheckingIp = true
+                            downloadFinished()
+                        }
                     }
                 }
                 else {
                     doneCheckingIp = true
+                    downloadFinished()
                 }
             },
             { error ->
@@ -674,16 +682,15 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun loadingDone(): Boolean {
-        if (realmId == 2) {
-            return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
-                    doneLoadingPixels && doneConnectingSocket
-        }
-        else if (world) {
-            return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
-                    doneLoadingChunkCount == 4 &&
-                    doneConnectingQueue && doneConnectingSocket && doneCheckingIp
-        }
-        return false
+        Log.d("Check loading done", "doneLoadingPaintQty = $doneLoadingPaintQty, " +
+                "doneSendingDeviceId = $doneSendingDeviceId, " +
+                "doneLoadingTopContributors = $doneLoadingTopContributors, " +
+                "doneLoadingCheckCount = $doneLoadingChunkCount, " +
+                "doneConnectingQueue = $doneConnectingQueue, " +
+                "doneConnectingSocket = $doneConnectingSocket, doneCheckingIp = $doneCheckingIp")
+        return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
+                doneLoadingChunkCount == 4 &&
+                doneConnectingQueue && doneConnectingSocket && doneCheckingIp
     }
 
     private fun getNumLoaded(): Int {
