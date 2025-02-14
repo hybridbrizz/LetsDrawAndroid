@@ -24,10 +24,17 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.socket.client.Socket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.Exception
 import java.net.URISyntaxException
+import java.time.Instant
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -79,6 +86,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
     var realmId = 0
 
+    var latencyJob: Job? = null
+    var coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
+
     // socket.io websocket for handling real-time pixel updates
 
     var receivedPaintRecently = false
@@ -89,6 +99,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     lateinit var connectingTimer: Timer
 
     private var isShowingCanvasError = false
+
+    var lastPingTime = 0L
 
     var summary: MutableList<RestorePoint> = ArrayList()
 
@@ -218,6 +230,16 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
+
+                latencyJob = coroutineScope.launch {
+                    while (true) {
+                        InteractiveCanvasSocket.instance.requireSocket().emit("lat")
+                        lastPingTime = System.currentTimeMillis()
+                        withContext(Dispatchers.Default) {
+                            delay(15 * 1000L)
+                        }
+                    }
+                }
             }
 
             try {
@@ -450,6 +472,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                         receivedPaintRecently = false
                     }
                 }, 1000 * 60)
+            }
+        }
+
+        socket?.on("res") {
+            coroutineScope.launch {
+                val latency = "${System.currentTimeMillis() - lastPingTime} ms"
+                interactiveCanvasListener?.notifySocketLatency(latency)
+                Log.d("Latency", "Pong $latency")
             }
         }
     }

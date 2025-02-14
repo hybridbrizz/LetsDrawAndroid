@@ -360,24 +360,22 @@ class MenuFragment: Fragment() {
 
         button_add_server.setOnClickListener {
             val accessKey = input_access_key.text.toString().trim().uppercase()
-            if (accessKey.length == 5 || accessKey.length == 8) {
-                it.isEnabled = false
+            it.isEnabled = false
 
-                if (SessionSettings.instance.hasServer(accessKey)) {
-                    it.isEnabled = true
-                    return@setOnClickListener
+            if (SessionSettings.instance.hasServer(accessKey)) {
+                it.isEnabled = true
+                return@setOnClickListener
+            }
+
+            service.getServer(accessKey) { _, server ->
+                it.isEnabled = true
+
+                if (server == null) {
+                    Toast.makeText(requireContext(), "Can't find server", Toast.LENGTH_LONG).show()
+                    return@getServer
                 }
-
-                service.getServer(accessKey) { _, server ->
-                    it.isEnabled = true
-
-                    if (server == null) {
-                        Toast.makeText(requireContext(), "Can't find server", Toast.LENGTH_LONG).show()
-                        return@getServer
-                    }
-                    SessionSettings.instance.addServer(requireContext(), server)
-                    showServerList()
-                }
+                SessionSettings.instance.addServer(requireContext(), server)
+                showServerList()
             }
         }
 

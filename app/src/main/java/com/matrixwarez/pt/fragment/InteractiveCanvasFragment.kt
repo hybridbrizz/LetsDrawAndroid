@@ -3,6 +3,7 @@ package com.matrixwarez.pt.fragment
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.*
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
@@ -26,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -326,6 +328,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no.color = Color.BLACK
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
+
+            text_latency.setTextColor(Color.BLACK)
+            text_latency.setShadowLayer(2f, 1f, 1f, Color.WHITE)
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
@@ -339,6 +344,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
+
+            text_latency.setTextColor(Color.WHITE)
+            text_latency.setShadowLayer(2f, 1f, 1f, Color.BLACK)
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
@@ -1143,6 +1151,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        surface_view.interactiveCanvas.latencyJob?.cancel()
+    }
+
     // screen rotation
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
@@ -1278,8 +1291,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun recolorVisibleActionViews() {
+        val isLight = SessionSettings.instance.backgroundColorsIndex != 1 && SessionSettings.instance.backgroundColorsIndex != 3
         for (buttonFrame in visibleActionViews) {
-            buttonFrame.isLight = SessionSettings.instance.backgroundColorsIndex != 1 && SessionSettings.instance.backgroundColorsIndex != 3
+            buttonFrame.isLight = isLight
+
+            when (isLight) {
+                true -> {
+                    text_latency.setTextColor(Color.WHITE)
+                    text_latency.setShadowLayer(2f, 1f, 1f, Color.BLACK)
+                }
+                false -> {
+                    text_latency.setTextColor(Color.BLACK)
+                    text_latency.setShadowLayer(2f, 1f, 1f, Color.WHITE)
+                }
+            }
         }
     }
 
@@ -1895,6 +1920,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
+    override fun notifySocketLatency(ms: String) {
+        text_latency.text = ms
+    }
+
     // interactive canvas gesture listener
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE
@@ -2389,12 +2418,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas
             .registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
 
-        showNoSocket(false)
+        updateSocketStatus(true)
     }
 
     override fun onSocketDisconnect(error: Boolean) {
         Log.i("Canvas Socket", "Socket disconnect.")
-        showNoSocket()
+        updateSocketStatus(false)
 
         if (error) {
             activity?.runOnUiThread {
@@ -2405,6 +2434,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun reconnectToSocket() {
         InteractiveCanvasSocket.instance.startSocket(server)
+        updateSocketStatus(true)
     }
 
     private fun scheduleReconnect() {
@@ -2501,13 +2531,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         //onViewCreated(requireView(), null)
     }
 
-    private fun showNoSocket(show: Boolean = true) {
+    private fun updateSocketStatus(connected: Boolean) {
         activity?.runOnUiThread {
-            if (show) {
-                image_no_socket?.visibility = View.VISIBLE
+            if (connected) {
+                image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
+
             }
             else {
-                image_no_socket?.visibility = View.GONE
+                image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.red_circle))
             }
         }
     }
