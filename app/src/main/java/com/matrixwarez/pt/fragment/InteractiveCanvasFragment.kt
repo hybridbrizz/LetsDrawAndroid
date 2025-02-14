@@ -328,9 +328,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no.color = Color.BLACK
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
-
-            text_latency.setTextColor(Color.BLACK)
-            text_latency.setShadowLayer(2f, 1f, 1f, Color.WHITE)
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
@@ -344,9 +341,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
-
-            text_latency.setTextColor(Color.WHITE)
-            text_latency.setShadowLayer(2f, 1f, 1f, Color.BLACK)
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
