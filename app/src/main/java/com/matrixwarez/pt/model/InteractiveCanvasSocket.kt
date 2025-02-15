@@ -6,6 +6,11 @@ import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import io.socket.engineio.client.transports.WebSocket
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class InteractiveCanvasSocket {
 
@@ -30,7 +35,7 @@ class InteractiveCanvasSocket {
         socket?.connect()
 
         socket?.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            //Log.i("Socket", "Socket connected!")
+            socket?.emit("connect2")
 
             socketConnectCallback?.onSocketConnect()
         })

@@ -5,6 +5,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
+import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.SessionSettings
 
@@ -155,14 +156,14 @@ class InteractiveCanvasSummaryView: View {
 //                }
             }
 
-            /*val borderPaint = Paint()
+            val borderPaint = Paint()
             borderPaint.color = Color.WHITE
             borderPaint.strokeWidth = Utils.dpToPxF(context, 1)
 
             canvas.drawLine(0F, 0F, width.toFloat(), 0F, borderPaint)
             canvas.drawLine(0F, 0F, 0F, height.toFloat(), borderPaint)
             canvas.drawLine(width.toFloat(), 0F, width.toFloat(), height.toFloat(), borderPaint)
-            canvas.drawLine(0F, height.toFloat(), width.toFloat(), height.toFloat(), borderPaint)*/
+            canvas.drawLine(0F, height.toFloat(), width.toFloat(), height.toFloat(), borderPaint)
 
             restore()
         }

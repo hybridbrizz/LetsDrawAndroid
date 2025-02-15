@@ -54,14 +54,11 @@ import com.matrixwarez.pt.view.PaintColorIndicator
 import com.matrixwarez.pt.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.android.synthetic.main.fragment_art_export.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.*
-import kotlinx.android.synthetic.main.fragment_loading_screen.*
-import kotlinx.android.synthetic.main.palette_adapter_view.*
 import org.json.JSONArray
 import java.lang.Exception
 import java.util.*
@@ -216,6 +213,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
+        paint_color_accept.color = Color.GREEN
+
         // listeners
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
@@ -312,39 +311,39 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             close_paint_panel.color = SessionSettings.instance.closePaintBackButtonColor
         }
         else {
-            close_paint_panel.color = panelThemeConfig.actionButtonColor
+            close_paint_panel.color = Color.YELLOW
         }
 
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.parseColor("#FF111111"))
             palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
 
-            paint_color_accept.color = Color.BLACK
+            //paint_color_accept.color = Color.BLACK
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
-            paint_yes.color = Color.BLACK
-            paint_no.color = Color.BLACK
+            paint_yes.color = Color.GREEN
+            paint_no.color = Color.RED
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
 
-            paint_color_accept.color = Color.WHITE
+            //paint_color_accept.color = Color.WHITE
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
 
-            paint_yes.color = Color.WHITE
-            paint_no.color = Color.WHITE
+            paint_yes.color = Color.GREEN
+            paint_no.color = Color.RED
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
 
         if (panelThemeConfig.actionButtonColor == ActionButtonView.blackPaint.color) {
-            paint_color_accept.color = Color.BLACK
+            //paint_color_accept.color = Color.BLACK
         }
 
         if (panelThemeConfig.inversePaintEventInfo) {
@@ -412,10 +411,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_indicator_view_bottom_layer.setPaintColor(color)
 
                 if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept.color = Color.BLACK
+                    //paint_color_accept.color = Color.BLACK
                 }
                 else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    paint_color_accept.color = Color.WHITE
+                    //paint_color_accept.color = Color.WHITE
                 }
                 else if (PaintColorIndicator.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
                     paint_color_accept.color = Color.WHITE
@@ -1044,6 +1043,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     layoutParams.height = (layoutParams.height * 0.833).toInt()
                     paint_color_accept_image.layoutParams = layoutParams
                     paint_color_accept_image.layoutParams = layoutParams
+                    ImageViewCompat.setImageTintList(paint_color_accept_image, ColorStateList.valueOf(Color.GREEN))
 
                     // close paint panel
                     layoutParams = close_paint_panel_action.layoutParams as FrameLayout.LayoutParams
@@ -1364,6 +1364,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // view toggles
     private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
         if (show) {
+            text_latency.visibility = View.GONE
+
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
 
@@ -1429,6 +1431,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             toggleTools(false)
         }
         else {
+            text_latency.visibility = View.VISIBLE
+
             surface_view.endPainting(false)
 
             paint_panel.visibility = View.GONE
@@ -1914,8 +1918,30 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
-    override fun notifySocketLatency(ms: String) {
-        text_latency.text = ms
+    private var msValue = 0L
+    private var count = 0
+
+    override fun notifySocketLatency(ms: String, msValue: Long) {
+        var str = ms
+        if (count > 1) {
+            str = "($count) $ms"
+        }
+        text_latency.text = str
+        if (msValue > 300) {
+            image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.yellow_circle))
+        }
+        else {
+            image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
+        }
+        this.msValue = msValue
+    }
+
+    override fun notifyConnectionCount(count: Int) {
+        this.count = count
+        if (count < 2) return
+
+        Log.d("Connection Count", count.toString())
+        text_latency.text = "($count) ${msValue} ms"
     }
 
     // interactive canvas gesture listener
@@ -2389,6 +2415,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // socket callback
     override fun onSocketConnect() {
         Log.i("Canvas Socket", "Socket connected!")
+
         canvasService.getRecentPixels(pauseTime) { pixels ->
             pixels?.also {
                 for (element in it) {
@@ -2417,6 +2444,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun onSocketDisconnect(error: Boolean) {
         Log.i("Canvas Socket", "Socket disconnect.")
+
+        InteractiveCanvasSocket.instance.requireSocket().emit("disconnect2")
+
         updateSocketStatus(false)
 
         if (error) {
@@ -2460,9 +2490,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
 
-            paint_yes.color = Color.BLACK
-            paint_no.color = Color.BLACK
-
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
         else {
@@ -2472,9 +2499,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
-
-            paint_yes.color = Color.WHITE
-            paint_no.color = Color.WHITE
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -2529,7 +2553,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         activity?.runOnUiThread {
             if (connected) {
                 image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
-
             }
             else {
                 image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.red_circle))

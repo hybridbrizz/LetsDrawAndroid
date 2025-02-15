@@ -49,6 +49,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var cols = 0
 
     lateinit var arr: Array<IntArray>
+    var errorPixels = mutableListOf<ErrorPixel>()
 
     val basePpu = 100
     var ppu = basePpu
@@ -234,6 +235,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 latencyJob = coroutineScope.launch {
                     while (true) {
                         InteractiveCanvasSocket.instance.requireSocket().emit("lat")
+                        InteractiveCanvasSocket.instance.requireSocket().emit("con")
                         lastPingTime = System.currentTimeMillis()
                         withContext(Dispatchers.Default) {
                             delay(15 * 1000L)
@@ -477,9 +479,17 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("res") {
             coroutineScope.launch {
-                val latency = "${System.currentTimeMillis() - lastPingTime} ms"
-                interactiveCanvasListener?.notifySocketLatency(latency)
+                val value = System.currentTimeMillis() - lastPingTime
+                val latency = "$value ms"
+                interactiveCanvasListener?.notifySocketLatency(latency, value)
                 Log.d("Latency", "Pong $latency")
+            }
+        }
+
+        socket?.on("cnt") {
+            coroutineScope.launch {
+                Log.d("Connection Count", it.toString())
+                interactiveCanvasListener?.notifyConnectionCount(it[0] as Int)
             }
         }
     }
@@ -672,6 +682,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         val restorePoint = unitInRestorePoints(unitPoint)
         if (mode == 0) {
+            var oob = false
             if (restorePoint == null && (sessionSettings.dropsAmt > 0 && restorePoints.size < SessionSettings.instance.maxSend || !world)) {
                 if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
                     val unitColor = arr[unitPoint.y][unitPoint.x]
@@ -693,6 +704,12 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                         }
                     }
                 }
+                else {
+                    addErrorPixel(unitPoint.x, unitPoint.y)
+                }
+            }
+            else if (sessionSettings.dropsAmt == 0 || restorePoints.size >= SessionSettings.instance.maxSend) {
+                addErrorPixel(unitPoint.x, unitPoint.y)
             }
         }
         else if (mode == 1) {
@@ -713,6 +730,16 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         if (redraw) {
             interactiveCanvasDrawer?.notifyRedraw()
+        }
+    }
+
+    private fun addErrorPixel(x: Int, y: Int) {
+        if (errorPixels.firstOrNull { it.x == x && it.y == y } == null) {
+            errorPixels.add(ErrorPixel(
+                x = x,
+                y = y,
+                0.65f
+            ))
         }
     }
 

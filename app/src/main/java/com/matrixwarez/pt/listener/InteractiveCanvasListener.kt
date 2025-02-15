@@ -18,5 +18,6 @@ interface InteractiveCanvasListener {
     fun notifyUpdateCanvasSummary()
     fun onDeviceViewportUpdate()
 
-    fun notifySocketLatency(ms: String)
+    fun notifySocketLatency(ms: String, msValue: Long)
+    fun notifyConnectionCount(count: Int)
 }

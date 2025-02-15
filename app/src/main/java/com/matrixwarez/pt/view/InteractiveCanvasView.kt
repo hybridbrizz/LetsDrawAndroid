@@ -11,10 +11,17 @@ import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.*
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.model.InteractiveCanvas
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToLong
 
 class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveCanvasScaleCallback, SelectedObjectListener {
 
@@ -561,12 +568,33 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         endPainting(true)
     }
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
+    private var redrawLoopJob: Job? = null
+
     // draw canvas
     override fun notifyRedraw() {
-        drawInteractiveCanvas(holder)
+        when (interactiveCanvas.errorPixels.isNotEmpty() && redrawLoopJob == null) {
+            true -> {
+                redrawLoopJob = coroutineScope.launch {
+                    while (interactiveCanvas.errorPixels.isNotEmpty()) {
+                        drawInteractiveCanvas(holder)
+                        withContext(Dispatchers.Default) {
+                            delay((1000 / 30f).roundToLong())
+                        }
+                    }
+                    redrawLoopJob?.cancel()
+                    redrawLoopJob = null
+                }
+            }
+            false -> {
+                drawInteractiveCanvas(holder)
+            }
+        }
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {
+        Log.d("Draw Interactive Canvas", "Redraw")
+
         paint.color = Color.parseColor("#FFFFFFFF")
 
         val canvas = holder.lockCanvas()
@@ -577,6 +605,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         canvas.drawARGB(255, 0, 0, 0)
 
         drawUnits(canvas)
+        drawErrors(canvas)
         drawGridLines(canvas, deviceViewport, ppu)
 
         holder.unlockCanvasAndPost(canvas)
@@ -648,6 +677,29 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             }
         }
 
+    }
+
+    private fun drawErrors(canvas: Canvas) {
+        val errorPixels = interactiveCanvas.errorPixels
+
+        errorPixels.forEach { pixel ->
+            val rect = interactiveCanvas.getScreenSpaceForUnit(
+                pixel.x,
+                pixel.y
+            )
+            paint.color = pixel.getColor()
+            canvas.drawRect(rect, paint)
+        }
+
+        var i = 0
+        while (i < errorPixels.size) {
+            val pixel = errorPixels[i]
+            if (!pixel.isActive) {
+                errorPixels.removeAt(i)
+                i--
+            }
+            i++
+        }
     }
 
     private fun drawUnits(canvas: Canvas) {

@@ -308,7 +308,8 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_done" />
+                    android:src="@drawable/ic_done"
+                    app:tint="#FF00FF00" />
 
         </com.matrixwarez.pt.view.ButtonFrame>
 
