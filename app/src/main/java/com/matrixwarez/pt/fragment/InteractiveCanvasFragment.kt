@@ -2420,7 +2420,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             pixels?.also {
                 for (element in it) {
                     val pixelInfo = element.asString
-                    surface_view?.interactiveCanvas?.receivePixel(pixelInfo)
+                    surface_view?.interactiveCanvas?.receivePixels(pixelInfo)
                 }
             }
         }

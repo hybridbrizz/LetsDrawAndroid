@@ -430,9 +430,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 //            })
 //        }
 
-        socket?.on("pixel_receive") {
+        socket?.on("pixels_receive") {
             val data = it[0] as String
-            receivePixel(data)
+            receivePixels(data)
         }
 
         socket?.on("canvas_error") {
@@ -494,19 +494,52 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    fun receivePixel(pixelInfo: String) {
-        val t = pixelInfo.split("&")
-        val pixelId = t[0].toInt()
-        val deviceId = t[1].toInt()
-        val color = t[2].toInt()
+    fun receivePixels(message: String) {
+        val t = message.split("&")
 
-        val x = pixelId % cols
-        val y = pixelId / rows
+        val pixelIds = mutableListOf<Int>()
+        val colors = mutableListOf<Int>()
+        var deviceId = -1
+        var key = ""
 
-        arr[y][x] = color
+        for (i in t.indices) {
+            if (t.size % 2 == 0 && i == t.size - 1) {
+                key = t[i]
+                break
+            }
+
+            when {
+                i == 0 -> {
+                    deviceId = t[i].toInt()
+                }
+                i % 2 != 0 -> {
+                    pixelIds.add(t[i].toInt())
+                }
+                else -> {
+                    colors.add(t[i].toInt())
+                }
+            }
+        }
+
+        if (pixelIds.size != colors.size) {
+            return
+        }
+
+        for (i in pixelIds.indices) {
+            val pixelId = pixelIds[i]
+            val color = colors[i]
+
+            val x = pixelId % cols
+            val y = pixelId / rows
+
+            Log.d("Receive Pixel", "pixelId($pixelId) = ($x, $y)")
+
+            arr[y][x] = color
+        }
+
         interactiveCanvasDrawer?.notifyRedraw()
 
-        Log.i("Receive Pixel", pixelInfo)
+        Log.i("Receive Pixels", message)
     }
 
     fun erasePixels(startUnit: Point, endUnit: Point) {
@@ -748,11 +781,19 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         if (!InteractiveCanvasSocket.instance.isConnected()) return
 
         if (world) {
-            for(restorePoint in restorePoints) {
-                InteractiveCanvasSocket.instance.requireSocket().emit("pixel_send",
-                    buildPixelString(restorePoint.point.x, restorePoint.point.y, SessionSettings.instance.deviceId, restorePoint.newColor)
-                )
+            val xs = mutableListOf<Int>()
+            val ys = mutableListOf<Int>()
+            val colors = mutableListOf<Int>()
+
+            for (restorePoint in restorePoints) {
+                xs.add(restorePoint.point.x)
+                ys.add(restorePoint.point.y)
+                colors.add(restorePoint.newColor)
             }
+
+            InteractiveCanvasSocket.instance.requireSocket().emit("pixels_send",
+                buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors)
+            )
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,
@@ -772,9 +813,20 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
     }
 
-    private fun buildPixelString(x: Int, y: Int, deviceId: Int, color: Int): String {
-        val pixelId = y * cols + x
-        return String.format("%d&%d&%d", pixelId, deviceId, color)
+    private fun buildPixelsString(xs: List<Int>, ys: List<Int>, deviceId: Int, colors: List<Int>): String {
+        var str = deviceId.toString()
+        for (i in colors.indices) {
+            val x = xs[i]
+            val y = ys[i]
+            val color = colors[i]
+
+            val pixelId = y * cols + x
+            str += "&$pixelId&$color"
+        }
+        if (server.isAdmin) {
+            str += "&${server.adminKey}"
+        }
+        return str
     }
 
     fun undoPendingPaint() {
