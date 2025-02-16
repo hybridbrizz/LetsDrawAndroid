@@ -87,7 +87,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
     var realmId = 0
 
-    var latencyJob: Job? = null
+    private var latencyJob: Job? = null
     var coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
 
     // socket.io websocket for handling real-time pixel updates
@@ -232,16 +232,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe()
 
-                latencyJob = coroutineScope.launch {
-                    while (true) {
-                        InteractiveCanvasSocket.instance.requireSocket().emit("lat")
-                        InteractiveCanvasSocket.instance.requireSocket().emit("con")
-                        lastPingTime = System.currentTimeMillis()
-                        withContext(Dispatchers.Default) {
-                            delay(15 * 1000L)
-                        }
-                    }
-                }
+                startLatencyJob()
             }
 
             try {
@@ -384,6 +375,27 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }
             }
         }
+    }
+
+    fun startLatencyJob() {
+        if (latencyJob != null) return
+
+        latencyJob = coroutineScope.launch {
+            while (true) {
+                Log.d("Latency Check", "Get latency and connection count")
+                InteractiveCanvasSocket.instance.requireSocket().emit("lat")
+                InteractiveCanvasSocket.instance.requireSocket().emit("con")
+                lastPingTime = System.currentTimeMillis()
+                withContext(Dispatchers.Default) {
+                    delay(15 * 1000L)
+                }
+            }
+        }
+    }
+
+    fun cancelLatencyJob() {
+        latencyJob?.cancel()
+        latencyJob = null
     }
 
     fun registerForSocketEvents(socket: Socket?) {

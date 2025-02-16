@@ -121,15 +121,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
         // position
-        if (SessionSettings.instance.restoreDeviceViewportCenterX == 0F && SessionSettings.instance.restoreDeviceViewportCenterY == 0F) {
-            interactiveCanvas.updateDeviceViewport(
-                context,
-                interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
-            )
-        }
-        else {
-            interactiveCanvas.updateDeviceViewport(context, SessionSettings.instance.restoreDeviceViewportCenterX, SessionSettings.instance.restoreDeviceViewportCenterY)
-        }
+        interactiveCanvas.updateDeviceViewport(
+            context,
+            interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
+        )
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {

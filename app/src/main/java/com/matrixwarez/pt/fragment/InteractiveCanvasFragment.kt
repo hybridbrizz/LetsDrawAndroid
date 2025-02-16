@@ -1084,6 +1084,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun pauseCanvas() {
         Log.i("Interactive Canvas", "Canvas Pause")
+        surface_view.interactiveCanvas.cancelLatencyJob()
         InteractiveCanvasSocket.instance.disconnect()
 
         paused = true
@@ -1147,7 +1148,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun onDestroyView() {
         super.onDestroyView()
-        surface_view.interactiveCanvas.latencyJob?.cancel()
+        surface_view.interactiveCanvas.cancelLatencyJob()
     }
 
     // screen rotation
@@ -2438,6 +2439,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         surface_view.interactiveCanvas
             .registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
+
+        surface_view.interactiveCanvas.startLatencyJob()
 
         updateSocketStatus(true)
     }
