@@ -797,7 +797,5 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
         doneConnectingSocket = false
         showConnectionErrorMessage(true)
-
-        InteractiveCanvasSocket.instance.requireSocket().emit("disconnect2")
     }
 }

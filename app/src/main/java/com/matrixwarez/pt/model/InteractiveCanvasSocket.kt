@@ -22,8 +22,6 @@ class InteractiveCanvasSocket {
 
     var socketConnectCallback: SocketConnectCallback? = null
 
-    private var manualDisconnect = false
-
     fun startSocket(server: Server) {
         Log.i("Canvas Socket", "Connecting to socket... (${socketConnectCallback?.javaClass?.simpleName})")
         val opts = IO.Options()
@@ -44,20 +42,17 @@ class InteractiveCanvasSocket {
             //Log.i("Socket", "Socket connect error!")
 
             socketConnectCallback?.onSocketDisconnect(true)
-            socket?.disconnect()
+            //socket?.disconnect()
         }
 
         socket?.on(Socket.EVENT_DISCONNECT) {
             Log.i("Socket", "Socket disconnected!")
 
-            socketConnectCallback?.onSocketDisconnect(!manualDisconnect)
-
-            manualDisconnect = false
+            socketConnectCallback?.onSocketDisconnect(false)
         }
     }
 
     fun disconnect() {
-        manualDisconnect = true
         socket?.disconnect()
     }
 

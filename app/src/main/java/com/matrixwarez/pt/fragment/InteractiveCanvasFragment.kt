@@ -1065,7 +1065,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         SessionSettings.instance.paintQtyListeners.remove(this)
 
         context?.apply {
-            surface_view.interactiveCanvas.saveUnits(this)
+            //surface_view.interactiveCanvas.saveUnits(this)
             surface_view.interactiveCanvas.interactiveCanvasListener = null
 
             SessionSettings.instance.saveLastPaintColor(this, world)
@@ -1085,6 +1085,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun pauseCanvas() {
         Log.i("Interactive Canvas", "Canvas Pause")
         surface_view.interactiveCanvas.cancelLatencyJob()
+        InteractiveCanvasSocket.instance.socketConnectCallback = null
         InteractiveCanvasSocket.instance.disconnect()
 
         paused = true
@@ -2446,9 +2447,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun onSocketDisconnect(error: Boolean) {
-        Log.i("Canvas Socket", "Socket disconnect.")
-
-        InteractiveCanvasSocket.instance.requireSocket().emit("disconnect2")
+        Log.i("Canvas Socket", "Socket disconnect ($error).")
 
         updateSocketStatus(false)
 
