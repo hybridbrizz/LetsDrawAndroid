@@ -32,8 +32,8 @@
     <string name="option_paint_indicator_square">Square current color</string>
     <string name="option_paint_indicator_outline_title">Current color outline</string>
     <string name="option_grid_line_color_title">Grid line color</string>
-    <string name="option_canvas_background_primary_color_title">Background color</string>
-    <string name="option_canvas_background_secondary_color_title">Background color (2)</string>
+    <string name="option_canvas_background_primary_color_title">Custom canvas color (1)</string>
+    <string name="option_canvas_background_secondary_color_title">Custom canvas color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
     <string name="step1">Welcome to this quick guide. This guide will help you get setup and fill you in on what you need to know to get started. First, you can connect to the public canvas by going to Connect then entering \'PIXEL\'. Once connected you will automatically start to gain a certain amount of pixels that you can use to draw pixel art.</string>

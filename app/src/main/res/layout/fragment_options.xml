@@ -258,6 +258,7 @@
 
             <LinearLayout
                     android:id="@+id/option_right_handed"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:orientation="horizontal"

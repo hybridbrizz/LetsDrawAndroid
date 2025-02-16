@@ -6,7 +6,11 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -29,9 +33,65 @@ import com.matrixwarez.pt.listener.FragmentListener
 import com.matrixwarez.pt.listener.OptionsListener
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_options.*
 import kotlinx.android.synthetic.main.fragment_options.back_button
-import kotlinx.android.synthetic.main.fragment_signin.*
+import kotlinx.android.synthetic.main.fragment_options.change_name_button
+import kotlinx.android.synthetic.main.fragment_options.change_name_container
+import kotlinx.android.synthetic.main.fragment_options.credits_container
+import kotlinx.android.synthetic.main.fragment_options.export_single_play
+import kotlinx.android.synthetic.main.fragment_options.fragment_container
+import kotlinx.android.synthetic.main.fragment_options.import_single_play
+import kotlinx.android.synthetic.main.fragment_options.input_name
+import kotlinx.android.synthetic.main.fragment_options.option_bold_action_buttons
+import kotlinx.android.synthetic.main.fragment_options.option_bold_action_buttons_switch
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_container
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_container
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_color_reset
+import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_switch
+import kotlinx.android.synthetic.main.fragment_options.option_close_paint_panel_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_close_paint_panel_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_action_minus
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_action_plus
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_button_minus
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_button_plus
+import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_value
+import kotlinx.android.synthetic.main.fragment_options.option_emitters_container
+import kotlinx.android.synthetic.main.fragment_options.option_emitters_switch
+import kotlinx.android.synthetic.main.fragment_options.option_frame_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_frame_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_container
+import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_num_recent_colors
+import kotlinx.android.synthetic.main.fragment_options.option_num_recent_colors_choice_layout
+import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_button
+import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_container
+import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_fill_circle_switch
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_outline_switch
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_square_switch
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_action_minus
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_action_plus
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_button_minus
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_button_plus
+import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_value
+import kotlinx.android.synthetic.main.fragment_options.option_paint_panel_texture_title
+import kotlinx.android.synthetic.main.fragment_options.option_show_paint_bar_container
+import kotlinx.android.synthetic.main.fragment_options.option_show_paint_bar_switch
+import kotlinx.android.synthetic.main.fragment_options.option_show_paint_circle_container
+import kotlinx.android.synthetic.main.fragment_options.option_show_paint_circle_switch
+import kotlinx.android.synthetic.main.fragment_options.option_small_action_buttons_container
+import kotlinx.android.synthetic.main.fragment_options.option_small_action_buttons_switch
+import kotlinx.android.synthetic.main.fragment_options.options_title_text
+import kotlinx.android.synthetic.main.fragment_options.panel_recycler_view
+import kotlinx.android.synthetic.main.fragment_options.recovery_pincode_button
+import kotlinx.android.synthetic.main.fragment_options.reset_single_play
+import kotlinx.android.synthetic.main.fragment_options.sign_in_button
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -63,17 +123,16 @@ class OptionsFragment: Fragment(), FragmentListener {
             option_color_palette_size.visibility = View.GONE
         }
 
-        if (isFromInteractiveCanvas()) {
-            option_right_handed.visibility = View.GONE
-            option_small_action_buttons_container.visibility = View.GONE
-            option_bold_action_buttons.visibility = View.GONE
-            option_num_recent_colors.visibility = View.GONE
-            option_show_paint_bar_container.visibility = View.GONE
-            option_show_paint_circle_container.visibility = View.GONE
-        }
-        else {
+        if (!isFromInteractiveCanvas()) {
             change_name_container.visibility = View.GONE
         }
+
+        //option_right_handed.visibility = View.GONE
+        option_small_action_buttons_container.visibility = View.GONE
+        option_bold_action_buttons.visibility = View.GONE
+        //option_num_recent_colors.visibility = View.GONE
+        option_show_paint_bar_container.visibility = View.GONE
+        option_show_paint_circle_container.visibility = View.GONE
 
         back_button.setOnClickListener {
             if (credits_container.visibility == View.VISIBLE) {
@@ -470,12 +529,12 @@ class OptionsFragment: Fragment(), FragmentListener {
             }
         }
 
-        // option right handed
-        option_right_handed_switch.isChecked = SessionSettings.instance.rightHanded
-
-        option_right_handed_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.rightHanded = button.isChecked
-        }
+//        // option right handed
+//        option_right_handed_switch.isChecked = SessionSettings.instance.rightHanded
+//
+//        option_right_handed_switch.setOnCheckedChangeListener { button, _ ->
+//            SessionSettings.instance.rightHanded = button.isChecked
+//        }
 
         // option small action buttons
         option_small_action_buttons_switch.isChecked = SessionSettings.instance.smallActionButtons
