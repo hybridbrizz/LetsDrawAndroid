@@ -103,6 +103,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var lastPingTime = 0L
 
+    private var pendingUndos = mutableListOf<PendingUndo>()
+
+
     var summary: MutableList<RestorePoint> = ArrayList()
 
     var selectedPixels: List<RestorePoint>? = null
@@ -507,6 +510,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun receivePixels(message: String) {
+        val index = pendingUndos.indexOfFirst {
+            it.sendMessage == message
+        }
+        if (index in pendingUndos.indices) {
+            pendingUndos[index].cancel()
+            pendingUndos.removeAt(index)
+        }
+
         val t = message.split("&")
 
         val pixelIds = mutableListOf<Int>()
@@ -803,9 +814,20 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 colors.add(restorePoint.newColor)
             }
 
-            InteractiveCanvasSocket.instance.requireSocket().emit("pixels_send",
-                buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors)
-            )
+            val sendStr = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors)
+
+            InteractiveCanvasSocket.instance.requireSocket().emit("pixels_send", sendStr)
+
+            pendingUndos.add(PendingUndo(mutableListOf<RestorePoint>().apply {
+                restorePoints.forEach {
+                    this.add(it)
+                }
+            }, sendStr) { restorePoints ->
+                for(restorePoint: RestorePoint in restorePoints) {
+                    arr[restorePoint.point.y][restorePoint.point.x] = restorePoint.color
+                }
+                interactiveCanvasDrawer?.notifyRedraw()
+            })
 
             StatTracker.instance.reportEvent(context,
                 StatTracker.EventType.PIXEL_PAINTED_WORLD,
