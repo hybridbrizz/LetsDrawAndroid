@@ -235,12 +235,6 @@ ALTER TABLE `paint_events`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `pixels`
---
-ALTER TABLE `pixels`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=529914;
-
---
 -- AUTO_INCREMENT for table `pixel_history`
 --
 ALTER TABLE `pixel_history`
