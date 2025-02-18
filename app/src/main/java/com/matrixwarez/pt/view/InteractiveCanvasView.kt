@@ -7,6 +7,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.*
 import com.matrixwarez.pt.model.SessionSettings
@@ -44,6 +46,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     val paint = Paint()
     private val gridLinePaint = Paint()
     private val gridLinePaintAlt = Paint()
+
+    var redrawCountState = mutableIntStateOf(0)
 
     var paintActionListener: PaintActionListener? = null
 
@@ -585,6 +589,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 drawInteractiveCanvas(holder)
             }
         }
+        redrawCountState.value += 1
     }
 
     fun drawInteractiveCanvas(holder: SurfaceHolder) {

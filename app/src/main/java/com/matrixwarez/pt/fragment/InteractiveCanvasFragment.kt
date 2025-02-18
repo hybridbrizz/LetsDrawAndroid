@@ -23,6 +23,12 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
@@ -53,6 +59,7 @@ import com.matrixwarez.pt.view.ButtonFrame
 import com.matrixwarez.pt.view.PaintColorIndicator
 import com.matrixwarez.pt.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
+import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
@@ -120,6 +127,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var saveViewportTimer: Timer? = null
 
+    private var clientsInfoState = mutableStateOf<List<Pair<String, Int>>?>(null)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -178,6 +187,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.server = server
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
+
+        client_canvas_locations.setContent {
+            ClientCanvasLocationsView(
+                clientsInfoState = clientsInfoState,
+                interactiveCanvas = surface_view.interactiveCanvas,
+                redrawCountState = surface_view.redrawCountState
+            )
+        }
 
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
 
@@ -1948,6 +1965,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun notifyClientsInfo(clientsInfo: List<Pair<String, Int>>) {
         Log.d("Clients Info", clientsInfo.joinToString("|") { "${it.first}, ${it.second}" })
+        clientsInfoState.value = clientsInfo
     }
 
     // interactive canvas gesture listener

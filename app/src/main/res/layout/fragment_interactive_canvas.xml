@@ -7,9 +7,12 @@
     <com.matrixwarez.pt.view.InteractiveCanvasView
             android:id="@+id/surface_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent" />
 
-    </com.matrixwarez.pt.view.InteractiveCanvasView>
+    <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/client_canvas_locations"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/paint_panel_button"

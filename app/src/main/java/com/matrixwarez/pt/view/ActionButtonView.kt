@@ -2355,6 +2355,7 @@ class ActionButtonView: View {
                 paint1 = chessTan
                 paint2 = blackPaint
             }
+            else -> {}
         }
 
         if (selected) {

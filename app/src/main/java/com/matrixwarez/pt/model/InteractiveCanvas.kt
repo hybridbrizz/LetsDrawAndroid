@@ -527,7 +527,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 val latency = "$value ms"
                 interactiveCanvasListener?.notifySocketLatency(latency, value)
                 interactiveCanvasListener?.notifyConnectionCount(connectionCount)
-                interactiveCanvasListener?.notifyClientsInfo(clientsInfo)
+                interactiveCanvasListener?.notifyClientsInfo(mutableListOf<Pair<String, Int>>().apply {
+                    clientsInfo.forEach {
+                        add(it)
+                    }
+                })
                 Log.d("Latency", "Pong $latency")
                 Log.d("Viewport Center", "Res: ${it[0]}")
             }

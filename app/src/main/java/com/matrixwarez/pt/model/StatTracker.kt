@@ -95,6 +95,7 @@ class StatTracker {
                 numPixelOverwritesOut = amt
                 checkAchievements(eventType, numPixelOverwritesOutOld, numPixelOverwritesOut)
             }
+            else -> {}
         }
 
         if (eventType != EventType.PAINT_RECEIVED && eventType != EventType.PIXEL_OVERWRITE_IN &&
@@ -150,6 +151,7 @@ class StatTracker {
                 EventType.PAINT_RECEIVED -> requestParams["tp"] = totalPaintAccrued
                 EventType.PIXEL_OVERWRITE_IN -> requestParams["oi"] = numPixelOverwritesIn
                 EventType.PIXEL_OVERWRITE_OUT -> requestParams["oo"] = numPixelOverwritesOut
+                else -> {}
             }
 
             val paramsJson = JSONObject(requestParams as Map<String, Int>)
@@ -297,6 +299,7 @@ class StatTracker {
                     thresholdsPassed -= 1
                 }
             }
+            else -> {}
         }
     }
 
