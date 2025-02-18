@@ -1946,6 +1946,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         text_latency.text = "($count) ${msValue} ms"
     }
 
+    override fun notifyClientsInfo(clientsInfo: List<Pair<String, Int>>) {
+        Log.d("Clients Info", clientsInfo.joinToString("|") { "${it.first}, ${it.second}" })
+    }
+
     // interactive canvas gesture listener
     override fun onInteractiveCanvasPan() {
         pixel_history_fragment_container.visibility = View.GONE

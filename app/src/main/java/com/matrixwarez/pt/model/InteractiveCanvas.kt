@@ -386,11 +386,16 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         latencyJob = coroutineScope.launch {
             while (true) {
                 Log.d("Latency Check", "Get latency and connection count")
-                InteractiveCanvasSocket.instance.requireSocket().emit("lat")
-                InteractiveCanvasSocket.instance.requireSocket().emit("con")
+                deviceViewport?.let {
+                    InteractiveCanvasSocket.instance.requireSocket().emit("lat",
+                        "${SessionSettings.instance.displayName}&" +
+                                "${pixelId(Point(it.centerX().toInt(), it.centerY().toInt()))}")
+                }
+
+                //InteractiveCanvasSocket.instance.requireSocket().emit("con")
                 lastPingTime = System.currentTimeMillis()
                 withContext(Dispatchers.Default) {
-                    delay(15 * 1000L)
+                    delay(4 * 1000L)
                 }
             }
         }
@@ -400,6 +405,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         latencyJob?.cancel()
         latencyJob = null
     }
+
+    private var clientsInfo = mutableListOf<Pair<String, Int>>()
 
     fun registerForSocketEvents(socket: Socket?) {
 //        socket?.on("pixels_commit") {
@@ -494,10 +501,35 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("res") {
             coroutineScope.launch {
+                val t = (it[0] as String).split("&")
+
+                var connectionCount = 0
+
+                var name = ""
+
+                clientsInfo.clear()
+
+                t.forEachIndexed { index, s ->
+                    when {
+                        index == 0 -> {
+                            connectionCount = s.toInt()
+                        }
+                        index % 2 != 0 -> {
+                            name = s
+                        }
+                        else -> {
+                            clientsInfo.add(name to s.toInt())
+                        }
+                    }
+                }
+
                 val value = System.currentTimeMillis() - lastPingTime
                 val latency = "$value ms"
                 interactiveCanvasListener?.notifySocketLatency(latency, value)
+                interactiveCanvasListener?.notifyConnectionCount(connectionCount)
+                interactiveCanvasListener?.notifyClientsInfo(clientsInfo)
                 Log.d("Latency", "Pong $latency")
+                Log.d("Viewport Center", "Res: ${it[0]}")
             }
         }
 
@@ -996,6 +1028,10 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return RectF(0F, 0F, 0F, 0F)
     }
 
+    fun pixelId(point: Point): Int {
+        return point.y * cols + point.x
+    }
+
     fun canvasScreenBounds(): Rect {
         deviceViewport?.apply {
             val topLeftScreen = unitToScreenPoint(0F, 0F)
@@ -1024,6 +1060,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val point = Point()
             point.x = floor(absX).toInt()
             point.y = floor(absY).toInt()
+
+            Log.d("Viewport Center", "(${point.x}, ${point.y})")
 
             return point
         }
