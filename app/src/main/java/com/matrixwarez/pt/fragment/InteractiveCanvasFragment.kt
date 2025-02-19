@@ -60,6 +60,7 @@ import com.matrixwarez.pt.view.PaintColorIndicator
 import com.matrixwarez.pt.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
+import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
@@ -2174,6 +2175,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
+
+            canvas_summary_clients_view.setContent {
+                ClientSummaryLocationsView(
+                    clientsInfoState = clientsInfoState,
+                    interactiveCanvas = surface_view.interactiveCanvas
+                )
+            }
 
             canvas_summary_container.visibility = View.VISIBLE
         }

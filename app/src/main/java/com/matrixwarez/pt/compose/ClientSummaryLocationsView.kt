@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -16,10 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.SessionSettings
 
-
 @Composable
-fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, Int>>?>,
-                              redrawCountState: MutableIntState, interactiveCanvas: InteractiveCanvas) {
+fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Pair<String, Int>>?>,
+                              interactiveCanvas: InteractiveCanvas
+) {
     val density = LocalDensity.current
 
     val clientsInfo by clientsInfoState
@@ -28,16 +27,13 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, I
         clientsInfo?.forEachIndexed { index, it ->
             val (name, centerPixelId) = it
 
-            val centerX = centerPixelId % interactiveCanvas.cols
-            val centerY = centerPixelId / interactiveCanvas.cols
+            var centerX = (centerPixelId % interactiveCanvas.cols).toFloat()
+            centerX = centerX / interactiveCanvas.cols.toFloat() * drawContext.size.width
 
-            val screenPoint = interactiveCanvas.unitToScreenPoint(centerX.toFloat(), centerY.toFloat())
+            var centerY = (centerPixelId / interactiveCanvas.cols).toFloat()
+            centerY = centerY / interactiveCanvas.rows.toFloat() * drawContext.size.height
 
-            screenPoint?.let {
-                Log.d("Screen Point", "center($centerX, $centerY) -> ${it.x}, ${it.y}")
-            }
-
-            if (redrawCountState.value > 3) {}
+            Log.d("Center Test", "($centerX, $centerY)")
 
             val color = when {
                 index == 0 -> Color.Blue
@@ -45,14 +41,13 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, I
             }
 
             if (name != SessionSettings.instance.displayName) {
-                screenPoint?.let {
-                    drawCircle(
-                        color = color,
-                        radius = density.run { 10.dp.toPx() },
-                        center = Offset(screenPoint.x.toFloat(), screenPoint.y.toFloat())
-                    )
-                }
-            }        }
+                drawCircle(
+                    color = color,
+                    radius = density.run { 2.dp.toPx() },
+                    center = Offset(centerX,centerY)
+                )
+            }
+        }
         drawContent()
     })
 }

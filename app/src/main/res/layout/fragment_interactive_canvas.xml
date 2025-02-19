@@ -951,6 +951,11 @@
                 android:layout_height="300dp"
                 android:layout_gravity="center" />
 
+        <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/canvas_summary_clients_view"
+                android:layout_width="300dp"
+                android:layout_height="300dp" />
+
     </FrameLayout>
 
     <com.matrixwarez.pt.view.ActionButtonFrame
