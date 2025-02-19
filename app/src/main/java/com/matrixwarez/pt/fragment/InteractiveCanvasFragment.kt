@@ -26,6 +26,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -130,6 +131,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var clientsInfoState = mutableStateOf<List<Pair<String, Int>>?>(null)
 
+    private val lineColorDarkState = mutableStateOf(false)
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -189,15 +192,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
-        client_canvas_locations.setContent {
-            ClientCanvasLocationsView(
-                clientsInfoState = clientsInfoState,
-                interactiveCanvas = surface_view.interactiveCanvas,
-                redrawCountState = surface_view.redrawCountState
-            )
-        }
+
 
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
+        lineColorDarkState.value = SessionSettings.instance.darkIcons
 
         SessionSettings.instance.paintQtyListeners.add(this)
 
@@ -205,6 +203,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             SessionSettings.instance.darkIcons = true
 
             invalidateButtons()
+        }
+
+        lineColorDarkState.value = SessionSettings.instance.darkIcons
+
+        client_canvas_locations.setContent {
+            ClientCanvasLocationsView(
+                clientsInfoState = clientsInfoState,
+                interactiveCanvas = surface_view.interactiveCanvas,
+                redrawCountState = surface_view.redrawCountState,
+                lineColorIsDarkState = lineColorDarkState
+            )
         }
 
         setupStreamBanner()
@@ -696,6 +705,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
 
             SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
+            lineColorDarkState.value = SessionSettings.instance.darkIcons
             recolorVisibleActionViews()
 
             if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1
