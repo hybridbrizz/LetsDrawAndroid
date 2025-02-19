@@ -220,22 +220,18 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
             // world
             else {
-                Observable.fromRunnable<Void> {
-                    rows = SessionSettings.instance.canvasSize
-                    cols = rows
-                    arr = Array(rows) { IntArray(cols) }
+                coroutineScope.launch {
+                    startLatencyJob()
+                    withContext(Dispatchers.Default) {
+                        rows = SessionSettings.instance.canvasSize
+                        cols = rows
+                        arr = Array(rows) { IntArray(cols) }
 
-                    initChunkPixelsFromMemory()
-                }
-                .doOnComplete {
+                        initChunkPixelsFromMemory()
+                    }
                     interactiveCanvasDrawer?.notifyRedraw()
                     interactiveCanvasListener?.notifyPixelsReady()
                 }
-                .subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe()
-
-                startLatencyJob()
             }
 
             try {

@@ -146,17 +146,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun notifyPixelsReady() {
-        requireActivity().runOnUiThread {
-            paint_panel_button.visibility = View.VISIBLE
-            open_tools_button.visibility = View.VISIBLE
-            recent_colors_button.visibility = View.VISIBLE
-            menu_button.visibility = View.VISIBLE
+        paint_panel_button.visibility = View.VISIBLE
+        open_tools_button.visibility = View.VISIBLE
+        recent_colors_button.visibility = View.VISIBLE
+        menu_button.visibility = View.VISIBLE
 
-            togglePaintPanel(SessionSettings.instance.paintPanelOpen)
-            toggleTools(SessionSettings.instance.toolboxOpen)
+        togglePaintPanel(SessionSettings.instance.paintPanelOpen)
+        toggleTools(SessionSettings.instance.toolboxOpen)
 
-            progress_circular.visibility = View.GONE
-        }
+        progress_circular.visibility = View.GONE
     }
 
     // setup views
@@ -1963,12 +1961,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             str = "($count) $ms"
         }
         text_latency.text = str
-        if (msValue > 300) {
-            image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.yellow_circle))
-        }
-        else {
-            image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
-        }
+
         this.msValue = msValue
     }
 

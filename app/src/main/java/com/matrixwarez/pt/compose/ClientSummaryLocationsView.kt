@@ -1,6 +1,7 @@
 package com.matrixwarez.pt.compose
 
 import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -23,7 +24,7 @@ fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Pair<String, 
 
     val clientsInfo by clientsInfoState
 
-    Box(modifier = Modifier.fillMaxSize().drawWithContent {
+    Box(modifier = Modifier.fillMaxSize().border(1.dp, color = Color.White.copy(0.4f)).drawWithContent {
         clientsInfo?.forEachIndexed { index, it ->
             val (name, centerPixelId) = it
 

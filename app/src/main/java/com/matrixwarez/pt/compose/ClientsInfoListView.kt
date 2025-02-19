@@ -77,7 +77,7 @@ fun ClientsInfoItemView(clientInfo: Pair<String, Int>, interactiveCanvas: Intera
             text = displayName,
             color = Color.White,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Normal,
             fontFamily = Inter
         )
     }
