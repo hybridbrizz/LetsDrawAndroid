@@ -4,10 +4,12 @@ import android.graphics.Typeface
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -35,6 +37,7 @@ import com.matrixwarez.pt.model.SessionSettings
 fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, Int>>?>,
                               redrawCountState: MutableIntState,
                               lineColorIsDarkState: MutableState<Boolean>,
+                              showServerListState: MutableState<Boolean>,
                               interactiveCanvas: InteractiveCanvas) {
 
     val density = LocalDensity.current
@@ -42,6 +45,8 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, I
     val clientsInfo by clientsInfoState
 
     val lineColorIsDark by lineColorIsDarkState
+
+    val showServerList by showServerListState
 
     val fontSize = 18.sp
 
@@ -117,8 +122,18 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, I
             }
         }
         drawContent()
-    })
+    }) {
+        if (showServerList && clientsInfo != null) {
+            ClientsInfoListView(
+                modifier = Modifier.align(Alignment.Center),
+                interactiveCanvas = interactiveCanvas,
+                clientsInfo = clientsInfo!!
+            )
+        }
+    }
 }
+
+
 
 fun measureTextSize(textMeasurer: TextMeasurer, text: String, fontSize: TextUnit, fontWeight: FontWeight): IntSize {
     val textMeasurement = textMeasurer.measure(

@@ -985,6 +985,19 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
+    fun jumpToUnit(context: Context, x: Int, y: Int) {
+        deviceViewport?.let {
+            val cvX = it.centerX()
+            val cvY = it.centerY()
+
+            translateBy(
+                context = context,
+                x = (x - cvX) * ppu,
+                y = (y - cvY) * ppu
+            )
+        }
+    }
+
     fun translateBy(context: Context, x: Float, y: Float) {
         deviceViewport?.apply {
             val len = max(width(), height())

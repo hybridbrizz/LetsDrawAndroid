@@ -132,6 +132,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var clientsInfoState = mutableStateOf<List<Pair<String, Int>>?>(null)
 
     private val lineColorDarkState = mutableStateOf(false)
+    private val showServerListState = mutableStateOf(false)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -212,8 +213,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 clientsInfoState = clientsInfoState,
                 interactiveCanvas = surface_view.interactiveCanvas,
                 redrawCountState = surface_view.redrawCountState,
-                lineColorIsDarkState = lineColorDarkState
+                lineColorIsDarkState = lineColorDarkState,
+                showServerListState = showServerListState
             )
+        }
+
+        text_latency.setOnClickListener {
+            showServerListState.value = !showServerListState.value
         }
 
         setupStreamBanner()
