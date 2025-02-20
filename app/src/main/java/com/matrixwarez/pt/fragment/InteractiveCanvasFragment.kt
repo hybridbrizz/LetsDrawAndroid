@@ -23,6 +23,10 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -31,8 +35,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.dp
@@ -66,6 +75,7 @@ import com.matrixwarez.pt.view.ButtonFrame
 import com.matrixwarez.pt.view.PaintColorIndicator
 import com.matrixwarez.pt.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
+import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import com.matrixwarez.pt.compose.mapMarkerTypes
@@ -147,6 +157,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private val lineColorDarkState = mutableStateOf(false)
     private val showServerListState = mutableStateOf(false)
     private val mapMarkerIndexState = mutableIntStateOf(0)
+    private val showMenuState = mutableStateOf(false)
+
+    private var leave = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -231,6 +244,41 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 showServerListState = showServerListState,
                 mapMarkerIndexState = mapMarkerIndexState
             )
+        }
+
+        canvas_menu.setContent {
+            var showMenu by showMenuState
+
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                AnimatedVisibility(
+                    visible = showMenu,
+                    enter = fadeIn(
+                        tween(200)
+                    ),
+                    exit = fadeOut(
+                        tween(200)
+                    )
+                ) {
+                    CanvasMenuView(
+                        onServerList = {
+                            showServerListState.value = true
+                            showMenu = false
+                        },
+                        onStyles = {
+                            (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this@InteractiveCanvasFragment)
+                            showMenu = false
+                        },
+                        onGrabImage = {
+
+                        },
+                        onLeave = {
+                            InteractiveCanvasSocket.instance.disconnect()
+                            lastCanvasSummaryImageTime = 0L
+                            leave = true
+                        }
+                    )
+                }
+            }
         }
 
         text_latency.setOnClickListener {
@@ -675,8 +723,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else if (terminal_container.visibility == View.VISIBLE) {
                 toggleTerminal(false)
             }
+            else if (showServerListState.value) {
+                showServerListState.value = false
+            }
             else {
-                (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this)
+                showMenuState.value = !showMenuState.value
+                //(requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this)
                 //toggleMenu(menu_container.visibility != View.VISIBLE)
             }
         }
@@ -2213,8 +2265,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         )
                     }
                 }
-
-                Surface {  }
             }
 
             canvas_summary_container.visibility = View.VISIBLE
@@ -2538,8 +2588,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         updateSocketStatus(false)
 
-        if (error) {
+        if (error || leave) {
             activity?.runOnUiThread {
+                InteractiveCanvasSocket.instance.socketConnectCallback = null
                 (activity as? InteractiveCanvasActivity)?.showMenuFragment()
             }
         }

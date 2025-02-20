@@ -2,6 +2,10 @@ package com.matrixwarez.pt.compose
 
 import android.graphics.Typeface
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -128,7 +132,15 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
         }
         drawContent()
     }) {
-        if (showServerList && clientsInfo != null) {
+        AnimatedVisibility(
+            visible = showServerList && clientsInfo != null,
+            enter = fadeIn(
+                tween(200)
+            ),
+            exit = fadeOut(
+                tween(200)
+            )
+        ) {
             ClientsInfoListView(
                 modifier = Modifier.align(Alignment.Center),
                 interactiveCanvas = interactiveCanvas,

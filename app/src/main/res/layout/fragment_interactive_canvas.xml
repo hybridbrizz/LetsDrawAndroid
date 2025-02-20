@@ -14,6 +14,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+    <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/canvas_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/paint_panel_button"
             android:visibility="gone"
