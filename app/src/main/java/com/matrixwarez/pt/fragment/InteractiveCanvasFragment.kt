@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -74,6 +75,12 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import java.lang.Exception
 import java.util.*
@@ -126,7 +133,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     lateinit var canvasService: CanvasService
 
     var paused = false
-    var pauseTime = 0L
+    var pauseTime = System.currentTimeMillis()
     private val maxBgTime = 60 * 5
 
     private var lastCanvasSummaryImageTime = 0L
@@ -162,6 +169,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         toggleTools(SessionSettings.instance.toolboxOpen)
 
         progress_circular.visibility = View.GONE
+
+        startRecentPixels()
     }
 
     // setup views
@@ -1130,6 +1139,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paused = true
         pauseTime = System.currentTimeMillis() / 1000
+
+        cancelRecentPixels()
     }
 
     private fun saveDeviceViewport() {
@@ -2202,6 +2213,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                         )
                     }
                 }
+
+                Surface {  }
             }
 
             canvas_summary_container.visibility = View.VISIBLE
@@ -2465,18 +2478,41 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }, 0, 1000)
     }
 
+    private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
+    private var recentPixelsJob: Job? = null
+
+    private fun startRecentPixels() {
+        if (recentPixelsJob != null) return
+
+        recentPixelsJob = coroutineScope.launch {
+            while (true) {
+                canvasService.getRecentPixels(pauseTime) { pixels ->
+                    Log.i("Recent Pixels", "Got recent pixels")
+                    pixels?.also {
+                        for (element in it) {
+                            val pixelInfo = element.asString
+                            surface_view?.interactiveCanvas?.receivePixels(pixelInfo)
+                        }
+                    }
+                }
+                pauseTime = System.currentTimeMillis()
+                withContext(Dispatchers.Default) {
+                    delay(85 * 1000)
+                }
+            }
+        }
+    }
+
+    private fun cancelRecentPixels() {
+        recentPixelsJob?.cancel()
+        recentPixelsJob = null
+    }
+
     // socket callback
     override fun onSocketConnect() {
         Log.i("Canvas Socket", "Socket connected!")
 
-        canvasService.getRecentPixels(pauseTime) { pixels ->
-            pixels?.also {
-                for (element in it) {
-                    val pixelInfo = element.asString
-                    surface_view?.interactiveCanvas?.receivePixels(pixelInfo)
-                }
-            }
-        }
+        startRecentPixels()
 
         SessionSettings.instance.uniqueId?.also { uuid ->
             canvasService.getPaintQty(uuid) { paintQtyInfo ->
