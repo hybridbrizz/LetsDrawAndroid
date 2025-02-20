@@ -34,12 +34,13 @@ import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.SessionSettings
 import kotlin.random.Random
 
+val mapMarkerTypes = listOf("On", "Off", "Canvas Only", "Minimap Only")
+
 @Composable
 fun ClientsInfoListView(modifier: Modifier = Modifier, clientsInfo: List<Triple<String, Int, Int>>,
                         mapMarkerIndexState: MutableIntState, interactiveCanvas: InteractiveCanvas) {
     val random = remember { Random(System.currentTimeMillis()) }
 
-    val mapMarkerTypes = remember { listOf("On", "Off", "Canvas Only", "Minimap Only") }
     var mapMarkerIndex by mapMarkerIndexState
 
     Column(modifier = modifier.fillMaxWidth(0.4f)) {

@@ -23,14 +23,18 @@ import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
@@ -63,6 +67,7 @@ import com.matrixwarez.pt.view.RecentColorView
 import com.google.android.material.snackbar.Snackbar
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
+import com.matrixwarez.pt.compose.mapMarkerTypes
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
@@ -2189,10 +2194,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
 
             canvas_summary_clients_view.setContent {
-                ClientSummaryLocationsView(
-                    clientsInfoState = clientsInfoState,
-                    interactiveCanvas = surface_view.interactiveCanvas
-                )
+                Box(modifier = Modifier.border(1.dp, androidx.compose.ui.graphics.Color.White.copy(0.4f)).padding(1.dp)) {
+                    if (listOf("on", "minimap only").firstOrNull { it == mapMarkerTypes[mapMarkerIndexState.intValue % mapMarkerTypes.size].lowercase() } != null) {
+                        ClientSummaryLocationsView(
+                            clientsInfoState = clientsInfoState,
+                            interactiveCanvas = surface_view.interactiveCanvas
+                        )
+                    }
+                }
             }
 
             canvas_summary_container.visibility = View.VISIBLE

@@ -79,7 +79,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         "Tap on any pixel on the canvas to view a history of edits.",
         "No harassment, racism, or hate symbols are allowed on the canvas.",
         "Anyone can get pixels to draw on the canvas in 3 minutes or less! Simply wait for the next paint cycle.",
-        "Tap the palette icon to show and select from recently used colors."
+        "Tap the palette icon to show and select from recently used colors.",
+        "Tap on latency text to take a shortcut to the server list and marker settings."
     )
 
     var showingError = false

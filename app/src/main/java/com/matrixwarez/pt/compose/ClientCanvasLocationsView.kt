@@ -54,71 +54,75 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
     val textMeasurer = rememberTextMeasurer()
 
     Box(modifier = Modifier.fillMaxSize().drawWithContent {
-        clientsInfo?.forEachIndexed { index, it ->
-            val (name, centerPixelId) = it
+        if (listOf("on", "canvas only").firstOrNull {
+                it == mapMarkerTypes[mapMarkerIndexState.intValue % mapMarkerTypes.size].lowercase()
+            } != null) {
+            clientsInfo?.forEachIndexed { index, it ->
+                val (name, centerPixelId) = it
 
-            val textSize = measureTextSize(
-                textMeasurer = textMeasurer,
-                text = name,
-                fontSize = fontSize,
-                fontWeight = FontWeight.Normal
-            )
+                val textSize = measureTextSize(
+                    textMeasurer = textMeasurer,
+                    text = name,
+                    fontSize = fontSize,
+                    fontWeight = FontWeight.Normal
+                )
 
-            val centerX = centerPixelId % interactiveCanvas.cols
-            val centerY = centerPixelId / interactiveCanvas.cols
+                val centerX = centerPixelId % interactiveCanvas.cols
+                val centerY = centerPixelId / interactiveCanvas.cols
 
-            val screenPoint = interactiveCanvas.unitToScreenPoint(centerX.toFloat(), centerY.toFloat())
+                val screenPoint = interactiveCanvas.unitToScreenPoint(centerX.toFloat(), centerY.toFloat())
 
-            screenPoint?.let {
-                Log.d("Screen Point", "center($centerX, $centerY) -> ${it.x}, ${it.y}")
-            }
-
-            if (redrawCountState.value > 3) {}
-
-            val color = when {
-                index == 0 -> Color.Blue
-                else -> Color.Red
-            }
-
-            if (name != SessionSettings.instance.displayName) {
                 screenPoint?.let {
-                    val lineColor = when (lineColorIsDark) {
-                        true -> Color.Black
-                        false -> Color.White
+                    Log.d("Screen Point", "center($centerX, $centerY) -> ${it.x}, ${it.y}")
+                }
+
+                if (redrawCountState.value > 3) {}
+
+                val color = when {
+                    index == 0 -> Color.Blue
+                    else -> Color.Red
+                }
+
+                if (name != SessionSettings.instance.displayName) {
+                    screenPoint?.let {
+                        val lineColor = when (lineColorIsDark) {
+                            true -> Color.Black
+                            false -> Color.White
+                        }
+
+                        val center = Offset(screenPoint.x.toFloat(), screenPoint.y.toFloat())
+                        val firstLineEnd = center.plus(Offset(density.run { 10.dp.toPx() }, density.run { -20.dp.toPx() }))
+                        val secondLineEnd = firstLineEnd.plus(Offset(density.run { textSize.width.toDp().toPx() }, 0f))
+
+                        drawLine(
+                            color = lineColor,
+                            start = center,
+                            end = firstLineEnd,
+                            strokeWidth = 1.dp.toPx()
+                        )
+
+                        drawLine(
+                            color = lineColor,
+                            start = firstLineEnd,
+                            end = secondLineEnd,
+                            strokeWidth = 1.dp.toPx()
+                        )
+
+                        drawTextAtCenterPoint(
+                            text = name,
+                            x = secondLineEnd.x - (secondLineEnd.x - firstLineEnd.x) / 2,
+                            y = firstLineEnd.y - textSize.height / 2,
+                            size = fontSize.toPx(),
+                            textColor = lineColor,
+                            drawContext = drawContext
+                        )
+
+                        drawCircle(
+                            color = color,
+                            radius = density.run { 10.dp.toPx() },
+                            center = center
+                        )
                     }
-
-                    val center = Offset(screenPoint.x.toFloat(), screenPoint.y.toFloat())
-                    val firstLineEnd = center.plus(Offset(density.run { 10.dp.toPx() }, density.run { -20.dp.toPx() }))
-                    val secondLineEnd = firstLineEnd.plus(Offset(density.run { textSize.width.toDp().toPx() }, 0f))
-
-                    drawLine(
-                        color = lineColor,
-                        start = center,
-                        end = firstLineEnd,
-                        strokeWidth = 1.dp.toPx()
-                    )
-
-                    drawLine(
-                        color = lineColor,
-                        start = firstLineEnd,
-                        end = secondLineEnd,
-                        strokeWidth = 1.dp.toPx()
-                    )
-
-                    drawTextAtCenterPoint(
-                        text = name,
-                        x = secondLineEnd.x - (secondLineEnd.x - firstLineEnd.x) / 2,
-                        y = firstLineEnd.y - textSize.height / 2,
-                        size = fontSize.toPx(),
-                        textColor = lineColor,
-                        drawContext = drawContext
-                    )
-
-                    drawCircle(
-                        color = color,
-                        radius = density.run { 10.dp.toPx() },
-                        center = center
-                    )
                 }
             }
         }

@@ -24,7 +24,7 @@ fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Triple<String
 
     val clientsInfo by clientsInfoState
 
-    Box(modifier = Modifier.fillMaxSize().border(1.dp, color = Color.White.copy(0.4f)).drawWithContent {
+    Box(modifier = Modifier.fillMaxSize().drawWithContent {
         clientsInfo?.forEachIndexed { index, it ->
             val (name, centerPixelId) = it
 
