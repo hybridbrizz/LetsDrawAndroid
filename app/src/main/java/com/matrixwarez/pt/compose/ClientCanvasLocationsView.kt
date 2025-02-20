@@ -34,10 +34,11 @@ import com.matrixwarez.pt.model.SessionSettings
 
 
 @Composable
-fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, Int>>?>,
+fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String, Int, Int>>?>,
                               redrawCountState: MutableIntState,
                               lineColorIsDarkState: MutableState<Boolean>,
                               showServerListState: MutableState<Boolean>,
+                              mapMarkerIndexState: MutableIntState,
                               interactiveCanvas: InteractiveCanvas) {
 
     val density = LocalDensity.current
@@ -127,7 +128,8 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Pair<String, I
             ClientsInfoListView(
                 modifier = Modifier.align(Alignment.Center),
                 interactiveCanvas = interactiveCanvas,
-                clientsInfo = clientsInfo!!
+                clientsInfo = clientsInfo!!,
+                mapMarkerIndexState = mapMarkerIndexState
             )
         }
     }

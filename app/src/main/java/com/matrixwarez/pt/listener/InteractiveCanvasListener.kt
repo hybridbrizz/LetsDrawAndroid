@@ -20,5 +20,5 @@ interface InteractiveCanvasListener {
 
     fun notifySocketLatency(ms: String, msValue: Long)
     fun notifyConnectionCount(count: Int)
-    fun notifyClientsInfo(clientsInfo: List<Pair<String, Int>>)
+    fun notifyClientsInfo(clientsInfo: List<Triple<String, Int, Int>>)
 }

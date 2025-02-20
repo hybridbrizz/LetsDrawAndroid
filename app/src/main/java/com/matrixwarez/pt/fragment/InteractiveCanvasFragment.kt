@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -129,10 +130,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var saveViewportTimer: Timer? = null
 
-    private var clientsInfoState = mutableStateOf<List<Pair<String, Int>>?>(null)
+    private var clientsInfoState = mutableStateOf<List<Triple<String, Int, Int>>?>(null)
 
     private val lineColorDarkState = mutableStateOf(false)
     private val showServerListState = mutableStateOf(false)
+    private val mapMarkerIndexState = mutableIntStateOf(0)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -212,7 +214,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 interactiveCanvas = surface_view.interactiveCanvas,
                 redrawCountState = surface_view.redrawCountState,
                 lineColorIsDarkState = lineColorDarkState,
-                showServerListState = showServerListState
+                showServerListState = showServerListState,
+                mapMarkerIndexState = mapMarkerIndexState
             )
         }
 
@@ -1973,7 +1976,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         text_latency.text = "($count) ${msValue} ms"
     }
 
-    override fun notifyClientsInfo(clientsInfo: List<Pair<String, Int>>) {
+    override fun notifyClientsInfo(clientsInfo: List<Triple<String, Int, Int>>) {
         Log.d("Clients Info", clientsInfo.joinToString("|") { "${it.first}, ${it.second}" })
         clientsInfoState.value = clientsInfo
     }

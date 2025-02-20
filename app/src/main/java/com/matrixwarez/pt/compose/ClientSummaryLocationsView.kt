@@ -17,7 +17,7 @@ import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.SessionSettings
 
 @Composable
-fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Pair<String, Int>>?>,
+fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Triple<String, Int, Int>>?>,
                               interactiveCanvas: InteractiveCanvas
 ) {
     val density = LocalDensity.current

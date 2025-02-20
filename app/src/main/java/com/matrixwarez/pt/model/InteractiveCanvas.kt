@@ -80,6 +80,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     lateinit var server: Server
 
+    private var clientsInfo = mutableListOf<Triple<String, Int, Int>>()
+
     var world = false
     set(value) {
         field = value
@@ -402,8 +404,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         latencyJob = null
     }
 
-    private var clientsInfo = mutableListOf<Pair<String, Int>>()
-
     fun registerForSocketEvents(socket: Socket?) {
 //        socket?.on("pixels_commit") {
 //            (context as Activity?)?.runOnUiThread(Runnable {
@@ -497,11 +497,13 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         socket?.on("res") {
             coroutineScope.launch {
-                val t = (it[0] as String).split("&")
+                val msg = it[0] as String
+                val t = msg.substring(0, msg.length - 1).split("&")
 
                 var connectionCount = 0
 
                 var name = ""
+                var center = -1
 
                 clientsInfo.clear()
 
@@ -510,11 +512,14 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                         index == 0 -> {
                             connectionCount = s.toInt()
                         }
-                        index % 2 != 0 -> {
+                        index % 3 == 1 -> {
                             name = s
                         }
+                        index % 3 == 2 -> {
+                            center = s.toInt()
+                        }
                         else -> {
-                            clientsInfo.add(name to s.toInt())
+                            clientsInfo.add(Triple(name, center, s.toInt()))
                         }
                     }
                 }
@@ -523,7 +528,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 val latency = "$value ms"
                 interactiveCanvasListener?.notifySocketLatency(latency, value)
                 interactiveCanvasListener?.notifyConnectionCount(connectionCount)
-                interactiveCanvasListener?.notifyClientsInfo(mutableListOf<Pair<String, Int>>().apply {
+                interactiveCanvasListener?.notifyClientsInfo(mutableListOf<Triple<String, Int, Int>>().apply {
                     clientsInfo.forEach {
                         add(it)
                     }
