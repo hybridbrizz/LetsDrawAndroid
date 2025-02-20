@@ -133,6 +133,7 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
         drawContent()
     }) {
         AnimatedVisibility(
+            modifier = Modifier.align(Alignment.Center),
             visible = showServerList && clientsInfo != null,
             enter = fadeIn(
                 tween(200)
@@ -142,7 +143,6 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
             )
         ) {
             ClientsInfoListView(
-                modifier = Modifier.align(Alignment.Center),
                 interactiveCanvas = interactiveCanvas,
                 clientsInfo = clientsInfo!!,
                 mapMarkerIndexState = mapMarkerIndexState

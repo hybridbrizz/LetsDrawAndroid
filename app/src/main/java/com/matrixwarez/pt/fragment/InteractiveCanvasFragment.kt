@@ -282,6 +282,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         text_latency.setOnClickListener {
+            showMenuState.value = false
             showServerListState.value = !showServerListState.value
         }
 
