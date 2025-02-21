@@ -28,6 +28,12 @@ open class ArtView: View {
         invalidate()
     }
 
+    var interactiveCanvas: InteractiveCanvas? = null
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     var jsonResId: Int = 0
     set(value) {
         field = value
@@ -81,12 +87,12 @@ open class ArtView: View {
 
     }
 
-    fun show(art: List<InteractiveCanvas.RestorePoint>, fillCanvas: Boolean, showBackground: Boolean, blackBackground: Boolean) {
-        this.fillCanvas = fillCanvas
-        this.showBackground = showBackground
-        this.blackBackground = blackBackground
-        this.art = art
-    }
+//    fun show(art: List<InteractiveCanvas.RestorePoint>, fillCanvas: Boolean, showBackground: Boolean, blackBackground: Boolean) {
+//        this.fillCanvas = fillCanvas
+//        this.showBackground = showBackground
+//        this.blackBackground = blackBackground
+//        this.art = art
+//    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -185,6 +191,21 @@ open class ArtView: View {
                 }
             }
 
+            interactiveCanvas?.apply {
+                for (y in 0 until rows) {
+                    for (x in 0 until cols) {
+                        paint.color = arr[y][x]
+
+                        canvas.drawRect(
+                            ((x - minX) * displayPpu) + offsetX,
+                            ((y - minY) * displayPpu) + offsetY,
+                            ((x - minX + 1) * displayPpu) + offsetX,
+                            ((y - minY + 1) * displayPpu) + offsetY, paint
+                        )
+                    }
+                }
+            }
+
             restore()
         }
     }
@@ -197,6 +218,9 @@ open class ArtView: View {
                     min = pixelPoint.point.x
                 }
             }
+        }
+        interactiveCanvas?.apply {
+            min = 0
         }
 
         return min
@@ -212,6 +236,10 @@ open class ArtView: View {
             }
         }
 
+        interactiveCanvas?.apply {
+            max = cols - 1
+        }
+
         return max
     }
 
@@ -225,6 +253,10 @@ open class ArtView: View {
             }
         }
 
+        interactiveCanvas?.apply {
+            min = 0
+        }
+
         return min
     }
 
@@ -236,6 +268,10 @@ open class ArtView: View {
                     max = pixelPoint.point.y
                 }
             }
+        }
+
+        interactiveCanvas?.apply {
+            max = rows - 1
         }
 
         return max
@@ -263,21 +299,30 @@ open class ArtView: View {
         }
     }
 
-    fun saveArt(context: Context) {
-        val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
+    fun saveArt(context: Context, bitmap: Bitmap? = null) {
+        val bmp = when (bitmap != null) {
+            true -> {
+                bitmap
+            }
+            false -> {
+                val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
 
-        var exportWidth = width
-        var exportHeight = height
+                var exportWidth = width
+                var exportHeight = height
 
-        if (actualSize) {
-            exportWidth = getArtWidth()
-            exportHeight = getArtHeight()
+                if (actualSize) {
+                    exportWidth = getArtWidth()
+                    exportHeight = getArtHeight()
+                }
+
+                val bmp = Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
+
+                val canvas = Canvas(bmp)
+                drawToCanvas(canvas, drawBackground = false, actualSize = actualSize, export = true)
+
+                bmp
+            }
         }
-
-        val bitmap: Bitmap = Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
-
-        val canvas = Canvas(bitmap)
-        drawToCanvas(canvas, drawBackground = false, actualSize = actualSize, export = true)
 
         //Generating a file name
         val filename = "${System.currentTimeMillis()}.png"
@@ -317,23 +362,30 @@ open class ArtView: View {
 
         fos?.use {
             //Finally writing the bitmap to the output stream that we opened
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+            bmp.compress(Bitmap.CompressFormat.PNG, 100, it)
             Toast.makeText(context, "Saved to Photos", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun shareArt(context: Context) {
-        val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
+    fun shareArt(context: Context, bitmap: Bitmap? = null) {
+        val bmp = when (bitmap != null) {
+            true -> {
+                bitmap
+            }
+            false -> {
+                val conf: Bitmap.Config = Bitmap.Config.ARGB_8888 // see other conf types
 
-        var exportWidth = width
-        var exportHeight = height
+                var exportWidth = width
+                var exportHeight = height
 
-        if (actualSize) {
-            exportWidth = getArtWidth()
-            exportHeight = getArtHeight()
+                if (actualSize) {
+                    exportWidth = getArtWidth()
+                    exportHeight = getArtHeight()
+                }
+
+                Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
+            }
         }
-
-        val bmp: Bitmap = Bitmap.createBitmap(exportWidth, exportHeight, conf) // this creates a MUTABLE bitmap
 
         val canvas = Canvas(bmp)
         drawToCanvas(canvas, drawBackground = false, actualSize = actualSize, export = true)
@@ -354,7 +406,7 @@ open class ArtView: View {
         share.putExtra(
             Intent.EXTRA_STREAM, FileProvider.getUriForFile(
                 context,
-                "com.ericversteeg.liquidocean.fileprovider",
+                "com.matrixwarez.pt.fileprovider",
                 f
             )
         )

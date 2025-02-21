@@ -31,7 +31,7 @@ import com.matrixwarez.pt.R
 private val menuItems = listOf(
     MenuItem("Server List", R.drawable.server_person),
     MenuItem("Styles", R.drawable.colors),
-    MenuItem("Get Image", R.drawable.photo_camera),
+    MenuItem("Yank Canvas", R.drawable.photo_camera),
     MenuItem("Leave", R.drawable.logout)
 )
 
@@ -73,10 +73,10 @@ fun CanvasMenuItemView(item: MenuItem, onClick: () -> Unit) {
             .border(2.dp, color = Color.White, shape = RoundedCornerShape(10.dp))
     ) {
         Text(
-            modifier = Modifier.fillMaxWidth().padding(5.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp, horizontal = 5.dp),
             text = item.title.uppercase(),
             textAlign = TextAlign.Center,
-            fontSize = 14.sp,
+            fontSize = 10.sp,
             fontFamily = Inter,
             fontWeight = FontWeight.SemiBold,
             color = Color.White

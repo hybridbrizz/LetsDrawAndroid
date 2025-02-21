@@ -269,7 +269,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             showMenu = false
                         },
                         onGrabImage = {
+                            val fragment = ArtExportFragment()
+                            fragment.interactiveCanvas = surface_view.interactiveCanvas
+                            fragment.listener = this@InteractiveCanvasFragment
 
+                            fragmentManager?.apply {
+                                // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+
+                                beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
+
+                                export_fragment_container.visibility = View.VISIBLE
+                                export_fragment_container.setOnClickListener {
+
+                                }
+                            }
                         },
                         onLeave = {
                             InteractiveCanvasSocket.instance.disconnect()
