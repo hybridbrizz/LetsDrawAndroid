@@ -66,6 +66,15 @@ class Server {
     @SerializedName("queue_port")
     var queuePort = 0
 
+    @SerializedName("online")
+    var online = false
+
+    @SerializedName("connection_count")
+    var connectionCount = 0
+
+    @SerializedName("max_connections")
+    var maxConnections = 0
+
     fun serviceBaseUrl(): String {
         return buildUrl(baseUrl, apiPort)
     }

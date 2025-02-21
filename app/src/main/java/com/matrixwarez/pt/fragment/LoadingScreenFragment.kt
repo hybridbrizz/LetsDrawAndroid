@@ -167,6 +167,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 it.uuid = storeduuid
             }
 
+            canvasService = CanvasService(server)
+
             SessionSettings.instance.addServer(requireContext(), this.server)
 
             SessionSettings.instance.uniqueId = this.server.uuid

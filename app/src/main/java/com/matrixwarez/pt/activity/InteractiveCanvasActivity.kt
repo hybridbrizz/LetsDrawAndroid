@@ -193,7 +193,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         frag.dataLoadingCallback = this
         frag.world = true
         frag.server = server
-        frag.canvasService = CanvasService(server)
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }

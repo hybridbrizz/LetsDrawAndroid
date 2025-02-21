@@ -3,23 +3,85 @@ package com.matrixwarez.pt.fragment
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.view.*
+import android.view.GestureDetector
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.adapter.ServersRecyclerAdapter
+import com.matrixwarez.pt.compose.menu.ServerListsView
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.MenuButtonListener
 import com.matrixwarez.pt.listener.MenuCardListener
 import com.matrixwarez.pt.model.InteractiveCanvas
+import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_menu.*
-import java.util.*
+import kotlinx.android.synthetic.main.fragment_menu.add_button
+import kotlinx.android.synthetic.main.fragment_menu.art_showcase
+import kotlinx.android.synthetic.main.fragment_menu.back_button
+import kotlinx.android.synthetic.main.fragment_menu.button_add_server
+import kotlinx.android.synthetic.main.fragment_menu.connect_button
+import kotlinx.android.synthetic.main.fragment_menu.connect_input_container
+import kotlinx.android.synthetic.main.fragment_menu.connect_menu_text
+import kotlinx.android.synthetic.main.fragment_menu.dev_button
+import kotlinx.android.synthetic.main.fragment_menu.dev_button_bottom_layer
+import kotlinx.android.synthetic.main.fragment_menu.dev_button_container
+import kotlinx.android.synthetic.main.fragment_menu.empty_button_1_container
+import kotlinx.android.synthetic.main.fragment_menu.empty_button_2_container
+import kotlinx.android.synthetic.main.fragment_menu.how_to_menu_text
+import kotlinx.android.synthetic.main.fragment_menu.howto_button
+import kotlinx.android.synthetic.main.fragment_menu.input_access_key
+import kotlinx.android.synthetic.main.fragment_menu.lefty_button
+import kotlinx.android.synthetic.main.fragment_menu.lefty_menu_text
+import kotlinx.android.synthetic.main.fragment_menu.menu_button
+import kotlinx.android.synthetic.main.fragment_menu.menu_button_container
+import kotlinx.android.synthetic.main.fragment_menu.menu_button_container_horizontal_spacer
+import kotlinx.android.synthetic.main.fragment_menu.options_button
+import kotlinx.android.synthetic.main.fragment_menu.options_menu_text
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_1
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_2
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_3
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_4
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_5
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_6
+import kotlinx.android.synthetic.main.fragment_menu.pixel_view_7
+import kotlinx.android.synthetic.main.fragment_menu.recycler_view_servers
+import kotlinx.android.synthetic.main.fragment_menu.righty_button
+import kotlinx.android.synthetic.main.fragment_menu.righty_menu_text
+import kotlinx.android.synthetic.main.fragment_menu.server_list_container
+import kotlinx.android.synthetic.main.fragment_menu.single_button
+import kotlinx.android.synthetic.main.fragment_menu.single_button_bottom_layer
+import kotlinx.android.synthetic.main.fragment_menu.single_button_container
+import kotlinx.android.synthetic.main.fragment_menu.stats_button
+import kotlinx.android.synthetic.main.fragment_menu.stats_button_bottom_layer
+import kotlinx.android.synthetic.main.fragment_menu.stats_button_container
+import kotlinx.android.synthetic.main.fragment_menu.world_button
+import kotlinx.android.synthetic.main.fragment_menu.world_button_bottom_layer
+import kotlinx.android.synthetic.main.fragment_menu.world_button_container
+import java.util.Timer
+import java.util.TimerTask
 
 
 class MenuFragment: Fragment() {
@@ -47,6 +109,9 @@ class MenuFragment: Fragment() {
     var touchTotalY = 0F
 
     private val service = ServerService()
+
+    private val showServerListState = mutableStateOf(false)
+    private val  serverListState = mutableStateOf(listOf<Server>())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -179,16 +244,17 @@ class MenuFragment: Fragment() {
         }
 
         connect_button.setOnClickListener {
-            //menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
-            if (SessionSettings.instance.servers.isEmpty()) {
-                showConnectInput()
-            }
-            else {
-                showServerList()
-//                SessionSettings.instance.lastVisitedServer?.also {
-//                    menuButtonListener?.onServerSelected(it)
-//                } ?: showServerList()
-            }
+            showServerListState.value = true
+//            //menuButtonListener?.onMenuButtonSelected(worldMenuIndex)
+//            if (SessionSettings.instance.servers.isEmpty()) {
+//                showConnectInput()
+//            }
+//            else {
+//                showServerList()
+////                SessionSettings.instance.lastVisitedServer?.also {
+////                    menuButtonListener?.onServerSelected(it)
+////                } ?: showServerList()
+//            }
         }
 
         options_button.setOnClickListener {
@@ -322,6 +388,39 @@ class MenuFragment: Fragment() {
 
         if (!SessionSettings.instance.selectedHand) {
             selectHand()
+        }
+
+        server_list_container.setContent {
+            AnimatedVisibility(
+                visible = showServerListState.value,
+                enter = fadeIn(tween(200)),
+                exit = fadeOut(tween(200))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f))
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            showServerListState.value = false
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    ServerListsView(
+                        serverListState = serverListState,
+                        onSelectServer = {
+                            menuButtonListener?.onServerSelected(it)
+                            showServerListState.value = false
+                        }
+                    )
+                }
+            }
+        }
+
+        service.getServerList { _, list ->
+            serverListState.value = list
         }
     }
 

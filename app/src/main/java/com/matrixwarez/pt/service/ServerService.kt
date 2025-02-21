@@ -30,4 +30,16 @@ class ServerService {
             }
         })
     }
+
+    fun getServerList(completionHandler: (statusCode: Int, list: List<Server>) -> Unit) {
+        service.getServerList().enqueue(object: Callback<List<Server>> {
+            override fun onResponse(call: Call<List<Server>>, response: Response<List<Server>>) {
+                completionHandler.invoke(response.code(), response.body() ?: listOf())
+            }
+
+            override fun onFailure(call: Call<List<Server>>, t: Throwable) {
+                completionHandler.invoke(0, listOf())
+            }
+        })
+    }
 }
