@@ -13,6 +13,9 @@ interface ServerRetrofitService {
     @GET("api/v1/find/server/{access_key}")
     fun getServer(@Header("key0") key0: String, @Path("access_key") accessKey: String): Call<Server>
 
+    @GET("api/v1/find/private/server/{access_key}")
+    fun getPrivateServer(@Header("key0") key0: String, @Path("access_key") accessKey: String): Call<Server>
+
     @GET("api/v1/serverlist")
     fun getServerList(): Call<List<Server>>
 

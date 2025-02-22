@@ -33,6 +33,18 @@ class ServerService {
         })
     }
 
+    fun getPrivateServer(accessKey: String, completionHandler: (statusCode: Int, server: Server?) -> Unit) {
+        service.getPrivateServer(key0, accessKey).enqueue(object: Callback<Server> {
+            override fun onResponse(call: Call<Server>, response: Response<Server>) {
+                completionHandler.invoke(response.code(), response.body())
+            }
+
+            override fun onFailure(call: Call<Server>, t: Throwable) {
+                completionHandler.invoke(0, null)
+            }
+        })
+    }
+
     fun getServerList(completionHandler: (statusCode: Int, list: List<Server>) -> Unit) {
         service.getServerList().enqueue(object: Callback<List<Server>> {
             override fun onResponse(call: Call<List<Server>>, response: Response<List<Server>>) {

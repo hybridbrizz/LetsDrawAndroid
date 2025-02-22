@@ -118,6 +118,7 @@ class MenuFragment: Fragment() {
     private val loadingState = mutableStateOf(false)
 
     private var lastPublicRefreshTime = 0L
+    private var lastPrivateRefreshTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -415,6 +416,7 @@ class MenuFragment: Fragment() {
                     contentAlignment = Alignment.Center
                 ) {
                     ServerListsView(
+                        serverService = service,
                         publicServerListState = publicServerListState,
                         privateServerListState = privateServerListState,
                         loadingState = loadingState,
@@ -422,18 +424,49 @@ class MenuFragment: Fragment() {
                             menuButtonListener?.onServerSelected(it)
                             showServerListState.value = false
                         },
-                        onRefreshServerList = {
+                        onRefreshServerList = { public ->
                             val cTime = System.currentTimeMillis()
-                            if (cTime - lastPublicRefreshTime > 15 * 1000) {
-                                loadingState.value = true
-                                service.getServerList { _, list ->
-                                    Log.d("Serverlist", "Refreshed")
-                                    publicServerListState.value = list.onEach {
-                                        it.public = true
+
+                            when (public) {
+                                true -> {
+                                    if (cTime - lastPublicRefreshTime > 15 * 1000) {
+                                        loadingState.value = true
+                                        service.getServerList { _, list ->
+                                            Log.d("Serverlist", "Refreshed (public)")
+                                            publicServerListState.value = list
+                                            loadingState.value = false
+                                        }
+                                        lastPublicRefreshTime = cTime
                                     }
-                                    loadingState.value = false
                                 }
-                                lastPublicRefreshTime = cTime
+                                false -> {
+                                    if (cTime - lastPrivateRefreshTime > 15 * 1000) {
+                                        loadingState.value = true
+                                        var downloadCount = 0
+                                        service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
+                                            privateServerListState.value = list
+
+                                            downloadCount += 1
+                                            Log.d("Serverlist", "Refreshed (private)")
+
+                                            if (downloadCount == 2) {
+                                                loadingState.value = false
+                                            }
+                                        }
+
+                                        service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
+                                            privateServerListState.value = list
+
+                                            downloadCount += 1
+                                            Log.d("Serverlist", "Refreshed (admin)")
+
+                                            if (downloadCount == 2) {
+                                                loadingState.value = false
+                                            }
+                                        }
+                                        lastPrivateRefreshTime = cTime
+                                    }
+                                }
                             }
                         }
                     )
@@ -442,9 +475,7 @@ class MenuFragment: Fragment() {
 
             LaunchedEffect(Unit) {
                 service.getServerList { _, list ->
-                    publicServerListState.value = list.onEach {
-                        it.public = true
-                    }
+                    publicServerListState.value = list
                 }
 
                 service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->

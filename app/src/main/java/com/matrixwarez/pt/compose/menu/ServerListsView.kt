@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,6 +23,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -32,21 +35,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
+import com.matrixwarez.pt.service.ServerService
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServerListsView(publicServerListState: MutableState<List<Server>>,
+fun ServerListsView(serverService: ServerService, publicServerListState: MutableState<List<Server>>,
                     privateServerListState: MutableState<List<Server>>,
                     loadingState: MutableState<Boolean>,
-                    onSelectServer: (Server) -> Unit, onRefreshServerList: () -> Unit) {
+                    onSelectServer: (Server) -> Unit, onRefreshServerList: (Boolean) -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
 
     val pagerState = rememberPagerState {
         2
     }
+
+    val showAddFormState = remember { mutableStateOf(false) }
 
     Column(modifier = Modifier
         .shadow(2.dp)
@@ -102,7 +107,7 @@ fun ServerListsView(publicServerListState: MutableState<List<Server>>,
         Row {
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = {
-                onRefreshServerList()
+                onRefreshServerList(pagerState.targetPage == 0)
             }) {
                 Icon(
                     modifier = Modifier.size(24.dp),
@@ -110,6 +115,18 @@ fun ServerListsView(publicServerListState: MutableState<List<Server>>,
                     contentDescription = "Refresh",
                     tint = Color.White
                 )
+            }
+            if (pagerState.targetPage == 1) {
+                IconButton(onClick = {
+                    showAddFormState.value = true
+                }) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add Private Server",
+                        tint = Color.White
+                    )
+                }
             }
         }
 
@@ -126,8 +143,10 @@ fun ServerListsView(publicServerListState: MutableState<List<Server>>,
                     loadingState = loadingState
                 )
                 false -> PrivateServerListView(
+                    serverService = serverService,
                     onSelectServer = onSelectServer,
                     privateServerListState = privateServerListState,
+                    showAddFormState = showAddFormState,
                     loadingState = loadingState
                 )
             }

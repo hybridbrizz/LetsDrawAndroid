@@ -152,7 +152,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         serverService.getServer(accessKey) { code, server ->
             val storeduuid = this.server.uuid
             val storedpublic = this.server.public
-            SessionSettings.instance.removeServer(requireContext(), this.server, false)
+
+            if (!this.server.public) {
+                SessionSettings.instance.removeServer(requireContext(), this.server, false)
+            }
 
             if (server == null && code >= 400 && code < 500) {
                 showConnectionErrorMessage(authError = true)
@@ -173,10 +176,11 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             if (this.server.public) {
                 SessionSettings.instance.serverLastVisitedTimes[this.server.id.toString()] = this.server.lastVisited
             }
+            else {
+                SessionSettings.instance.addServer(requireContext(), this.server)
+            }
 
             canvasService = CanvasService(server)
-
-            SessionSettings.instance.addServer(requireContext(), this.server)
 
             SessionSettings.instance.uniqueId = this.server.uuid
             SessionSettings.instance.lastVisitedServer = this.server

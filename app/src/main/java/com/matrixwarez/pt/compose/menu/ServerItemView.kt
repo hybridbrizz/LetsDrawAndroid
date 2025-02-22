@@ -1,7 +1,9 @@
 package com.matrixwarez.pt.compose.menu
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,14 +24,20 @@ import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ServerItemView(server: Server, onClick: (Server) -> Unit) {
+fun ServerItemView(server: Server, onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                onClick(server)
-            }
+            .combinedClickable(
+                onClick = {
+                    onClick(server)
+                },
+                onLongClick = {
+                    onLongClick(server)
+                }
+            )
             .padding(horizontal = 10.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
