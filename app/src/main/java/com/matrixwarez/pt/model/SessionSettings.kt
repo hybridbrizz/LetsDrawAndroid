@@ -14,6 +14,7 @@ import com.matrixwarez.pt.listener.PaintQtyListener
 import com.matrixwarez.pt.view.ArtView
 import com.google.gson.Gson
 import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import org.json.JSONArray
 import java.util.*
 import kotlin.collections.ArrayList
@@ -27,6 +28,7 @@ class SessionSettings {
     var gson = Gson()
 
     var uniqueId: String? = null
+    var uniqueId2: String? = null
     var deviceId: Int = -1
 
     var googleAuth = false
@@ -212,6 +214,8 @@ class SessionSettings {
     var lastVisitedServer: Server? = null
     var lastVisitedServerId = -1
 
+    var publicServerUniqueIds = mutableMapOf<String, String>()
+
     var agreedToTermOfService = false
 
     fun getSharedPrefs(context: Context): SharedPreferences {
@@ -328,6 +332,8 @@ class SessionSettings {
         ed.putInt("color_palette_size", 3)
 
         ed.putBoolean("hsb_text_visible", hsbTextVisible)
+
+        ed.putString("public_server_unique_ids", gson.toJson(publicServerUniqueIds))
 
         ed.apply()
     }
@@ -509,6 +515,15 @@ class SessionSettings {
 
         lastVisitedServerId = getSharedPrefs(context).getInt("last_visited_server_id", -1)
         lastVisitedServer = servers.firstOrNull { it.id == lastVisitedServerId }
+
+        publicServerUniqueIds = gson.fromJson(getSharedPrefs(context).getString("public_server_unique_ids", "{}"), JsonObject::class.java).let {
+            val map = mutableMapOf<String, String>()
+            val keys = it.keySet()
+            keys.forEach { key ->
+                map[key] = it.get(key).asString
+            }
+            map
+        }
     }
 
     fun loadViewportInfo(context: Context) {
@@ -724,6 +739,39 @@ class SessionSettings {
             .apply()
     }
 
+    fun syncServerStatus(context: Context, remoteServers: List<Server>) {
+        servers.forEach { server ->
+            val remoteServer = remoteServers.firstOrNull { it.id == server.id }
+
+            remoteServer?.let {
+                server.online = remoteServer.online
+                server.connectionCount = remoteServer.connectionCount
+                server.maxConnections = remoteServer.maxConnections
+            }
+        }
+        saveServers(context)
+    }
+
+    fun getAccessKeys(): List<String> {
+        val keys = mutableListOf<String>()
+        servers.forEach { server ->
+            if (!server.isAdmin) {
+                keys.add(server.accessKey)
+            }
+        }
+        return keys
+    }
+
+    fun getAdminKeys(): List<String> {
+        val keys = mutableListOf<String>()
+        servers.forEach { server ->
+            if (server.isAdmin) {
+                keys.add(server.adminKey)
+            }
+        }
+        return keys
+    }
+
     fun hasServer(accessKey: String): Boolean {
         servers.forEach {
             if (accessKey == it.adminKey || accessKey == it.accessKey) {
@@ -769,6 +817,16 @@ class SessionSettings {
 
     fun saveAgreeToTerms(context: Context) {
         getSharedPrefs(context).edit().putBoolean("agreed_to_terms", agreedToTermOfService).apply()
+    }
+
+    fun displayNameOrId(): String {
+        if (uniqueId2 == null || uniqueId2!!.isBlank()) {
+            uniqueId2 = UUID.randomUUID().toString().substring(0, 4)
+        }
+        return when (displayName.isNotBlank()) {
+            true -> displayName
+            false -> uniqueId2!!
+        }
     }
 
     companion object {

@@ -151,6 +151,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         }
         serverService.getServer(accessKey) { code, server ->
             val storeduuid = this.server.uuid
+            val storedpublic = this.server.public
             SessionSettings.instance.removeServer(requireContext(), this.server, false)
 
             if (server == null && code >= 400 && code < 500) {
@@ -165,6 +166,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
             this.server = server.also {
                 it.uuid = storeduuid
+                it.public = storedpublic
             }
 
             canvasService = CanvasService(server)
@@ -423,6 +425,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
                 server.uuid = uniqueId
                 SessionSettings.instance.saveServers(requireContext())
+                if (server.public) {
+                    SessionSettings.instance.publicServerUniqueIds[server.id.toString()] = uniqueId
+                    SessionSettings.instance.save(requireContext())
+                }
 
                 SessionSettings.instance.deviceId = response.getInt("id")
                 SessionSettings.instance.dropsAmt = response.getInt("paint_qty")

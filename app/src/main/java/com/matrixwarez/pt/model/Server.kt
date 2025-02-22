@@ -75,6 +75,8 @@ class Server {
     @SerializedName("max_connections")
     var maxConnections = 0
 
+    var public = false
+
     fun serviceBaseUrl(): String {
         return buildUrl(baseUrl, apiPort)
     }

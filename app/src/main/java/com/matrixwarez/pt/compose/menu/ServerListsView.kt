@@ -11,7 +11,9 @@ import com.matrixwarez.pt.model.Server
 
 
 @Composable
-fun ServerListsView(serverListState: MutableState<List<Server>>, onSelectServer: (Server) -> Unit) {
+fun ServerListsView(publicServerListState: MutableState<List<Server>>,
+                    privateServerListState: MutableState<List<Server>>,
+                    onSelectServer: (Server) -> Unit) {
 
     val pagerState = rememberPagerState {
         2
@@ -25,11 +27,12 @@ fun ServerListsView(serverListState: MutableState<List<Server>>, onSelectServer:
     ) { page ->
         when (page == 0) {
             true -> PublicServerListView(
-                serverListState = serverListState,
+                serverListState = publicServerListState,
                 onSelectServer = onSelectServer
             )
             false -> PrivateServerListView(
-                onSelectServer = onSelectServer
+                onSelectServer = onSelectServer,
+                privateServerListState = privateServerListState
             )
         }
     }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -111,7 +112,8 @@ class MenuFragment: Fragment() {
     private val service = ServerService()
 
     private val showServerListState = mutableStateOf(false)
-    private val  serverListState = mutableStateOf(listOf<Server>())
+    private val publicServerListState = mutableStateOf(listOf<Server>())
+    private val privateServerListState = mutableStateOf(listOf<Server>())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -409,7 +411,8 @@ class MenuFragment: Fragment() {
                     contentAlignment = Alignment.Center
                 ) {
                     ServerListsView(
-                        serverListState = serverListState,
+                        publicServerListState = publicServerListState,
+                        privateServerListState = privateServerListState,
                         onSelectServer = {
                             menuButtonListener?.onServerSelected(it)
                             showServerListState.value = false
@@ -417,10 +420,22 @@ class MenuFragment: Fragment() {
                     )
                 }
             }
-        }
 
-        service.getServerList { _, list ->
-            serverListState.value = list
+            LaunchedEffect(Unit) {
+                service.getServerList { _, list ->
+                    publicServerListState.value = list.onEach {
+                        it.public = true
+                    }
+                }
+
+                service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
+                    privateServerListState.value = list
+                }
+
+                service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
+                    privateServerListState.value = list
+                }
+            }
         }
     }
 

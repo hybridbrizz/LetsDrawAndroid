@@ -111,7 +111,7 @@ fun ClientsInfoItemView(clientInfo: Triple<String, Int, Int>, interactiveCanvas:
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    if (name == SessionSettings.instance.displayName) return@clickable
+                    if (name == SessionSettings.instance.displayNameOrId()) return@clickable
 
                     val x = center % interactiveCanvas.cols
                     val minX = x - 10

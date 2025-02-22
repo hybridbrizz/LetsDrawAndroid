@@ -87,7 +87,7 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
                     else -> Color.Red
                 }
 
-                if (name != SessionSettings.instance.displayName) {
+                if (name != SessionSettings.instance.displayNameOrId()) {
                     screenPoint?.let {
                         val lineColor = when (lineColorIsDark) {
                             true -> Color.Black

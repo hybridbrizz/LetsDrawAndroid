@@ -386,7 +386,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 Log.d("Latency Check", "Get latency and connection count")
                 deviceViewport?.let {
                     InteractiveCanvasSocket.instance.requireSocket().emit("lat",
-                        "${SessionSettings.instance.displayName}&" +
+                        "${SessionSettings.instance.displayNameOrId()}&" +
                                 "${pixelId(Point(it.centerX().toInt(), it.centerY().toInt()))}")
                 }
 

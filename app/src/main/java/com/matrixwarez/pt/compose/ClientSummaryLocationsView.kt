@@ -41,7 +41,7 @@ fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Triple<String
                 else -> Color.Red
             }
 
-            if (name != SessionSettings.instance.displayName) {
+            if (name != SessionSettings.instance.displayNameOrId()) {
                 drawCircle(
                     color = color,
                     radius = density.run { 2.dp.toPx() },
