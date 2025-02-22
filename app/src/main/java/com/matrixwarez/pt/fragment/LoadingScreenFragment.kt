@@ -167,6 +167,11 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             this.server = server.also {
                 it.uuid = storeduuid
                 it.public = storedpublic
+                it.lastVisited = System.currentTimeMillis()
+            }
+
+            if (this.server.public) {
+                SessionSettings.instance.serverLastVisitedTimes[this.server.id.toString()] = this.server.lastVisited
             }
 
             canvasService = CanvasService(server)

@@ -3,6 +3,7 @@ package com.matrixwarez.pt.fragment
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -114,6 +115,9 @@ class MenuFragment: Fragment() {
     private val showServerListState = mutableStateOf(false)
     private val publicServerListState = mutableStateOf(listOf<Server>())
     private val privateServerListState = mutableStateOf(listOf<Server>())
+    private val loadingState = mutableStateOf(false)
+
+    private var lastPublicRefreshTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -413,9 +417,24 @@ class MenuFragment: Fragment() {
                     ServerListsView(
                         publicServerListState = publicServerListState,
                         privateServerListState = privateServerListState,
+                        loadingState = loadingState,
                         onSelectServer = {
                             menuButtonListener?.onServerSelected(it)
                             showServerListState.value = false
+                        },
+                        onRefreshServerList = {
+                            val cTime = System.currentTimeMillis()
+                            if (cTime - lastPublicRefreshTime > 15 * 1000) {
+                                loadingState.value = true
+                                service.getServerList { _, list ->
+                                    Log.d("Serverlist", "Refreshed")
+                                    publicServerListState.value = list.onEach {
+                                        it.public = true
+                                    }
+                                    loadingState.value = false
+                                }
+                                lastPublicRefreshTime = cTime
+                            }
                         }
                     )
                 }

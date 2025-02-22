@@ -40,9 +40,10 @@ class ServerService {
                 list?.let {
                     it.forEach { server ->
                         server.uuid = SessionSettings.instance.publicServerUniqueIds[server.id.toString()] ?: ""
+                        server.lastVisited = SessionSettings.instance.serverLastVisitedTimes[server.id.toString()] ?: 0L
                     }
                 }
-                completionHandler.invoke(response.code(), list ?: listOf())
+                completionHandler.invoke(response.code(), list?.sortedBy { -it.lastVisited } ?: listOf())
             }
 
             override fun onFailure(call: Call<List<Server>>, t: Throwable) {
@@ -58,7 +59,7 @@ class ServerService {
                 list?.let {
                     SessionSettings.instance.syncServerStatus(context, it)
                 }
-                completionHandler.invoke(response.code(), SessionSettings.instance.servers)
+                completionHandler.invoke(response.code(), SessionSettings.instance.servers.sortedBy { -it.lastVisited })
             }
 
             override fun onFailure(call: Call<List<Server>>, t: Throwable) {
@@ -74,7 +75,7 @@ class ServerService {
                 list?.let {
                     SessionSettings.instance.syncServerStatus(context, it)
                 }
-                completionHandler.invoke(response.code(), SessionSettings.instance.servers)
+                completionHandler.invoke(response.code(), SessionSettings.instance.servers.sortedBy { -it.lastVisited })
             }
 
             override fun onFailure(call: Call<List<Server>>, t: Throwable) {

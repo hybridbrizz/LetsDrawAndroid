@@ -215,6 +215,7 @@ class SessionSettings {
     var lastVisitedServerId = -1
 
     var publicServerUniqueIds = mutableMapOf<String, String>()
+    var serverLastVisitedTimes = mutableMapOf<String, Long>()
 
     var agreedToTermOfService = false
 
@@ -334,6 +335,8 @@ class SessionSettings {
         ed.putBoolean("hsb_text_visible", hsbTextVisible)
 
         ed.putString("public_server_unique_ids", gson.toJson(publicServerUniqueIds))
+
+        ed.putString("server_last_visited_times", gson.toJson(serverLastVisitedTimes))
 
         ed.apply()
     }
@@ -521,6 +524,15 @@ class SessionSettings {
             val keys = it.keySet()
             keys.forEach { key ->
                 map[key] = it.get(key).asString
+            }
+            map
+        }
+
+        serverLastVisitedTimes = gson.fromJson(getSharedPrefs(context).getString("server_last_visited_times", "{}"), JsonObject::class.java).let {
+            val map = mutableMapOf<String, Long>()
+            val keys = it.keySet()
+            keys.forEach { key ->
+                map[key] = it.get(key).asLong
             }
             map
         }
