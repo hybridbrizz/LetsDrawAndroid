@@ -92,9 +92,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.Exception
 import kotlin.math.max
 
 
@@ -264,6 +264,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             showServerListState.value = true
                             showMenu = false
                         },
+                        onCommunity = {
+                            if (server.iconLink.isNotBlank()) {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+                                    startActivity(intent)
+                                }
+                                catch (e: Exception) {}
+                            }
+
+                        },
                         onStyles = {
                             (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this@InteractiveCanvasFragment)
                             showMenu = false
@@ -283,6 +293,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                                 }
                             }
+                        },
+                        onHelp = {
+                            (requireActivity() as InteractiveCanvasActivity).showHowtoFragment()
+                            showMenu = false
                         },
                         onLeave = {
                             InteractiveCanvasSocket.instance.disconnect()

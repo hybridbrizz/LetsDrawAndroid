@@ -29,15 +29,17 @@ import androidx.compose.ui.unit.sp
 import com.matrixwarez.pt.R
 
 private val menuItems = listOf(
-    MenuItem("Server List", R.drawable.server_person),
-    MenuItem("Styles", R.drawable.colors),
+    MenuItem("Person List", R.drawable.server_person),
+    MenuItem("Community", R.drawable.groups),
+    MenuItem("Customize", R.drawable.colors),
     MenuItem("Yank Canvas", R.drawable.photo_camera),
+    MenuItem("Help", R.drawable.help),
     MenuItem("Leave", R.drawable.logout)
 )
 
 @Composable
-fun CanvasMenuView(onServerList: () -> Unit, onStyles: () -> Unit,
-                   onGrabImage: () -> Unit, onLeave: () -> Unit) {
+fun CanvasMenuView(onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
+                   onGrabImage: () -> Unit, onHelp: () -> Unit, onLeave: () -> Unit) {
 
     Box(modifier = Modifier.background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp)).padding(16.dp)) {
         Column {
@@ -47,16 +49,24 @@ fun CanvasMenuView(onServerList: () -> Unit, onStyles: () -> Unit,
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 CanvasMenuItemView(item = menuItems[1]) {
+                    onCommunity()
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                CanvasMenuItemView(item = menuItems[2]) {
                     onStyles()
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
-                CanvasMenuItemView(item = menuItems[2]) {
+                CanvasMenuItemView(item = menuItems[3]) {
                     onGrabImage()
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                CanvasMenuItemView(item = menuItems[3]) {
+                CanvasMenuItemView(item = menuItems[4]) {
+                    onHelp()
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                CanvasMenuItemView(item = menuItems[5]) {
                     onLeave()
                 }
             }

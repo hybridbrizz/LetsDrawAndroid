@@ -171,7 +171,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }
 
-    private fun showHowtoFragment() {
+    fun showHowtoFragment() {
         howtoFragment = HowtoFragment()
 
         howtoFragment?.listener = this
