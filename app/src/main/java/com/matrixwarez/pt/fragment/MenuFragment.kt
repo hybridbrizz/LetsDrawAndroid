@@ -150,6 +150,10 @@ class MenuFragment: Fragment() {
 
         view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
+        connect_button.color = Color.GREEN
+        options_button.color = Color.YELLOW
+        exit_button.color = Color.WHITE
+
 //        back_button.setOnClickListener {
 //            if (recycler_view_servers.visibility == View.VISIBLE) {
 //                showMenuOptions()

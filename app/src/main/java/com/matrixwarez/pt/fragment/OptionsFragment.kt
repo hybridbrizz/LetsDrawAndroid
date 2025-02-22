@@ -127,6 +127,8 @@ class OptionsFragment: Fragment(), FragmentListener {
             change_name_container.visibility = View.GONE
         }
 
+        options_title_text.visibility = View.INVISIBLE
+
         //option_right_handed.visibility = View.GONE
         option_small_action_buttons_container.visibility = View.GONE
         option_bold_action_buttons.visibility = View.GONE
