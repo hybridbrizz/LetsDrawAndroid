@@ -35,7 +35,7 @@ class ButtonFrame: FrameLayout {
             select(false)
         }
 
-    private var baseColor = Color.parseColor("#DDFFFFFF")
+    private var baseColor = Color.parseColor("#FFFFFF")
     private val highlightColor = Color.parseColor("#FAD452")
 
     var color: Int? = null

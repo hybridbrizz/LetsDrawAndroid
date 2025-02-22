@@ -77,12 +77,12 @@
     <string name="export_canvas_button_title">EXPORT CANVAS</string>
     <string name="import_canvas_button_title">IMPORT CANVAS</string>
     <string name="draw_menu_title">CANVAS</string>
-    <string name="connect_menu_title">SERVER LIST</string>
-    <string name="options_menu_title">CUSTOMIZE</string>
+    <string name="connect_menu_title">Canvas List</string>
+    <string name="options_menu_title">Options</string>
     <string name="how_to_menu_title">INFO</string>
     <string name="lefty_menu_title">LEFTY</string>
     <string name="righty_menu_title">RIGHTY</string>
-    <string name="options_title">Customize</string>
+    <string name="options_title">Options</string>
     <string name="howto_title">Getting Started</string>
     <string name="howto_step2_title">Share</string>
     <string name="howto_step3_title">Change Background</string>

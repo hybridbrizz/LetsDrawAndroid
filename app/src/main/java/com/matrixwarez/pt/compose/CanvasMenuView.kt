@@ -31,7 +31,7 @@ import com.matrixwarez.pt.R
 private val menuItems = listOf(
     MenuItem("Person List", R.drawable.server_person),
     MenuItem("Community", R.drawable.groups),
-    MenuItem("Customize", R.drawable.colors),
+    MenuItem("Options", R.drawable.colors),
     MenuItem("Yank Canvas", R.drawable.photo_camera),
     MenuItem("Help", R.drawable.help),
     MenuItem("Leave", R.drawable.logout)

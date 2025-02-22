@@ -57,6 +57,8 @@ import kotlinx.android.synthetic.main.fragment_menu.dev_button_bottom_layer
 import kotlinx.android.synthetic.main.fragment_menu.dev_button_container
 import kotlinx.android.synthetic.main.fragment_menu.empty_button_1_container
 import kotlinx.android.synthetic.main.fragment_menu.empty_button_2_container
+import kotlinx.android.synthetic.main.fragment_menu.exit_button
+import kotlinx.android.synthetic.main.fragment_menu.exit_menu_text
 import kotlinx.android.synthetic.main.fragment_menu.input_access_key
 import kotlinx.android.synthetic.main.fragment_menu.lefty_button
 import kotlinx.android.synthetic.main.fragment_menu.lefty_menu_text
@@ -205,7 +207,7 @@ class MenuFragment: Fragment() {
 
             stats_button_container.visibility = View.GONE
 
-            howto_button_container.visibility = View.GONE
+            exit_button_container.visibility = View.GONE
 
             single_button_container.visibility = View.VISIBLE
 
@@ -224,7 +226,7 @@ class MenuFragment: Fragment() {
                 draw_button_container.visibility = View.GONE
                 options_button_container.visibility = View.GONE
                 stats_button_container.visibility = View.GONE
-                howto_button_container.visibility = View.GONE
+                exit_button_container.visibility = View.GONE
 
                 lefty_button_container.visibility = View.VISIBLE
                 righty_button_container.visibility = View.VISIBLE
@@ -276,11 +278,9 @@ class MenuFragment: Fragment() {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-//        howto_button.setOnClickListener {
-//            menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
-//            menuCardListener?.closeMenu()
-//            clearMenuTextHighlights()
-//        }
+        exit_button.setOnClickListener {
+            activity?.finish()
+        }
 
         single_button.setOnClickListener {
 
@@ -346,7 +346,7 @@ class MenuFragment: Fragment() {
         if (SessionSettings.instance.selectedHand) {
             connect_button.visibility = View.VISIBLE
             options_button.visibility = View.VISIBLE
-//            howto_button.visibility = View.VISIBLE
+            exit_button.visibility = View.VISIBLE
 
             if (canvasFragment != null) {
                 connect_button.visibility = View.GONE
@@ -538,7 +538,7 @@ class MenuFragment: Fragment() {
 
         connect_button.visibility = View.VISIBLE
         options_button.visibility = View.VISIBLE
-//        howto_button.visibility = View.VISIBLE
+        exit_button.visibility = View.VISIBLE
 
         animateMenuButtons(0)
     }
@@ -586,7 +586,7 @@ class MenuFragment: Fragment() {
 
         connect_button.visibility = View.GONE
         options_button.visibility = View.GONE
-//        howto_button.visibility = View.GONE
+        exit_button.visibility = View.GONE
 
         connect_input_container.visibility = View.GONE
 
@@ -637,7 +637,7 @@ class MenuFragment: Fragment() {
             animatingMenu = true
             if (layer == 0) {
                 Animator.animateMenuItems(listOf(
-                    listOf(connect_menu_text), listOf(options_menu_text),
+                    listOf(connect_menu_text), listOf(options_menu_text), listOf(exit_menu_text),
                     listOf(stats_button_bottom_layer, stats_button)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -761,7 +761,7 @@ class MenuFragment: Fragment() {
 
         stats_button_container.visibility = View.GONE
 
-//        howto_button.visibility = View.GONE
+        exit_button.visibility = View.GONE
 
         single_button_container.visibility = View.GONE
 
