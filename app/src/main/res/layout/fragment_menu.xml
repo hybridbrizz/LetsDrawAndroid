@@ -6,58 +6,6 @@
         android:layout_width="match_parent"
         android:background="@drawable/gradient_2">
 
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/back_button"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent">
-
-        <ImageView
-                android:id="@+id/back_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="start|top"
-                android:src="@drawable/ic_back" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/add_button"
-            android:visibility="gone"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-                android:id="@+id/add_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="end|top"
-                android:src="@drawable/ic_add" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/menu_button"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-                android:id="@+id/menu_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="end|top"
-                android:src="@drawable/ic_menu" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
     <com.matrixwarez.pt.view.ArtView
             android:id="@+id/art_showcase"
             android:layout_width="0dp"
@@ -101,8 +49,8 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         android:fontFamily="@font/inter_medium"
-                        android:textSize="38dp"
-                        android:textColor="#DDFFFFFF"
+                        android:textSize="30dp"
+                        android:textColor="#0000FF"
                         android:gravity="center_vertical"
                         android:text="@string/connect_menu_title"
                         android:shadowColor="#7F000000"
@@ -117,7 +65,7 @@
                     android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="-5dp"
+                    android:layout_marginTop="20dp"
                     android:layout_marginLeft="30dp"
                     android:layout_marginRight="30dp">
 
@@ -128,7 +76,7 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintLeft_toLeftOf="parent"
                         android:fontFamily="@font/inter_medium"
-                        android:textSize="38dp"
+                        android:textSize="30dp"
                         android:textColor="#DDFFFFFF"
                         android:gravity="center_vertical"
                         android:text="@string/options_menu_title"
@@ -163,34 +111,6 @@
                         app:layout_constraintLeft_toLeftOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <com.matrixwarez.pt.view.ButtonFrame
-                    android:id="@+id/howto_button"
-                    android:visibility="gone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="-5dp"
-                    android:layout_marginStart="30dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginEnd="30dp">
-
-                <TextView
-                        android:id="@+id/how_to_menu_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        android:fontFamily="@font/inter_medium"
-                        android:textSize="38dp"
-                        android:textColor="#DDFFFFFF"
-                        android:gravity="center"
-                        android:text="@string/how_to_menu_title"
-                        android:shadowColor="#7F000000"
-                        android:shadowDx="3"
-                        android:shadowDy="3"
-                        android:shadowRadius="4" />
-
-            </com.matrixwarez.pt.view.ButtonFrame>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/single_button_container"

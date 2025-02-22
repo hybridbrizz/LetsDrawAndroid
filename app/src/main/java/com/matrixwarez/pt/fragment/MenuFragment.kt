@@ -26,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
@@ -49,9 +47,7 @@ import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_menu.add_button
 import kotlinx.android.synthetic.main.fragment_menu.art_showcase
-import kotlinx.android.synthetic.main.fragment_menu.back_button
 import kotlinx.android.synthetic.main.fragment_menu.button_add_server
 import kotlinx.android.synthetic.main.fragment_menu.connect_button
 import kotlinx.android.synthetic.main.fragment_menu.connect_input_container
@@ -61,12 +57,9 @@ import kotlinx.android.synthetic.main.fragment_menu.dev_button_bottom_layer
 import kotlinx.android.synthetic.main.fragment_menu.dev_button_container
 import kotlinx.android.synthetic.main.fragment_menu.empty_button_1_container
 import kotlinx.android.synthetic.main.fragment_menu.empty_button_2_container
-import kotlinx.android.synthetic.main.fragment_menu.how_to_menu_text
-import kotlinx.android.synthetic.main.fragment_menu.howto_button
 import kotlinx.android.synthetic.main.fragment_menu.input_access_key
 import kotlinx.android.synthetic.main.fragment_menu.lefty_button
 import kotlinx.android.synthetic.main.fragment_menu.lefty_menu_text
-import kotlinx.android.synthetic.main.fragment_menu.menu_button
 import kotlinx.android.synthetic.main.fragment_menu.menu_button_container
 import kotlinx.android.synthetic.main.fragment_menu.menu_button_container_horizontal_spacer
 import kotlinx.android.synthetic.main.fragment_menu.options_button
@@ -91,7 +84,6 @@ import kotlinx.android.synthetic.main.fragment_menu.stats_button_container
 import kotlinx.android.synthetic.main.fragment_menu.world_button
 import kotlinx.android.synthetic.main.fragment_menu.world_button_bottom_layer
 import kotlinx.android.synthetic.main.fragment_menu.world_button_container
-import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 
@@ -156,32 +148,32 @@ class MenuFragment: Fragment() {
 
         view.setBackgroundResource(SessionSettings.instance.menuBackgroundResId)
 
-        back_button.setOnClickListener {
-            if (recycler_view_servers.visibility == View.VISIBLE) {
-                showMenuOptions()
-            }
-            else if (connect_input_container.visibility == View.VISIBLE) {
-                if (SessionSettings.instance.servers.isEmpty()) {
-                    showMenuOptions()
-                }
-                else {
-                    showServerList()
-                }
-            }
+//        back_button.setOnClickListener {
+//            if (recycler_view_servers.visibility == View.VISIBLE) {
+//                showMenuOptions()
+//            }
+//            else if (connect_input_container.visibility == View.VISIBLE) {
+//                if (SessionSettings.instance.servers.isEmpty()) {
+//                    showMenuOptions()
+//                }
+//                else {
+//                    showServerList()
+//                }
+//            }
+//
+//            if (backCount == 1) {
+//                resetMenu()
+//                animateMenuButtons(0)
+//            }
+//            else if (backCount == 2) {
+//                resetToPlayMode()
+//                animateMenuButtons(1)
+//            }
+//
+//            backCount--
+//        }
 
-            if (backCount == 1) {
-                resetMenu()
-                animateMenuButtons(0)
-            }
-            else if (backCount == 2) {
-                resetToPlayMode()
-                animateMenuButtons(1)
-            }
-
-            backCount--
-        }
-
-        back_button.visibility = View.GONE
+//        back_button.visibility = View.GONE
 
         stats_button.type = ActionButtonView.Type.STATS
         stats_button.topLayer = true
@@ -251,14 +243,14 @@ class MenuFragment: Fragment() {
             }
         }*/
 
-        menu_button.setOnClickListener {
-            if (SessionSettings.instance.servers.isEmpty()) {
-                showConnectInput()
-            }
-            else {
-                showServerList()
-            }
-        }
+//        menu_button.setOnClickListener {
+//            if (SessionSettings.instance.servers.isEmpty()) {
+//                showConnectInput()
+//            }
+//            else {
+//                showServerList()
+//            }
+//        }
 
         connect_button.setOnClickListener {
             showServerListState.value = true
@@ -284,11 +276,11 @@ class MenuFragment: Fragment() {
             menuButtonListener?.onMenuButtonSelected(statsMenuIndex)
         }
 
-        howto_button.setOnClickListener {
-            menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
-            menuCardListener?.closeMenu()
-            clearMenuTextHighlights()
-        }
+//        howto_button.setOnClickListener {
+//            menuButtonListener?.onMenuButtonSelected(howtoMenuIndex)
+//            menuCardListener?.closeMenu()
+//            clearMenuTextHighlights()
+//        }
 
         single_button.setOnClickListener {
 
@@ -354,7 +346,7 @@ class MenuFragment: Fragment() {
         if (SessionSettings.instance.selectedHand) {
             connect_button.visibility = View.VISIBLE
             options_button.visibility = View.VISIBLE
-            howto_button.visibility = View.VISIBLE
+//            howto_button.visibility = View.VISIBLE
 
             if (canvasFragment != null) {
                 connect_button.visibility = View.GONE
@@ -530,7 +522,7 @@ class MenuFragment: Fragment() {
 
     private fun selectHand() {
         if (!SessionSettings.instance.selectedHand) {
-            menu_button.visibility = View.INVISIBLE
+//            menu_button.visibility = View.INVISIBLE
 
             lefty_button.visibility = View.VISIBLE
             righty_button.visibility = View.VISIBLE
@@ -542,11 +534,11 @@ class MenuFragment: Fragment() {
     private fun showMenuOptions() {
         resetMenu()
 
-        menu_button.visibility = View.VISIBLE
+//        menu_button.visibility = View.VISIBLE
 
         connect_button.visibility = View.VISIBLE
         options_button.visibility = View.VISIBLE
-        howto_button.visibility = View.VISIBLE
+//        howto_button.visibility = View.VISIBLE
 
         animateMenuButtons(0)
     }
@@ -554,8 +546,8 @@ class MenuFragment: Fragment() {
     private fun showConnectInput() {
         resetMenu()
 
-        back_button.visibility = View.VISIBLE
-        menu_button.visibility = View.GONE
+//        back_button.visibility = View.VISIBLE
+//        menu_button.visibility = View.GONE
 
         button_add_server.setOnClickListener {
             val accessKey = input_access_key.text.toString().trim().uppercase()
@@ -584,17 +576,17 @@ class MenuFragment: Fragment() {
     }
 
     private fun showServerList() {
-        menu_button.visibility = View.GONE
-        back_button.visibility = View.VISIBLE
-        add_button.visibility = View.VISIBLE
-
-        add_button.setOnClickListener {
-            showConnectInput()
-        }
+//        menu_button.visibility = View.GONE
+//        back_button.visibility = View.VISIBLE
+//        add_button.visibility = View.VISIBLE
+//
+//        add_button.setOnClickListener {
+//            showConnectInput()
+//        }
 
         connect_button.visibility = View.GONE
         options_button.visibility = View.GONE
-        howto_button.visibility = View.GONE
+//        howto_button.visibility = View.GONE
 
         connect_input_container.visibility = View.GONE
 
@@ -646,7 +638,7 @@ class MenuFragment: Fragment() {
             if (layer == 0) {
                 Animator.animateMenuItems(listOf(
                     listOf(connect_menu_text), listOf(options_menu_text),
-                    listOf(stats_button_bottom_layer, stats_button), listOf(how_to_menu_text)), cascade = true, out = false, inverse = false,
+                    listOf(stats_button_bottom_layer, stats_button)), cascade = true, out = false, inverse = false,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
                             animatingMenu = false
@@ -769,7 +761,7 @@ class MenuFragment: Fragment() {
 
         stats_button_container.visibility = View.GONE
 
-        howto_button.visibility = View.GONE
+//        howto_button.visibility = View.GONE
 
         single_button_container.visibility = View.GONE
 
@@ -787,8 +779,8 @@ class MenuFragment: Fragment() {
 
         recycler_view_servers.visibility = View.GONE
 
-        back_button.visibility = View.GONE
-        add_button.visibility = View.GONE
+//        back_button.visibility = View.GONE
+//        add_button.visibility = View.GONE
     }
 
     private fun resetToPlayMode() {
@@ -806,7 +798,7 @@ class MenuFragment: Fragment() {
 
         empty_button_1_container.visibility = View.GONE
 
-        back_button.visibility = View.VISIBLE
+//        back_button.visibility = View.VISIBLE
     }
 
     companion object {
