@@ -77,7 +77,7 @@
     <string name="export_canvas_button_title">EXPORT CANVAS</string>
     <string name="import_canvas_button_title">IMPORT CANVAS</string>
     <string name="draw_menu_title">CANVAS</string>
-    <string name="connect_menu_title">CONNECT</string>
+    <string name="connect_menu_title">SERVERS</string>
     <string name="options_menu_title">STYLES</string>
     <string name="how_to_menu_title">INFO</string>
     <string name="lefty_menu_title">LEFTY</string>

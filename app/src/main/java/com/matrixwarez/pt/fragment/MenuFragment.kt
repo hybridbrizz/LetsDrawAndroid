@@ -20,12 +20,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
@@ -82,6 +91,7 @@ import kotlinx.android.synthetic.main.fragment_menu.stats_button_container
 import kotlinx.android.synthetic.main.fragment_menu.world_button
 import kotlinx.android.synthetic.main.fragment_menu.world_button_bottom_layer
 import kotlinx.android.synthetic.main.fragment_menu.world_button_container
+import kotlinx.coroutines.launch
 import java.util.Timer
 import java.util.TimerTask
 
@@ -410,66 +420,91 @@ class MenuFragment: Fragment() {
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) {
-                            showServerListState.value = false
-                        },
+                        ) {},
                     contentAlignment = Alignment.Center
                 ) {
-                    ServerListsView(
-                        serverService = service,
-                        publicServerListState = publicServerListState,
-                        privateServerListState = privateServerListState,
-                        loadingState = loadingState,
-                        onSelectServer = {
-                            menuButtonListener?.onServerSelected(it)
-                            showServerListState.value = false
-                        },
-                        onRefreshServerList = { public ->
-                            val cTime = System.currentTimeMillis()
+                    Box {
+                        ServerListsView(
+                            serverService = service,
+                            publicServerListState = publicServerListState,
+                            privateServerListState = privateServerListState,
+                            loadingState = loadingState,
+                            onSelectServer = {
+                                menuButtonListener?.onServerSelected(it)
+                                showServerListState.value = false
+                            },
+                            onRefreshServerList = { public ->
+                                val cTime = System.currentTimeMillis()
 
-                            when (public) {
-                                true -> {
-                                    if (cTime - lastPublicRefreshTime > 15 * 1000) {
-                                        loadingState.value = true
-                                        service.getServerList { _, list ->
-                                            Log.d("Serverlist", "Refreshed (public)")
-                                            publicServerListState.value = list
-                                            loadingState.value = false
+                                when (public) {
+                                    true -> {
+                                        if (cTime - lastPublicRefreshTime > 15 * 1000) {
+                                            publicServerListState.value = listOf()
+                                            loadingState.value = true
+                                            service.getServerList { _, list ->
+                                                Log.d("Serverlist", "Refreshed (public)")
+                                                publicServerListState.value = list
+                                                loadingState.value = false
+                                            }
+                                            lastPublicRefreshTime = cTime
                                         }
-                                        lastPublicRefreshTime = cTime
                                     }
-                                }
-                                false -> {
-                                    if (cTime - lastPrivateRefreshTime > 15 * 1000) {
-                                        loadingState.value = true
-                                        var downloadCount = 0
-                                        service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
-                                            privateServerListState.value = list
+                                    false -> {
+                                        if (cTime - lastPrivateRefreshTime > 15 * 1000) {
+                                            privateServerListState.value = listOf()
 
-                                            downloadCount += 1
-                                            Log.d("Serverlist", "Refreshed (private)")
+                                            loadingState.value = true
+                                            var downloadCount = 0
 
-                                            if (downloadCount == 2) {
-                                                loadingState.value = false
+                                            service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
+                                                val privateServers = list.toMutableList()
+
+                                                downloadCount += 1
+                                                Log.d("Serverlist", "Refreshed (private)")
+
+                                                if (downloadCount == 2) {
+                                                    privateServerListState.value = privateServers
+                                                    loadingState.value = false
+                                                }
                                             }
-                                        }
 
-                                        service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
-                                            privateServerListState.value = list
+                                            service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
+                                                val privateServers = list.toMutableList()
 
-                                            downloadCount += 1
-                                            Log.d("Serverlist", "Refreshed (admin)")
+                                                downloadCount += 1
+                                                Log.d("Serverlist", "Refreshed (admin)")
 
-                                            if (downloadCount == 2) {
-                                                loadingState.value = false
+                                                if (downloadCount == 2) {
+                                                    privateServerListState.value = privateServers
+                                                    loadingState.value = false
+                                                }
                                             }
+                                            lastPrivateRefreshTime = cTime
                                         }
-                                        lastPrivateRefreshTime = cTime
                                     }
                                 }
                             }
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.TopEnd)
+                                .offset(x = 8.dp, y = (-8).dp)
+                                .background(androidx.compose.ui.graphics.Color.Black, shape = CircleShape)
+                                .clickable {
+                                    showServerListState.value = false
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                imageVector = Icons.Filled.Close,
+                                tint = androidx.compose.ui.graphics.Color.White,
+                                contentDescription = "Close Server List"
+                            )
                         }
-                    )
+                    }
                 }
             }
 
