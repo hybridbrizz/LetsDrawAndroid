@@ -286,8 +286,17 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         }
     }
 
+    private var blockLoadingFragment = false
+
     override fun onServerSelected(server: Server) {
-        showLoadingFragment(server)
+        if (!blockLoadingFragment) {
+            showLoadingFragment(server)
+        }
+        blockLoadingFragment = true
+    }
+
+    override fun clearBlockLoadingFragment() {
+        blockLoadingFragment = false
     }
 
     override fun onResetSinglePlay() {

@@ -20,6 +20,7 @@ class QueueSocket {
         fun onQueueConnect()
         fun onQueueConnectError()
         fun onAddedToQueue(pos: Int)
+        fun onQueuePos(pos: Int)
         fun onServiceReady()
     }
 
@@ -53,6 +54,11 @@ class QueueSocket {
         socket?.on("added_to_queue") {
             Log.i("Queue Socket", "Added to queue!")
             socketListener?.onAddedToQueue(it[0].toString().toInt())
+        }
+
+        socket?.on("queue_pos") {
+            Log.i("Queue Socket", "Added to queue!")
+            socketListener?.onQueuePos(it[0].toString().toInt())
         }
 
         socket?.on("service_ready") {

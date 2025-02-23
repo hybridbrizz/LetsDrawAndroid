@@ -723,6 +723,8 @@ class MenuFragment: Fragment() {
     override fun onResume() {
         super.onResume()
 
+        menuButtonListener?.clearBlockLoadingFragment()
+
         Animator.context = context
 
         showcaseTimer = Timer()

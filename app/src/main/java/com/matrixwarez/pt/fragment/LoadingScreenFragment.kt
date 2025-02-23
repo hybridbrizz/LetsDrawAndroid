@@ -639,7 +639,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         requestQueue.add(request)
     }
 
-    private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false, banError: Boolean = false) {
+    private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false, banError: Boolean = false, queue: Boolean = false) {
         InteractiveCanvasSocket.instance.disconnect()
 
         if (!showingError) {
@@ -655,6 +655,9 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 }
                 else if (socket) {
                     "Socket error."
+                }
+                else if (queue) {
+                    "Queue is not responding."
                 }
                 else {
                     "Server error."
@@ -762,34 +765,37 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     override fun onQueueConnectError() {
         doneConnectingQueue = false
-        showConnectionErrorMessage(true)
+        showConnectionErrorMessage(queue = true)
     }
 
     override fun onAddedToQueue(pos: Int) {
         Log.d("Connection", "Added to queue.")
         queuePos = pos
         updateQueuePos(true)
+    }
 
-        timer.schedule(object: TimerTask() {
-            override fun run() {
-                requireActivity().runOnUiThread {
-                    updateQueuePos()
-                }
-            }
-        }, QueueSocket.interval * 1000L, QueueSocket.interval * 1000L)
+    override fun onQueuePos(pos: Int) {
+        Log.d("Connection", "Queue pos is $pos.")
+        queuePos = pos
+        updateQueuePos()
     }
 
     private fun updateQueuePos(start: Boolean = false) {
         requireActivity().runOnUiThread {
-            if (start && queuePos > 1) {
+            if (start && queuePos > 0) {
                 text_queue_pos.animate().setDuration(500).alphaBy(1F).start()
             }
-            text_queue_pos.text = String.format("~%d in queue", queuePos--)
+            else if (queuePos < 1) {
+                text_queue_pos.animate().setDuration(500).alpha(0f).start()
+            }
+            text_queue_pos.text = String.format("%d in queue", queuePos)
         }
     }
 
     override fun onServiceReady() {
         Log.d("Connection", "Canvas socket ready, disconnecting from queue.")
+        queuePos = 0
+        updateQueuePos()
 
         QueueSocket.instance.socketListener = null
         QueueSocket.instance.socket?.disconnect()
