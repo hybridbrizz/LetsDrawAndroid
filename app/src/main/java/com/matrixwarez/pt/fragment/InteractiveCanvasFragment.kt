@@ -2772,6 +2772,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     }.start()
                 }
             }
-        }, 3000)
+        }, 7000)
     }
 }

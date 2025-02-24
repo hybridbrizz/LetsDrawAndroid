@@ -4,11 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -37,13 +41,18 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                     indication = null
                 ) {},
         ) {
-            items(serverList) { server ->
-                ServerItemView(
-                    server = server,
-                    onClick = {
-                        onSelectServer(server)
+            itemsIndexed(serverList) { index, server ->
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    ServerItemView(
+                        server = server,
+                        onClick = {
+                            onSelectServer(server)
+                        }
+                    )
+                    if (index < serverList.size - 1) {
+                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
                     }
-                )
+                }
             }
         }
 

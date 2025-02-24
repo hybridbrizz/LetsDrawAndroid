@@ -1,6 +1,7 @@
 package com.matrixwarez.pt.compose.menu
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +10,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -26,6 +29,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -55,10 +59,22 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
 
     Column(modifier = Modifier
         .shadow(2.dp)
-        .fillMaxHeight(0.8f)
-        .aspectRatio(16/9f)
-        .background(Color.DarkGray)
+        .fillMaxHeight()
+        .aspectRatio(11/12f)
+        .background(Color(android.graphics.Color.parseColor("#3b3b3b")))
     ) {
+        Box(modifier = Modifier.fillMaxWidth().background(Color(android.graphics.Color.parseColor("#90D5FF"))).padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
+            Box(modifier = Modifier.border(1.dp, Color.White).padding(5.dp).background(Color(android.graphics.Color.parseColor("#FF4D00"))).padding(5.dp)) {
+                Text(
+                    text = "SERVER LIST",
+                    color = Color.White,
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 15.sp
+                )
+            }
+        }
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
         Row {
             Button(
                 modifier = Modifier.weight(0.5f).height(60.dp),
@@ -102,7 +118,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(0.2f)))
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
 
         Row {
             Spacer(modifier = Modifier.weight(1f))
@@ -130,7 +146,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.White.copy(0.2f)))
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
 
         HorizontalPager(
             state = pagerState,

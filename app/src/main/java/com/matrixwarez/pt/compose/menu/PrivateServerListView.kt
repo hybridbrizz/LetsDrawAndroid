@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -184,7 +185,10 @@ fun PrivateServerListView(serverService: ServerService,
                         )
                     }
                 }
-                items(adminServerList) { server ->
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
+                }
+                itemsIndexed(adminServerList) { index, server ->
                     ServerItemView(
                         server = server,
                         onClick = {
@@ -195,6 +199,10 @@ fun PrivateServerListView(serverService: ServerService,
                             showDeleteConfirmation = true
                         }
                     )
+
+                    if (index < adminServerList.size - 1) {
+                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
+                    }
                 }
             }
             if (adminServerList.isNotEmpty()) {
@@ -208,6 +216,9 @@ fun PrivateServerListView(serverService: ServerService,
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
                 }
             }
             items(privateServerList) { server ->
