@@ -66,7 +66,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
         Box(modifier = Modifier.fillMaxWidth().background(Color(android.graphics.Color.parseColor("#90D5FF"))).padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
             Box(modifier = Modifier.border(1.dp, Color.White).padding(5.dp).background(Color(android.graphics.Color.parseColor("#FF4D00"))).padding(5.dp)) {
                 Text(
-                    text = "SERVER LIST",
+                    text = "PIXELS: TOGETHER",
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
@@ -93,7 +93,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             }
             Button(
@@ -113,7 +113,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 14.sp
+                    fontSize = 12.sp
                 )
             }
         }
