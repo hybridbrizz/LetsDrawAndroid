@@ -6,13 +6,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -25,7 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,7 +52,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ServerListsView(serverService: ServerService, publicServerListState: MutableState<List<Server>>,
                     privateServerListState: MutableState<List<Server>>,
-                    loadingState: MutableState<Boolean>,
+                    loadingState: MutableState<Boolean>, portraitState: MutableState<Boolean>,
                     onSelectServer: (Server) -> Unit, onRefreshServerList: (Boolean) -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -57,10 +63,24 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
 
     val showAddFormState = remember { mutableStateOf(false) }
 
+    val isPortrait by portraitState
+
+    val sizeMod = when (isPortrait) {
+        true -> Modifier.fillMaxSize()
+        false -> Modifier
+            .fillMaxHeight()
+            .aspectRatio(11/12f)
+    }
+
+    val windowInsetMod = when (isPortrait) {
+        true -> Modifier.windowInsetsPadding(WindowInsets.systemBars)
+        false -> Modifier
+    }
+
     Column(modifier = Modifier
         .shadow(2.dp)
-        .fillMaxHeight()
-        .aspectRatio(11/12f)
+        .then(sizeMod)
+        .then(windowInsetMod)
         .background(Color(android.graphics.Color.parseColor("#3b3b3b")))
     ) {
         Box(modifier = Modifier.fillMaxWidth().background(Color(android.graphics.Color.parseColor("#90D5FF"))).padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
@@ -167,5 +187,9 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 )
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        loadingState.value = true
     }
 }

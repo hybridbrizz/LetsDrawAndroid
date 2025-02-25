@@ -61,6 +61,14 @@ fun ServerItemView(server: Server, onClick: (Server) -> Unit, onLongClick: (Serv
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
+            text = "[${server.size}]",
+            color = Color.White.copy(alpha = 0.3f),
+            fontFamily = Inter,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Normal
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
             text = "${server.connectionCount} / ${server.maxConnections}",
             color = Color.White,
             fontFamily = Inter,

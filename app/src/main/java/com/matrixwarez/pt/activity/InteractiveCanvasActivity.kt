@@ -1,11 +1,15 @@
 package com.matrixwarez.pt.activity
 
+import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.fragment.*
 import com.matrixwarez.pt.helper.Utils
@@ -46,7 +50,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         fullscreen_content_controls.visibility = View.VISIBLE
     }
     private var mVisible: Boolean = false
-    private val mHideRunnable = Runnable { hide() }
 
     private val backgrounds = intArrayOf(
         R.drawable.gradient,
@@ -66,10 +69,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!Utils.isTablet(this)) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        }
-
         setContentView(R.layout.activity_fullscreen)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
@@ -86,7 +85,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
         mVisible = true
 
-        hide()
+        supportActionBar?.hide()
+
+        //window.navigationBarColor = Color.DarkGray.toArgb()
+
+        //exitFullscreen()
+        //goFullscreen()
 
         //showInteractiveCanvasFragment(false, 0)
         showMenuFragment()
@@ -142,6 +146,9 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     fun showMenuFragment() {
+        landscapeLock(false)
+        exitFullscreen()
+
         val frag = MenuFragment()
         frag.menuButtonListener = this
 
@@ -189,6 +196,9 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     private fun showLoadingFragment(server: Server) {
+        landscapeLock(true)
+        goFullscreen()
+
         val frag = LoadingScreenFragment()
         frag.dataLoadingCallback = this
         frag.world = true
@@ -371,7 +381,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         }, 5000)
     }
 
-    private fun hide() {
+    fun goFullscreen() {
         // Hide UI first
         supportActionBar?.hide()
         fullscreen_content_controls.visibility = View.GONE
@@ -382,12 +392,21 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         mHideHandler.postDelayed(mHidePart2Runnable, 0)
     }
 
-    /**
-     * Schedules a call to hide() in [delayMillis], canceling any
-     * previously scheduled calls.
-     */
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
+    fun exitFullscreen() {
+        fullscreen_content.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_VISIBLE
     }
+}
+
+fun Activity.landscapeLock(lock: Boolean) {
+    if (!Utils.isTablet(this) && lock) {
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+    }
+    else {
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+}
+
+fun Activity.isPortrait(): Boolean {
+    return resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 }

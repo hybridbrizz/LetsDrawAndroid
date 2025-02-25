@@ -1,6 +1,7 @@
 package com.matrixwarez.pt.fragment
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -31,15 +32,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
+import com.matrixwarez.pt.activity.isPortrait
 import com.matrixwarez.pt.adapter.ServersRecyclerAdapter
 import com.matrixwarez.pt.compose.menu.ServerListsView
 import com.matrixwarez.pt.helper.Animator
@@ -51,7 +57,7 @@ import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
-import kotlinx.android.synthetic.main.fragment_menu.art_showcase
+import com.matrixwarez.pt.view.ArtView
 import kotlinx.android.synthetic.main.fragment_menu.button_add_server
 import kotlinx.android.synthetic.main.fragment_menu.connect_button
 import kotlinx.android.synthetic.main.fragment_menu.connect_input_container
@@ -92,6 +98,7 @@ import kotlinx.android.synthetic.main.fragment_menu.world_button_bottom_layer
 import kotlinx.android.synthetic.main.fragment_menu.world_button_container
 import java.util.Timer
 import java.util.TimerTask
+import kotlin.math.roundToInt
 
 
 class MenuFragment: Fragment() {
@@ -124,6 +131,7 @@ class MenuFragment: Fragment() {
     private val publicServerListState = mutableStateOf(listOf<Server>())
     private val privateServerListState = mutableStateOf(listOf<Server>())
     private val loadingState = mutableStateOf(false)
+    private lateinit var portraitState: MutableState<Boolean>
 
     private var lastPublicRefreshTime = 0L
     private var lastPrivateRefreshTime = 0L
@@ -145,8 +153,16 @@ class MenuFragment: Fragment() {
         (requireActivity() as InteractiveCanvasActivity).canvasFragment = canvasFragment
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        portraitState.value = requireActivity().isPortrait()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        portraitState = mutableStateOf(requireActivity().isPortrait())
 
         SessionSettings.instance.canvasOpen = false
 
@@ -377,18 +393,21 @@ class MenuFragment: Fragment() {
 
                 val safeViews: MutableList<View> = ArrayList()
 
-                if (art_showcase != null) {
-                    safeViews.add(art_showcase)
-                    safeViews.add(menu_button_container_horizontal_spacer)
+                val artShowcaseLayoutParams = ConstraintLayout.LayoutParams((view.width - view.height * 11/12f).roundToInt(), Utils.dpToPx(requireContext(), 300))
 
-                    Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
-                    Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
-                }
+                artShowcaseLayoutParams.leftToLeft = ConstraintSet.PARENT_ID
+                artShowcaseLayoutParams.topToTop = ConstraintSet.PARENT_ID
+                artShowcaseLayoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+
+                safeViews.add(menu_button_container_horizontal_spacer)
+
+                Animator.animatePixelColorEffect(pixel_view_1, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_2, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_3, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_4, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_5, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_6, view, safeViews.toList())
+                Animator.animatePixelColorEffect(pixel_view_7, view, safeViews.toList())
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
                 menuButtonContainerWidth = menu_button_container.width
@@ -408,10 +427,14 @@ class MenuFragment: Fragment() {
         }
 
         server_list_container.setContent {
+            val bgColor = when (portraitState.value) {
+                true -> androidx.compose.ui.graphics.Color.DarkGray
+                false -> androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f))
+                    .background(bgColor)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
@@ -419,11 +442,53 @@ class MenuFragment: Fragment() {
                 contentAlignment = Alignment.Center
             ) {
                 Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-                    Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color(Color.parseColor("#FAD452")).copy(0.5f)))
-                    Spacer(modifier = Modifier.width(10.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color.DarkGray))
-                    Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color(Color.parseColor("#FAD452")).copy(0.5f)))
+                    if (!portraitState.value) {
+                        Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                            AndroidView(
+                                modifier = Modifier.size(300.dp),
+                                factory = {
+                                    val artView = LayoutInflater.from(it).inflate(R.layout.art_showcase, null, false) as ArtView
+
+                                    Animator.context = context
+
+                                    showcaseTimer = Timer()
+                                    showcaseTimer.schedule(object: TimerTask() {
+                                        override fun run() {
+                                            activity?.runOnUiThread {
+                                                SessionSettings.instance.artShowcase?.apply {
+                                                    artView.alpha = 0F
+
+                                                    artView.showBackground = false
+                                                    artView.art = getNextArtShowcase()
+
+                                                    artView.animate().alpha(1F).setDuration(2500).withEndAction {
+                                                        Timer().schedule(object: TimerTask() {
+                                                            override fun run() {
+                                                                activity?.runOnUiThread {
+                                                                    artView.animate().alpha(0F).setDuration(1500).start()
+                                                                }
+                                                            }
+
+                                                        }, 3000)
+                                                    }.start()
+                                                }
+                                            }
+                                        }
+
+                                    }, 0, 7000)
+
+                                    artView
+                                }
+                            )
+                        }
+
+                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color(Color.parseColor("#FAD452")).copy(0.5f)))
+                        Spacer(modifier = Modifier.width(10.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color.DarkGray))
+                        Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(androidx.compose.ui.graphics.Color(Color.parseColor("#FAD452")).copy(0.5f)))
+                    }
                     ServerListsView(
                         serverService = service,
+                        portraitState = portraitState,
                         publicServerListState = publicServerListState,
                         privateServerListState = privateServerListState,
                         loadingState = loadingState,
@@ -508,6 +573,7 @@ class MenuFragment: Fragment() {
             LaunchedEffect(Unit) {
                 service.getServerList { _, list ->
                     publicServerListState.value = list
+                    loadingState.value = false
                 }
 
                 service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
@@ -516,6 +582,13 @@ class MenuFragment: Fragment() {
 
                 service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
                     privateServerListState.value = list
+                }
+            }
+
+            LaunchedEffect(portraitState.value) {
+                when (portraitState.value) {
+                    true -> (activity as? InteractiveCanvasActivity)?.exitFullscreen()
+                    false -> (activity as? InteractiveCanvasActivity)?.goFullscreen()
                 }
             }
         }
@@ -726,37 +799,7 @@ class MenuFragment: Fragment() {
 
         menuButtonListener?.clearBlockLoadingFragment()
 
-        Animator.context = context
 
-        showcaseTimer = Timer()
-        showcaseTimer.schedule(object: TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    SessionSettings.instance.artShowcase?.apply {
-                        if (art_showcase != null) {
-                            art_showcase.alpha = 0F
-
-                            art_showcase.showBackground = false
-                            art_showcase.art = getNextArtShowcase()
-
-                            art_showcase.animate().alpha(1F).setDuration(2500).withEndAction {
-                                Timer().schedule(object: TimerTask() {
-                                    override fun run() {
-                                        activity?.runOnUiThread {
-                                            if (art_showcase != null) {
-                                                art_showcase.animate().alpha(0F).setDuration(1500).start()
-                                            }
-                                        }
-                                    }
-
-                                }, 3000)
-                            }.start()
-                        }
-                    }
-                }
-            }
-
-        }, 0, 7000)
     }
 
     private fun resetMenu() {

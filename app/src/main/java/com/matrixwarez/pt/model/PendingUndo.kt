@@ -17,7 +17,7 @@ data class PendingUndo(
     init {
         job = CoroutineScope(Dispatchers.Main.immediate).launch {
             withContext(Dispatchers.Default) {
-                delay(500)
+                delay(1500)
             }
             onUndo(restorePoints)
         }
