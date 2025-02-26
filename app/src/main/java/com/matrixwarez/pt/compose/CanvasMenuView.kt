@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.matrixwarez.pt.R
+import com.matrixwarez.pt.model.Server
 
 private val menuItems = listOf(
     MenuItem("Person List", R.drawable.server_person),
@@ -38,11 +39,19 @@ private val menuItems = listOf(
 )
 
 @Composable
-fun CanvasMenuView(onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
+fun CanvasMenuView(server: Server, onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
                    onGrabImage: () -> Unit, onHelp: () -> Unit, onLeave: () -> Unit) {
 
-    Box(modifier = Modifier.background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp)).padding(16.dp)) {
-        Column {
+    Box(modifier = Modifier.background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp)).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = server.name,
+                color = Color.White,
+                fontSize = 14.sp,
+                fontFamily = Inter,
+                fontWeight = FontWeight.Bold
+            )
             Row {
                 CanvasMenuItemView(item = menuItems[0]) {
                     onServerList()

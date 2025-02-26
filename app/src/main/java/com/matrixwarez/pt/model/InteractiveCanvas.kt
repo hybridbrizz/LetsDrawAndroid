@@ -54,7 +54,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     val basePpu = 100
     var ppu = basePpu
 
-    val autoCloseGridLineThreshold = 50
+    val autoCloseGridLineThreshold = 25
 
     var deviceViewport: RectF? = null
 
@@ -1480,6 +1480,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     fun isSelectedPixelBackground(): Boolean {
-        return arr[lastSelectedUnitPoint.y][lastSelectedUnitPoint.x] == 0
+        if (lastSelectedUnitPoint.y in arr.indices && lastSelectedUnitPoint.x in arr[0].indices) {
+            return arr[lastSelectedUnitPoint.y][lastSelectedUnitPoint.x] == 0
+        }
+        return true
     }
 }

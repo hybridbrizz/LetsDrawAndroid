@@ -744,7 +744,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                         }
                     }
                     else {
-                        paint.color = Color.BLACK
+                        paint.color = Color.DKGRAY
                     }
                     val rect = interactiveCanvas.getScreenSpaceForUnit(
                         x + startUnitIndexX,

@@ -260,6 +260,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     )
                 ) {
                     CanvasMenuView(
+                        server = server,
                         onServerList = {
                             showServerListState.value = true
                             showMenu = false
