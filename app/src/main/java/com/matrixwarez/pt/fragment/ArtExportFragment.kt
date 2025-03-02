@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.matrixwarez.pt.R
@@ -129,9 +130,9 @@ class ArtExportFragment: Fragment() {
         Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 if (SessionSettings.instance.tablet) {
-                    val layoutParams = (art_view.layoutParams as ConstraintLayout.LayoutParams)
+                    val layoutParams = (art_view.layoutParams as FrameLayout.LayoutParams)
 
-                    layoutParams.topMargin = Utils.dpToPx(context, 80)
+//                    layoutParams.topMargin = Utils.dpToPx(context, 80)
 
                     art_view.layoutParams = layoutParams
                 }

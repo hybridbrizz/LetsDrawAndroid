@@ -503,6 +503,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 var connectionCount = 0
 
                 var name = ""
+
                 var center = -1
 
                 clientsInfo.clear()

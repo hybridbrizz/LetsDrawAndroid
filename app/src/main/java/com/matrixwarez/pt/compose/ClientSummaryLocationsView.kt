@@ -26,7 +26,7 @@ fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Triple<String
 
     Box(modifier = Modifier.fillMaxSize().drawWithContent {
         clientsInfo?.forEachIndexed { index, it ->
-            val (name, centerPixelId) = it
+            val (name, centerPixelId, color) = it
 
             var centerX = (centerPixelId % interactiveCanvas.cols).toFloat()
             centerX = centerX / interactiveCanvas.cols.toFloat() * drawContext.size.width
@@ -36,14 +36,9 @@ fun ClientSummaryLocationsView(clientsInfoState: MutableState<List<Triple<String
 
             Log.d("Center Test", "($centerX, $centerY)")
 
-            val color = when {
-                index == 0 -> Color.Blue
-                else -> Color.Red
-            }
-
             if (name != SessionSettings.instance.displayNameOrId()) {
                 drawCircle(
-                    color = color,
+                    color = Color(color),
                     radius = density.run { 2.dp.toPx() },
                     center = Offset(centerX,centerY)
                 )

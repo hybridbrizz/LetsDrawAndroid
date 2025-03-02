@@ -62,7 +62,7 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
                 it == mapMarkerTypes[mapMarkerIndexState.intValue % mapMarkerTypes.size].lowercase()
             } != null) {
             clientsInfo?.forEachIndexed { index, it ->
-                val (name, centerPixelId) = it
+                val (name, centerPixelId, color) = it
 
                 val textSize = measureTextSize(
                     textMeasurer = textMeasurer,
@@ -81,11 +81,6 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
                 }
 
                 if (redrawCountState.value > 3) {}
-
-                val color = when {
-                    index == 0 -> Color.Blue
-                    else -> Color.Red
-                }
 
                 if (name != SessionSettings.instance.displayNameOrId()) {
                     screenPoint?.let {
@@ -122,7 +117,7 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
                         )
 
                         drawCircle(
-                            color = color,
+                            color = Color(color),
                             radius = density.run { 10.dp.toPx() },
                             center = center
                         )
