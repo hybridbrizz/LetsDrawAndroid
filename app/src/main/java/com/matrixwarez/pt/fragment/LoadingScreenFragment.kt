@@ -417,7 +417,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun sendDeviceId(server: Server) {
-        val uniqueId = UUID.randomUUID().toString()
+        val uniqueId = UUID.randomUUID().toString().uppercase()
 
         val requestParams = HashMap<String, String>()
 
@@ -459,10 +459,12 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                         }
 
                         doneCheckingIp = true
+                        downloadFinished()
                     }
                 }
                 else {
                     doneCheckingIp = true
+                    downloadFinished()
                 }
             },
             { error ->

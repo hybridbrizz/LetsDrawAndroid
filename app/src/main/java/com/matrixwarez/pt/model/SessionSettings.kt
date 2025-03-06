@@ -837,7 +837,10 @@ class SessionSettings {
         }
         return when (displayName.isNotBlank()) {
             true -> displayName
-            false -> uniqueId2!!
+            false -> {
+                val serverUUID = lastVisitedServer?.uuid?.substring(0, 4)
+                serverUUID ?: uniqueId2!!
+            }
         }
     }
 

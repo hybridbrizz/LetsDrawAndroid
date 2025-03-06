@@ -137,7 +137,7 @@ fun ClientsInfoItemView(clientInfo: Triple<String, Int, Int>, interactiveCanvas:
             verticalAlignment = Alignment.CenterVertically
         ) {
             var displayName = name
-            if (displayName == SessionSettings.instance.displayName) {
+            if (displayName == SessionSettings.instance.displayNameOrId()) {
                 displayName = "$displayName (me)"
             }
 
