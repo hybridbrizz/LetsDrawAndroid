@@ -173,6 +173,14 @@ fun PrivateServerListView(serverService: ServerService,
                 }
             }
 
+            if (adminServerList.isEmpty() && privateServerList.isEmpty() && !isLoading) {
+                item {
+                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                        Text("Enter an access key to add canvas.", fontFamily = Inter, fontSize = 12.sp, color = Color.White)
+                    }
+                }
+            }
+
             if (adminServerList.isNotEmpty()) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
@@ -205,7 +213,7 @@ fun PrivateServerListView(serverService: ServerService,
                     }
                 }
             }
-            if (adminServerList.isNotEmpty()) {
+            if (adminServerList.isNotEmpty() && privateServerList.isNotEmpty()) {
                 item {
                     Box(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
                         Text(
