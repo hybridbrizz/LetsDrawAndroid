@@ -3,10 +3,14 @@ package com.matrixwarez.pt.colorpicker
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import com.matrixwarez.pt.helper.Utils
 import java.lang.Float.min
 import java.nio.IntBuffer
 import kotlin.math.max
@@ -101,6 +105,8 @@ class SBPalette: View {
 
             drawSBSquare(hue, canvas)
 
+            drawBorder(canvas)
+
             restore()
         }
 
@@ -134,6 +140,22 @@ class SBPalette: View {
         bitmap = Bitmap.createScaledBitmap(bitmap, width, height, false)
 
         canvas.drawBitmap(bitmap, 0F, 0F, null)
+    }
+
+    private fun drawBorder(canvas: Canvas) {
+        val borderPaint = Paint()
+        borderPaint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
+        borderPaint.color = Color.parseColor("#FAD452")
+        borderPaint.style = Paint.Style.STROKE
+
+        val path = Path()
+        path.moveTo(0f, 0f)
+        path.lineTo(canvas.width.toFloat(), 0f)
+        path.lineTo(canvas.width.toFloat(), canvas.height.toFloat())
+        path.lineTo(0f, canvas.height.toFloat())
+        path.lineTo(0f, 0f)
+
+        canvas.drawPath(path, borderPaint)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

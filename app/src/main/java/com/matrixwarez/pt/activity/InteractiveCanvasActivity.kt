@@ -147,7 +147,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     fun showMenuFragment() {
         landscapeLock(false)
-        exitFullscreen()
+        //exitFullscreen()
 
         val frag = MenuFragment()
         frag.menuButtonListener = this

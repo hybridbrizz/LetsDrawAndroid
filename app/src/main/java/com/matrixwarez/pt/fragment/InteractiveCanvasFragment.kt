@@ -309,7 +309,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        text_latency.setOnClickListener {
+        ll_latency_container.setOnClickListener {
             showMenuState.value = false
             showServerListState.value = !showServerListState.value
         }
@@ -520,14 +520,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        color_hex_string_input.addTextChangedListener(textChangeListener)
-
-        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                hideKeyboard()
-            }
-            true
-        }
+//        color_hex_string_input.addTextChangedListener(textChangeListener)
+//
+//        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+//            if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                hideKeyboard()
+//            }
+//            true
+//        }
 
         hsb_palette.listen(object: HSBPalette.ColorListener {
             override fun onColor(color: Int) {
@@ -548,12 +548,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     paint_color_accept.color = Color.BLACK
                 }
 
-                color_hex_string_input.removeTextChangedListener(textChangeListener)
+                //color_hex_string_input.removeTextChangedListener(textChangeListener)
 
                 val hexColor = java.lang.String.format("%06X", 0xFFFFFF and color)
-                color_hex_string_input.setText(hexColor)
+                //color_hex_string_input.setText(hexColor)
 
-                color_hex_string_input.addTextChangedListener(textChangeListener)
+                //color_hex_string_input.addTextChangedListener(textChangeListener)
 
                 // palette color actions
                 syncPaletteAndColor()
@@ -872,14 +872,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     color_picker_frame.layoutParams = layoutParams
 
-                    color_hex_string_input.textSize = 28F
+                    //color_hex_string_input.textSize = 28F
                     var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), LinearLayout.LayoutParams.MATCH_PARENT)
                     linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
                     linearLayoutParams.gravity = Gravity.BOTTOM
 
-                    color_hex_string_input.layoutParams = linearLayoutParams
+                    //color_hex_string_input.layoutParams = linearLayoutParams
 
-                    color_hex_string_input.gravity = Gravity.BOTTOM
+                    //color_hex_string_input.gravity = Gravity.BOTTOM
 
                     // default color buttons size
                     var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
@@ -1498,7 +1498,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // view toggles
     private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
         if (show) {
-            text_latency.visibility = View.GONE
+            ll_latency_container.visibility = View.GONE
 
             paint_panel.visibility = View.VISIBLE
             paint_panel_button.visibility = View.GONE
@@ -1565,7 +1565,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             toggleTools(false)
         }
         else {
-            text_latency.visibility = View.VISIBLE
+            ll_latency_container.visibility = View.VISIBLE
 
             surface_view.endPainting(false)
 

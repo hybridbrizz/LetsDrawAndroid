@@ -49,11 +49,11 @@ class HSBPalette: FrameLayout {
     }
 
     fun init(startColor: Int) {
-        val textContainer = findViewById<LinearLayout>(R.id.linear_layout_text_container)
+        //val textContainer = findViewById<LinearLayout>(R.id.linear_layout_text_container)
 
-        val hueTextView = findViewById<TextView>(R.id.hue_text)
-        val saturationTextView = findViewById<TextView>(R.id.saturation_text)
-        val brightnessTextView = findViewById<TextView>(R.id.brightness_text)
+        //val hueTextView = findViewById<TextView>(R.id.hue_text)
+        //val saturationTextView = findViewById<TextView>(R.id.saturation_text)
+        //val brightnessTextView = findViewById<TextView>(R.id.brightness_text)
 
         val hsbValues = FloatArray(3)
         Color.colorToHSV(startColor, hsbValues)
@@ -71,8 +71,8 @@ class HSBPalette: FrameLayout {
                 hsb[1] = saturation
                 hsb[2] = brightness
 
-                saturationTextView.text = context.getString(R.string.saturation_value_text, (saturation * 100).toInt())
-                brightnessTextView.text = context.getString(R.string.brightness_value_text, (brightness * 100).toInt())
+                //saturationTextView.text = context.getString(R.string.saturation_value_text, (saturation * 100).toInt())
+                //brightnessTextView.text = context.getString(R.string.brightness_value_text, (brightness * 100).toInt())
 
                 listeners.forEach { it.onColor(Color.HSVToColor(hsb)) }
             }
@@ -121,7 +121,7 @@ class HSBPalette: FrameLayout {
                 sbPalette.setH(hue)
                 hsb[0] = hue
 
-                hueTextView.text = context.getString(R.string.hue_value_text, hue.toInt())
+                //hueTextView.text = context.getString(R.string.hue_value_text, hue.toInt())
 
                 listeners.forEach { it.onColor(Color.HSVToColor(hsb)) }
             }
@@ -136,7 +136,7 @@ class HSBPalette: FrameLayout {
             }
         })
 
-        textContainer.setOnClickListener {
+        /*textContainer.setOnClickListener {
             if (it.alpha == 1F) {
                 it.alpha = 0F
             }
@@ -150,7 +150,7 @@ class HSBPalette: FrameLayout {
 
         if (!SessionSettings.instance.hsbTextVisible) {
             textContainer.alpha = 0F
-        }
+        }*/
     }
 
     fun listen(listener: ColorListener) {
