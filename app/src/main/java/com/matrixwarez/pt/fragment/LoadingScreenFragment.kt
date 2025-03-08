@@ -122,7 +122,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             connecting_title.text = "Connecting to dev server"
         }
         if (server.isAdmin) {
-            connecting_title.text = "Connecting to ${server.name} (Admin)"
+            connecting_title.text = "Connecting to ${server.name} (Mod)"
         }
         else {
             connecting_title.text = "Connecting to ${server.name}"
@@ -201,7 +201,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             }
 
             if (server.isAdmin) {
-                connecting_title.text = "Connecting to ${server.name} (Admin)"
+                connecting_title.text = "Connecting to ${server.name} (Mod)"
             }
             else {
                 connecting_title.text = "Connecting to ${server.name}"
