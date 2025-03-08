@@ -19,6 +19,7 @@ class QueueSocket {
     interface SocketListener {
         fun onQueueConnect()
         fun onQueueConnectError()
+        fun onCanvasSocketDownError()
         fun onAddedToQueue(pos: Int)
         fun onQueuePos(pos: Int)
         fun onServiceReady()
@@ -72,6 +73,11 @@ class QueueSocket {
             }
 
             socketListener?.onServiceReady()
+        }
+
+        socket?.on("canvas_socket_down") {
+            socket?.disconnect()
+            socketListener?.onCanvasSocketDownError()
         }
 
         socket?.on(Socket.EVENT_DISCONNECT) {

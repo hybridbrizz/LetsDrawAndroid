@@ -381,7 +381,7 @@ class MenuFragment: Fragment() {
 
         view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                if (view == null) return
+                if (menu_button_container_horizontal_spacer == null) return
 
                 view.viewTreeObserver.removeOnGlobalLayoutListener(this)
 

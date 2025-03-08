@@ -770,6 +770,11 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         showConnectionErrorMessage(queue = true)
     }
 
+    override fun onCanvasSocketDownError() {
+        doneConnectingQueue = false
+        showConnectionErrorMessage(socket = true)
+    }
+
     override fun onAddedToQueue(pos: Int) {
         Log.d("Connection", "Added to queue.")
         queuePos = pos
