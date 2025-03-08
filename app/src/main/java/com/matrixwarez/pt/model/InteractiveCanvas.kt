@@ -852,7 +852,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 colors.add(restorePoint.newColor)
             }
 
-            val sendStr = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors)
+            val sendStr = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors, true)
+            val sendStrMinusKey = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors, false)
 
             InteractiveCanvasSocket.instance.requireSocket().emit("pixels_send", sendStr)
 
@@ -860,7 +861,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 restorePoints.forEach {
                     this.add(it)
                 }
-            }, sendStr) { restorePoints ->
+            }, sendStrMinusKey) { restorePoints ->
                 for(restorePoint: RestorePoint in restorePoints) {
                     arr[restorePoint.point.y][restorePoint.point.x] = restorePoint.color
                 }
@@ -885,7 +886,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
     }
 
-    private fun buildPixelsString(xs: List<Int>, ys: List<Int>, deviceId: Int, colors: List<Int>): String {
+    private fun buildPixelsString(xs: List<Int>, ys: List<Int>, deviceId: Int, colors: List<Int>, includeAdminKey: Boolean): String {
         var str = deviceId.toString()
         for (i in colors.indices) {
             val x = xs[i]
@@ -895,7 +896,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val pixelId = y * cols + x
             str += "&$pixelId&$color"
         }
-        if (server.isAdmin) {
+        if (server.isAdmin && includeAdminKey) {
             str += "&${server.adminKey}"
         }
         return str
