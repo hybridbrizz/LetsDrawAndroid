@@ -69,7 +69,7 @@ class ServerService {
             override fun onResponse(call: Call<List<Server>>, response: Response<List<Server>>) {
                 val list = response.body()
                 list?.let {
-                    SessionSettings.instance.syncServerStatus(context, it)
+                    SessionSettings.instance.syncServerStatus(context, it, false)
                 }
                 completionHandler.invoke(response.code(), SessionSettings.instance.servers.sortedBy { -it.lastVisited })
             }
@@ -85,7 +85,7 @@ class ServerService {
             override fun onResponse(call: Call<List<Server>>, response: Response<List<Server>>) {
                 val list = response.body()
                 list?.let {
-                    SessionSettings.instance.syncServerStatus(context, it)
+                    SessionSettings.instance.syncServerStatus(context, it, true)
                 }
                 completionHandler.invoke(response.code(), SessionSettings.instance.servers.sortedBy { -it.lastVisited })
             }

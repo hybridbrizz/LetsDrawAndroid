@@ -751,16 +751,55 @@ class SessionSettings {
             .apply()
     }
 
-    fun syncServerStatus(context: Context, remoteServers: List<Server>) {
+    fun syncServerStatus(context: Context, remoteServers: List<Server>, admin: Boolean) {
+        val toDelete = mutableListOf<Server>()
         servers.forEach { server ->
-            val remoteServer = remoteServers.firstOrNull { it.id == server.id }
+            when (admin) {
+                true -> {
+                    val remoteServer = remoteServers.firstOrNull {
+                        it.id == server.id
+                                && it.isAdmin
+                                && server.isAdmin
+                                && it.adminKey == server.adminKey
+                    }
 
-            remoteServer?.let {
-                server.online = remoteServer.online
-                server.connectionCount = remoteServer.connectionCount
-                server.maxConnections = remoteServer.maxConnections
+                    remoteServer?.let {
+                        server.name = remoteServer.name
+                        server.online = remoteServer.online
+                        server.connectionCount = remoteServer.connectionCount
+                        server.maxConnections = remoteServer.maxConnections
+                    }
+
+                    if (remoteServer == null && server.isAdmin) {
+                        toDelete.add(server)
+                    }
+                }
+                false -> {
+                    val remoteServer = remoteServers.firstOrNull {
+                        it.id == server.id
+                                && !it.isAdmin
+                                && !server.isAdmin
+                                && it.accessKey == server.accessKey
+                    }
+
+                    remoteServer?.let {
+                        server.name = remoteServer.name
+                        server.online = remoteServer.online
+                        server.connectionCount = remoteServer.connectionCount
+                        server.maxConnections = remoteServer.maxConnections
+                    }
+
+                    if (remoteServer == null && !server.isAdmin) {
+                        toDelete.add(server)
+                    }
+                }
             }
         }
+
+        toDelete.forEach {
+            removeServer(context, it, true)
+        }
+
         saveServers(context)
     }
 
