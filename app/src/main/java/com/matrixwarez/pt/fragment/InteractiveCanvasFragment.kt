@@ -174,7 +174,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun notifyPixelsReady() {
         paint_panel_button.visibility = View.VISIBLE
-        open_tools_button.visibility = View.VISIBLE
+        export_button.visibility = View.VISIBLE
+        background_button.visibility = View.VISIBLE
+        grid_lines_button.visibility = View.VISIBLE
+        canvas_summary_button.visibility = View.VISIBLE
         recent_colors_button.visibility = View.VISIBLE
         menu_button.visibility = View.VISIBLE
 
@@ -333,7 +336,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        visibleActionViews = arrayOf(menu_button, paint_panel_button, open_tools_button, recent_colors_button,
+        visibleActionViews = arrayOf(menu_button, paint_panel_button, recent_colors_button,
             export_button, background_button, grid_lines_button, canvas_summary_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -590,6 +593,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 syncPaletteAndColor()
 
                 color_picker_frame.visibility = View.GONE
+                recent_colors_button.visibility = View.VISIBLE
 
                 if (SessionSettings.instance.canvasLockBorder) {
                     paint_warning_frame.visibility = View.VISIBLE
@@ -653,6 +657,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             // start color selection mode
             if (color_picker_frame.visibility != View.VISIBLE) {
                 color_picker_frame.visibility = View.VISIBLE
+                recent_colors_container.visibility = View.GONE
+                recent_colors_button.visibility = View.GONE
+
                 initalColor = SessionSettings.instance.paintColor
                 hsb_palette.init(initalColor)
 
@@ -673,6 +680,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_color_accept.setOnClickListener {
             color_picker_frame.visibility = View.GONE
+            recent_colors_button.visibility = View.VISIBLE
 
             if (SessionSettings.instance.canvasLockBorder) {
                 paint_warning_frame.visibility = View.VISIBLE
@@ -843,14 +851,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         // open tools button
-        open_tools_button.setOnClickListener {
-            if (toolboxOpen) {
-                toggleTools(false)
-            }
-            else {
-                toggleTools(true)
-            }
-        }
+//        open_tools_button.setOnClickListener {
+//            if (toolboxOpen) {
+//                toggleTools(false)
+//            }
+//            else {
+//                toggleTools(true)
+//            }
+//        }
 
         // recent colors background
         recent_colors_container.setOnClickListener {
@@ -1073,48 +1081,48 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     // paint meter bar
                     paint_qty_bar.rotation = 180F
 
-                    // toolbox
-                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
-
-                    layoutParams.rightToRight = -1
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                    open_tools_button.layoutParams = layoutParams
-
-                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
-                    layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
-                    open_tools_action.layoutParams = layoutParams3
+//                    // toolbox
+//                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
+//
+//                    layoutParams.rightToRight = -1
+//                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                    open_tools_button.layoutParams = layoutParams
+//
+//                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
+//                    layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
+//                    open_tools_action.layoutParams = layoutParams3
 
                     // toolbox buttons
-                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
+//                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
+//
+//                    for (button in toolboxButtons) {
+//                        layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
+//                        layoutParams.rightToRight = -1
+//                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                        //layoutParams.leftMargin = Utils.dpToPx(context, 6)
+//                        button.layoutParams = layoutParams
+//                    }
 
-                    for (button in toolboxButtons) {
-                        layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
-                        layoutParams.rightToRight = -1
-                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                        //layoutParams.leftMargin = Utils.dpToPx(context, 6)
-                        button.layoutParams = layoutParams
-                    }
-
-                    val toolboxImages = arrayOf(export_action, background_action, grid_lines_action, canvas_summary_action)
-
-                    for (image in toolboxImages) {
-                        image.layoutParams = (image.layoutParams as FrameLayout.LayoutParams).also {
-                            it.gravity = Gravity.START or Gravity.TOP
-                        }
-                    }
+//                    val toolboxImages = arrayOf(export_action, background_action, grid_lines_action, canvas_summary_action)
+//
+//                    for (image in toolboxImages) {
+//                        image.layoutParams = (image.layoutParams as FrameLayout.LayoutParams).also {
+//                            it.gravity = Gravity.START or Gravity.TOP
+//                        }
+//                    }
 
                     // recent colors button
-                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
-
-                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-                    layoutParams.rightToLeft = color_picker_frame.id
-
-                    recent_colors_button.layoutParams = layoutParams
-
-                    // recent colors action
-                    layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
-                    layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
-                    recent_colors_action.layoutParams = layoutParams3
+//                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
+//
+//                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+//                    layoutParams.rightToLeft = color_picker_frame.id
+//
+//                    recent_colors_button.layoutParams = layoutParams
+//
+//                    // recent colors action
+//                    val layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
+//                    layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
+//                    recent_colors_action.layoutParams = layoutParams3
 
                     // recent colors container
                     layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
@@ -1488,7 +1496,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         grid_lines_action.invalidate()
         canvas_summary_action.invalidate()
         recent_colors_action.invalidate()
-        open_tools_action.invalidate()
         object_move_up_action.invalidate()
         object_move_down_action.invalidate()
         object_move_left_action.invalidate()
@@ -1505,8 +1512,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             export_button.visibility = View.INVISIBLE
             background_button.visibility = View.INVISIBLE
-
-            open_tools_button.visibility = View.INVISIBLE
+            grid_lines_button.visibility = View.INVISIBLE
+            canvas_summary_button.visibility = View.INVISIBLE
 
             toggleTools(false)
 
@@ -1577,15 +1584,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             //recent_colors_action.visibility = View.VISIBLE
             //recent_colors_container.visibility = View.GONE
 
-            if (toolboxOpen) {
-                export_button.visibility = View.VISIBLE
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
-            }
+            export_button.visibility = View.VISIBLE
+            background_button.visibility = View.VISIBLE
+            grid_lines_button.visibility = View.VISIBLE
+            canvas_summary_button.visibility = View.VISIBLE
 
             menu_button.visibility = View.VISIBLE
-
-            open_tools_button.visibility = View.VISIBLE
 
             toggleExportBorder(false)
 

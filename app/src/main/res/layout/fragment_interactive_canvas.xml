@@ -22,20 +22,18 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/paint_panel_button"
             android:visibility="gone"
-            android:layout_width="60dp"
-            android:layout_height="80dp"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="58dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
                 android:id="@+id/paint_panel_action_view"
-                android:layout_width="21dp"
-                android:layout_height="21dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
                 android:elevation="5dp"
-                android:layout_marginTop="17dp"
-                android:layout_marginEnd="17dp"
-                android:layout_gravity="top|end"
                 android:src="@drawable/ic_brush" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -46,7 +44,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             app:layout_constraintTop_toTopOf="@id/paint_panel_button"
-            app:layout_constraintEnd_toStartOf="@id/paint_panel_button">
+            app:layout_constraintEnd_toStartOf="@id/paint_panel_button"
+            android:layout_marginEnd="5dp">
 
         <TextView
                 android:id="@+id/text_latency"
@@ -54,7 +53,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
                 android:layout_marginEnd="10dp"
-                android:textStyle="bold"
+                android:fontFamily="@font/inter_regular"
                 android:textColor="#FFFFFF"
                 android:shadowColor="#000000"
                 android:shadowDx="1"
@@ -487,17 +486,18 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/recent_colors_button"
             android:visibility="gone"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginStart="58dp"
+            android:layout_marginEnd="58dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/color_picker_frame">
+            app:layout_constraintRight_toLeftOf="@id/color_picker_frame">
 
         <ImageView
                 android:id="@+id/recent_colors_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="start|bottom"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_palette" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -509,8 +509,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="40dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="58dp"
+            android:layout_marginRight="58dp"
             android:elevation="10dp"
             app:layout_constraintLeft_toRightOf="@id/color_picker_frame"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -776,8 +776,9 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/menu_button"
             android:visibility="gone"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginStart="58dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent">
 
@@ -785,8 +786,7 @@
                 android:id="@+id/menu_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="start|top"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_menu" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -815,18 +815,17 @@
 
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/export_button"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="58dp"
+            android:layout_height="58dp"
             android:visibility="invisible"
-            app:layout_constraintTop_toBottomOf="@id/paint_panel_button"
-            app:layout_constraintRight_toRightOf="parent">
+            app:layout_constraintTop_toTopOf="@id/menu_button"
+            app:layout_constraintStart_toEndOf="@id/menu_button">
 
         <ImageView
                 android:id="@+id/export_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="top|end"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_export" />
 
         <FrameLayout
@@ -834,8 +833,7 @@
                 android:visibility="gone"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="top|end"
+                android:layout_gravity="center"
                 android:background="@drawable/export_background" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -843,17 +841,16 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/background_button"
             android:visibility="invisible"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            app:layout_constraintTop_toBottomOf="@id/export_button"
-            app:layout_constraintRight_toRightOf="parent">
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            app:layout_constraintBottom_toBottomOf="@id/canvas_summary_button"
+            app:layout_constraintStart_toEndOf="@id/grid_lines_button">
 
         <ImageView
                 android:id="@+id/background_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="top|end"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_background" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -861,17 +858,16 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/grid_lines_button"
             android:visibility="invisible"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            app:layout_constraintTop_toBottomOf="@id/background_button"
-            app:layout_constraintRight_toRightOf="parent">
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            app:layout_constraintBottom_toBottomOf="@id/canvas_summary_button"
+            app:layout_constraintStart_toEndOf="@id/canvas_summary_button">
 
         <ImageView
                 android:id="@+id/grid_lines_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="top|end"
+                android:layout_gravity="center"
                 android:src="@drawable/ic_toggle_grid" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
@@ -879,37 +875,19 @@
     <com.matrixwarez.pt.view.ButtonFrame
             android:id="@+id/canvas_summary_button"
             android:visibility="invisible"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            app:layout_constraintTop_toBottomOf="@id/grid_lines_button"
-            app:layout_constraintRight_toRightOf="parent">
+            android:layout_width="58dp"
+            android:layout_height="58dp"
+            android:layout_marginStart="58dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
                 android:id="@+id/canvas_summary_action"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="top|end"
+                android:layout_gravity="center"
                 android:elevation="5dp"
                 android:src="@drawable/ic_canvas_summary" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/open_tools_button"
-            android:visibility="gone"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent">
-
-        <ImageView
-                android:id="@+id/open_tools_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_margin="17dp"
-                android:layout_gravity="bottom|end"
-                android:src="@drawable/ic_open_widgets" />
 
     </com.matrixwarez.pt.view.ButtonFrame>
 
