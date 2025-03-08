@@ -36,13 +36,13 @@
     <string name="option_canvas_background_secondary_color_title">Custom canvas color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
-    <string name="step1">Welcome to this quick guide. This will help get you started and fill you in on what you need to know. First, you can connect to one of the public canvases by going to Connect and entering \'SMALL\', \'MEDIUM\', or \'LARGE\', each one is a different size. Once connected you will automatically start to gain pixels that you can use to draw onto the canvas.</string>
-    <string name="step2">It\'s worth mentioning that you get a certain amount of pixels over time from each canvas you have connected to. You will get pixels even if you aren\'t online, up to a maximum amount. It\'s limited so that no one person has too much control over a canvas. You can easily export and share pixel art that you see. Just use this icon and select what you want.</string>
-    <string name="step3">The canvas is interactive so as you draw, everyone can see what you\'re doing. Finally each pixel keeps a history of edits. Now onto tools… There are a few basic tools. The first lets you change the canvas background to different colors.</string>
-    <string name="step4">The next one allows you to turn on and off canvas grid lines. When you are far from the canvas, grid lines are always toggled off.</string>
-    <string name="step5">This shows you an overview of the canvas.</string>
-    <string name="step6">Use this to show and hide the toolbox. If your camera punch-out is here, simply click right next to the punch-out.</string>
-    <string name="step7">Finally this shows and hides your recently used colors. And that\'s all there is to getting started.</string>
+    <string name="step1">Welcome. This will help you get all set up and fill you in on what you need to know. Once you connect to server you will start to get pixels that you can use to paint onto the canvas.</string>
+    <string name="step2">You get a certain amount of pixels over time from each canvas. You will get pixels even if you aren\'t online, up to a maximum configured by the server. You can easily export and share pixel art that you see. Just use this icon and select whatever you want. You can also yank the whole canvas in the menu.</string>
+    <string name="step3">Each pixel keeps a record of edits on it. Tap any pixel on the canvas to see this history. This icon is for changing background presets, you can configure a custom background that will be the last preset in the cycle.</string>
+    <string name="step4">This is for turning on and off grid lines. When you are very far zoomed out grid lines auto toggle off.</string>
+    <string name="step5">This shows you an overview of the canvas. If you tap on your ping in the corner it will bring up a server list (also accessible through the menu). Tap on a name to jump to that person whenever they are on the canvas.</string>
+    <string name="step6">Use this to show and hide the toolbox.</string>
+    <string name="step7">This shows your recently used colors.</string>
     <string name="step8">The default color palette is the Recent Color palette. It is composed of all colors that you have drawn with recently. To add a new color palette
     tap on \"Recent Color\" in the draw panel. Then tap the + button and enter a name for your new palette. The new palette will be added to your list of palettes. Select the new palette by
         tapping on it in the list. As you use the color picker to select colors you will see a + and - sign appear under the palette name in the draw panel. Tap the + icon to add the
