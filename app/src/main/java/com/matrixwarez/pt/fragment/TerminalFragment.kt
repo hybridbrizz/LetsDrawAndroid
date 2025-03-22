@@ -213,7 +213,7 @@ class TerminalFragment: Fragment() {
                                         val y = yStr.toInt()
 
                                         if (interactiveCanvas.unitInBounds(Point(x, y))) {
-                                            interactiveCanvas.paintUnitOrUndo(Point(x, y))
+                                            interactiveCanvas.paintUnit(Point(x, y))
                                             interactiveCanvas.commitPixels()
                                         }
                                     }
@@ -235,7 +235,7 @@ class TerminalFragment: Fragment() {
                                             val lastColor = SessionSettings.instance.paintColor
                                             SessionSettings.instance.paintColor = 0
 
-                                            interactiveCanvas.paintUnitOrUndo(Point(x, y))
+                                            interactiveCanvas.paintUnit(Point(x, y))
                                             interactiveCanvas.commitPixels()
 
                                             SessionSettings.instance.paintColor = lastColor

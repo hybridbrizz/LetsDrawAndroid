@@ -19,32 +19,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/paint_panel_button"
-            android:visibility="gone"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_marginEnd="58dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-                android:id="@+id/paint_panel_action_view"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:elevation="5dp"
-                android:src="@drawable/ic_brush" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
     <LinearLayout
             android:id="@+id/ll_latency_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="@id/paint_panel_button"
-            app:layout_constraintEnd_toStartOf="@id/paint_panel_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="5dp">
 
         <TextView
@@ -304,6 +285,35 @@
                 app:layout_constraintRight_toRightOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
+
+        <LinearLayout
+                android:id="@+id/paint_button_container"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:gravity="center_horizontal">
+
+            <com.matrixwarez.pt.view.ButtonFrame
+                    android:id="@+id/paint_panel_button"
+                    android:visibility="gone"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp">
+
+                <ImageView
+                        android:id="@+id/paint_panel_action_view"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:elevation="5dp"
+                        android:src="@drawable/ic_brush" />
+
+            </com.matrixwarez.pt.view.ButtonFrame>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

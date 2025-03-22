@@ -7,6 +7,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.*
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
@@ -79,6 +80,7 @@ import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import com.matrixwarez.pt.compose.mapMarkerTypes
+import com.matrixwarez.pt.view.InteractiveCanvasView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
@@ -553,6 +555,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 //        paint_panel_button.setOnClickListener {
 //            togglePaintPanel(true)
 //        }
+
+        paint_panel_button.setOnClickListener {
+            if (surface_view.mode == InteractiveCanvasView.Mode.EXPLORING
+                || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.EXPLORING) {
+                surface_view.startPainting()
+                paint_button_container.background = ColorDrawable(Color.parseColor("#99ffffff"))
+            }
+            else {
+                surface_view.endPainting()
+                paint_button_container.background = ColorDrawable(Color.TRANSPARENT)
+            }
+        }
 
 //        paint_yes.setOnClickListener {
 //            if (world && !InteractiveCanvasSocket.instance.isConnected()) return@setOnClickListener
@@ -1426,7 +1440,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             ll_latency_container.visibility = View.GONE
 
             paint_panel.visibility = View.VISIBLE
-            paint_panel_button.visibility = View.GONE
+//            paint_panel_button.visibility = View.GONE
 
             export_button.visibility = View.INVISIBLE
             background_button.visibility = View.INVISIBLE
@@ -1497,7 +1511,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_panel.visibility = View.GONE
             paint_warning_frame.visibility = View.GONE
 
-            paint_panel_button.visibility = View.VISIBLE
+//            paint_panel_button.visibility = View.VISIBLE
 
             //recent_colors_action.visibility = View.VISIBLE
             //recent_colors_container.visibility = View.GONE

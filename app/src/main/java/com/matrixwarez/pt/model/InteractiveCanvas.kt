@@ -771,53 +771,38 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     // painting
-    fun paintUnitOrUndo(unitPoint: Point, mode: Int = 0, redraw: Boolean = true) {
+    fun paintUnit(unitPoint: Point, redraw: Boolean = true) {
         if (world && !InteractiveCanvasSocket.instance.isConnected()) return
 
         val restorePoint = unitInRestorePoints(unitPoint)
-        if (mode == 0) {
-            var oob = false
-            if (restorePoint == null && (sessionSettings.dropsAmt > 0 && restorePoints.size < SessionSettings.instance.maxSend || !world)) {
-                if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
-                    val unitColor = arr[unitPoint.y][unitPoint.x]
+        if (restorePoint == null && (sessionSettings.dropsAmt > 0 || server.isAdmin)) {
+            if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
+                val unitColor = arr[unitPoint.y][unitPoint.x]
 
-                    if (sessionSettings.paintColor != unitColor) {
-                        Log.i("Interactive Canvas", "Paint!")
-                        // paint
-                        restorePoints.add(
-                            RestorePoint(
-                                unitPoint,
-                                arr[unitPoint.y][unitPoint.x],
-                                sessionSettings.paintColor
-                            )
+                if (sessionSettings.paintColor != unitColor) {
+                    Log.i("Interactive Canvas", "Paint!")
+                    // paint
+                    restorePoints.add(
+                        RestorePoint(
+                            unitPoint,
+                            arr[unitPoint.y][unitPoint.x],
+                            sessionSettings.paintColor
                         )
-                        arr[unitPoint.y][unitPoint.x] = sessionSettings.paintColor
+                    )
+                    arr[unitPoint.y][unitPoint.x] = sessionSettings.paintColor
 
-                        if (world) {
-                            sessionSettings.dropsAmt -= 1
-                        }
-                    }
-                }
-                else {
-                    addErrorPixel(unitPoint.x, unitPoint.y)
+                    sessionSettings.dropsAmt -= 1
+
+                    cancelBatchPixels()
+                    startBatchPixels()
                 }
             }
-            else if (sessionSettings.dropsAmt == 0 || restorePoints.size >= SessionSettings.instance.maxSend) {
+            else {
                 addErrorPixel(unitPoint.x, unitPoint.y)
             }
         }
-        else if (mode == 1) {
-            if (restorePoint != null) {
-                if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
-                    // undo
-                    restorePoints.remove(restorePoint)
-                    arr[unitPoint.y][unitPoint.x] = restorePoint.color
-
-                    if (world) {
-                        sessionSettings.dropsAmt += 1
-                    }
-                }
-            }
+        else if (sessionSettings.dropsAmt == 0 || restorePoints.size >= SessionSettings.instance.maxSend) {
+            addErrorPixel(unitPoint.x, unitPoint.y)
         }
 
         interactiveCanvasListener?.notifyUpdateCanvasSummary()
@@ -837,6 +822,24 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
+    private var batchPixelsJob: Job? = null
+
+    private fun startBatchPixels() {
+        if (batchPixelsJob != null) return
+
+        batchPixelsJob = coroutineScope.launch {
+            withContext(Dispatchers.Default) {
+                delay(250)
+            }
+            commitPixels()
+        }
+    }
+
+    private fun cancelBatchPixels() {
+        batchPixelsJob?.cancel()
+        batchPixelsJob = null
+    }
+
     // sends pixel updates to the web server
     fun commitPixels() {
         if (!InteractiveCanvasSocket.instance.isConnected()) return
@@ -854,6 +857,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
             val sendStr = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors, true)
             val sendStrMinusKey = buildPixelsString(xs, ys, SessionSettings.instance.deviceId, colors, false)
+
+            Log.d("Send", "Sending ${colors.size} pixels.")
 
             InteractiveCanvasSocket.instance.requireSocket().emit("pixels_send", sendStr)
 

@@ -220,17 +220,17 @@ class Utils {
             for (i in 0 until rBigAmt) {
                 val rX = (Math.random() * interactiveCanvasView.interactiveCanvas.cols).toInt()
                 val rY = (Math.random() * interactiveCanvasView.interactiveCanvas.rows).toInt()
-                interactiveCanvasView.interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+                interactiveCanvasView.interactiveCanvas.paintUnit(Point(rX, rY))
             }
         }
         else {
             for (i in 0 until rSmallAmt) {
                 val rX = (Math.random() * interactiveCanvasView.interactiveCanvas.cols).toInt()
                 val rY = (Math.random() * interactiveCanvasView.interactiveCanvas.rows).toInt()
-                interactiveCanvasView.interactiveCanvas.paintUnitOrUndo(Point(rX, rY))
+                interactiveCanvasView.interactiveCanvas.paintUnit(Point(rX, rY))
             }
         }
 
-        interactiveCanvasView.endPainting(true)
+        interactiveCanvasView.endPainting()
     }
 }

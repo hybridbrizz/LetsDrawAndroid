@@ -36,7 +36,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         OBJECT_MOVING
     }
 
-    private var mode = Mode.EXPLORING
+    var mode = Mode.EXPLORING
 
     var undo = false
 
@@ -160,16 +160,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 unitPoint?.apply {
                     Log.i("Unit Tap", "Tapped on unit $unitPoint")
 
-                    undo = interactiveCanvas.unitInRestorePoints(this) != null
-
-                    if (undo) {
-                        // undo
-                        interactiveCanvas.paintUnitOrUndo(unitPoint, 1)
-                    }
-                    else {
-                        // paint
-                        interactiveCanvas.paintUnitOrUndo(unitPoint)
-                    }
+                    // paint
+                    interactiveCanvas.paintUnit(unitPoint)
 
                     paintActionListener?.onPaintStart()
                 }
@@ -187,14 +179,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 unitPoint?.apply {
                     // Log.i("Unit Tap", "Tapped on unit $unitPoint")
 
-                    if (undo) {
-                        // undo
-                        interactiveCanvas.paintUnitOrUndo(unitPoint, 1)
-                    }
-                    else {
-                        // paint
-                        interactiveCanvas.paintUnitOrUndo(unitPoint)
-                    }
+                    // paint
+                    interactiveCanvas.paintUnit(unitPoint)
                 }
 
                 if (interactiveCanvas.restorePoints.size == 1) {
@@ -408,30 +394,31 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun endPainting(accept: Boolean) {
-        if (!accept) {
-            interactiveCanvas.undoPendingPaint()
-            SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
-        }
-        else {
-            // before restore points are cleared
-            interactiveCanvas.commitPixels()
-        }
-
-        interactiveCanvas.clearRestorePoints()
+    fun endPainting() {
+//        if (!accept) {
+//            interactiveCanvas.undoPendingPaint()
+//            SessionSettings.instance.dropsAmt += interactiveCanvas.restorePoints.size
+//        }
+//        else {
+//            // before restore points are cleared
+//            interactiveCanvas.commitPixels()
+//        }
+//
+//        interactiveCanvas.clearRestorePoints()
 
         interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
         mode = Mode.EXPLORING
     }
 
-    private var lastMode: Mode? = null
+    var lastModeBeforePaintSelect: Mode? = null
     fun startPaintSelection() {
-        lastMode = mode
+        lastModeBeforePaintSelect = mode
         mode = Mode.PAINT_SELECTION
     }
 
     fun endPaintSelection() {
-        mode = lastMode ?: Mode.PAINTING
+        mode = lastModeBeforePaintSelect ?: Mode.PAINTING
+        lastModeBeforePaintSelect = null
     }
 
     fun startExport() {
@@ -547,26 +534,26 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             maxY = centerY + (height + 1) / 2
         }
 
-        // left
-        for (y in minY..maxY) {
-            interactiveCanvas.paintUnitOrUndo(Point(minX, y), redraw = false)
-        }
-        // right
-        for (y in minY..maxY) {
-            interactiveCanvas.paintUnitOrUndo(Point(maxX, y), redraw = false)
-        }
-        // top
-        for (x in minX..maxX) {
-            interactiveCanvas.paintUnitOrUndo(Point(x, minY), redraw = false)
-        }
-        // bottom
-        for (x in minX..maxX) {
-            interactiveCanvas.paintUnitOrUndo(Point(x, maxY), redraw = false)
-        }
+//        // left
+//        for (y in minY..maxY) {
+//            interactiveCanvas.paintUnitOrUndo(Point(minX, y), redraw = false)
+//        }
+//        // right
+//        for (y in minY..maxY) {
+//            interactiveCanvas.paintUnitOrUndo(Point(maxX, y), redraw = false)
+//        }
+//        // top
+//        for (x in minX..maxX) {
+//            interactiveCanvas.paintUnitOrUndo(Point(x, minY), redraw = false)
+//        }
+//        // bottom
+//        for (x in minX..maxX) {
+//            interactiveCanvas.paintUnitOrUndo(Point(x, maxY), redraw = false)
+//        }
 
         SessionSettings.instance.paintColor = oldColor
 
-        endPainting(true)
+        endPainting()
     }
 
     private val coroutineScope = CoroutineScope(Dispatchers.Main.immediate)
