@@ -89,7 +89,7 @@ class HPalette: View {
             if (w > 0) {
                 drawHuePalette(canvas)
 
-                drawBorder(canvas)
+                //drawBorder(canvas)
             }
 
             restore()
@@ -121,21 +121,21 @@ class HPalette: View {
         canvas.drawBitmap(bitmap, 0F, 0F, null)
     }
 
-    private fun drawBorder(canvas: Canvas) {
-        val borderPaint = Paint()
-        borderPaint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
-        borderPaint.color = Color.parseColor("#FAD452")
-        borderPaint.style = Paint.Style.STROKE
-
-        val path = Path()
-        path.moveTo(0f, 0f)
-        path.lineTo(canvas.width.toFloat(), 0f)
-        path.lineTo(canvas.width.toFloat(), canvas.height.toFloat())
-        path.lineTo(0f, canvas.height.toFloat())
-        path.lineTo(0f, 0f)
-
-        canvas.drawPath(path, borderPaint)
-    }
+//    private fun drawBorder(canvas: Canvas) {
+//        val borderPaint = Paint()
+//        borderPaint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
+//        borderPaint.color = Color.parseColor("#FAD452")
+//        borderPaint.style = Paint.Style.STROKE
+//
+//        val path = Path()
+//        path.moveTo(0f, 0f)
+//        path.lineTo(canvas.width.toFloat(), 0f)
+//        path.lineTo(canvas.width.toFloat(), canvas.height.toFloat())
+//        path.lineTo(0f, canvas.height.toFloat())
+//        path.lineTo(0f, 0f)
+//
+//        canvas.drawPath(path, borderPaint)
+//    }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {

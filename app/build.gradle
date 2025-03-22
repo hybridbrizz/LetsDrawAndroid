@@ -9,7 +9,7 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file('/Users/eric/OneDrive/Documents/keystore/keystore_debug.jks.old')
+            storeFile file('C:/Users/erver/OneDrive/Documents/keystore/keystore_debug.jks.old')
             storePassword 'java123'
             keyAlias 'key0'
             keyPassword 'java123'

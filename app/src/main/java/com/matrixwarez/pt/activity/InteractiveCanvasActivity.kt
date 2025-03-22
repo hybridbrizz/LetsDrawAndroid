@@ -146,7 +146,9 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     fun showMenuFragment() {
-        landscapeLock(false)
+        if (!Utils.isTablet(this)) {
+            portraitLock()
+        }
         //exitFullscreen()
 
         val frag = MenuFragment()
@@ -196,7 +198,6 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     private fun showLoadingFragment(server: Server) {
-        landscapeLock(true)
         goFullscreen()
 
         val frag = LoadingScreenFragment()
@@ -398,13 +399,8 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 }
 
-fun Activity.landscapeLock(lock: Boolean) {
-    if (!Utils.isTablet(this) && lock) {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-    }
-    else {
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-    }
+fun Activity.portraitLock() {
+    requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 }
 
 fun Activity.isPortrait(): Boolean {

@@ -424,12 +424,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         mode = Mode.EXPLORING
     }
 
+    private var lastMode: Mode? = null
     fun startPaintSelection() {
+        lastMode = mode
         mode = Mode.PAINT_SELECTION
     }
 
     fun endPaintSelection() {
-        mode = Mode.PAINTING
+        mode = lastMode ?: Mode.PAINTING
     }
 
     fun startExport() {

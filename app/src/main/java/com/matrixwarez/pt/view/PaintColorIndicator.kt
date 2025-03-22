@@ -172,10 +172,10 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
                         SessionSettings.instance.colorIndicatorWidth
                     )
                     it.drawRect(
-                        (width / 2 - w / 2).toFloat() + padding,
-                        (height / 2 - w / 2).toFloat() + padding,
-                        (width / 2 + w / 2).toFloat() - padding,
-                        (height / 2 + w / 2).toFloat() - padding,
+                        0f,
+                        0f,
+                        width.toFloat(),
+                        height.toFloat(),
                         paint
                     )
                 }

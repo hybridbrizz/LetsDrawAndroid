@@ -341,8 +341,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
-        paint_color_accept.color = Color.GREEN
-
         // listeners
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
@@ -435,13 +433,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         recolorVisibleActionViews()
 
-        if (SessionSettings.instance.closePaintBackButtonColor != -1) {
-            close_paint_panel.color = SessionSettings.instance.closePaintBackButtonColor
-        }
-        else {
-            close_paint_panel.color = Color.YELLOW
-        }
-
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.parseColor("#FF111111"))
             palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
@@ -450,9 +441,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
-
-            paint_yes.color = Color.GREEN
-            paint_no.color = Color.RED
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.BLACK
         }
@@ -463,9 +451,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
-
-            paint_yes.color = Color.GREEN
-            paint_no.color = Color.RED
 
             lock_paint_panel_action.colorMode = ActionButtonView.ColorMode.WHITE
         }
@@ -544,12 +529,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
                     //paint_color_accept.color = Color.WHITE
                 }
-                else if (PaintColorIndicator.isColorDark(color) && panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept.color = Color.WHITE
-                }
-                else if (panelThemeConfig.actionButtonColor == Color.BLACK) {
-                    paint_color_accept.color = Color.BLACK
-                }
 
                 //color_hex_string_input.removeTextChangedListener(textChangeListener)
 
@@ -568,79 +547,75 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             closePopoverFragment()
         }
 
-        // paint buttons
-        paint_panel_button.setOnClickListener {
-            togglePaintPanel(true)
-        }
+        togglePaintPanel(true)
 
-        paint_yes.setOnClickListener {
-            if (world && !InteractiveCanvasSocket.instance.isConnected()) return@setOnClickListener
+//        // paint buttons
+//        paint_panel_button.setOnClickListener {
+//            togglePaintPanel(true)
+//        }
 
-            surface_view.endPainting(true)
+//        paint_yes.setOnClickListener {
+//            if (world && !InteractiveCanvasSocket.instance.isConnected()) return@setOnClickListener
+//
+//            //surface_view.endPainting(true)
+//
+//            paint_yes_container.visibility = View.GONE
+//            paint_no_container.visibility = View.GONE
+//
+//            paint_yes.invalidate()
+//
+//            //surface_view.startPainting()
+//        }
 
-            paint_yes_container.visibility = View.GONE
-            paint_no_container.visibility = View.GONE
-            close_paint_panel_container.visibility = View.VISIBLE
+//        paint_no.setOnClickListener {
+//            if (color_picker_frame.visibility == View.VISIBLE) {
+//                paint_indicator_view_bottom_layer.setPaintColor(initalColor)
+//                syncPaletteAndColor()
+//
+//                color_picker_frame.visibility = View.GONE
+//                recent_colors_button.visibility = View.VISIBLE
+//
+//                if (SessionSettings.instance.canvasLockBorder) {
+//                    paint_warning_frame.visibility = View.VISIBLE
+//                }
+//
+//                paint_yes.visibility = View.VISIBLE
+//
+//                //recent_colors_button.visibility = View.VISIBLE
+//                //recent_colors_container.visibility = View.GONE
+//
+//                surface_view.endPaintSelection()
+//
+//                if (surface_view.interactiveCanvas.restorePoints.size == 0) {
+//                    paint_yes_container.visibility = View.GONE
+//                    paint_no_container.visibility = View.GONE
+//                }
+//                else {
+//                    paint_yes_container.visibility = View.VISIBLE
+//                    paint_no_container.visibility = View.VISIBLE
+//                }
+//            }
+//            else {
+//                //surface_view.endPainting(false)
+//
+//                paint_yes_container.visibility = View.GONE
+//                paint_no_container.visibility = View.GONE
+//
+//                //recent_colors_button.visibility = View.VISIBLE
+//                //recent_colors_container.visibility = View.GONE
+//
+//                //surface_view.startPainting()
+//            }
+//        }
 
-            paint_yes.invalidate()
-
-            surface_view.startPainting()
-        }
-
-        paint_no.setOnClickListener {
-            if (color_picker_frame.visibility == View.VISIBLE) {
-                paint_indicator_view_bottom_layer.setPaintColor(initalColor)
-                syncPaletteAndColor()
-
-                color_picker_frame.visibility = View.GONE
-                recent_colors_button.visibility = View.VISIBLE
-
-                if (SessionSettings.instance.canvasLockBorder) {
-                    paint_warning_frame.visibility = View.VISIBLE
-                }
-
-                paint_yes.visibility = View.VISIBLE
-
-                paint_color_accept.visibility = View.GONE
-
-                //recent_colors_button.visibility = View.VISIBLE
-                //recent_colors_container.visibility = View.GONE
-
-                surface_view.endPaintSelection()
-
-                if (surface_view.interactiveCanvas.restorePoints.size == 0) {
-                    paint_yes_container.visibility = View.GONE
-                    paint_no_container.visibility = View.GONE
-                    close_paint_panel_container.visibility = View.VISIBLE
-                }
-                else {
-                    paint_yes_container.visibility = View.VISIBLE
-                    paint_no_container.visibility = View.VISIBLE
-                    close_paint_panel_container.visibility = View.GONE
-                }
-            }
-            else {
-                surface_view.endPainting(false)
-
-                paint_yes_container.visibility = View.GONE
-                paint_no_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.VISIBLE
-
-                //recent_colors_button.visibility = View.VISIBLE
-                //recent_colors_container.visibility = View.GONE
-
-                surface_view.startPainting()
-            }
-        }
-
-        close_paint_panel.setOnClickListener {
-            togglePaintPanel(false)
-
-            recent_colors_container.visibility = View.GONE
-            recent_colors_action.visibility = View.VISIBLE
-
-            closePopoverFragment()
-        }
+//        close_paint_panel.setOnClickListener {
+//            togglePaintPanel(false)
+//
+//            recent_colors_container.visibility = View.GONE
+//            recent_colors_action.visibility = View.VISIBLE
+//
+//            closePopoverFragment()
+//        }
 
         lock_paint_panel.setOnClickListener {
             SessionSettings.instance.lockPaintPanel = !SessionSettings.instance.lockPaintPanel
@@ -665,46 +640,42 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 paint_warning_frame.visibility = View.GONE
 
-                paint_color_accept.visibility = View.VISIBLE
-
-                paint_yes_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.GONE
-                paint_no_container.visibility = View.VISIBLE
-
                 //recent_colors_button.visibility = View.GONE
                 //recent_colors_container.visibility = View.GONE
 
                 surface_view.startPaintSelection()
             }
-        }
-
-        paint_color_accept.setOnClickListener {
-            color_picker_frame.visibility = View.GONE
-            recent_colors_button.visibility = View.VISIBLE
-
-            if (SessionSettings.instance.canvasLockBorder) {
-                paint_warning_frame.visibility = View.VISIBLE
-            }
-
-            paint_yes.visibility = View.VISIBLE
-
-            paint_color_accept.visibility = View.GONE
-
-            surface_view.endPaintSelection()
-
-            if (surface_view.interactiveCanvas.restorePoints.size == 0) {
-                paint_yes_container.visibility = View.GONE
-                paint_no_container.visibility = View.GONE
-                close_paint_panel_container.visibility = View.VISIBLE
-            }
             else {
-                paint_yes_container.visibility = View.VISIBLE
-                paint_no_container.visibility = View.VISIBLE
-                close_paint_panel_container.visibility = View.GONE
+                color_picker_frame.visibility = View.GONE
+                surface_view.endPaintSelection()
             }
-
-            SessionSettings.instance.saveColor(requireContext())
         }
+
+//        paint_color_accept.setOnClickListener {
+//            color_picker_frame.visibility = View.GONE
+//            recent_colors_button.visibility = View.VISIBLE
+//
+//            if (SessionSettings.instance.canvasLockBorder) {
+//                paint_warning_frame.visibility = View.VISIBLE
+//            }
+//
+//            paint_yes.visibility = View.VISIBLE
+//
+//            paint_color_accept.visibility = View.GONE
+//
+//            surface_view.endPaintSelection()
+//
+//            if (surface_view.interactiveCanvas.restorePoints.size == 0) {
+//                paint_yes_container.visibility = View.GONE
+//                paint_no_container.visibility = View.GONE
+//            }
+//            else {
+//                paint_yes_container.visibility = View.VISIBLE
+//                paint_no_container.visibility = View.VISIBLE
+//            }
+//
+//            SessionSettings.instance.saveColor(requireContext())
+//        }
 
         // to stop click-through to the canvas behind
         color_picker_frame.setOnClickListener {
@@ -921,15 +892,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     layoutParams.rightToRight = ConstraintSet.PARENT_ID
 
                     paint_panel.layoutParams = layoutParams
-
-                    linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
-                    if (paint_panel.layoutParams.width < 288) {
-                        linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
-                    }
-                    else {
-                        linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
-                    }
-                    paint_yes_container.layoutParams = linearLayoutParams
 
                     // paint indicator size
                     val frameWidth = ((150 / 1000F) * view.width).toInt()
@@ -1154,41 +1116,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
                 else {
                     // close paint panel button
-                    close_paint_panel_action.rotation = 180F
-                }
-                // small action buttons
-                if (SessionSettings.instance.smallActionButtons) {
-                    // paint yes
-                    var layoutParams = paint_yes_image.layoutParams as FrameLayout.LayoutParams
-
-                    layoutParams.width = (layoutParams.width * 0.833).toInt()
-                    layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_yes_image.layoutParams = layoutParams
-                    paint_yes_image.layoutParams = layoutParams
-
-                    // paint no
-                    layoutParams = paint_no_image.layoutParams as FrameLayout.LayoutParams
-
-                    layoutParams.width = (layoutParams.width * 0.833).toInt()
-                    layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_no_image.layoutParams = layoutParams
-                    paint_no_image.layoutParams = layoutParams
-
-                    // paint select accept
-                    layoutParams = paint_color_accept_image.layoutParams as FrameLayout.LayoutParams
-
-                    layoutParams.width = (layoutParams.width * 0.833).toInt()
-                    layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    paint_color_accept_image.layoutParams = layoutParams
-                    paint_color_accept_image.layoutParams = layoutParams
-                    ImageViewCompat.setImageTintList(paint_color_accept_image, ColorStateList.valueOf(Color.GREEN))
-
-                    // close paint panel
-                    layoutParams = close_paint_panel_action.layoutParams as FrameLayout.LayoutParams
-
-                    layoutParams.width = (layoutParams.width * 0.833).toInt()
-                    layoutParams.height = (layoutParams.height * 0.833).toInt()
-                    close_paint_panel_action.layoutParams = layoutParams
                 }
 
                 surface_view.setInitialPositionAndScale()
@@ -1360,15 +1287,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 paint_panel.layoutParams = layoutParams
 
-                linearLayoutParams = (paint_yes_container.layoutParams as LinearLayout.LayoutParams)
-                if (paint_panel.layoutParams.width < 288) {
-                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 5)
-                }
-                else {
-                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 30)
-                }
-                paint_yes_container.layoutParams = linearLayoutParams
-
                 // paint indicator size
                 val frameWidth = ((150 / 1000F) * view.width).toInt()
                 val indicatorMargin = (frameWidth * 0.15).toInt()
@@ -1525,37 +1443,37 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 canvas_summary_container.visibility = View.INVISIBLE
             }
 
-            var startLoc = paint_panel.width.toFloat() * 0.99F
-            if (SessionSettings.instance.rightHanded) {
-                startLoc = -startLoc
-            }
+//            var startLoc = paint_panel.width.toFloat() * 0.99F
+//            if (SessionSettings.instance.rightHanded) {
+//                startLoc = -startLoc
+//            }
+//
+//            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
+//                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
+//                    AccelerateDecelerateInterpolator()
+//                ).withEndAction {
+//
+//                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
+//                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
+//
+//                }.start()
+//
+//                if (SessionSettings.instance.canvasLockBorder) {
+//                    context?.apply {
+//                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
+//                        drawable.setStroke(
+//                            Utils.dpToPx(this, 4),
+//                            SessionSettings.instance.canvasLockBorderColor
+//                        ) // set stroke width and stroke color
+//                    }
+//
+//                    paint_warning_frame.visibility = View.VISIBLE
+//                    paint_warning_frame.alpha = 0F
+//                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
+//                }
+//            }.start()
 
-            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
-                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
-                    AccelerateDecelerateInterpolator()
-                ).withEndAction {
-
-                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
-                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
-
-                }.start()
-
-                if (SessionSettings.instance.canvasLockBorder) {
-                    context?.apply {
-                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
-                        drawable.setStroke(
-                            Utils.dpToPx(this, 4),
-                            SessionSettings.instance.canvasLockBorderColor
-                        ) // set stroke width and stroke color
-                    }
-
-                    paint_warning_frame.visibility = View.VISIBLE
-                    paint_warning_frame.alpha = 0F
-                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
-                }
-            }.start()
-
-            surface_view.startPainting()
+            //surface_view.startPainting()
 
             if (pixel_history_fragment_container.visibility == View.VISIBLE) {
                 pixel_history_fragment_container.visibility = View.GONE
@@ -1574,7 +1492,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         else {
             ll_latency_container.visibility = View.VISIBLE
 
-            surface_view.endPainting(false)
+            //surface_view.endPainting(false)
 
             paint_panel.visibility = View.GONE
             paint_warning_frame.visibility = View.GONE
@@ -1971,15 +1889,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun notifyPaintingStarted() {
-        close_paint_panel_container.visibility = View.GONE
-        paint_yes_container.visibility = View.VISIBLE
-        paint_no_container.visibility = View.VISIBLE
+
     }
 
     override fun notifyPaintingEnded() {
-        close_paint_panel_container.visibility = View.VISIBLE
-        paint_yes_container.visibility = View.GONE
-        paint_no_container.visibility = View.GONE
+
     }
 
     override fun notifyPaintActionStarted() {
@@ -2647,18 +2561,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // panel theme config
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
-        if (SessionSettings.instance.closePaintBackButtonColor != -1) {
-            close_paint_panel.color = SessionSettings.instance.closePaintBackButtonColor
-        }
-        else {
-            close_paint_panel.color = panelThemeConfig.actionButtonColor
-        }
-
         if (panelThemeConfig.actionButtonColor == Color.BLACK) {
             palette_name_text.setTextColor(Color.parseColor("#FF111111"))
             palette_name_text.setShadowLayer(3F, 2F, 2F, Color.parseColor("#7F333333"))
-
-            paint_color_accept.color = Color.BLACK
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.BLACK
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.BLACK
@@ -2667,8 +2572,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         else {
             palette_name_text.setTextColor(Color.WHITE)
-
-            paint_color_accept.color = Color.WHITE
 
             palette_add_color_action.colorMode = ActionButtonView.ColorMode.WHITE
             palette_remove_color_action.colorMode = ActionButtonView.ColorMode.WHITE
