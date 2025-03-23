@@ -171,7 +171,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_view
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.reload_transparent
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_yes_action
@@ -1275,8 +1274,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.interactiveCanvasListener = this
 
         if (paused) {
-            reload_transparent.visibility = View.VISIBLE
-            reload_transparent.setOnClickListener { }
+            //reload_transparent.visibility = View.VISIBLE
+            //reload_transparent.setOnClickListener { }
             resumeCanvas()
 
 //            canvasService.logIp(SessionSettings.instance.uniqueId!!) { response ->
@@ -2716,7 +2715,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val paintQty = it.get("paint_qty").asInt
                     Log.i("Canvas Service", "Paint qty = $paintQty")
                     SessionSettings.instance.dropsAmt = paintQty
-                    reload_transparent?.visibility = View.GONE
+                    //reload_transparent?.visibility = View.GONE
                 }
             }
         }
