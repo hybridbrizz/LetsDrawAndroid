@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
@@ -41,7 +42,6 @@ import com.matrixwarez.pt.model.SessionSettings
 fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String, Int, Int>>?>,
                               redrawCountState: MutableIntState,
                               lineColorIsDarkState: MutableState<Boolean>,
-                              showServerListState: MutableState<Boolean>,
                               mapMarkerIndexState: MutableIntState,
                               interactiveCanvas: InteractiveCanvas) {
 
@@ -50,8 +50,6 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
     val clientsInfo by clientsInfoState
 
     val lineColorIsDark by lineColorIsDarkState
-
-    val showServerList by showServerListState
 
     val fontSize = 18.sp
 
@@ -126,24 +124,7 @@ fun ClientCanvasLocationsView(clientsInfoState: MutableState<List<Triple<String,
             }
         }
         drawContent()
-    }) {
-        AnimatedVisibility(
-            modifier = Modifier.align(Alignment.Center),
-            visible = showServerList && clientsInfo != null,
-            enter = fadeIn(
-                tween(200)
-            ),
-            exit = fadeOut(
-                tween(200)
-            )
-        ) {
-            ClientsInfoListView(
-                interactiveCanvas = interactiveCanvas,
-                clientsInfo = clientsInfo!!,
-                mapMarkerIndexState = mapMarkerIndexState
-            )
-        }
-    }
+    })
 }
 
 

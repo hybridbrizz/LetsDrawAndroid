@@ -14,11 +14,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/canvas_menu"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
     <LinearLayout
             android:id="@+id/ll_latency_container"
             android:layout_width="wrap_content"
@@ -81,7 +76,6 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:elevation="3dp"
             android:background="@drawable/marble_2">
 
         <TextView
@@ -416,25 +410,6 @@
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/recent_colors_button"
-            android:visibility="gone"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_marginStart="58dp"
-            android:layout_marginEnd="58dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/color_picker_frame">
-
-        <ImageView
-                android:id="@+id/recent_colors_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_palette" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
 
     <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/recent_colors_container"
@@ -842,27 +817,28 @@
             android:visibility="invisible"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
                 android:id="@+id/canvas_summary_view"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
                 android:background="@android:color/black"
                 android:layout_gravity="center" />
 
         <com.matrixwarez.pt.view.DeviceCanvasViewportView
                 android:id="@+id/device_canvas_viewport_view"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="180dp"
+                android:layout_height="180dp"
                 android:layout_gravity="center" />
 
         <androidx.compose.ui.platform.ComposeView
                 android:id="@+id/canvas_summary_clients_view"
-                android:layout_width="300dp"
-                android:layout_height="300dp" />
+                android:layout_width="180dp"
+                android:layout_height="180dp" />
 
     </FrameLayout>
 
@@ -1046,6 +1022,18 @@
 
     <FrameLayout
             android:id="@+id/reload_transparent"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/server_list"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/canvas_menu"
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

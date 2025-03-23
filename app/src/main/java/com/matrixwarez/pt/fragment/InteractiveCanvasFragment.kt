@@ -30,8 +30,13 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Surface
@@ -81,6 +86,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
+import com.matrixwarez.pt.compose.ClientsInfoListView
 import com.matrixwarez.pt.compose.mapMarkerTypes
 import com.matrixwarez.pt.view.InteractiveCanvasView
 import com.matrixwarez.pt.view.RecentColorsView
@@ -187,7 +193,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         background_button.visibility = View.VISIBLE
         grid_lines_button.visibility = View.VISIBLE
         canvas_summary_button.visibility = View.VISIBLE
-        recent_colors_button.visibility = View.VISIBLE
         menu_button.visibility = View.VISIBLE
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
@@ -255,15 +260,58 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 interactiveCanvas = surface_view.interactiveCanvas,
                 redrawCountState = surface_view.redrawCountState,
                 lineColorIsDarkState = lineColorDarkState,
-                showServerListState = showServerListState,
                 mapMarkerIndexState = mapMarkerIndexState
             )
+        }
+
+        server_list.setContent {
+            var showServerList by showServerListState
+            val clientsInfo by clientsInfoState
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        closeServerList()
+                    }
+            ) {
+                AnimatedVisibility(
+                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 120.dp),
+                    visible = showServerList && clientsInfo != null,
+                    enter = fadeIn(
+                        tween(200)
+                    ),
+                    exit = fadeOut(
+                        tween(200)
+                    )
+                ) {
+                    ClientsInfoListView(
+                        interactiveCanvas = surface_view.interactiveCanvas,
+                        clientsInfo = clientsInfo!!,
+                        mapMarkerIndexState = mapMarkerIndexState
+                    )
+                }
+            }
         }
 
         canvas_menu.setContent {
             var showMenu by showMenuState
 
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        closeCanvasMenu()
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(80.dp))
                 AnimatedVisibility(
                     visible = showMenu,
                     enter = fadeIn(
@@ -276,8 +324,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     CanvasMenuView(
                         server = server,
                         onServerList = {
-                            showServerListState.value = true
-                            showMenu = false
+                            closeCanvasMenu()
+                            showServerList()
                         },
                         onCommunity = {
                             if (server.iconLink.isNotBlank()) {
@@ -287,11 +335,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                                 }
                                 catch (e: Exception) {}
                             }
-
+                            closeCanvasMenu()
                         },
                         onStyles = {
                             (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this@InteractiveCanvasFragment)
-                            showMenu = false
+                            closeCanvasMenu()
                         },
                         onGrabImage = {
                             val fragment = ArtExportFragment()
@@ -308,15 +356,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                                 }
                             }
+                            closeCanvasMenu()
                         },
                         onHelp = {
                             (requireActivity() as InteractiveCanvasActivity).showHowtoFragment()
-                            showMenu = false
+                            closeCanvasMenu()
                         },
                         onLeave = {
                             InteractiveCanvasSocket.instance.disconnect()
                             lastCanvasSummaryImageTime = 0L
                             leave = true
+                        },
+                        onGridLines = {
+                            SessionSettings.instance.gridLineMode += 1
+
+                            if (SessionSettings.instance.gridLineMode > 1) {
+                                SessionSettings.instance.gridLineMode = 0
+                            }
+
+                            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+                            closeCanvasMenu()
+                        },
+                        onBackground = {
+                            changeBackground()
+                        },
+                        onSummary = {
+                            toggleCanvasSummary()
+                            closeCanvasMenu()
                         }
                     )
                 }
@@ -330,7 +397,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         setupStreamBanner()
 
-        visibleActionViews = arrayOf(menu_button, paint_panel_button, recent_colors_button,
+        visibleActionViews = arrayOf(menu_button, paint_panel_button,
             export_button, background_button, grid_lines_button, canvas_summary_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -674,63 +741,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         }
 
-        // recent colors
-        recent_colors_button.setOnClickListener {
-            if (recent_colors_container.visibility != View.VISIBLE) {
-                recent_colors_container.visibility = View.VISIBLE
-                recent_colors_action.visibility = View.INVISIBLE
-
-                if (paint_panel.visibility != View.VISIBLE) {
-                    togglePaintPanel(true)
-                }
-
-                if (canvas_summary_view.visibility == View.VISIBLE) {
-                    canvas_summary_container.visibility = View.INVISIBLE
-                }
-            }
-            else {
-                recent_colors_container.visibility = View.GONE
-                recent_colors_action.visibility = View.VISIBLE
-            }
-        }
-
         // menu button
         if (!SessionSettings.instance.selectedHand) {
             toggleMenu(true)
         }
 
         menu_button.setOnClickListener {
-            if (surface_view.isExporting()) {
-                export_fragment_container.visibility = View.INVISIBLE
-                surface_view.endExport()
 
-                toggleExportBorder(false)
-                export_button.toggleState = ButtonFrame.ToggleState.NONE
-
-                // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
-            }
-            else if (surface_view.isObjectMoveSelection()) {
-                surface_view.interactiveCanvas.cancelMoveSelectedObject()
-                toggleExportBorder(false, double = true)
-
-                surface_view.startExport()
-                toggleExportBorder(true)
-            }
-            else if (surface_view.isObjectMoving()) {
-                surface_view.interactiveCanvas.cancelMoveSelectedObject()
-                toggleExportBorder(false)
-            }
-            else if (terminal_container.visibility == View.VISIBLE) {
-                toggleTerminal(false)
-            }
-            else if (showServerListState.value) {
-                showServerListState.value = false
-            }
-            else {
-                showMenuState.value = !showMenuState.value
-                //(requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this)
-                //toggleMenu(menu_container.visibility != View.VISIBLE)
-            }
         }
 
 //        activity?.apply {
@@ -767,35 +784,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         Log.i("Panel size", SessionSettings.instance.panelResIds.size.toString())
-
-        // background button
-        background_button.setOnClickListener {
-            if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
-                SessionSettings.instance.backgroundColorsIndex = 0
-            }
-            else {
-                SessionSettings.instance.backgroundColorsIndex += 1
-            }
-
-            SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
-            lineColorDarkState.value = SessionSettings.instance.darkIcons
-            recolorVisibleActionViews()
-
-            if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1
-                && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
-                SessionSettings.instance.backgroundColorsIndex = 0
-            }
-
-            invalidateButtons()
-
-            if (canvas_summary_container.visibility == View.VISIBLE) {
-                canvas_summary_view.invalidate()
-            }
-
-            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-
-            SessionSettings.instance.saveBackground(requireContext())
-        }
 
         // grid lines toggle button
         grid_lines_button.setOnClickListener {
@@ -1407,7 +1395,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         background_action.invalidate()
         grid_lines_action.invalidate()
         canvas_summary_action.invalidate()
-        recent_colors_action.invalidate()
         object_move_up_action.invalidate()
         object_move_down_action.invalidate()
         object_move_left_action.invalidate()
@@ -1509,12 +1496,62 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
+    private fun showCanvasMenu() {
+        if (surface_view.isExporting()) {
+            export_fragment_container.visibility = View.INVISIBLE
+            surface_view.endExport()
+
+            toggleExportBorder(false)
+            export_button.toggleState = ButtonFrame.ToggleState.NONE
+
+            // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+        }
+        else if (surface_view.isObjectMoveSelection()) {
+            surface_view.interactiveCanvas.cancelMoveSelectedObject()
+            toggleExportBorder(false, double = true)
+
+            surface_view.startExport()
+            toggleExportBorder(true)
+        }
+        else if (surface_view.isObjectMoving()) {
+            surface_view.interactiveCanvas.cancelMoveSelectedObject()
+            toggleExportBorder(false)
+        }
+        else if (terminal_container.visibility == View.VISIBLE) {
+            toggleTerminal(false)
+        }
+        else if (showServerListState.value) {
+            showServerListState.value = false
+        }
+        else {
+            canvas_menu.visibility = View.VISIBLE
+            showMenuState.value = true
+            //(requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this)
+            //toggleMenu(menu_container.visibility != View.VISIBLE)
+        }
+    }
+
+    private fun closeCanvasMenu() {
+        showMenuState.value = false
+        canvas_menu.visibility = View.GONE
+    }
+    
+    private fun showServerList() {
+        server_list.visibility = View.VISIBLE
+        showServerListState.value = true
+    }
+
+    private fun closeServerList() {
+        showServerListState.value = false
+
+        server_list.visibility = View.GONE
+    }
+
     private fun onPaintIndicatorClick() {
         // start color selection mode
         if (color_picker_frame.visibility != View.VISIBLE) {
             color_picker_frame.visibility = View.VISIBLE
             recent_colors_container.visibility = View.GONE
-            recent_colors_button.visibility = View.GONE
 
             initalColor = SessionSettings.instance.paintColor
             hsb_palette.init(initalColor)
@@ -1611,6 +1648,34 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 //        }
         export_button.select(show)
         export_button.invalidate()
+    }
+
+    private fun changeBackground() {
+        if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
+            SessionSettings.instance.backgroundColorsIndex = 0
+        }
+        else {
+            SessionSettings.instance.backgroundColorsIndex += 1
+        }
+
+        SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
+        lineColorDarkState.value = SessionSettings.instance.darkIcons
+        recolorVisibleActionViews()
+
+        if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1
+            && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
+            SessionSettings.instance.backgroundColorsIndex = 0
+        }
+
+        invalidateButtons()
+
+        if (canvas_summary_container.visibility == View.VISIBLE) {
+            canvas_summary_view.invalidate()
+        }
+
+        surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+        SessionSettings.instance.saveBackground(requireContext())
     }
 
     private fun toggleMenu(open: Boolean) {
@@ -2028,6 +2093,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         /*if (device_canvas_viewport_view.visibility == View.VISIBLE) {
             device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
         }*/
+    }
+
+    override fun onInteractiveCanvasDoubleTap() {
+        showCanvasMenu()
     }
 
     // paint qty listener

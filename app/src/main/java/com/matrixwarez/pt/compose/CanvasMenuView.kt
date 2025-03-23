@@ -35,12 +35,16 @@ private val menuItems = listOf(
     MenuItem("Options", R.drawable.colors),
     MenuItem("Yank Canvas", R.drawable.photo_camera),
     MenuItem("Help", R.drawable.help),
-    MenuItem("Leave", R.drawable.logout)
+    MenuItem("Leave", R.drawable.logout),
+    MenuItem("Grid Lines", R.drawable.ic_toggle_grid),
+    MenuItem("Background", R.drawable.ic_background),
+    MenuItem("Minimap", R.drawable.ic_map),
 )
 
 @Composable
 fun CanvasMenuView(server: Server, onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
-                   onGrabImage: () -> Unit, onHelp: () -> Unit, onLeave: () -> Unit) {
+                   onGrabImage: () -> Unit, onHelp: () -> Unit, onLeave: () -> Unit, onGridLines: () -> Unit,
+                   onBackground: () -> Unit, onSummary: () -> Unit) {
 
     Box(modifier = Modifier.background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp)).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -77,6 +81,20 @@ fun CanvasMenuView(server: Server, onServerList: () -> Unit, onCommunity: () -> 
                 Spacer(modifier = Modifier.width(16.dp))
                 CanvasMenuItemView(item = menuItems[5]) {
                     onLeave()
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Row {
+                CanvasMenuItemView(item = menuItems[6]) {
+                    onGridLines()
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                CanvasMenuItemView(item = menuItems[7]) {
+                    onBackground()
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                CanvasMenuItemView(item = menuItems[8]) {
+                    onSummary()
                 }
             }
         }

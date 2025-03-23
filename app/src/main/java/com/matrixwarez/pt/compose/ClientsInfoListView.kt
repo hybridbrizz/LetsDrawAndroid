@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableIntState
@@ -50,7 +51,11 @@ fun ClientsInfoListView(modifier: Modifier = Modifier, clientsInfo: List<Triple<
 
     var mapMarkerIndex by mapMarkerIndexState
 
-    Column(modifier = modifier.shadow(2.dp, RectangleShape).fillMaxWidth(0.4f)) {
+    Column(modifier = modifier
+        .shadow(2.dp, RoundedCornerShape(10.dp))
+        .fillMaxWidth(0.8f)
+        .clip(RoundedCornerShape(10.dp))
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
