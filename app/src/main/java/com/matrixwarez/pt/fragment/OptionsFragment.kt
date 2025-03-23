@@ -1,8 +1,6 @@
 package com.matrixwarez.pt.fragment
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -13,85 +11,33 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.children
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.matrixwarez.pt.R
-import com.matrixwarez.pt.activity.SignInActivity
-import com.matrixwarez.pt.adapter.PanelRecyclerViewAdapter
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.FragmentListener
 import com.matrixwarez.pt.listener.OptionsListener
 import com.matrixwarez.pt.model.SessionSettings
-import com.matrixwarez.pt.view.ActionButtonView
 import kotlinx.android.synthetic.main.fragment_options.back_button
 import kotlinx.android.synthetic.main.fragment_options.change_name_button
 import kotlinx.android.synthetic.main.fragment_options.change_name_container
 import kotlinx.android.synthetic.main.fragment_options.credits_container
-import kotlinx.android.synthetic.main.fragment_options.export_single_play
 import kotlinx.android.synthetic.main.fragment_options.fragment_container
-import kotlinx.android.synthetic.main.fragment_options.import_single_play
 import kotlinx.android.synthetic.main.fragment_options.input_name
-import kotlinx.android.synthetic.main.fragment_options.option_bold_action_buttons
-import kotlinx.android.synthetic.main.fragment_options.option_bold_action_buttons_switch
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_button
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_reset_button
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_button
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_reset_button
-import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_color_reset
-import kotlinx.android.synthetic.main.fragment_options.option_canvas_lock_switch
-import kotlinx.android.synthetic.main.fragment_options.option_close_paint_panel_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_close_paint_panel_color_reset_button
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_action_minus
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_action_plus
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_button_minus
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_button_plus
-import kotlinx.android.synthetic.main.fragment_options.option_color_palette_size_value
-import kotlinx.android.synthetic.main.fragment_options.option_emitters_container
-import kotlinx.android.synthetic.main.fragment_options.option_emitters_switch
-import kotlinx.android.synthetic.main.fragment_options.option_frame_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_frame_color_reset_button
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_button
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_reset_button
-import kotlinx.android.synthetic.main.fragment_options.option_num_recent_colors
-import kotlinx.android.synthetic.main.fragment_options.option_num_recent_colors_choice_layout
-import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_container
-import kotlinx.android.synthetic.main.fragment_options.option_paint_bar_color_reset_button
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_fill_circle_switch
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_outline_switch
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_square_switch
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_action_minus
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_action_plus
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_button_minus
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_button_plus
-import kotlinx.android.synthetic.main.fragment_options.option_paint_indicator_width_value
-import kotlinx.android.synthetic.main.fragment_options.option_paint_panel_texture_title
-import kotlinx.android.synthetic.main.fragment_options.option_show_paint_bar_container
-import kotlinx.android.synthetic.main.fragment_options.option_show_paint_bar_switch
-import kotlinx.android.synthetic.main.fragment_options.option_show_paint_circle_container
-import kotlinx.android.synthetic.main.fragment_options.option_show_paint_circle_switch
-import kotlinx.android.synthetic.main.fragment_options.option_small_action_buttons_container
-import kotlinx.android.synthetic.main.fragment_options.option_small_action_buttons_switch
-import kotlinx.android.synthetic.main.fragment_options.options_title_text
-import kotlinx.android.synthetic.main.fragment_options.panel_recycler_view
-import kotlinx.android.synthetic.main.fragment_options.recovery_pincode_button
-import kotlinx.android.synthetic.main.fragment_options.reset_single_play
-import kotlinx.android.synthetic.main.fragment_options.sign_in_button
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -100,10 +46,6 @@ import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
 class OptionsFragment: Fragment(), FragmentListener {
 
     var optionsListener: OptionsListener? = null
-
-    var selectingCanvasLockColor = false
-    var selectingGridLineColor = false
-    var selectingPaintMeterColor = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -119,22 +61,9 @@ class OptionsFragment: Fragment(), FragmentListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (!Utils.isTablet(requireContext())) {
-            option_color_palette_size.visibility = View.GONE
-        }
-
         if (!isFromInteractiveCanvas()) {
             change_name_container.visibility = View.GONE
         }
-
-        options_title_text.visibility = View.INVISIBLE
-
-        //option_right_handed.visibility = View.GONE
-        option_small_action_buttons_container.visibility = View.GONE
-        option_bold_action_buttons.visibility = View.GONE
-        //option_num_recent_colors.visibility = View.GONE
-        option_show_paint_bar_container.visibility = View.GONE
-        option_show_paint_circle_container.visibility = View.GONE
 
         back_button.setOnClickListener {
             if (credits_container.visibility == View.VISIBLE) {
@@ -188,48 +117,7 @@ class OptionsFragment: Fragment(), FragmentListener {
             updateDisplayName(input_name.text.toString())
         }
 
-        sign_in_button.setOnClickListener {
-            val intent = Intent(context, SignInActivity::class.java)
-            intent.putExtra("mode", SignInFragment.modeSignIn)
-            startActivity(intent)
-        }
-
-        recovery_pincode_button.setOnClickListener {
-            val intent = Intent(context, SignInActivity::class.java)
-            if (SessionSettings.instance.pincodeSet) {
-                intent.putExtra("mode", SignInFragment.modeChangePincode)
-            }
-            else {
-                intent.putExtra("mode", SignInFragment.modeSetPincode)
-            }
-
-            startActivity(intent)
-        }
-
         context?.apply {
-            if (!SessionSettings.instance.getSharedPrefs(this).contains("arr_canvas")) {
-                reset_single_play.isEnabled = false
-            }
-
-            reset_single_play.setOnClickListener {
-                showSinglePlayRestWarning()
-            }
-
-            import_single_play.setOnClickListener {
-                showCanvasImportFragment()
-            }
-
-            export_single_play.setOnClickListener {
-                showCanvasExportFragment()
-            }
-
-            // option paint panel background
-            panel_recycler_view.layoutManager = LinearLayoutManager(
-                this,
-                LinearLayoutManager.HORIZONTAL,
-                false
-            )
-
             view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
@@ -237,58 +125,8 @@ class OptionsFragment: Fragment(), FragmentListener {
                     } else {
                         view.viewTreeObserver.removeGlobalOnLayoutListener(this)
                     }
-
-                    (panel_recycler_view.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
-                        SessionSettings.instance.panelBackgroundResIndex, (view.width * 0.15).toInt()
-                    )
                 }
             })
-
-            panel_recycler_view.adapter = PanelRecyclerViewAdapter(
-                this, SessionSettings.instance.panelResIds.toMutableList()
-            )
-
-            (panel_recycler_view.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        }
-
-        // option canvas lock
-        option_canvas_lock_switch.isChecked = SessionSettings.instance.canvasLockBorder
-        option_canvas_lock_switch.setOnCheckedChangeListener { _, value ->
-            SessionSettings.instance.canvasLockBorder = value
-        }
-
-        // option canvas lock color
-        option_canvas_lock_color_button.setBackgroundColor(SessionSettings.instance.canvasLockBorderColor)
-        option_canvas_lock_color_reset.setOnClickListener {
-            SessionSettings.instance.resetCanvasLockBorderColor()
-            option_canvas_lock_color_button.setBackgroundColor(SessionSettings.instance.canvasLockBorderColor)
-        }
-
-        // option canvas lock color
-        option_canvas_lock_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.canvasLockBorderColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(true) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.canvasLockBorderColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        it.setBackgroundColor(SessionSettings.instance.canvasLockBorderColor)
-                    }
-                })
         }
 
         // option grid line color
@@ -345,222 +183,12 @@ class OptionsFragment: Fragment(), FragmentListener {
             }
         }
 
-        // option frame color
-        option_frame_color_button.setBackgroundColor(SessionSettings.instance.frameColor)
-        option_frame_color_reset_button.setOnClickListener {
-            SessionSettings.instance.frameColor = Color.GRAY
-            option_frame_color_button.setBackgroundColor(SessionSettings.instance.frameColor)
-        }
-
-        // option frame color
-        option_frame_color_button.setOnClickListener {
-            ColorPickerPopup.Builder(activity)
-                .initialColor(SessionSettings.instance.frameColor) // Set initial color
-                .enableBrightness(true) // Enable brightness slider or not
-                .enableAlpha(false) // Enable alpha slider or not
-                .okTitle("Choose")
-                .cancelTitle("Cancel")
-                .showIndicator(false)
-                .showValue(false)
-                .build()
-                .show(it, object : ColorPickerObserver() {
-                    override fun onColorPicked(color: Int) {
-                        it.setBackgroundColor(color)
-                        SessionSettings.instance.frameColor = color
-                    }
-
-                    override fun onColor(color: Int, fromUser: Boolean, shouldPropagate: Boolean) {
-                        it.setBackgroundColor(color)
-                    }
-
-                    override fun onColorCancel() {
-                        it.setBackgroundColor(SessionSettings.instance.frameColor)
-                    }
-                })
-        }
-
-        // option emitters
-        option_emitters_container.visibility = View.GONE
-
-        option_emitters_switch.isChecked = SessionSettings.instance.emittersEnabled
-        option_emitters_switch.setOnCheckedChangeListener { _, value ->
-            SessionSettings.instance.emittersEnabled = value
-        }
-
-        // option bold action buttons
-        option_bold_action_buttons_switch.isChecked = SessionSettings.instance.boldActionButtons
-        option_bold_action_buttons_switch.setOnCheckedChangeListener { _, value ->
-            SessionSettings.instance.boldActionButtons = value
-        }
-
-        // option paint indicator width
-        option_paint_indicator_width_value.text = SessionSettings.instance.colorIndicatorWidth.toString()
-
-        option_paint_indicator_width_action_minus.type = ActionButtonView.Type.DOT
-        option_paint_indicator_width_action_plus.type = ActionButtonView.Type.DOT
-
-        option_paint_indicator_width_button_minus.actionBtnView = option_paint_indicator_width_action_minus
-        option_paint_indicator_width_button_plus.actionBtnView = option_paint_indicator_width_action_plus
-
-        option_paint_indicator_width_button_minus.setOnClickListener {
-            var value = option_paint_indicator_width_value.text.toString().toInt() - 1
-            if (value == 0) value = 1
-
-            option_paint_indicator_width_value.text = value.toString()
-            SessionSettings.instance.colorIndicatorWidth = value
-        }
-
-        option_paint_indicator_width_button_plus.setOnClickListener {
-            var value = option_paint_indicator_width_value.text.toString().toInt() + 1
-            if (value == 6) value = 5
-
-            option_paint_indicator_width_value.text = value.toString()
-            SessionSettings.instance.colorIndicatorWidth = value
-        }
-
-        // option color palette size
-        option_color_palette_size_value.text = SessionSettings.instance.colorPaletteSize.toString()
-
-        option_color_palette_size_action_minus.type = ActionButtonView.Type.DOT
-        option_color_palette_size_action_plus.type = ActionButtonView.Type.DOT
-
-        option_color_palette_size_button_minus.actionBtnView = option_color_palette_size_action_minus
-        option_color_palette_size_button_plus.actionBtnView = option_color_palette_size_action_plus
-
-        option_color_palette_size_button_minus.setOnClickListener {
-            var value = option_color_palette_size_value.text.toString().toInt() - 1
-            if (value <= 0) value = 1
-
-            option_color_palette_size_value.text = value.toString()
-            SessionSettings.instance.colorPaletteSize = value
-        }
-
-        option_color_palette_size_button_plus.setOnClickListener {
-            var value = option_color_palette_size_value.text.toString().toInt() + 1
-            if (value >= 15) value = 14
-
-            option_color_palette_size_value.text = value.toString()
-            SessionSettings.instance.colorPaletteSize = value
-        }
-
-        // option paint indicator fill circle
-        option_paint_indicator_fill_circle_switch.isChecked = SessionSettings.instance.colorIndicatorFill
-
-        option_paint_indicator_fill_circle_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.colorIndicatorFill = button.isChecked
-            if (button.isChecked && SessionSettings.instance.colorIndicatorSquare) {
-                option_paint_indicator_square_switch.isChecked = false
-            }
-        }
-
-        // option paint indicator square
-        option_paint_indicator_square_switch.isChecked = SessionSettings.instance.colorIndicatorSquare
-
-        option_paint_indicator_square_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.colorIndicatorSquare = button.isChecked
-            if (button.isChecked && SessionSettings.instance.colorIndicatorFill) {
-                option_paint_indicator_fill_circle_switch.isChecked = false
-            }
-        }
-
-        // option paint indicator outline
-        option_paint_indicator_outline_switch.isChecked = SessionSettings.instance.colorIndicatorOutline
-
-        option_paint_indicator_outline_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.colorIndicatorOutline = button.isChecked
-        }
-
-        // option close paint panel button color
-        option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
-        option_close_paint_panel_color_reset_button.setOnClickListener {
-            SessionSettings.instance.closePaintBackButtonColor = -1
-            option_close_paint_panel_color_button.setBackgroundColor(SessionSettings.instance.closePaintBackButtonColor)
-        }
-
-        option_close_paint_panel_color_button.setOnClickListener {
-            showColorPicker(option_close_paint_panel_color_button, SessionSettings.instance.closePaintBackButtonColor) { color ->
-                option_close_paint_panel_color_button.setBackgroundColor(color)
-                SessionSettings.instance.closePaintBackButtonColor = color
-            }
-        }
-
-        // option show paint bar
-        option_show_paint_bar_switch.isChecked = SessionSettings.instance.showPaintBar
-
-        option_show_paint_bar_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.showPaintBar = button.isChecked
-            if (button.isChecked && option_show_paint_circle_switch.isChecked) {
-                option_show_paint_circle_switch.isChecked = false
-                SessionSettings.instance.showPaintCircle = false
-            }
-            else if (!button.isChecked) {
-                option_show_paint_circle_switch.isChecked = true
-                SessionSettings.instance.showPaintBar = false
-                SessionSettings.instance.showPaintCircle = true
-            }
-        }
-
-        // option show paint circle
-        option_show_paint_circle_switch.isChecked = SessionSettings.instance.showPaintCircle
-
-        option_show_paint_circle_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.showPaintCircle = button.isChecked
-            if (button.isChecked && option_show_paint_bar_switch.isChecked) {
-                option_show_paint_bar_switch.isChecked = false
-                SessionSettings.instance.showPaintBar = false
-            }
-            else if (!button.isChecked) {
-                option_show_paint_bar_switch.isChecked = true
-                SessionSettings.instance.showPaintCircle = false
-                SessionSettings.instance.showPaintBar = true
-            }
-        }
-
-        // option paint bar color
-        option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
-        option_paint_bar_color_reset_button.setOnClickListener {
-            SessionSettings.instance.paintBarColor = ContextCompat.getColor(requireContext(), R.color.default_paint_qty_bar_color)
-            option_paint_bar_color_button.setBackgroundColor(SessionSettings.instance.paintBarColor)
-        }
-
-        // option grid line color
-        option_paint_bar_color_button.setOnClickListener {
-            showColorPicker(option_paint_bar_color_button, SessionSettings.instance.paintBarColor) { color ->
-                option_paint_bar_color_button.setBackgroundColor(color)
-                SessionSettings.instance.paintBarColor = color
-            }
-        }
-
-//        // option right handed
-//        option_right_handed_switch.isChecked = SessionSettings.instance.rightHanded
-//
-//        option_right_handed_switch.setOnCheckedChangeListener { button, _ ->
-//            SessionSettings.instance.rightHanded = button.isChecked
+//        if (!SessionSettings.instance.tablet) {
+//            Animator.animateTitleFromTop(back_button)
+//            Animator.animateHorizontalViewEnter(option_grid_line_color_container, true)
+//            Animator.animateHorizontalViewEnter(option_canvas_background_primary_color_container, true)
+//            Animator.animateHorizontalViewEnter(option_canvas_background_secondary_color_container, true)
 //        }
-
-        // option small action buttons
-        option_small_action_buttons_switch.isChecked = SessionSettings.instance.smallActionButtons
-
-        option_small_action_buttons_switch.setOnCheckedChangeListener { button, _ ->
-            SessionSettings.instance.smallActionButtons = button.isChecked
-        }
-
-        option_paint_panel_texture_title.setOnClickListener {
-            credits_container.visibility = View.VISIBLE
-        }
-
-        setupNumRecentColorsChoices()
-
-        if (!SessionSettings.instance.tablet) {
-            Animator.animateTitleFromTop(options_title_text)
-            Animator.animateTitleFromTop(back_button)
-            Animator.animateHorizontalViewEnter(option_paint_panel_texture_title, false)
-            Animator.animateHorizontalViewEnter(panel_recycler_view, true)
-            Animator.animateHorizontalViewEnter(option_grid_line_color_container, true)
-            Animator.animateHorizontalViewEnter(option_paint_bar_color_container, true)
-            Animator.animateHorizontalViewEnter(option_canvas_background_primary_color_container, true)
-            Animator.animateHorizontalViewEnter(option_canvas_background_secondary_color_container, true)
-        }
     }
 
     override fun onResume() {
@@ -568,96 +196,7 @@ class OptionsFragment: Fragment(), FragmentListener {
 
         input_name.setText(SessionSettings.instance.displayName)
 
-        if (SessionSettings.instance.pincodeSet) {
-            sign_in_button.text = "Signed in"
-            sign_in_button.isEnabled = false
-
-            recovery_pincode_button.text = "Change access pincode"
-        }
-
         fragment_container.visibility = View.GONE
-    }
-
-    private fun setupNumRecentColorsChoices() {
-        // option num recent colors
-        for (v in option_num_recent_colors_choice_layout.children) {
-            val textView = v as TextView
-
-            textView.setOnClickListener {
-                SessionSettings.instance.numRecentColors = textView.text.toString().toInt()
-                setupNumRecentColorsChoices()
-            }
-
-            if (SessionSettings.instance.numRecentColors.toString() == textView.text) {
-                textView.setTextColor(ActionButtonView.altGreenPaint.color)
-            }
-            else {
-                textView.setTextColor(ActionButtonView.whitePaint.color)
-            }
-        }
-    }
-
-    private fun showSinglePlayRestWarning() {
-        val alert = AlertDialog.Builder(context)
-
-        val editText = EditText(activity)
-        alert.setMessage(getString(R.string.reset_single_play_alert_message))
-
-        alert.setView(editText)
-
-        alert.setPositiveButton(
-            "Erase"
-        ) { dialog, _ ->
-            if (editText.text.toString() == getString(R.string.reset_single_play_confirm_string)) {
-                resetSinglePlay()
-                dialog?.dismiss()
-            }
-        }
-
-        alert.setNegativeButton("Cancel") { dialog, _ ->
-            dialog?.dismiss()
-        }
-
-        alert.show()
-    }
-
-    private fun resetSinglePlay() {
-        context?.apply {
-            val ed = SessionSettings.instance.getSharedPrefs(this).edit()
-            ed.remove("arr_canvas")
-            ed.apply()
-
-            //SessionSettings.instance.restoreDeviceViewportLeft = 0F
-            //SessionSettings.instance.restoreDeviceViewportTop = 0F
-            //SessionSettings.instance.restoreDeviceViewportRight = 0F
-            //SessionSettings.instance.restoreDeviceViewportBottom = 0F
-
-            SessionSettings.instance.restoreCanvasScaleFactor = 0F
-
-            optionsListener?.onResetSinglePlay()
-        }
-    }
-
-    private fun showCanvasImportFragment() {
-        fragmentManager?.apply {
-            val canvasImportFragment = CanvasImportFragment()
-            canvasImportFragment.fragmentListener = this@OptionsFragment
-
-            beginTransaction().replace(R.id.fragment_container, canvasImportFragment).commit()
-
-            fragment_container.visibility = View.VISIBLE
-        }
-    }
-
-    private fun showCanvasExportFragment() {
-        fragmentManager?.apply {
-            val canvasExportFragment = CanvasExportFragment()
-            canvasExportFragment.fragmentListener = this@OptionsFragment
-
-            beginTransaction().replace(R.id.fragment_container, canvasExportFragment).commit()
-
-            fragment_container.visibility = View.VISIBLE
-        }
     }
 
     fun sendNameCheck(name: String) {
