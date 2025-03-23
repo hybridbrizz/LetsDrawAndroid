@@ -83,6 +83,7 @@ import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import com.matrixwarez.pt.compose.mapMarkerTypes
 import com.matrixwarez.pt.view.InteractiveCanvasView
+import com.matrixwarez.pt.view.RecentColorsView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.*
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
@@ -108,7 +109,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     RecentColorsListener, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
-    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback {
+    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, RecentColorsView.Listener {
 
     var initalColor = 0
 
@@ -244,6 +245,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             invalidateButtons()
         }
 
+        setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+
         lineColorDarkState.value = SessionSettings.instance.darkIcons
 
         client_canvas_locations.setContent {
@@ -326,23 +329,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         setupStreamBanner()
-
-        context?.apply {
-            if (world) {
-                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
-                    "last_world_paint_color",
-                    surface_view.interactiveCanvas.getGridLineColor()
-                )
-
-                //setupPaintEventTimer()
-            }
-            else {
-                SessionSettings.instance.paintColor = SessionSettings.instance.getSharedPrefs(this).getInt(
-                    "last_single_paint_color",
-                    surface_view.interactiveCanvas.getGridLineColor()
-                )
-            }
-        }
 
         visibleActionViews = arrayOf(menu_button, paint_panel_button, recent_colors_button,
             export_button, background_button, grid_lines_button, canvas_summary_button)
@@ -549,7 +535,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_panel_button.setOnClickListener {
             if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-                || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.PAINTING) {
+                || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
                 surface_view.endPainting()
             }
             else {
@@ -1139,7 +1125,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             //surface_view.interactiveCanvas.saveUnits(this)
             surface_view.interactiveCanvas.interactiveCanvasListener = null
 
-            SessionSettings.instance.saveLastPaintColor(this, world)
+            SessionSettings.instance.save(requireContext())
         }
 
         paintEventTimer?.cancel()
@@ -1369,14 +1355,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun updateSelectedColor(color: Int) {
-        Log.i("Color", color.toString())
+        Log.i("Selected Color", color.toString())
 
         paint_indicator_view_bottom_layer.setPaintColor(color)
 
         val isColorDark = Utils.isColorDark(color)
 
         when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-            || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.PAINTING) {
+            || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
             true -> {
                 val drawableResId = when (isColorDark) {
                     true -> R.drawable.paint_button_background_light_selected
@@ -1407,47 +1393,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun setupColorPalette(colors: Array<Int>?) {
-        if (colors != null) {
-            var i = 0
-            for (v in recent_colors_container.children) {
-                if (i < colors.size) {
-                    (v as RecentColorView).color = colors[colors.size - 1 - i]
-                    v.visibility = View.VISIBLE
-                }
-                else {
-                    v.visibility = View.GONE
-                }
-
-                v.setOnClickListener {
-                    (v as RecentColorView).color?.apply {
-                        SessionSettings.instance.paintColor = this
-                        notifyPaintColorUpdate(SessionSettings.instance.paintColor)
-
-                        //recent_colors_container.visibility = View.GONE
-                        //recent_colors_action.visibility = View.VISIBLE
-                    }
-                }
-
-                val layoutParams = v.layoutParams
-
-                layoutParams.width = Utils.dpToPx(context, SessionSettings.instance.colorPaletteSize * 10)
-                layoutParams.height = Utils.dpToPx(context, SessionSettings.instance.colorPaletteSize * 10)
-
-                v.layoutParams = layoutParams
-
-                i++
-            }
-
-            // fixes issue where with no colors on the color palette the paint panel won't open
-            if (colors.isEmpty()) {
-                recent1.visibility = View.VISIBLE
-            }
-        }
-        else {
-            for (v in recent_colors_container.children) {
-                (v as ActionButtonView).type = ActionButtonView.Type.RECENT_COLOR
-            }
-        }
+        recent_colors_view.listener = this
+        recent_colors_view.recentColors = colors
+            ?.toList()
+            ?.reversed()
+            ?.toMutableList() ?: mutableListOf()
     }
 
     private fun invalidateButtons() {
@@ -2751,5 +2701,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }, 7000)
+    }
+
+    // Recent Colors View Listener
+    override fun onSelectRecentColor(color: Int) {
+        updateSelectedColor(color)
     }
 }

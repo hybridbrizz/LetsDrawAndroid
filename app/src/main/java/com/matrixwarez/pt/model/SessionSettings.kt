@@ -341,9 +341,9 @@ class SessionSettings {
         ed.apply()
     }
 
-    fun saveColor(context: Context) {
+    fun savePaintColor(context: Context) {
         val ed = getSharedPrefs(context).edit()
-        ed.putInt("last_world_paint_color", paintColor)
+        ed.putInt("paint_color", paintColor)
         ed.apply()
     }
 
@@ -393,7 +393,7 @@ class SessionSettings {
     }
 
     fun load(context: Context) {
-        paintColor = getSharedPrefs(context).getInt("paint_color", Color.WHITE)
+        paintColor = getSharedPrefs(context).getInt("paint_color", Color.parseColor("#ff023020"))
 
         dropsAmt = getSharedPrefs(context).getInt("drops_amt", 0)
 

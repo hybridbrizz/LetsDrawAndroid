@@ -30,7 +30,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     enum class Mode {
         EXPLORING,
         PAINTING,
-        PAINT_SELECTION,
+        PAINT_SELECTION_EXPLORING,
+        PAINT_SELECTION_PAINTING,
         EXPORTING,
         OBJECT_MOVE_SELECTION,
         OBJECT_MOVING
@@ -191,7 +192,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 }
             }
         }
-        else if (mode == Mode.PAINT_SELECTION) {
+        else if (mode == Mode.PAINT_SELECTION_PAINTING || mode == Mode.PAINT_SELECTION_EXPLORING) {
             if (ev.action == MotionEvent.ACTION_DOWN) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
                 unitPoint?.apply {
@@ -390,7 +391,11 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             interactiveCanvas.cancelMoveSelectedObject()
         }
 
-        mode = Mode.PAINTING
+        when (mode) {
+            Mode.EXPLORING -> mode = Mode.PAINTING
+            Mode.PAINT_SELECTION_EXPLORING -> mode = Mode.PAINT_SELECTION_PAINTING
+            else -> {}
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
@@ -407,18 +412,28 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 //        interactiveCanvas.clearRestorePoints()
 
         interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-        mode = Mode.EXPLORING
+
+        when (mode) {
+            Mode.PAINTING -> mode = Mode.EXPLORING
+            Mode.PAINT_SELECTION_PAINTING -> mode = Mode.PAINT_SELECTION_EXPLORING
+            else -> {}
+        }
     }
 
-    var lastModeBeforePaintSelect: Mode? = null
     fun startPaintSelection() {
-        lastModeBeforePaintSelect = mode
-        mode = Mode.PAINT_SELECTION
+        when (mode) {
+            Mode.EXPLORING -> mode = Mode.PAINT_SELECTION_EXPLORING
+            Mode.PAINTING -> mode = Mode.PAINT_SELECTION_PAINTING
+            else -> {}
+        }
     }
 
     fun endPaintSelection() {
-        mode = lastModeBeforePaintSelect ?: Mode.PAINTING
-        lastModeBeforePaintSelect = null
+        when (mode) {
+            Mode.PAINT_SELECTION_EXPLORING -> mode = Mode.EXPLORING
+            Mode.PAINT_SELECTION_PAINTING -> mode = Mode.PAINTING
+            else -> {}
+        }
     }
 
     fun startExport() {
