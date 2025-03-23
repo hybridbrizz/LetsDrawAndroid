@@ -74,6 +74,7 @@ import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import com.matrixwarez.pt.compose.ClientsInfoListView
+import com.matrixwarez.pt.compose.HelpMessageListView
 import com.matrixwarez.pt.compose.mapMarkerTypes
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.PanelThemeConfig
@@ -131,6 +132,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_button
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.help_messages
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.hsb_palette
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.image_no_socket
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.ll_latency_container
@@ -342,6 +344,20 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         lineColorDarkState.value = SessionSettings.instance.darkIcons
 
+        help_messages.setContent {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(120.dp))
+                HelpMessageListView {
+                    SessionSettings.instance.showHelpMessages = false
+                    SessionSettings.instance.save(requireContext())
+                    help_messages.visibility = View.GONE
+                }
+            }
+        }
+
         client_canvas_locations.setContent {
             ClientCanvasLocationsView(
                 clientsInfoState = clientsInfoState,
@@ -449,7 +465,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             closeCanvasMenu()
                         },
                         onHelp = {
-                            (requireActivity() as InteractiveCanvasActivity).showHowtoFragment()
+                            showHelpMessages()
                             closeCanvasMenu()
                         },
                         onLeave = {
@@ -1189,6 +1205,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
 
                 surface_view.setInitialPositionAndScale()
+
+                if (SessionSettings.instance.showHelpMessages) {
+                    showHelpMessages()
+                }
             }
         })
     }
@@ -2867,5 +2887,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // Recent Colors View Listener
     override fun onSelectRecentColor(color: Int) {
         updateSelectedColor(color)
+    }
+
+    private fun showHelpMessages() {
+        help_messages.visibility = View.VISIBLE
     }
 }

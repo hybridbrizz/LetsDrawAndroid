@@ -175,6 +175,8 @@ class SessionSettings {
 
     var firstLaunch = true
 
+    var showHelpMessages = true
+
     var palettes: MutableList<Palette> = ArrayList()
 
     var selectedPaletteIndex = 0
@@ -338,6 +340,8 @@ class SessionSettings {
 
         ed.putString("server_last_visited_times", gson.toJson(serverLastVisitedTimes))
 
+        ed.putBoolean("show_help_messages", showHelpMessages)
+
         ed.apply()
     }
 
@@ -476,6 +480,8 @@ class SessionSettings {
         palettes.add(0, Palette("Recent Color"))
 
         selectedPaletteIndex = getSharedPrefs(context).getInt("selected_palette_index", 0)
+
+        showHelpMessages = getSharedPrefs(context).getBoolean("show_help_messages", true)
 
         //selectedPaletteIndex = 0
 
@@ -881,6 +887,16 @@ class SessionSettings {
                 serverUUID ?: uniqueId2!!
             }
         }
+    }
+
+    fun getHelpMessages(): List<String> {
+        return listOf(
+            "Double tap canvas for menu.",
+            "Long press pixel for edit history.",
+            "Tap color area for color selection.",
+            "Tap brush to edit canvas.",
+            "Number shows remaining edits."
+        )
     }
 
     companion object {

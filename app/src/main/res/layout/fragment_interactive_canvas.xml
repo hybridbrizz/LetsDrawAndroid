@@ -1027,6 +1027,12 @@
             android:layout_height="match_parent" />
 
     <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/help_messages"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    <androidx.compose.ui.platform.ComposeView
             android:id="@+id/server_list"
             android:visibility="gone"
             android:layout_width="match_parent"
