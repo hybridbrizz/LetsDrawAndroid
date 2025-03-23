@@ -12,6 +12,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.mutableStateOf
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.matrixwarez.pt.R
@@ -24,6 +25,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
 import io.socket.client.Socket
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_latency
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -126,6 +128,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     lateinit var cSelectedStartUnit: Point
     lateinit var cSelectedEndUnit: Point
+
+    var latencyTextState = mutableStateOf("")
+    var connectedState = mutableStateOf(true)
 
     enum class Direction {
         UP,
@@ -522,13 +527,22 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
                 val value = System.currentTimeMillis() - lastPingTime
                 val latency = "$value ms"
-                interactiveCanvasListener?.notifySocketLatency(latency, value)
-                interactiveCanvasListener?.notifyConnectionCount(connectionCount)
+
                 interactiveCanvasListener?.notifyClientsInfo(mutableListOf<Triple<String, Int, Int>>().apply {
                     clientsInfo.forEach {
                         add(it)
                     }
                 })
+
+                when (connectionCount > 1) {
+                    true -> {
+                        latencyTextState.value = "($connectionCount) $latency"
+                    }
+                    false -> {
+                        latencyTextState.value = latency
+                    }
+                }
+
                 Log.d("Latency", "Pong $latency")
                 Log.d("Viewport Center", "Res: ${it[0]}")
             }

@@ -6,16 +6,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,20 +45,54 @@ private val menuItems = listOf(
 )
 
 @Composable
-fun CanvasMenuView(server: Server, onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
+fun CanvasMenuView(server: Server, latencyTextState: MutableState<String>, connectedState: MutableState<Boolean>,
+                   onServerList: () -> Unit, onCommunity: () -> Unit, onStyles: () -> Unit,
                    onGrabImage: () -> Unit, onHelp: () -> Unit, onLeave: () -> Unit, onGridLines: () -> Unit,
                    onBackground: () -> Unit, onSummary: () -> Unit) {
 
-    Box(modifier = Modifier.background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp)).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)) {
+    Box(
+        modifier = Modifier
+            .background(color = Color.DarkGray, shape = RoundedCornerShape(10.dp))
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp)
+    ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                modifier = Modifier.padding(bottom = 16.dp),
-                text = server.name,
-                color = Color.White,
-                fontSize = 14.sp,
-                fontFamily = Inter,
-                fontWeight = FontWeight.Bold
-            )
+            Box(modifier = Modifier.width(328.dp)) {
+                Text(
+                    modifier = Modifier.align(Alignment.Center),
+                    text = server.name,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.Black
+                )
+
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = latencyTextState.value,
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontFamily = Inter,
+                        fontWeight = FontWeight.Thin
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    val statusImage = when (connectedState.value) {
+                        true -> painterResource(R.drawable.green_circle)
+                        false -> painterResource(R.drawable.red_circle)
+                    }
+
+                    Image(
+                        modifier = Modifier.size(10.dp),
+                        painter = statusImage,
+                        contentDescription = "Server status image"
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
             Row {
                 CanvasMenuItemView(item = menuItems[0]) {
                     onServerList()
