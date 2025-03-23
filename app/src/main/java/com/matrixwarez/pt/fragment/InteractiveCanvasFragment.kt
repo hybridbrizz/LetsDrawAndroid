@@ -278,7 +278,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun notifyPixelsReady() {
         paint_panel_button.visibility = View.VISIBLE
-        export_button.visibility = View.VISIBLE
         background_button.visibility = View.VISIBLE
         grid_lines_button.visibility = View.VISIBLE
         canvas_summary_button.visibility = View.VISIBLE
@@ -506,6 +505,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             export_button, background_button, grid_lines_button, canvas_summary_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
+
+        if (server.isAdmin) {
+            export_button.visibility = View.VISIBLE
+        }
 
         // listeners
         surface_view.pixelHistoryListener = this
@@ -1527,7 +1530,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             paint_panel.visibility = View.VISIBLE
 //            paint_panel_button.visibility = View.GONE
 
-            export_button.visibility = View.INVISIBLE
             background_button.visibility = View.INVISIBLE
             grid_lines_button.visibility = View.INVISIBLE
             canvas_summary_button.visibility = View.INVISIBLE
@@ -1601,7 +1603,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             //recent_colors_action.visibility = View.VISIBLE
             //recent_colors_container.visibility = View.GONE
 
-            export_button.visibility = View.VISIBLE
             background_button.visibility = View.VISIBLE
             grid_lines_button.visibility = View.VISIBLE
             canvas_summary_button.visibility = View.VISIBLE
@@ -1692,7 +1693,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (show && !toolboxOpen) {
                 animatingTools = true
 
-                export_button.visibility = View.VISIBLE
                 background_button.visibility = View.VISIBLE
                 grid_lines_button.visibility = View.VISIBLE
                 canvas_summary_button.visibility = View.VISIBLE
