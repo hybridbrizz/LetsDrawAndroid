@@ -925,283 +925,283 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         Utils.setViewLayoutListener(view, object : Utils.ViewLayoutListener {
             override fun onViewLayout(view: View) {
                 // tablet
-                if (SessionSettings.instance.tablet) {
-                    // color picker frame width
-                    var layoutParams = ConstraintLayout.LayoutParams(
-                        (view.width * 0.35).toInt(),
-                        ConstraintLayout.LayoutParams.MATCH_PARENT
-                    )
-
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-
-                    color_picker_frame.layoutParams = layoutParams
-
-                    //color_hex_string_input.textSize = 28F
-                    var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), LinearLayout.LayoutParams.MATCH_PARENT)
-                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
-                    linearLayoutParams.gravity = Gravity.BOTTOM
-
-                    //color_hex_string_input.layoutParams = linearLayoutParams
-
-                    //color_hex_string_input.gravity = Gravity.BOTTOM
-
-                    // default color buttons size
-                    var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
-                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
-                    frameLayoutParams.height = frameLayoutParams.width
-
-                    default_black_color_action.layoutParams = frameLayoutParams
-
-                    frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
-                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
-                    frameLayoutParams.height = frameLayoutParams.width
-
-                    default_white_color_action.layoutParams = frameLayoutParams
-
-                    linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
-
-                    if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
-                        linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
-                    }
-                    else {
-                        linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
-                    }
-
-                    default_white_color_button.layoutParams = linearLayoutParams
-
-                    // paint panel
-                    layoutParams = ConstraintLayout.LayoutParams(
-                        ((150 / 1000F) * view.width).toInt(),
-                        ConstraintLayout.LayoutParams.MATCH_PARENT
-                    )
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
-
-                    paint_panel.layoutParams = layoutParams
-
-                    // paint indicator size
-                    val frameWidth = ((150 / 1000F) * view.width).toInt()
-                    val indicatorMargin = (frameWidth * 0.15).toInt()
-                    val indicatorWidth = frameWidth - indicatorMargin
-
-                    layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
-                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
-
-                    paint_indicator_view_bottom_layer.layoutParams = layoutParams
-                    paint_indicator_view.layoutParams = layoutParams
-
-                    if (SessionSettings.instance.showPaintBar) {
-                        // paint quantity bar size
-                        /*layoutParams = ConstraintLayout.LayoutParams(
-                            (paint_qty_bar.width * 1.25).toInt(),
-                            (paint_qty_bar.height * 1.25).toInt()
-                        )
-                        layoutParams.topToTop = ConstraintSet.PARENT_ID
-                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
-
-                        layoutParams.topMargin = Utils.dpToPx(context, 15)
-
-                        paint_qty_bar.layoutParams = layoutParams*/
-                    }
-                    else if (SessionSettings.instance.showPaintCircle) {
-                        // paint quantity circle size
-                        layoutParams = ConstraintLayout.LayoutParams(
-                            (paint_qty_circle.width * 1.25).toInt(),
-                            (paint_qty_circle.height * 1.25).toInt()
-                        )
-                        layoutParams.topToTop = ConstraintSet.PARENT_ID
-                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
-
-                        layoutParams.topMargin = Utils.dpToPx(context, 15)
-
-                        paint_qty_circle.layoutParams = layoutParams
-                    }
-
-                    //layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
-                    palette_name_text.textSize = 28F
-
-                    var actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
-                    actionButtonLayoutParams.gravity = Gravity.CENTER
-                    palette_add_color_action.layoutParams = actionButtonLayoutParams
-
-                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 4))
-                    actionButtonLayoutParams.gravity = Gravity.CENTER
-                    palette_remove_color_action.layoutParams = actionButtonLayoutParams
-
-                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 27), Utils.dpToPx(context, 30))
-                    actionButtonLayoutParams.gravity = Gravity.CENTER
-                    lock_paint_panel_action.layoutParams = actionButtonLayoutParams
-
-                    layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
-                    layoutParams.startToStart = ConstraintSet.PARENT_ID
-                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
-                    layoutParams.topMargin = Utils.dpToPx(context, 10)
-
-                    color_action_button_menu.layoutParams = layoutParams
-
-                    /*layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
-                    layoutParams.topMargin = Utils.dpToPx(context, 20)
-                    layoutParams.bottomMargin = Utils.dpToPx(context, 50)
-                    layoutParams.topToTop = ConstraintSet.PARENT_ID
-
-                    palette_name_text.layoutParams = layoutParams*/
-
-                    /*layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
-                    layoutParams.topMargin = Utils.dpToPx(context, 20)
-                    layoutParams.startToStart = ConstraintSet.PARENT_ID
-                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
-
-                    palette_add_color_button.layoutParams = layoutParams
-
-                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
-                    layoutParams.topMargin = Utils.dpToPx(context, 20)
-                    layoutParams.startToStart = ConstraintSet.PARENT_ID
-                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    layoutParams.topToBottom = palette_name_text.id
-
-                    palette_remove_color_button.layoutParams = layoutParams
-
-                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
-                    frameLayoutParams.topMargin = Utils.dpToPx(context, 5)
-                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-
-                    palette_add_color_action.layoutParams = frameLayoutParams
-
-                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 6))
-                    frameLayoutParams.topMargin = Utils.dpToPx(context, 17)
-                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-
-                    palette_remove_color_action.layoutParams = frameLayoutParams*/
-                }
-
-                // paint text info placement
-                if (SessionSettings.instance.showPaintBar) {
-                    val layoutParams = ConstraintLayout.LayoutParams(paint_time_info_container.width, paint_time_info_container.height)
-                    layoutParams.topToBottom = paint_qty_bar.id
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
-
-                    layoutParams.topMargin = Utils.dpToPx(context, 0)
-
-                    paint_time_info_container.layoutParams = layoutParams
-                }
-                else if (SessionSettings.instance.showPaintCircle) {
-                    paint_time_info_container.setBackgroundColor(Color.TRANSPARENT)
-                }
-
-                // background texture scaling
-                setPanelBackground()
-
-                // right-handed
-                if (SessionSettings.instance.rightHanded) {
-                    // paint panel
-                    var layoutParams = paint_panel.layoutParams as ConstraintLayout.LayoutParams
-                    layoutParams.rightToRight = -1
-                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-
-                    paint_panel.layoutParams = layoutParams
-
-                    paint_panel.invalidate()
-
-                    // canvas lock border
-                    layoutParams = paint_warning_frame.layoutParams as ConstraintLayout.LayoutParams
-
-                    layoutParams.leftToLeft = -1
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
-                    layoutParams.rightToLeft = -1
-                    layoutParams.leftToRight = paint_panel.id
-                    paint_warning_frame.layoutParams = layoutParams
-
-                    // color picker
-                    layoutParams = color_picker_frame.layoutParams as ConstraintLayout.LayoutParams
-
-                    layoutParams.leftToLeft = -1
-                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
-                    color_picker_frame.layoutParams = layoutParams
-
-                    // paint meter bar
-                    paint_qty_bar.rotation = 180F
-
-//                    // toolbox
-//                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
+//                if (SessionSettings.instance.tablet) {
+//                    // color picker frame width
+//                    var layoutParams = ConstraintLayout.LayoutParams(
+//                        (view.width * 0.35).toInt(),
+//                        ConstraintLayout.LayoutParams.MATCH_PARENT
+//                    )
 //
+//                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//
+//                    color_picker_frame.layoutParams = layoutParams
+//
+//                    //color_hex_string_input.textSize = 28F
+//                    var linearLayoutParams = LinearLayout.LayoutParams(Utils.dpToPx(context, 120), LinearLayout.LayoutParams.MATCH_PARENT)
+//                    linearLayoutParams.rightMargin = Utils.dpToPx(context, 10)
+//                    linearLayoutParams.gravity = Gravity.BOTTOM
+//
+//                    //color_hex_string_input.layoutParams = linearLayoutParams
+//
+//                    //color_hex_string_input.gravity = Gravity.BOTTOM
+//
+//                    // default color buttons size
+//                    var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
+//                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+//                    frameLayoutParams.height = frameLayoutParams.width
+//
+//                    default_black_color_action.layoutParams = frameLayoutParams
+//
+//                    frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
+//                    frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+//                    frameLayoutParams.height = frameLayoutParams.width
+//
+//                    default_white_color_action.layoutParams = frameLayoutParams
+//
+//                    linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
+//
+//                    if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+//                        linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
+//                    }
+//                    else {
+//                        linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
+//                    }
+//
+//                    default_white_color_button.layoutParams = linearLayoutParams
+//
+//                    // paint panel
+//                    layoutParams = ConstraintLayout.LayoutParams(
+//                        ((150 / 1000F) * view.width).toInt(),
+//                        ConstraintLayout.LayoutParams.MATCH_PARENT
+//                    )
+//                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//
+//                    paint_panel.layoutParams = layoutParams
+//
+//                    // paint indicator size
+//                    val frameWidth = ((150 / 1000F) * view.width).toInt()
+//                    val indicatorMargin = (frameWidth * 0.15).toInt()
+//                    val indicatorWidth = frameWidth - indicatorMargin
+//
+//                    layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
+//                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+//                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+//                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//
+//                    paint_indicator_view_bottom_layer.layoutParams = layoutParams
+//                    paint_indicator_view.layoutParams = layoutParams
+//
+//                    if (SessionSettings.instance.showPaintBar) {
+//                        // paint quantity bar size
+//                        /*layoutParams = ConstraintLayout.LayoutParams(
+//                            (paint_qty_bar.width * 1.25).toInt(),
+//                            (paint_qty_bar.height * 1.25).toInt()
+//                        )
+//                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+//                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//
+//                        layoutParams.topMargin = Utils.dpToPx(context, 15)
+//
+//                        paint_qty_bar.layoutParams = layoutParams*/
+//                    }
+//                    else if (SessionSettings.instance.showPaintCircle) {
+//                        // paint quantity circle size
+//                        layoutParams = ConstraintLayout.LayoutParams(
+//                            (paint_qty_circle.width * 1.25).toInt(),
+//                            (paint_qty_circle.height * 1.25).toInt()
+//                        )
+//                        layoutParams.topToTop = ConstraintSet.PARENT_ID
+//                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                        layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//
+//                        layoutParams.topMargin = Utils.dpToPx(context, 15)
+//
+//                        paint_qty_circle.layoutParams = layoutParams
+//                    }
+//
+//                    //layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
+//                    palette_name_text.textSize = 28F
+//
+//                    var actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
+//                    actionButtonLayoutParams.gravity = Gravity.CENTER
+//                    palette_add_color_action.layoutParams = actionButtonLayoutParams
+//
+//                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 4))
+//                    actionButtonLayoutParams.gravity = Gravity.CENTER
+//                    palette_remove_color_action.layoutParams = actionButtonLayoutParams
+//
+//                    actionButtonLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 27), Utils.dpToPx(context, 30))
+//                    actionButtonLayoutParams.gravity = Gravity.CENTER
+//                    lock_paint_panel_action.layoutParams = actionButtonLayoutParams
+//
+//                    layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT)
+//                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+//                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+//                    layoutParams.topToBottom = palette_name_text.id
+//                    layoutParams.topMargin = Utils.dpToPx(context, 10)
+//
+//                    color_action_button_menu.layoutParams = layoutParams
+//
+//                    /*layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, Utils.dpToPx(context, 40))
+//                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+//                    layoutParams.bottomMargin = Utils.dpToPx(context, 50)
+//                    layoutParams.topToTop = ConstraintSet.PARENT_ID
+//
+//                    palette_name_text.layoutParams = layoutParams*/
+//
+//                    /*layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
+//                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+//                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+//                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+//                    layoutParams.topToBottom = palette_name_text.id
+//
+//                    palette_add_color_button.layoutParams = layoutParams
+//
+//                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 40), Utils.dpToPx(context, 40))
+//                    layoutParams.topMargin = Utils.dpToPx(context, 20)
+//                    layoutParams.startToStart = ConstraintSet.PARENT_ID
+//                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+//                    layoutParams.topToBottom = palette_name_text.id
+//
+//                    palette_remove_color_button.layoutParams = layoutParams
+//
+//                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 30))
+//                    frameLayoutParams.topMargin = Utils.dpToPx(context, 5)
+//                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+//
+//                    palette_add_color_action.layoutParams = frameLayoutParams
+//
+//                    frameLayoutParams = FrameLayout.LayoutParams(Utils.dpToPx(context, 30), Utils.dpToPx(context, 6))
+//                    frameLayoutParams.topMargin = Utils.dpToPx(context, 17)
+//                    frameLayoutParams.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+//
+//                    palette_remove_color_action.layoutParams = frameLayoutParams*/
+//                }
+//
+//                // paint text info placement
+//                if (SessionSettings.instance.showPaintBar) {
+//                    val layoutParams = ConstraintLayout.LayoutParams(paint_time_info_container.width, paint_time_info_container.height)
+//                    layoutParams.topToBottom = paint_qty_bar.id
+//                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+//                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//
+//                    layoutParams.topMargin = Utils.dpToPx(context, 0)
+//
+//                    paint_time_info_container.layoutParams = layoutParams
+//                }
+//                else if (SessionSettings.instance.showPaintCircle) {
+//                    paint_time_info_container.setBackgroundColor(Color.TRANSPARENT)
+//                }
+//
+//                // background texture scaling
+//                setPanelBackground()
+//
+//                // right-handed
+//                if (SessionSettings.instance.rightHanded) {
+//                    // paint panel
+//                    var layoutParams = paint_panel.layoutParams as ConstraintLayout.LayoutParams
 //                    layoutParams.rightToRight = -1
 //                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-//                    open_tools_button.layoutParams = layoutParams
 //
-//                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
-//                    layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
-//                    open_tools_action.layoutParams = layoutParams3
-
-                    // toolbox buttons
-//                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
+//                    paint_panel.layoutParams = layoutParams
 //
-//                    for (button in toolboxButtons) {
-//                        layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
-//                        layoutParams.rightToRight = -1
-//                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
-//                        //layoutParams.leftMargin = Utils.dpToPx(context, 6)
-//                        button.layoutParams = layoutParams
-//                    }
-
-//                    val toolboxImages = arrayOf(export_action, background_action, grid_lines_action, canvas_summary_action)
+//                    paint_panel.invalidate()
 //
-//                    for (image in toolboxImages) {
-//                        image.layoutParams = (image.layoutParams as FrameLayout.LayoutParams).also {
-//                            it.gravity = Gravity.START or Gravity.TOP
-//                        }
-//                    }
-
-                    // recent colors button
-//                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
+//                    // canvas lock border
+//                    layoutParams = paint_warning_frame.layoutParams as ConstraintLayout.LayoutParams
 //
-//                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+//                    layoutParams.leftToLeft = -1
+//                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//                    layoutParams.rightToLeft = -1
+//                    layoutParams.leftToRight = paint_panel.id
+//                    paint_warning_frame.layoutParams = layoutParams
+//
+//                    // color picker
+//                    layoutParams = color_picker_frame.layoutParams as ConstraintLayout.LayoutParams
+//
+//                    layoutParams.leftToLeft = -1
+//                    layoutParams.rightToRight = ConstraintSet.PARENT_ID
+//                    color_picker_frame.layoutParams = layoutParams
+//
+//                    // paint meter bar
+//                    paint_qty_bar.rotation = 180F
+//
+////                    // toolbox
+////                    layoutParams = open_tools_button.layoutParams as ConstraintLayout.LayoutParams
+////
+////                    layoutParams.rightToRight = -1
+////                    layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+////                    open_tools_button.layoutParams = layoutParams
+////
+////                    var layoutParams3 = open_tools_action.layoutParams as FrameLayout.LayoutParams
+////                    layoutParams3.gravity = Gravity.LEFT or Gravity.BOTTOM
+////                    open_tools_action.layoutParams = layoutParams3
+//
+//                    // toolbox buttons
+////                    val toolboxButtons = arrayOf(export_button, background_button, grid_lines_button, canvas_summary_button)
+////
+////                    for (button in toolboxButtons) {
+////                        layoutParams = button.layoutParams as ConstraintLayout.LayoutParams
+////                        layoutParams.rightToRight = -1
+////                        layoutParams.leftToLeft = ConstraintSet.PARENT_ID
+////                        //layoutParams.leftMargin = Utils.dpToPx(context, 6)
+////                        button.layoutParams = layoutParams
+////                    }
+//
+////                    val toolboxImages = arrayOf(export_action, background_action, grid_lines_action, canvas_summary_action)
+////
+////                    for (image in toolboxImages) {
+////                        image.layoutParams = (image.layoutParams as FrameLayout.LayoutParams).also {
+////                            it.gravity = Gravity.START or Gravity.TOP
+////                        }
+////                    }
+//
+//                    // recent colors button
+////                    layoutParams = ConstraintLayout.LayoutParams(Utils.dpToPx(context, 80), Utils.dpToPx(context, 80))
+////
+////                    layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
+////                    layoutParams.rightToLeft = color_picker_frame.id
+////
+////                    recent_colors_button.layoutParams = layoutParams
+////
+////                    // recent colors action
+////                    val layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
+////                    layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
+////                    recent_colors_action.layoutParams = layoutParams3
+//
+//                    // recent colors container
+//                    layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
+//
+//                    layoutParams.leftToRight = -1
 //                    layoutParams.rightToLeft = color_picker_frame.id
+//                    recent_colors_container.layoutParams = layoutParams
 //
-//                    recent_colors_button.layoutParams = layoutParams
+//                    layoutParams = canvas_summary_container.layoutParams as ConstraintLayout.LayoutParams
 //
-//                    // recent colors action
-//                    val layoutParams3 = recent_colors_action.layoutParams as FrameLayout.LayoutParams
-//                    layoutParams3.gravity = Gravity.END or Gravity.BOTTOM
-//                    recent_colors_action.layoutParams = layoutParams3
-
-                    // recent colors container
-                    layoutParams = recent_colors_container.layoutParams as ConstraintLayout.LayoutParams
-
-                    layoutParams.leftToRight = -1
-                    layoutParams.rightToLeft = color_picker_frame.id
-                    recent_colors_container.layoutParams = layoutParams
-
-                    layoutParams = canvas_summary_container.layoutParams as ConstraintLayout.LayoutParams
-
-                    layoutParams.startToStart = -1
-                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
-                    canvas_summary_container.layoutParams = layoutParams
-
-                    //open_tools_button.layoutParams = layoutParams
-
-                    // paint yes
-                    /*var layoutParams2 = paint_yes_container.layoutParams as LinearLayout.LayoutParams
-                    layoutParams2.rightMargin = 0
-                    paint_yes_container.layoutParams = layoutParams2
-
-                    // paint no
-                    layoutParams2 = paint_no_container.layoutParams as LinearLayout.LayoutParams
-                    layoutParams2.rightMargin = Utils.dpToPx(context, 30)
-                    paint_no_container.layoutParams = layoutParams2
-
-                    paint_action_button_container.removeViewAt(0)
-                    paint_action_button_container.addView(paint_yes_container)*/
-                }
-                else {
-                    // close paint panel button
-                }
+//                    layoutParams.startToStart = -1
+//                    layoutParams.endToEnd = ConstraintSet.PARENT_ID
+//                    canvas_summary_container.layoutParams = layoutParams
+//
+//                    //open_tools_button.layoutParams = layoutParams
+//
+//                    // paint yes
+//                    /*var layoutParams2 = paint_yes_container.layoutParams as LinearLayout.LayoutParams
+//                    layoutParams2.rightMargin = 0
+//                    paint_yes_container.layoutParams = layoutParams2
+//
+//                    // paint no
+//                    layoutParams2 = paint_no_container.layoutParams as LinearLayout.LayoutParams
+//                    layoutParams2.rightMargin = Utils.dpToPx(context, 30)
+//                    paint_no_container.layoutParams = layoutParams2
+//
+//                    paint_action_button_container.removeViewAt(0)
+//                    paint_action_button_container.addView(paint_yes_container)*/
+//                }
+//                else {
+//                    // close paint panel button
+//                }
 
                 surface_view.setInitialPositionAndScale()
 
@@ -1309,93 +1309,93 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     // screen rotation
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        if (!SessionSettings.instance.tablet) {
-            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-            return
-        }
-
-        paint_panel.background = null
-
-        Utils.setViewLayoutListener(requireView(), object : Utils.ViewLayoutListener {
-            override fun onViewLayout(view: View) {
-                // interactive canvas
-                surface_view.interactiveCanvas.deviceViewport?.apply {
-                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.requireContext())
-                }
-
-                // color picker frame width
-                var layoutParams = ConstraintLayout.LayoutParams(
-                    (view.width * 0.35).toInt(),
-                    ConstraintLayout.LayoutParams.MATCH_PARENT
-                )
-
-                layoutParams.leftToLeft = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).rightToRight
-
-                color_picker_frame.layoutParams = layoutParams
-
-                // color picker default color buttons
-                var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
-                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
-                frameLayoutParams.height = frameLayoutParams.width
-
-                default_black_color_action.layoutParams = frameLayoutParams
-
-                frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
-                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
-                frameLayoutParams.height = frameLayoutParams.width
-
-                default_white_color_action.layoutParams = frameLayoutParams
-
-                var linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
-                if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
-                    linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
-                }
-                else {
-                    linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
-                }
-                default_white_color_button.layoutParams = linearLayoutParams
-
-                val paintPanelWidth = if (Utils.isTablet(requireContext())) {
-                    ((150 / 1000F) * view.width).toInt()
-                }
-                else {
-                    ((250 / 1000F) * view.width).toInt()
-                }
-
-                // paint panel
-                layoutParams = ConstraintLayout.LayoutParams(
-                    paintPanelWidth,
-                    ConstraintLayout.LayoutParams.MATCH_PARENT
-                )
-                layoutParams.leftToLeft = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).rightToRight
-
-                paint_panel.layoutParams = layoutParams
-
-                // paint indicator size
-                val frameWidth = ((150 / 1000F) * view.width).toInt()
-                val indicatorMargin = (frameWidth * 0.15).toInt()
-                val indicatorWidth = frameWidth - indicatorMargin
-
-                layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
-                layoutParams.topToTop = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).topToTop
-                layoutParams.bottomToBottom = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).bottomToBottom
-                layoutParams.leftToLeft = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
-                layoutParams.rightToRight = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).rightToRight
-
-                paint_indicator_view_bottom_layer.layoutParams = layoutParams
-                paint_indicator_view.layoutParams = layoutParams
-
-                device_canvas_viewport_view.updateDeviceViewport()
-
-                setPanelBackground()
-            }
-        })
-    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//
+//        if (!SessionSettings.instance.tablet) {
+//            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+//            return
+//        }
+//
+//        paint_panel.background = null
+//
+//        Utils.setViewLayoutListener(requireView(), object : Utils.ViewLayoutListener {
+//            override fun onViewLayout(view: View) {
+//                // interactive canvas
+//                surface_view.interactiveCanvas.deviceViewport?.apply {
+//                    surface_view.interactiveCanvas.updateDeviceViewport(this@InteractiveCanvasFragment.requireContext())
+//                }
+//
+//                // color picker frame width
+//                var layoutParams = ConstraintLayout.LayoutParams(
+//                    (view.width * 0.35).toInt(),
+//                    ConstraintLayout.LayoutParams.MATCH_PARENT
+//                )
+//
+//                layoutParams.leftToLeft = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+//                layoutParams.rightToRight = (color_picker_frame.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+//
+//                color_picker_frame.layoutParams = layoutParams
+//
+//                // color picker default color buttons
+//                var frameLayoutParams = (default_black_color_action.layoutParams as FrameLayout.LayoutParams)
+//                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+//                frameLayoutParams.height = frameLayoutParams.width
+//
+//                default_black_color_action.layoutParams = frameLayoutParams
+//
+//                frameLayoutParams = (default_white_color_action.layoutParams as FrameLayout.LayoutParams)
+//                frameLayoutParams.width = (color_picker_frame.layoutParams.width * 0.16).toInt()
+//                frameLayoutParams.height = frameLayoutParams.width
+//
+//                default_white_color_action.layoutParams = frameLayoutParams
+//
+//                var linearLayoutParams = (default_white_color_button.layoutParams as LinearLayout.LayoutParams)
+//                if (default_white_color_action.layoutParams.width <= Utils.dpToPx(context, 40)) {
+//                    linearLayoutParams.marginStart = Utils.dpToPx(context, 10)
+//                }
+//                else {
+//                    linearLayoutParams.marginStart = Utils.dpToPx(context, 20)
+//                }
+//                default_white_color_button.layoutParams = linearLayoutParams
+//
+//                val paintPanelWidth = if (Utils.isTablet(requireContext())) {
+//                    ((150 / 1000F) * view.width).toInt()
+//                }
+//                else {
+//                    ((250 / 1000F) * view.width).toInt()
+//                }
+//
+//                // paint panel
+//                layoutParams = ConstraintLayout.LayoutParams(
+//                    paintPanelWidth,
+//                    ConstraintLayout.LayoutParams.MATCH_PARENT
+//                )
+//                layoutParams.leftToLeft = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+//                layoutParams.rightToRight = (paint_panel.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+//
+//                paint_panel.layoutParams = layoutParams
+//
+//                // paint indicator size
+//                val frameWidth = ((150 / 1000F) * view.width).toInt()
+//                val indicatorMargin = (frameWidth * 0.15).toInt()
+//                val indicatorWidth = frameWidth - indicatorMargin
+//
+//                layoutParams = ConstraintLayout.LayoutParams(indicatorWidth, indicatorWidth)
+//                layoutParams.topToTop = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).topToTop
+//                layoutParams.bottomToBottom = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).bottomToBottom
+//                layoutParams.leftToLeft = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).leftToLeft
+//                layoutParams.rightToRight = (paint_indicator_view.layoutParams as ConstraintLayout.LayoutParams).rightToRight
+//
+//                paint_indicator_view_bottom_layer.layoutParams = layoutParams
+//                paint_indicator_view.layoutParams = layoutParams
+//
+//                device_canvas_viewport_view.updateDeviceViewport()
+//
+//                setPanelBackground()
+//            }
+//        })
+//    }
 
     // view helper
     private fun setPanelBackground() {
@@ -1490,6 +1490,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun setupColorPalette(colors: Array<Int>?) {
+        if (Utils.isTablet(requireContext())) {
+            val layoutParams = recent_colors_view.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.dimensionRatio = "16:1"
+            recent_colors_view.layoutParams = layoutParams
+
+            recent_colors_view.rows = 1
+            recent_colors_view.cols = 16
+        }
+
         recent_colors_view.listener = this
         recent_colors_view.recentColors = colors
             ?.toList()
@@ -2754,7 +2763,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun applyOptions() {
         // panel background
-        setPanelBackground()
+        //setPanelBackground()
 
         // panel theme config
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])

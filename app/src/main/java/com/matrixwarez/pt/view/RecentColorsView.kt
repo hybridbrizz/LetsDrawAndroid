@@ -44,8 +44,8 @@ class RecentColorsView: View {
             }
         }
 
-    private var rows = 2
-    private var cols = 8
+    var rows = 2
+    var cols = 8
 
     private var itemWidth = 0
 
