@@ -67,7 +67,7 @@ class Utils {
                 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(
                     color
                 )) / 255
-            return darkness >= 0.85
+            return darkness >= 0.5
         }
 
         fun brightenColor(color: Int, by: Float): Int {

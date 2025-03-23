@@ -49,9 +49,11 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.minus
 import androidx.core.view.children
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
@@ -98,6 +100,8 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.Exception
 import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQtyListener,
@@ -160,6 +164,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private val showServerListState = mutableStateOf(false)
     private val mapMarkerIndexState = mutableIntStateOf(0)
     private val showMenuState = mutableStateOf(false)
+
+    private var paintIndicatorhDownLocation: PointF? = null
 
     private var leave = false
 
@@ -364,6 +370,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             showPalettesFragmentPopover()
         }
 
+        updateSelectedColor(SessionSettings.instance.paintColor)
+
         palette_name_text.text = SessionSettings.instance.palette.name
 
         palette_add_color_action.type = ActionButtonView.Type.ADD
@@ -428,6 +436,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
+
+        text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
@@ -521,26 +531,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         hsb_palette.listen(object: HSBPalette.ColorListener {
             override fun onColor(color: Int) {
-                Log.i("Color", color.toString())
-
-                paint_indicator_view_bottom_layer.setPaintColor(color)
-
-                if (PaintColorIndicator.isColorLight(color) && panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    //paint_color_accept.color = Color.BLACK
-                }
-                else if (panelThemeConfig.actionButtonColor == Color.WHITE) {
-                    //paint_color_accept.color = Color.WHITE
-                }
-
-                //color_hex_string_input.removeTextChangedListener(textChangeListener)
-
-                val hexColor = java.lang.String.format("%06X", 0xFFFFFF and color)
-                //color_hex_string_input.setText(hexColor)
-
-                //color_hex_string_input.addTextChangedListener(textChangeListener)
-
-                // palette color actions
-                syncPaletteAndColor()
+                updateSelectedColor(color)
             }
         })
 
@@ -557,15 +548,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 //        }
 
         paint_panel_button.setOnClickListener {
-            if (surface_view.mode == InteractiveCanvasView.Mode.EXPLORING
-                || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.EXPLORING) {
-                surface_view.startPainting()
-                paint_button_container.background = ColorDrawable(Color.parseColor("#99ffffff"))
+            if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
+                || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.PAINTING) {
+                surface_view.endPainting()
             }
             else {
-                surface_view.endPainting()
-                paint_button_container.background = ColorDrawable(Color.TRANSPARENT)
+                surface_view.startPainting()
             }
+
+            updateSelectedColor(SessionSettings.instance.paintColor)
         }
 
 //        paint_yes.setOnClickListener {
@@ -642,27 +633,28 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
         }
 
-        paint_indicator_view.setOnClickListener {
-            // start color selection mode
-            if (color_picker_frame.visibility != View.VISIBLE) {
-                color_picker_frame.visibility = View.VISIBLE
-                recent_colors_container.visibility = View.GONE
-                recent_colors_button.visibility = View.GONE
+        paint_indicator_view.setOnTouchListener { v, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    paintIndicatorhDownLocation = PointF(motionEvent.x, motionEvent.y)
+                }
+                MotionEvent.ACTION_MOVE -> {}
+                MotionEvent.ACTION_UP -> {
+                    val upLocation = PointF(motionEvent.x, motionEvent.y)
 
-                initalColor = SessionSettings.instance.paintColor
-                hsb_palette.init(initalColor)
+                    val x1 = upLocation.x.toDouble()
+                    val y1 = upLocation.y.toDouble()
+                    val x2 = paintIndicatorhDownLocation?.x?.toDouble() ?: x1
+                    val y2 = paintIndicatorhDownLocation?.y?.toDouble() ?: y1
 
-                paint_warning_frame.visibility = View.GONE
-
-                //recent_colors_button.visibility = View.GONE
-                //recent_colors_container.visibility = View.GONE
-
-                surface_view.startPaintSelection()
+                    if (sqrt((y2 - y1).pow(2.0) + (x2 - x1).pow(2.0)) < 10) {
+                        onPaintIndicatorClick()
+                        v.performClick()
+                    }
+                }
             }
-            else {
-                color_picker_frame.visibility = View.GONE
-                surface_view.endPaintSelection()
-            }
+
+            true
         }
 
 //        paint_color_accept.setOnClickListener {
@@ -1376,6 +1368,44 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
     }
 
+    private fun updateSelectedColor(color: Int) {
+        Log.i("Color", color.toString())
+
+        paint_indicator_view_bottom_layer.setPaintColor(color)
+
+        val isColorDark = Utils.isColorDark(color)
+
+        when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
+            || surface_view.lastModeBeforePaintSelect == InteractiveCanvasView.Mode.PAINTING) {
+            true -> {
+                val drawableResId = when (isColorDark) {
+                    true -> R.drawable.paint_button_background_light_selected
+                    false -> R.drawable.paint_button_background_dark_selected
+                }
+                paint_button_background.background = ContextCompat.getDrawable(requireContext(), drawableResId)
+            }
+            false -> {
+                paint_button_background.background = ColorDrawable(Color.TRANSPARENT)
+            }
+        }
+
+        when (isColorDark) {
+            true -> {
+                val iconColor = Color.parseColor("#CCFFFFFF")
+                paint_panel_button.color = iconColor
+                text_bottom_display.setTextColor(iconColor)
+            }
+            false -> {
+                val iconColor = Color.parseColor("#CC000000")
+                paint_panel_button.color = iconColor
+                text_bottom_display.setTextColor(iconColor)
+            }
+        }
+
+        // palette color actions
+        syncPaletteAndColor()
+    }
+
     private fun setupColorPalette(colors: Array<Int>?) {
         if (colors != null) {
             var i = 0
@@ -1526,6 +1556,29 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             toggleExportBorder(false)
 
             SessionSettings.instance.paintPanelOpen = false
+        }
+    }
+
+    private fun onPaintIndicatorClick() {
+        // start color selection mode
+        if (color_picker_frame.visibility != View.VISIBLE) {
+            color_picker_frame.visibility = View.VISIBLE
+            recent_colors_container.visibility = View.GONE
+            recent_colors_button.visibility = View.GONE
+
+            initalColor = SessionSettings.instance.paintColor
+            hsb_palette.init(initalColor)
+
+            paint_warning_frame.visibility = View.GONE
+
+            //recent_colors_button.visibility = View.GONE
+            //recent_colors_container.visibility = View.GONE
+
+            surface_view.startPaintSelection()
+        }
+        else {
+            color_picker_frame.visibility = View.GONE
+            surface_view.endPaintSelection()
         }
     }
 
@@ -2030,8 +2083,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // paint qty listener
     override fun paintQtyChanged(qty: Int) {
         //drops_amt_text.text = qty.toString()
-        activity?.runOnUiThread {
-            paint_amt_info.text = qty.toString()
+        lifecycleScope.launch {
+            activity?.runOnUiThread {
+                paint_amt_info.text = qty.toString()
+            }
+            text_bottom_display.text = qty.toString()
         }
     }
 
