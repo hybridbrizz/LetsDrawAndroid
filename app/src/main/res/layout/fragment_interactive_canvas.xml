@@ -703,7 +703,7 @@
     <FrameLayout
         android:id="@+id/pixel_history_fragment_container"
             android:visibility="invisible"
-            android:layout_width="400dp"
+            android:layout_width="240dp"
             android:layout_height="240dp"
             android:elevation="10dp"
             android:background="@android:drawable/dialog_holo_light_frame"

@@ -1,68 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/background_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:padding="10dp">
+
     <View
             android:id="@+id/paint_color"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
-            android:id="@+id/name_text_1"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:textSize="24sp"
+            android:id="@+id/name_text"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
-            android:textStyle="bold"
-            android:layout_marginLeft="10dp"
+            android:fontFamily="@font/inter_regular"
+            android:layout_marginStart="10dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/paint_color" />
-
-    <TextView
-            android:id="@+id/name_text_2"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/name_text_1" />
-
-    <TextView
-            android:id="@+id/name_text_3"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/name_text_2" />
-
-    <TextView
-            android:id="@+id/date_text"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:textSize="24sp"
-            android:textColor="@android:color/white"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintStart_toEndOf="@id/paint_color"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
             android:id="@+id/full_date_text"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:textSize="24sp"
+            android:layout_height="25dp"
+            android:textSize="16sp"
             android:textColor="@android:color/white"
+            android:fontFamily="@font/inter_regular"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"

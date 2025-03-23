@@ -1535,7 +1535,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         showMenuState.value = false
         canvas_menu.visibility = View.GONE
     }
-    
+
     private fun showServerList() {
         server_list.visibility = View.VISIBLE
         showServerListState.value = true
@@ -1766,8 +1766,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                                     ).toFloat()
                             }
 
-                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y = Utils.dpToPx(context, 20).toFloat()
+                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 40).toFloat()) {
+                                pixel_history_fragment_container.y = Utils.dpToPx(context, 40).toFloat()
                             } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
                                 pixel_history_fragment_container.y =
                                     height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(

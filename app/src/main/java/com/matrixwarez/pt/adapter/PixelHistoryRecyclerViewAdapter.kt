@@ -84,10 +84,8 @@ class PixelHistoryRecyclerViewAdapter(context: Context, val server: Server, pixe
         if (selectedItems[position]) {
             val simpleDateFormat =  SimpleDateFormat("MM-dd-yyyy HH:mm", Locale.ENGLISH)
             val dateStr = simpleDateFormat.format(date).toLowerCase()
-            holder.nameTextView1.text = ""
-            holder.nameTextView2.text = ""
-            holder.nameTextView3.text = ""
-            holder.dateTextView.text = ""
+            holder.nameTextView.text = ""
+            holder.colorView.visibility = View.GONE
             holder.fullDateView.text = dateStr
         }
         else {
@@ -97,70 +95,57 @@ class PixelHistoryRecyclerViewAdapter(context: Context, val server: Server, pixe
                 name = "${name.substring(0 until 7)}..."
             }
 
-            holder.nameTextView1.text = name
-            holder.nameTextView2.text = " (${jsonObj.getInt("level")})"
-
-            if (name == SessionSettings.instance.firstContributorName) {
-                //FAD55D
-                holder.nameTextView1.setTextColor(Color.parseColor("#DECB52"))
-            }
-            else if (name == SessionSettings.instance.secondContributorName) {
-                holder.nameTextView1.setTextColor(Color.parseColor("#AFB3B1"))
-            }
-            else if (name == SessionSettings.instance.thirdContributorName) {
-                holder.nameTextView1.setTextColor(Color.parseColor("#BD927B"))
-            }
-            else {
-                holder.nameTextView1.setTextColor(Color.WHITE)
-            }
+            holder.nameTextView.text = name
 
             holder.colorView.setBackgroundColor(jsonObj.getInt("color"))
+            holder.colorView.visibility = View.VISIBLE
+
             holder.fullDateView.text = ""
 
-            val dateCal = GregorianCalendar()
-            dateCal.time = date
-
-            val nowCal = GregorianCalendar()
-            nowCal.time = Date()
-
-            val days = nowCal.get(Calendar.DAY_OF_YEAR) - dateCal.get(Calendar.DAY_OF_YEAR)
-            val sameYear = dateCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
-
-            if (days == 0 && sameYear) {
-                val simpleDateFormat =  SimpleDateFormat("hh:mm a", Locale.ENGLISH)
-                val dateStr = simpleDateFormat.format(date).toLowerCase()
-                holder.dateTextView.text = dateStr
-            }
-            else if (days == 1 && sameYear) {
-                holder.dateTextView.text = "Yesterday"
-            }
-            else if (days in 2..6 && sameYear) {
-                val simpleDateFormat =  SimpleDateFormat("EEEE", Locale.ENGLISH)
-                val dateStr = simpleDateFormat.format(date)
-                holder.dateTextView.text = dateStr
-            }
-            else if (days in 7..13 && sameYear) {
-                holder.dateTextView.text = "Week ago"
-            }
-            else if (days in 14..20 && sameYear) {
-                holder.dateTextView.text = "Two weeks ago"
-            }
-            else if (days in 21..28 && sameYear) {
-                holder.dateTextView.text = "Three weeks ago"
-            }
-            else if (days in 29..31 && sameYear) {
-                holder.dateTextView.text = "Four weeks ago"
-            }
-            else if (sameYear) {
-                val simpleDateFormat =  SimpleDateFormat("MMMM", Locale.ENGLISH)
-                val dateStr = simpleDateFormat.format(date)
-                holder.dateTextView.text = dateStr
-            }
-            else {
-                val simpleDateFormat =  SimpleDateFormat("MM-dd-yy", Locale.ENGLISH)
-                val dateStr = simpleDateFormat.format(date).toLowerCase()
-                holder.dateTextView.text = dateStr
-            }
+//            val dateCal = GregorianCalendar()
+//            dateCal.time = date
+//
+//            val nowCal = GregorianCalendar()
+//            nowCal.time = Date()
+//
+//            val days = nowCal.get(Calendar.DAY_OF_YEAR) - dateCal.get(Calendar.DAY_OF_YEAR)
+//            val sameYear = dateCal.get(Calendar.YEAR) == nowCal.get(Calendar.YEAR)
+//
+//            if (days == 0 && sameYear) {
+//                val simpleDateFormat =  SimpleDateFormat("hh:mm a", Locale.ENGLISH)
+//                val dateStr = simpleDateFormat.format(date).toLowerCase()
+//                holder.dateTextView.text = dateStr
+//            }
+//            else if (days == 1 && sameYear) {
+//                holder.dateTextView.text = "Yesterday"
+//            }
+//            else if (days in 2..6 && sameYear) {
+//                val simpleDateFormat =  SimpleDateFormat("EEEE", Locale.ENGLISH)
+//                val dateStr = simpleDateFormat.format(date)
+//                holder.dateTextView.text = dateStr
+//            }
+//            else if (days in 7..13 && sameYear) {
+//                holder.dateTextView.text = "Week ago"
+//            }
+//            else if (days in 14..20 && sameYear) {
+//                holder.dateTextView.text = "Two weeks ago"
+//            }
+//            else if (days in 21..28 && sameYear) {
+//                holder.dateTextView.text = "Three weeks ago"
+//            }
+//            else if (days in 29..31 && sameYear) {
+//                holder.dateTextView.text = "Four weeks ago"
+//            }
+//            else if (sameYear) {
+//                val simpleDateFormat =  SimpleDateFormat("MMMM", Locale.ENGLISH)
+//                val dateStr = simpleDateFormat.format(date)
+//                holder.dateTextView.text = dateStr
+//            }
+//            else {
+//                val simpleDateFormat =  SimpleDateFormat("MM-dd-yy", Locale.ENGLISH)
+//                val dateStr = simpleDateFormat.format(date).toLowerCase()
+//                holder.dateTextView.text = dateStr
+//            }
         }
     }
 
@@ -169,11 +154,8 @@ class PixelHistoryRecyclerViewAdapter(context: Context, val server: Server, pixe
     }
 
     class PaintHistoryViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-        var nameTextView1: TextView = v.findViewById(R.id.name_text_1)
-        var nameTextView2: TextView = v.findViewById(R.id.name_text_2)
-        var nameTextView3: TextView = v.findViewById(R.id.name_text_3)
+        var nameTextView: TextView = v.findViewById(R.id.name_text)
         var colorView: View = v.findViewById(R.id.paint_color)
-        var dateTextView: TextView = v.findViewById(R.id.date_text)
         var backgroundView: ConstraintLayout = v.findViewById(R.id.background_view)
         var fullDateView: TextView = v.findViewById(R.id.full_date_text)
     }
