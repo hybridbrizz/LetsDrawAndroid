@@ -253,52 +253,22 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
             }
 
-            val recentColorsJsonStr = sessionSettings.getSharedPrefs(context).getString(
-                "recent_colors",
-                null
-            )
-
-            if (recentColorsJsonStr != null) {
-                val recentColorsArr = JSONArray(recentColorsJsonStr)
-                val sizeDiff = sessionSettings.numRecentColors - recentColorsArr.length()
-
-                if (sizeDiff < 0) {
-                    for (i in 0 until sessionSettings.numRecentColors) {
-                        // because the most recent is at the end of the list
-                        recentColorsList.add(recentColorsArr.getInt(-sizeDiff + i))
-                    }
-                }
-                else {
-                    for (i in 0 until recentColorsArr.length()) {
-                        recentColorsList.add(recentColorsArr.getInt(i))
-                    }
-
-                    if (sizeDiff > 0) {
-                        val gridLineColor = getGridLineColor()
-                        for (i in 0 until sizeDiff) {
-                            recentColorsList.add(0, gridLineColor)
-                        }
-                    }
-                }
-            }
-            else {
-                recentColorsList.add(Color.parseColor("#ffffffff"))
-                recentColorsList.add(Color.parseColor("#ff999999"))
-                recentColorsList.add(Color.parseColor("#ff000000"))
-                recentColorsList.add(Color.parseColor("#ffff0000"))
-                recentColorsList.add(Color.parseColor("#ff00ff00"))
-                recentColorsList.add(Color.parseColor("#ff0000ff"))
-                recentColorsList.add(Color.parseColor("#ffffff00"))
-                recentColorsList.add(Color.parseColor("#ffff00ff"))
-                recentColorsList.add(Color.parseColor("#ff00ffff"))
-                recentColorsList.add(Color.parseColor("#ffffa500"))
-                recentColorsList.add(Color.parseColor("#ffffc0cb"))
-                recentColorsList.add(Color.parseColor("#ff964b00"))
-                recentColorsList.add(Color.parseColor("#ff000040"))
-                recentColorsList.add(Color.parseColor("#ff8b0000"))
-                recentColorsList.add(Color.parseColor("#ff800080"))
-                recentColorsList.add(Color.parseColor("#ff023020"))
-            }
+            recentColorsList.add(Color.parseColor("#ffffffff"))
+            recentColorsList.add(Color.parseColor("#ff999999"))
+            recentColorsList.add(Color.parseColor("#ff000000"))
+            recentColorsList.add(Color.parseColor("#ffff0000"))
+            recentColorsList.add(Color.parseColor("#ff00ff00"))
+            recentColorsList.add(Color.parseColor("#ff0000ff"))
+            recentColorsList.add(Color.parseColor("#ffffff00"))
+            recentColorsList.add(Color.parseColor("#ffff00ff"))
+            recentColorsList.add(Color.parseColor("#ff00ffff"))
+            recentColorsList.add(Color.parseColor("#ffffa500"))
+            recentColorsList.add(Color.parseColor("#ffffc0cb"))
+            recentColorsList.add(Color.parseColor("#ff964b00"))
+            recentColorsList.add(Color.parseColor("#ff000040"))
+            recentColorsList.add(Color.parseColor("#ff8b0000"))
+            recentColorsList.add(Color.parseColor("#ff800080"))
+            recentColorsList.add(Color.parseColor("#ff023020"))
 //
 //            // short term pixels
 //            for (shortTermPixel in sessionSettings.shortTermPixels) {
