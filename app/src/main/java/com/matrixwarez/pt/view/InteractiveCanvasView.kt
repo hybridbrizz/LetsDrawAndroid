@@ -151,11 +151,6 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                 interactiveCanvas.interactiveCanvasListener?.notifyPaintActionStarted()
 
-                if ((ev.x > width - Utils.dpToPx(context, 50) && !SessionSettings.instance.rightHanded) || (ev.x < Utils.dpToPx(context, 50) && SessionSettings.instance.rightHanded)) {
-                    canvasEdgeTouchListener?.onTouchCanvasEdge()
-                    return false
-                }
-
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
 
                 unitPoint?.apply {
