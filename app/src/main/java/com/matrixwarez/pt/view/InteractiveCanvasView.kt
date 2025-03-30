@@ -44,9 +44,9 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     var oldScaleFactor = 0F
     var oldPpu = 0
 
-    val paint = Paint()
-    private val gridLinePaint = Paint()
-    private val gridLinePaintAlt = Paint()
+    val paint = Paint().apply { isAntiAlias = false }
+    private val gridLinePaint = Paint().apply { isAntiAlias = false }
+    private val gridLinePaintAlt = Paint().apply { isAntiAlias = false }
 
     var redrawCountState = mutableIntStateOf(0)
 
