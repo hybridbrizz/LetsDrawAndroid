@@ -309,21 +309,13 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:gravity="center_horizontal">
 
-            <com.matrixwarez.pt.view.ButtonFrame
-                    android:id="@+id/paint_panel_button"
-                    android:visibility="gone"
+            <ImageView
+                    android:id="@+id/paint_panel_action_view"
                     android:layout_width="50dp"
-                    android:layout_height="50dp">
-
-                <ImageView
-                        android:id="@+id/paint_panel_action_view"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:elevation="5dp"
-                        android:src="@drawable/ic_brush" />
-
-            </com.matrixwarez.pt.view.ButtonFrame>
+                    android:layout_height="50dp"
+                    android:layout_gravity="center"
+                    android:elevation="5dp"
+                    android:src="@drawable/ic_brush" />
 
             <TextView
                     android:id="@+id/text_bottom_display"

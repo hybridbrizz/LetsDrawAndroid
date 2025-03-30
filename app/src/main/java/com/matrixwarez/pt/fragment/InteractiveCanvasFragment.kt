@@ -156,7 +156,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicato
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view_bottom_layer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel_action_view
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_qty_bar
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_qty_circle
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_time_info
@@ -277,7 +276,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun notifyPixelsReady() {
-        paint_panel_button.visibility = View.VISIBLE
+        //paint_panel_button.visibility = View.VISIBLE
         background_button.visibility = View.VISIBLE
         grid_lines_button.visibility = View.VISIBLE
         canvas_summary_button.visibility = View.VISIBLE
@@ -501,7 +500,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         setupStreamBanner()
 
-        visibleActionViews = arrayOf(menu_button, paint_panel_button,
+        visibleActionViews = arrayOf(menu_button,
             export_button, background_button, grid_lines_button, canvas_summary_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -708,7 +707,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 //            togglePaintPanel(true)
 //        }
 
-        paint_panel_button.setOnClickListener {
+        paint_button_background.setOnClickListener {
             if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
                 || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
                 surface_view.endPainting()
@@ -1478,12 +1477,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         when (isColorDark) {
             true -> {
                 val iconColor = Color.parseColor("#CCFFFFFF")
-                paint_panel_button.color = iconColor
+                paint_panel_action_view.setColorFilter(iconColor)
                 text_bottom_display.setTextColor(iconColor)
             }
             false -> {
                 val iconColor = Color.parseColor("#CC000000")
-                paint_panel_button.color = iconColor
+                paint_panel_action_view.setColorFilter(iconColor)
                 text_bottom_display.setTextColor(iconColor)
             }
         }
