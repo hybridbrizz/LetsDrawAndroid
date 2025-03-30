@@ -12,9 +12,9 @@
             android:xlargeScreens="true" />
 
     <application
-            android:icon="@mipmap/pixels_together"
+            android:icon="@mipmap/ic_launcher_2"
             android:label="@string/app_name"
-            android:roundIcon="@mipmap/pixels_together_round"
+            android:roundIcon="@mipmap/ic_launcher_2_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme"
             android:allowBackup="false"

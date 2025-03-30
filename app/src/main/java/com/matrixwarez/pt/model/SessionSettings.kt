@@ -438,7 +438,7 @@ class SessionSettings {
 
         gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
 
-        canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", -1)
+        canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", 10066329)
 
         canvasBackgroundPrimaryColor = getSharedPrefs(context).getInt("canvas_background_primary_color", 0)
 
