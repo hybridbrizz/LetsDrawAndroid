@@ -783,7 +783,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 addErrorPixel(unitPoint.x, unitPoint.y)
             }
         }
-        else if (sessionSettings.dropsAmt == 0 || restorePoints.size >= SessionSettings.instance.maxSend) {
+        else if (sessionSettings.dropsAmt == 0) {
             addErrorPixel(unitPoint.x, unitPoint.y)
         }
 
