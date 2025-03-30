@@ -26,14 +26,13 @@ android {
         applicationId "com.matrixwarez.pt"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 9
-        versionName "1.2.0"
+        versionCode 10
+        versionName "1.2.1"
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
-            debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
