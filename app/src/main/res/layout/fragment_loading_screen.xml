@@ -37,6 +37,7 @@
                 android:textStyle="bold"
                 android:text="Connecting to world server"
                 android:textColor="@color/frost"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
