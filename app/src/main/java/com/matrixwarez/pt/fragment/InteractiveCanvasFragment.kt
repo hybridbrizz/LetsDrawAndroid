@@ -87,6 +87,7 @@ import com.matrixwarez.pt.listener.DrawFrameConfigFragmentListener
 import com.matrixwarez.pt.listener.InteractiveCanvasFragmentListener
 import com.matrixwarez.pt.listener.InteractiveCanvasGestureListener
 import com.matrixwarez.pt.listener.InteractiveCanvasListener
+import com.matrixwarez.pt.listener.InteractiveCanvasViewModeListener
 import com.matrixwarez.pt.listener.MenuCardListener
 import com.matrixwarez.pt.listener.ObjectSelectionListener
 import com.matrixwarez.pt.listener.PaintBarActionListener
@@ -203,7 +204,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     RecentColorsListener, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
-    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, RecentColorsView.Listener {
+    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, RecentColorsView.Listener,
+    InteractiveCanvasViewModeListener {
 
     var initalColor = 0
 
@@ -512,6 +514,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // listeners
         surface_view.pixelHistoryListener = this
         surface_view.gestureListener = this
+        surface_view.modeListener = this
         surface_view.objectSelectionListener = this
         surface_view.selectedObjectMoveView = this
         surface_view.selectedObjectView = this
@@ -715,8 +718,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 surface_view.startPainting()
             }
-
-            updateSelectedColor(SessionSettings.instance.paintColor)
         }
 
 //        paint_yes.setOnClickListener {
@@ -2898,5 +2899,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun showHelpMessages() {
         help_messages.visibility = View.VISIBLE
+    }
+
+    // Interactive Canvas View Mode Listener
+    override fun onModeChanged(mode: InteractiveCanvasView.Mode) {
+        updateSelectedColor(SessionSettings.instance.paintColor)
     }
 }

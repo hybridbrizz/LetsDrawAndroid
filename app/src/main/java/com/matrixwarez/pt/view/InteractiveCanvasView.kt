@@ -38,6 +38,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     var mode = Mode.EXPLORING
+        set(value) {
+            field = value
+            modeListener?.onModeChanged(value)
+        }
 
     var undo = false
 
@@ -56,6 +60,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     var pixelHistoryListener: PixelHistoryListener? = null
     var gestureListener: InteractiveCanvasGestureListener? = null
+    var modeListener: InteractiveCanvasViewModeListener? = null
 
     var objectSelectionListener: ObjectSelectionListener? = null
     var selectedObjectView: SelectedObjectView? = null
