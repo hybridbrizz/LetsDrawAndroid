@@ -21,6 +21,7 @@ import com.matrixwarez.pt.view.InteractiveCanvasView
 import kotlinx.android.synthetic.main.fragment_menu.*
 import java.io.*
 import java.util.*
+import kotlin.math.max
 import kotlin.math.min
 
 class Utils {
@@ -62,24 +63,12 @@ class Utils {
             return 0F
         }
 
-        fun isColorDark(color: Int): Boolean {
+        fun isColorDark(color: Int, threshold: Float): Boolean {
             val darkness =
                 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(
                     color
                 )) / 255
-            return darkness >= 0.5
-        }
-
-        fun brightenColor(color: Int, by: Float): Int {
-            var red = Color.red(color)
-            var green = Color.green(color)
-            var blue = Color.blue(color)
-
-            red = min(255, (red + red * by).toInt())
-            green = min(255, (green + green * by).toInt())
-            blue = min(255, (blue + blue * by).toInt())
-
-            return Color.argb(255, red, green, blue)
+            return darkness >= threshold
         }
 
         fun isNetworkAvailable(context: Context): Boolean {
@@ -192,6 +181,126 @@ class Utils {
                 ), null, Shader.TileMode.CLAMP
             )
             textView.paint.shader = textShader
+        }
+
+        /**
+         * By Claude
+         * Brightens a color by a specified amount while maintaining perceptual consistency.
+         *
+         * @param color The original color to brighten
+         * @param brightnessAdjustment A value between 0.0 and 1.0 where:
+         *   - 0.0 means no change
+         *   - 1.0 means brighten fully toward white
+         * @return The brightened color
+         */
+        fun brightenColor(color: Int, brightnessAdjustment: Float): Int {
+            // Clamp brightness adjustment to valid range
+            val adjustment = max(0f, min(1f, brightnessAdjustment))
+
+            // Extract color components
+            val alpha = Color.alpha(color)
+            val red = Color.red(color)
+            val green = Color.green(color)
+            val blue = Color.blue(color)
+
+            // Convert to HSL (Hue, Saturation, Lightness)
+            val hsl = FloatArray(3)
+            colorToHSL(red, green, blue, hsl)
+
+            // Adjust lightness while preserving hue and reducing saturation
+            // This provides more natural brightening than just increasing RGB values
+            hsl[1] = hsl[1] * (1f - adjustment * 0.5f) // Reduce saturation as brightness increases
+            hsl[2] = hsl[2] + (1f - hsl[2]) * adjustment // Increase lightness
+
+            // Convert back to RGB
+            val brightColor = hslToColor(alpha, hsl)
+
+            return brightColor
+        }
+
+        /**
+         * Converts RGB components to HSL.
+         */
+        private fun colorToHSL(red: Int, green: Int, blue: Int, hsl: FloatArray) {
+            val r = red / 255f
+            val g = green / 255f
+            val b = blue / 255f
+
+            val max = maxOf(r, g, b)
+            val min = minOf(r, g, b)
+            val delta = max - min
+
+            // Calculate lightness
+            val lightness = (max + min) / 2f
+            hsl[2] = lightness
+
+            // If max equals min, it's a shade of gray
+            if (delta == 0f) {
+                hsl[0] = 0f // Hue
+                hsl[1] = 0f // Saturation
+            } else {
+                // Calculate saturation
+                hsl[1] = if (lightness < 0.5f) {
+                    delta / (max + min)
+                } else {
+                    delta / (2f - max - min)
+                }
+
+                // Calculate hue
+                val deltaR = (((max - r) / 6f) + (delta / 2f)) / delta
+                val deltaG = (((max - g) / 6f) + (delta / 2f)) / delta
+                val deltaB = (((max - b) / 6f) + (delta / 2f)) / delta
+
+                hsl[0] = when (max) {
+                    r -> deltaB - deltaG
+                    g -> (1f / 3f) + deltaR - deltaB
+                    else -> (2f / 3f) + deltaG - deltaR
+                }
+
+                // Ensure hue is between 0 and 1
+                if (hsl[0] < 0) hsl[0] += 1f
+                if (hsl[0] > 1) hsl[0] -= 1f
+            }
+        }
+
+        /**
+         * Converts HSL values to RGB color with alpha.
+         */
+        private fun hslToColor(alpha: Int, hsl: FloatArray): Int {
+            val h = hsl[0]
+            val s = hsl[1]
+            val l = hsl[2]
+
+            val c = (1f - abs(2f * l - 1f)) * s
+            val x = c * (1f - abs((h * 6f) % 2f - 1f))
+            val m = l - c / 2f
+
+            var r = 0f
+            var g = 0f
+            var b = 0f
+
+            when ((h * 6f).toInt()) {
+                0, 6 -> { r = c; g = x; b = 0f }
+                1 -> { r = x; g = c; b = 0f }
+                2 -> { r = 0f; g = c; b = x }
+                3 -> { r = 0f; g = x; b = c }
+                4 -> { r = x; g = 0f; b = c }
+                5 -> { r = c; g = 0f; b = x }
+            }
+
+            return Color.argb(
+                alpha,
+                ((r + m) * 255).toInt().coerceIn(0, 255),
+                ((g + m) * 255).toInt().coerceIn(0, 255),
+                ((b + m) * 255).toInt().coerceIn(0, 255)
+            )
+        }
+
+        /**
+         * Helper function to get absolute value (equivalent to Math.abs)
+         */
+        private fun abs(value: Float): Float {
+            return if (value < 0) -value else value
         }
     }
 

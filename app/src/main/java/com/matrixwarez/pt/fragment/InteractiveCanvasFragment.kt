@@ -14,6 +14,7 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -153,6 +154,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_move_up
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_selection_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_amt_info
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_background
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_background_outer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view_bottom_layer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel
@@ -1459,8 +1461,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_indicator_view_bottom_layer.setPaintColor(color)
 
-        val isColorDark = Utils.isColorDark(color)
+        val isColorDark = Utils.isColorDark(color, 0.3f)
 
+        // paint button
         when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
             || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
             true -> {
@@ -1469,20 +1472,32 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     false -> R.drawable.paint_button_background_dark_selected
                 }
                 paint_button_background.background = ContextCompat.getDrawable(requireContext(), drawableResId)
+
+                val outerDrawableResId = when (isColorDark) {
+                    true -> R.drawable.paint_button_light_selected_outer_border
+                    false -> R.drawable.paint_button_dark_selected_outer_border
+                }
+
+                paint_button_background_outer.background = ContextCompat.getDrawable(requireContext(), outerDrawableResId)
             }
             false -> {
-                paint_button_background.background = ColorDrawable(Color.TRANSPARENT)
+                val drawableResId = when (isColorDark) {
+                    true -> R.drawable.paint_button_background_light_unselected
+                    false -> R.drawable.paint_button_background_dark_unselected
+                }
+                paint_button_background.background = ContextCompat.getDrawable(requireContext(), drawableResId)
+                paint_button_background_outer.background = null
             }
         }
 
         when (isColorDark) {
             true -> {
-                val iconColor = Color.parseColor("#CCFFFFFF")
+                val iconColor = Color.parseColor("#FFFFFFFF")
                 paint_panel_action_view.setColorFilter(iconColor)
                 text_bottom_display.setTextColor(iconColor)
             }
             false -> {
-                val iconColor = Color.parseColor("#CC000000")
+                val iconColor = Color.parseColor("#FF000000")
                 paint_panel_action_view.setColorFilter(iconColor)
                 text_bottom_display.setTextColor(iconColor)
             }
