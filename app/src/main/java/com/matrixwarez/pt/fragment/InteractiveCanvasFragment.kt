@@ -5,16 +5,13 @@ import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -27,8 +24,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
@@ -53,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -100,6 +94,7 @@ import com.matrixwarez.pt.listener.RecentColorsListener
 import com.matrixwarez.pt.listener.SelectedObjectMoveView
 import com.matrixwarez.pt.listener.SelectedObjectView
 import com.matrixwarez.pt.listener.SocketConnectCallback
+import com.matrixwarez.pt.model.ColorPanelIcon
 import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.InteractiveCanvasSocket
 import com.matrixwarez.pt.model.Palette
@@ -122,7 +117,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.client_canvas_locations
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_action_button_menu
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_picker_frame
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_button
@@ -268,6 +262,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var leave = false
 
+    private var colorPanelIcons = mutableSetOf<ColorPanelIcon>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -327,8 +323,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.server = server
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
-
-
 
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
         lineColorDarkState.value = SessionSettings.instance.darkIcons
@@ -530,6 +524,21 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_qty_bar.actionListener = this
         paint_qty_circle.actionListener = this
 
+        colorPanelIcons.add(
+            ColorPanelIcon(
+                iconViews = listOf(
+                    paint_panel_action_view,
+                    text_bottom_display
+                ),
+                bgView = paint_button_background,
+                outerBgView = paint_button_background_outer,
+                isSelected = {
+                    surface_view.mode == InteractiveCanvasView.Mode.PAINTING ||
+                            surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
+                }
+            )
+        )
+
         // palette
         palette_name_text.setOnClickListener {
             showPalettesFragmentPopover()
@@ -558,6 +567,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         palette_remove_color_button.setOnClickListener {
             showPaletteColorRemovePrompt(SessionSettings.instance.paintColor)
         }
+
+
 
         syncPaletteAndColor()
 
@@ -1461,46 +1472,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_indicator_view_bottom_layer.setPaintColor(color)
 
-        val isColorDark = Utils.isColorDark(color, 0.3f)
-
-        // paint button
-        when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-            || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
-            true -> {
-                val drawableResId = when (isColorDark) {
-                    true -> R.drawable.paint_button_background_light_selected
-                    false -> R.drawable.paint_button_background_dark_selected
-                }
-                paint_button_background.background = ContextCompat.getDrawable(requireContext(), drawableResId)
-
-                val outerDrawableResId = when (isColorDark) {
-                    true -> R.drawable.paint_button_light_selected_outer_border
-                    false -> R.drawable.paint_button_dark_selected_outer_border
-                }
-
-                paint_button_background_outer.background = ContextCompat.getDrawable(requireContext(), outerDrawableResId)
-            }
-            false -> {
-                val drawableResId = when (isColorDark) {
-                    true -> R.drawable.paint_button_background_light_unselected
-                    false -> R.drawable.paint_button_background_dark_unselected
-                }
-                paint_button_background.background = ContextCompat.getDrawable(requireContext(), drawableResId)
-                paint_button_background_outer.background = null
-            }
-        }
-
-        when (isColorDark) {
-            true -> {
-                val iconColor = Color.parseColor("#FFFFFFFF")
-                paint_panel_action_view.setColorFilter(iconColor)
-                text_bottom_display.setTextColor(iconColor)
-            }
-            false -> {
-                val iconColor = Color.parseColor("#FF000000")
-                paint_panel_action_view.setColorFilter(iconColor)
-                text_bottom_display.setTextColor(iconColor)
-            }
+        // color panel icons
+        colorPanelIcons.forEach {
+            it.updateAppearance(requireContext(), color)
         }
 
         // palette color actions
