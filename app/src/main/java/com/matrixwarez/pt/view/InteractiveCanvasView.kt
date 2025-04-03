@@ -34,7 +34,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         PAINT_SELECTION_PAINTING,
         EXPORTING,
         OBJECT_MOVE_SELECTION,
-        OBJECT_MOVING
+        OBJECT_MOVING,
+        ERASING
     }
 
     var mode = Mode.EXPLORING
@@ -434,6 +435,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             Mode.PAINT_SELECTION_PAINTING -> mode = Mode.PAINTING
             else -> {}
         }
+    }
+
+    fun startErasing() {
+        mode = Mode.ERASING
+    }
+
+    fun endErasing() {
+        mode = Mode.EXPLORING
     }
 
     fun startExport() {

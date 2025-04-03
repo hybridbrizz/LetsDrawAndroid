@@ -123,6 +123,9 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_white_color_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_white_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.device_canvas_viewport_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_action_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background_outer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_fragment_container
@@ -524,8 +527,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_qty_bar.actionListener = this
         paint_qty_circle.actionListener = this
 
+        // color panel icons
         colorPanelIcons.add(
             ColorPanelIcon(
+                context = requireContext(),
+                name = "Edit Canvas",
                 iconViews = listOf(
                     paint_panel_action_view,
                     text_bottom_display
@@ -535,6 +541,38 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 isSelected = {
                     surface_view.mode == InteractiveCanvasView.Mode.PAINTING ||
                             surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
+                },
+                onPress = {
+                    if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
+                        || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
+                        surface_view.endPainting()
+                    }
+                    else {
+                        surface_view.startPainting()
+                    }
+                }
+            )
+        )
+
+        colorPanelIcons.add(
+            ColorPanelIcon(
+                context = requireContext(),
+                name = "Erase",
+                iconViews = listOf(
+                    erase_action_view
+                ),
+                bgView = erase_button_background,
+                outerBgView = erase_button_background_outer,
+                isSelected = {
+                    surface_view.mode == InteractiveCanvasView.Mode.ERASING
+                },
+                onPress = {
+                    if (surface_view.mode == InteractiveCanvasView.Mode.ERASING) {
+                        surface_view.endErasing()
+                    }
+                    else {
+                        surface_view.startErasing()
+                    }
                 }
             )
         )
@@ -722,16 +760,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 //        paint_panel_button.setOnClickListener {
 //            togglePaintPanel(true)
 //        }
-
-        paint_button_background.setOnClickListener {
-            if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-                || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
-                surface_view.endPainting()
-            }
-            else {
-                surface_view.startPainting()
-            }
-        }
 
 //        paint_yes.setOnClickListener {
 //            if (world && !InteractiveCanvasSocket.instance.isConnected()) return@setOnClickListener
@@ -1474,7 +1502,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         // color panel icons
         colorPanelIcons.forEach {
-            it.updateAppearance(requireContext(), color)
+            it.updateAppearance(color)
         }
 
         // palette color actions

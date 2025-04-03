@@ -2,20 +2,31 @@ package com.matrixwarez.pt.model
 
 import android.content.Context
 import android.graphics.Color
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
+import com.matrixwarez.pt.view.ColorPanelTouchTargetView
 
 data class ColorPanelIcon(
+    val context: Context,
+    val name: String,
     val iconViews: List<View>,
-    val bgView: View,
+    val bgView: ColorPanelTouchTargetView,
     val outerBgView: View,
-    val isSelected: () -> Boolean
+    val isSelected: () -> Boolean,
+    val onPress: () -> Unit
 ) {
-    fun updateAppearance(context: Context, color: Int) {
+    init {
+        bgView.bindIconData(name, onPress)
+    }
+
+    fun updateAppearance(color: Int) {
         val isColorDark = Utils.isColorDark(color, 0.3f)
 
         // paint button
