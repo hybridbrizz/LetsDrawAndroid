@@ -583,7 +583,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         colorPanelIcons.add(
             ColorPanelIcon(
                 context = requireContext(),
-                name = "Select color",
+                name = "Color Selection",
                 iconViews = listOf(
                     color_select_action_view
                 ),
