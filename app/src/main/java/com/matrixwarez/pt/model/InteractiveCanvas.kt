@@ -804,6 +804,34 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
+    private var eraseRestorePoints = mutableListOf<RestorePoint>()
+
+    // erasing
+    fun eraseUnit(unitPoint: Point) {
+        if (world && !InteractiveCanvasSocket.instance.isConnected()) return
+
+        val restorePoint = unitInRestorePoints(unitPoint, eraseRestorePoints)
+        if (restorePoint == null) {
+            if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
+                Log.i("Interactive Canvas", "Erase!")
+                // erase
+                eraseRestorePoints.add(
+                    RestorePoint(
+                        unitPoint,
+                        -1,
+                        -1
+                    )
+                )
+
+                cancelBatchErase()
+                startBatchErase()
+            }
+            else {
+                addErrorPixel(unitPoint.x, unitPoint.y)
+            }
+        }
+    }
+
     private var batchPixelsJob: Job? = null
 
     private fun startBatchPixels() {
@@ -820,6 +848,24 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     private fun cancelBatchPixels() {
         batchPixelsJob?.cancel()
         batchPixelsJob = null
+    }
+
+    private var batchEraseJob: Job? = null
+
+    private fun startBatchErase() {
+        if (batchEraseJob != null) return
+
+        batchEraseJob = coroutineScope.launch {
+            withContext(Dispatchers.Default) {
+                delay(250)
+            }
+            commitErase()
+        }
+    }
+
+    private fun cancelBatchErase() {
+        batchEraseJob?.cancel()
+        batchEraseJob = null
     }
 
     // sends pixel updates to the web server
@@ -869,6 +915,23 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         clearRestorePoints()
     }
 
+    private fun commitErase() {
+        if (!InteractiveCanvasSocket.instance.isConnected()) return
+
+        val xs = mutableListOf<Int>()
+        val ys = mutableListOf<Int>()
+
+        for (restorePoint in eraseRestorePoints) {
+            xs.add(restorePoint.point.x)
+            ys.add(restorePoint.point.y)
+        }
+
+        val sendStr = buildEraseString(SessionSettings.instance.lastVisitedServer?.uuid ?: "", xs, ys)
+        InteractiveCanvasSocket.instance.requireSocket().emit("pixels_erase", sendStr)
+
+        eraseRestorePoints.clear()
+    }
+
     private fun buildPixelsString(xs: List<Int>, ys: List<Int>, deviceId: Int, colors: List<Int>, includeAdminKey: Boolean): String {
         var str = deviceId.toString()
         for (i in colors.indices) {
@@ -881,6 +944,18 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
         if (server.isAdmin && includeAdminKey) {
             str += "&${server.adminKey}"
+        }
+        return str
+    }
+
+    private fun buildEraseString(uuid: String, xs: List<Int>, ys: List<Int>): String {
+        var str = uuid
+        for (i in xs.indices) {
+            val x = xs[i]
+            val y = ys[i]
+
+            val pixelId = y * cols + x
+            str += "&$pixelId"
         }
         return str
     }

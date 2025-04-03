@@ -193,6 +193,31 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 }
             }
         }
+        else if (mode == Mode.ERASING) {
+            if(ev.action == MotionEvent.ACTION_DOWN) {
+                interactiveCanvas.interactiveCanvasListener?.apply {
+                    if (isPaletteFragmentOpen()) {
+                        notifyClosePaletteFragment()
+                        return false
+                    }
+                }
+
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                unitPoint?.apply {
+                    // erase
+                    interactiveCanvas.eraseUnit(unitPoint)
+                }
+            }
+            else if (ev.action == MotionEvent.ACTION_MOVE) {
+                val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
+
+                unitPoint?.apply {
+                    // erase
+                    interactiveCanvas.eraseUnit(unitPoint)
+                }
+            }
+        }
         else if (mode == Mode.PAINT_SELECTION_PAINTING || mode == Mode.PAINT_SELECTION_EXPLORING) {
             if (ev.action == MotionEvent.ACTION_DOWN) {
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
