@@ -118,6 +118,9 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.client_canvas_locations
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_picker_frame
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_action_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background_outer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_white_color_action
@@ -577,6 +580,24 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             )
         )
 
+        colorPanelIcons.add(
+            ColorPanelIcon(
+                context = requireContext(),
+                name = "Select color",
+                iconViews = listOf(
+                    color_select_action_view
+                ),
+                bgView = color_select_button_background,
+                outerBgView = color_select_button_background_outer,
+                isSelected = {
+                    color_picker_frame.visibility == View.VISIBLE
+                },
+                onPress = {
+                    onPaintIndicatorClick()
+                }
+            )
+        )
+
         // palette
         palette_name_text.setOnClickListener {
             showPalettesFragmentPopover()
@@ -850,7 +871,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     val y2 = paintIndicatorhDownLocation?.y?.toDouble() ?: y1
 
                     if (sqrt((y2 - y1).pow(2.0) + (x2 - x1).pow(2.0)) < 10) {
-                        onPaintIndicatorClick()
+                        //onPaintIndicatorClick()
                         v.performClick()
                     }
                 }

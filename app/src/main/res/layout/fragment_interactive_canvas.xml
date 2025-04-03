@@ -362,6 +362,33 @@
 
         </FrameLayout>
 
+        <FrameLayout
+                android:id="@+id/color_select_button_background_outer"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/paint_button_background"
+                app:layout_constraintEnd_toEndOf="parent">
+
+            <com.matrixwarez.pt.view.ColorPanelTouchTargetView
+                    android:id="@+id/color_select_button_background"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_gravity="center">
+
+                <ImageView
+                        android:id="@+id/color_select_action_view"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center"
+                        android:elevation="5dp"
+                        android:src="@drawable/palette" />
+
+            </com.matrixwarez.pt.view.ColorPanelTouchTargetView>
+
+        </FrameLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
