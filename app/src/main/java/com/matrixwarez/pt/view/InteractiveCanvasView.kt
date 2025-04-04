@@ -463,6 +463,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     fun startErasing() {
+        if (mode == Mode.PAINT_SELECTION_EXPLORING || mode == Mode.PAINT_SELECTION_PAINTING) {
+            return
+        }
+
         mode = Mode.ERASING
     }
 
