@@ -419,6 +419,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
         when (mode) {
             Mode.EXPLORING -> mode = Mode.PAINTING
+            Mode.ERASING -> mode = Mode.PAINTING
             Mode.PAINT_SELECTION_EXPLORING -> mode = Mode.PAINT_SELECTION_PAINTING
             else -> {}
         }

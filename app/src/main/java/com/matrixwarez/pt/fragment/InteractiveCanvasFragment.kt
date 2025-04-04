@@ -547,7 +547,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 },
                 onPress = {
                     if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-                        || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING) {
+                        || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
+                        || surface_view.mode == InteractiveCanvasView.Mode.ERASING) {
                         surface_view.endPainting()
                     }
                     else {
