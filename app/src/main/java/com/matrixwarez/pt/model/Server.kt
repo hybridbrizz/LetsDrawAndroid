@@ -81,6 +81,9 @@ class Server {
     @SerializedName("last_visited")
     var lastVisited = 0L
 
+    @SerializedName("canvas_img_url")
+    var canvasImageUrl = ""
+
     fun serviceBaseUrl(): String {
         return buildUrl(baseUrl, apiPort)
     }

@@ -131,6 +131,7 @@ class MenuFragment: Fragment() {
     private val publicServerListState = mutableStateOf(listOf<Server>())
     private val privateServerListState = mutableStateOf(listOf<Server>())
     private val loadingState = mutableStateOf(false)
+    private val refreshingState = mutableStateOf(false)
     private lateinit var portraitState: MutableState<Boolean>
 
     private var lastPublicRefreshTime = 0L
@@ -427,14 +428,10 @@ class MenuFragment: Fragment() {
         }
 
         server_list_container.setContent {
-            val bgColor = when (portraitState.value) {
-                true -> androidx.compose.ui.graphics.Color.DarkGray
-                false -> androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.3f)
-            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(bgColor)
+                    .background(androidx.compose.ui.graphics.Color.Black)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
@@ -492,57 +489,47 @@ class MenuFragment: Fragment() {
                         publicServerListState = publicServerListState,
                         privateServerListState = privateServerListState,
                         loadingState = loadingState,
+                        refreshingState = refreshingState,
                         onSelectServer = {
                             menuButtonListener?.onServerSelected(it)
                             showServerListState.value = false
                         },
                         onRefreshServerList = { public ->
-                            val cTime = System.currentTimeMillis()
-
                             when (public) {
                                 true -> {
-                                    if (cTime - lastPublicRefreshTime > 15 * 1000) {
-                                        publicServerListState.value = listOf()
-                                        loadingState.value = true
-                                        service.getServerList { _, list ->
-                                            Log.d("Serverlist", "Refreshed (public)")
-                                            publicServerListState.value = list
-                                            loadingState.value = false
-                                        }
-                                        lastPublicRefreshTime = cTime
+                                    refreshingState.value = true
+                                    service.getServerList { _, list ->
+                                        Log.d("Serverlist", "Refreshed (public)")
+                                        publicServerListState.value = list
+                                        refreshingState.value = false
                                     }
                                 }
                                 false -> {
-                                    if (cTime - lastPrivateRefreshTime > 15 * 1000) {
-                                        privateServerListState.value = listOf()
+                                    refreshingState.value = true
+                                    var downloadCount = 0
 
-                                        loadingState.value = true
-                                        var downloadCount = 0
+                                    service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
+                                        val privateServers = list.toMutableList()
 
-                                        service.getPrivateServerList(requireContext(), SessionSettings.instance.getAccessKeys()) { _, list ->
-                                            val privateServers = list.toMutableList()
+                                        downloadCount += 1
+                                        Log.d("Serverlist", "Refreshed (private)")
 
-                                            downloadCount += 1
-                                            Log.d("Serverlist", "Refreshed (private)")
-
-                                            if (downloadCount == 2) {
-                                                privateServerListState.value = privateServers
-                                                loadingState.value = false
-                                            }
+                                        if (downloadCount == 2) {
+                                            privateServerListState.value = privateServers
+                                            refreshingState.value = false
                                         }
+                                    }
 
-                                        service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
-                                            val privateServers = list.toMutableList()
+                                    service.getPrivateAdminServerList(requireContext(), SessionSettings.instance.getAdminKeys()) { _, list ->
+                                        val privateServers = list.toMutableList()
 
-                                            downloadCount += 1
-                                            Log.d("Serverlist", "Refreshed (admin)")
+                                        downloadCount += 1
+                                        Log.d("Serverlist", "Refreshed (admin)")
 
-                                            if (downloadCount == 2) {
-                                                privateServerListState.value = privateServers
-                                                loadingState.value = false
-                                            }
+                                        if (downloadCount == 2) {
+                                            privateServerListState.value = privateServers
+                                            loadingState.value = false
                                         }
-                                        lastPrivateRefreshTime = cTime
                                     }
                                 }
                             }

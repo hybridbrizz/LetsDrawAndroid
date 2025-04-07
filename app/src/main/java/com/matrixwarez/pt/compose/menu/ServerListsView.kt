@@ -13,20 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -52,7 +47,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun ServerListsView(serverService: ServerService, publicServerListState: MutableState<List<Server>>,
                     privateServerListState: MutableState<List<Server>>,
-                    loadingState: MutableState<Boolean>, portraitState: MutableState<Boolean>,
+                    loadingState: MutableState<Boolean>, refreshingState: MutableState<Boolean>,
+                    portraitState: MutableState<Boolean>,
                     onSelectServer: (Server) -> Unit, onRefreshServerList: (Boolean) -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -77,30 +73,47 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
         false -> Modifier
     }
 
-    Column(modifier = Modifier
-        .shadow(2.dp)
-        .then(sizeMod)
-        .then(windowInsetMod)
-        .background(Color(android.graphics.Color.parseColor("#3b3b3b")))
+    Column(
+        modifier = Modifier
+            .shadow(2.dp)
+            .then(sizeMod)
+            .then(windowInsetMod)
+            .background(Color.Black),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.fillMaxWidth().background(Color(android.graphics.Color.parseColor("#90D5FF"))).padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
             Box(modifier = Modifier.border(1.dp, Color.White).padding(5.dp).background(Color(android.graphics.Color.parseColor("#FF4D00"))).padding(5.dp)) {
                 Text(
                     text = "PIXELS: TOGETHER",
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 15.sp
+                    fontSize = 20.sp
                 )
             }
         }
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
-        Row {
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier
+                .width(180.dp)
+                .height(40.dp)
+                .clip(RoundedCornerShape(50))
+                .border(1.dp, Color.White, RoundedCornerShape(50))
+        ) {
             Button(
-                modifier = Modifier.weight(0.5f).height(60.dp),
+                modifier = Modifier.weight(0.5f).height(40.dp),
                 shape = RectangleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.DarkGray
+                    containerColor = when (pagerState.targetPage == 0) {
+                        true -> Color.White
+                        false -> Color.Black
+                    },
+                    contentColor = when (pagerState.targetPage == 0) {
+                        true -> Color.Black
+                        false -> Color.White
+                    }
                 ),
                 onClick = {
                     coroutineScope.launch {
@@ -109,18 +122,24 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 }
             ) {
                 Text(
-                    text = "Public".uppercase(),
-                    color = Color.White,
+                    text = "Global",
                     fontFamily = Inter,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 12.sp
                 )
             }
             Button(
-                modifier = Modifier.weight(0.5f).height(60.dp),
+                modifier = Modifier.weight(0.5f).height(40.dp),
                 shape = RectangleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.DarkGray
+                    containerColor = when (pagerState.targetPage == 1) {
+                        true -> Color.White
+                        false -> Color.Black
+                    },
+                    contentColor = when (pagerState.targetPage == 1) {
+                        true -> Color.Black
+                        false -> Color.White
+                    }
                 ),
                 onClick = {
                     coroutineScope.launch {
@@ -129,44 +148,15 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 }
             ) {
                 Text(
-                    text = "Private".uppercase(),
-                    color = Color.White,
+                    text = "Group",
                     fontFamily = Inter,
-                    fontWeight = FontWeight.ExtraBold,
+                    fontWeight = FontWeight.Normal,
                     fontSize = 12.sp
                 )
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
-
-        Row {
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = {
-                onRefreshServerList(pagerState.targetPage == 0)
-            }) {
-                Icon(
-                    modifier = Modifier.size(24.dp),
-                    imageVector = Icons.Filled.Refresh,
-                    contentDescription = "Refresh",
-                    tint = Color.White
-                )
-            }
-            if (pagerState.targetPage == 1) {
-                IconButton(onClick = {
-                    showAddFormState.value = true
-                }) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = "Add Private Server",
-                        tint = Color.White
-                    )
-                }
-            }
-        }
-
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
+        Spacer(modifier = Modifier.height(30.dp))
 
         HorizontalPager(
             state = pagerState,
@@ -176,7 +166,9 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 true -> PublicServerListView(
                     serverListState = publicServerListState,
                     onSelectServer = onSelectServer,
-                    loadingState = loadingState
+                    loadingState = loadingState,
+                    refreshingState = refreshingState,
+                    onRefreshServerList = onRefreshServerList
                 )
                 false -> PrivateServerListView(
                     serverService = serverService,
