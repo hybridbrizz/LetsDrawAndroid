@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -46,16 +47,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.matrixwarez.pt.R
 import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.service.ServerService
+import androidx.compose.material3.AlertDialog
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,8 +86,11 @@ fun PrivateServerListView(serverService: ServerService,
 
     var keyInput by remember { mutableStateOf("") }
 
-    var showDeleteConfirmation by remember { mutableStateOf(false) }
-    var serverToRemove by remember { mutableStateOf<Server?>(null) }
+    var editingAdminServers by remember { mutableStateOf(false) }
+    var editingPrivateServers by remember { mutableStateOf(false) }
+
+    var serverToRemoveState = remember { mutableStateOf<Server?>(null) }
+    val showDeleteConfirmationState = remember { mutableStateOf(false) }
 
     PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
@@ -142,11 +149,6 @@ fun PrivateServerListView(serverService: ServerService,
                                     )
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
-
-                                val buttonColor = when (keyInput.isNotBlank()) {
-                                    true -> Color.Blue
-                                    false -> Color.Gray
-                                }
 
                                 Button(
                                     modifier = Modifier.height(30.dp),
@@ -207,12 +209,22 @@ fun PrivateServerListView(serverService: ServerService,
                                 color = Color.White,
                                 fontFamily = Inter
                             )
+                            Image(
+                                modifier = Modifier.size(24.dp).align(Alignment.CenterEnd).clickable {
+                                    editingAdminServers = !editingAdminServers
+                                },
+                                painter = painterResource(R.drawable.edit),
+                                contentDescription = "Edit Mod Servers"
+                            )
                         }
                     }
                     itemsIndexed(adminServerList) { _, server ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             ServerItemView(
                                 server = server,
+                                editing = editingAdminServers,
+                                showDeleteConfirmationState = showDeleteConfirmationState,
+                                serverToRemoveState = serverToRemoveState,
                                 onClick = {
                                     onSelectServer(server)
                                 }
@@ -231,12 +243,22 @@ fun PrivateServerListView(serverService: ServerService,
                                 color = Color.White,
                                 fontFamily = Inter
                             )
+                            Image(
+                                modifier = Modifier.size(24.dp).align(Alignment.CenterEnd).clickable {
+                                    editingPrivateServers = !editingPrivateServers
+                                },
+                                painter = painterResource(R.drawable.edit),
+                                contentDescription = "Edit Private Servers"
+                            )
                         }
                     }
                     itemsIndexed(privateServerList) { _, server ->
                         Column(modifier = Modifier.fillMaxWidth()) {
                             ServerItemView(
                                 server = server,
+                                editing = editingPrivateServers,
+                                showDeleteConfirmationState = showDeleteConfirmationState,
+                                serverToRemoveState = serverToRemoveState,
                                 onClick = {
                                     onSelectServer(server)
                                 }
@@ -252,6 +274,50 @@ fun PrivateServerListView(serverService: ServerService,
                     strokeWidth = 2.dp
                 )
             }
+        }
+
+        if (showDeleteConfirmationState.value) {
+            AlertDialog(
+                containerColor = Color.Black,
+                textContentColor = Color.White,
+                text = {
+                    Text("Remove ${serverToRemoveState.value?.name ?: "{ERROR}"} from your private server list?")
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showDeleteConfirmationState.value = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0.15f, 0.15f, 0.15f),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Cancel", fontFamily = Inter)
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            serverToRemoveState.value?.let { serverToRemove ->
+                                SessionSettings.instance.removeServer(context, serverToRemove, true)
+                                privateServerListState.value =
+                                    SessionSettings.instance.servers.sortedBy { it.id }
+                            }
+                            showDeleteConfirmationState.value = false
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Remove", fontFamily = Inter)
+                    }
+                },
+                onDismissRequest = {
+                    showDeleteConfirmationState.value = false
+                }
+            )
         }
     }
 

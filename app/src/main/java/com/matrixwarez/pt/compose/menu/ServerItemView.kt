@@ -21,6 +21,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +41,10 @@ import com.matrixwarez.pt.model.Server
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun ServerItemView(server: Server, onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
+fun ServerItemView(server: Server, editing: Boolean,
+                   showDeleteConfirmationState: MutableState<Boolean> = mutableStateOf(false),
+                   serverToRemoveState: MutableState<Server?> = mutableStateOf(null),
+                   onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -87,26 +92,54 @@ fun ServerItemView(server: Server, onClick: (Server) -> Unit, onLongClick: (Serv
                 contentDescription = "Online Image"
             )
         }
-        Button(
-            modifier = Modifier.height(30.dp),
-            onClick = {
-                onClick(server)
-            },
-            shape = RoundedCornerShape(5.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0.15f, 0.15f, 0.15f),
-                contentColor = Color.White
-            ),
-            contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
-        ) {
-            Text(
-                text = "Connect",
-                fontFamily = Inter,
-                fontSize = 11.sp,
-                lineHeight = 14.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        when (editing) {
+            true -> {
+                Button(
+                    modifier = Modifier.height(30.dp),
+                    onClick = {
+                        serverToRemoveState.value = server
+                        showDeleteConfirmationState.value = true
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Red,
+                        contentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "Remove",
+                        fontFamily = Inter,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            false -> {
+                Button(
+                    modifier = Modifier.height(30.dp),
+                    onClick = {
+                        onClick(server)
+                    },
+                    shape = RoundedCornerShape(5.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0.15f, 0.15f, 0.15f),
+                        contentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "Connect",
+                        fontFamily = Inter,
+                        fontSize = 11.sp,
+                        lineHeight = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }

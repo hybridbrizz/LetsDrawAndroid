@@ -61,6 +61,7 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ServerItemView(
                             server = server,
+                            editing = false,
                             onClick = {
                                 onSelectServer(server)
                             }
