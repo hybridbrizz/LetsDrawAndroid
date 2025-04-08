@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.matrixwarez.pt.compose.Inter
@@ -81,15 +83,49 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
             .background(Color.Black),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), contentAlignment = Alignment.TopCenter) {
-            Box(modifier = Modifier.border(1.dp, Color.White).padding(5.dp).background(Color(android.graphics.Color.parseColor("#FF4D00"))).padding(5.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .border(1.dp, Color.White)
+                    .padding(5.dp)
+                    .background(Color(android.graphics.Color.parseColor("#FF4D00")))
+                    .padding(5.dp),
+            ) {
                 Text(
                     text = "PIXELS: TOGETHER",
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 20.sp
+                    fontSize = 18.sp
                 )
+            }
+
+            if (pagerState.targetPage == 1) {
+
+                if (!showAddFormState.value) {
+                    Button(
+                        modifier = Modifier.height(30.dp).align(Alignment.CenterEnd).padding(end = 20.dp),
+                        onClick = {
+                            showAddFormState.value = true
+                        },
+                        shape = RoundedCornerShape(5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0.15f, 0.15f, 0.15f),
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "Add",
+                            fontFamily = Inter,
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
 
@@ -175,7 +211,9 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                     onSelectServer = onSelectServer,
                     privateServerListState = privateServerListState,
                     showAddFormState = showAddFormState,
-                    loadingState = loadingState
+                    loadingState = loadingState,
+                    refreshingState = refreshingState,
+                    onRefreshServerList = onRefreshServerList
                 )
             }
         }

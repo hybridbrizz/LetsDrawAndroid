@@ -7,23 +7,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -48,9 +49,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
@@ -63,7 +64,9 @@ import com.matrixwarez.pt.service.ServerService
 fun PrivateServerListView(serverService: ServerService,
                           privateServerListState: MutableState<List<Server>>,
                           loadingState: MutableState<Boolean>,
+                          refreshingState: MutableState<Boolean>,
                           showAddFormState: MutableState<Boolean>,
+                          onRefreshServerList: (Boolean) -> Unit,
                           onSelectServer: (Server) -> Unit) {
 
     val context = LocalContext.current
@@ -73,6 +76,7 @@ fun PrivateServerListView(serverService: ServerService,
     val privateServerList = privateAndAdminServerList.filter { !it.isAdmin }
 
     var isLoading by loadingState
+    var isRefreshing by refreshingState
 
     var showAddForm by showAddFormState
 
@@ -81,209 +85,173 @@ fun PrivateServerListView(serverService: ServerService,
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var serverToRemove by remember { mutableStateOf<Server?>(null) }
 
-    Box(contentAlignment = Alignment.Center) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.DarkGray)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {},
-        ) {
-            if (showAddForm) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
-                    ) {
-                        Row(modifier = Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
-                            TextField(
-                                modifier = Modifier.width(200.dp),
-                                value = keyInput,
-                                onValueChange = {
-                                    keyInput = it
-                                },
-                                singleLine = true,
-                                placeholder = {
-                                    Text("Access Key", fontFamily = Inter)
-                                },
-                                colors = TextFieldDefaults.colors(
-                                    unfocusedContainerColor = Color.Transparent,
-                                    focusedContainerColor = Color.Transparent,
-                                    focusedTextColor = Color.White,
-                                    unfocusedTextColor = Color.White,
-                                    focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-                                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
-                                    focusedIndicatorColor = Color.Blue,
-                                    cursorColor = Color.Blue
-                                ),
-                                textStyle = TextStyle(
-                                    fontFamily = Inter,
-                                    fontSize = 16.sp
-                                ),
-                                keyboardOptions = KeyboardOptions(
-                                    capitalization = KeyboardCapitalization.Characters,
-                                    autoCorrectEnabled = false
+    PullToRefreshBox(
+        modifier = Modifier.fillMaxSize(),
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            onRefreshServerList(false)
+        }
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LazyVerticalGrid(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {},
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp),
+                verticalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                if (showAddForm) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp)
+                        ) {
+                            Row(modifier = Modifier.align(Alignment.Center), verticalAlignment = Alignment.CenterVertically) {
+                                TextField(
+                                    modifier = Modifier.width(200.dp),
+                                    value = keyInput,
+                                    onValueChange = {
+                                        keyInput = it
+                                    },
+                                    singleLine = true,
+                                    placeholder = {
+                                        Text("Access Key", fontFamily = Inter)
+                                    },
+                                    colors = TextFieldDefaults.colors(
+                                        unfocusedContainerColor = Color.Transparent,
+                                        focusedContainerColor = Color.Transparent,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
+                                        focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+                                        unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+                                        focusedIndicatorColor = Color.White,
+                                        cursorColor = Color.White
+                                    ),
+                                    textStyle = TextStyle(
+                                        fontFamily = Inter,
+                                        fontSize = 16.sp
+                                    ),
+                                    keyboardOptions = KeyboardOptions(
+                                        capitalization = KeyboardCapitalization.Characters,
+                                        autoCorrectEnabled = false
+                                    )
                                 )
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
+                                Spacer(modifier = Modifier.width(10.dp))
 
-                            val buttonColor = when (keyInput.isNotBlank()) {
-                                true -> Color.Blue
-                                false -> Color.Gray
-                            }
+                                val buttonColor = when (keyInput.isNotBlank()) {
+                                    true -> Color.Blue
+                                    false -> Color.Gray
+                                }
 
-                            Button(
-                                onClick = {
-                                    val trimmedInput = keyInput.uppercase().trim()
-                                    if (!isLoading && !SessionSettings.instance.hasServer(trimmedInput)) {
-                                        showAddForm = false
-                                        isLoading = true
-                                        serverService.getPrivateServer(trimmedInput) { _, server ->
-                                            isLoading = false
-                                            server?.let {
-                                                SessionSettings.instance.addServer(context, server)
-                                                privateServerListState.value =
-                                                    SessionSettings.instance.servers.sortedBy { -it.lastVisited }
+                                Button(
+                                    modifier = Modifier.height(30.dp),
+                                    onClick = {
+                                        val trimmedInput = keyInput.uppercase().trim()
+                                        if (!isRefreshing && !SessionSettings.instance.hasServer(trimmedInput)) {
+                                            showAddForm = false
+                                            isLoading = true
+                                            serverService.getPrivateServer(trimmedInput) { _, server ->
+                                                isLoading = false
+                                                server?.let {
+                                                    SessionSettings.instance.addServer(context, server)
+                                                    onRefreshServerList(false)
+                                                }
                                             }
                                         }
-                                    }
-                                },
-                                shape = RectangleShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = buttonColor
-                                )
+                                    },
+                                    shape = RoundedCornerShape(5.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0.15f, 0.15f, 0.15f),
+                                        contentColor = Color.White
+                                    ),
+                                    contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                                ) {
+                                    Text(
+                                        text = "Add",
+                                        fontFamily = Inter,
+                                        fontSize = 11.sp,
+                                        lineHeight = 14.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            IconButton(
+                                modifier = Modifier.align(Alignment.CenterEnd),
+                                onClick = {
+                                    showAddForm = false
+                                }
                             ) {
-                                Text("Add", fontFamily = Inter)
+                                Image(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Close add server",
+                                    colorFilter = ColorFilter.tint(Color.White)
+                                )
                             }
                         }
-                        IconButton(
-                            modifier = Modifier.align(Alignment.CenterEnd),
-                            onClick = {
-                                showAddForm = false
-                            }
-                        ) {
-                            Image(
-                                imageVector = Icons.Filled.Close,
-                                contentDescription = "Close add server",
-                                colorFilter = ColorFilter.tint(Color.White)
+                    }
+                }
+
+                if (adminServerList.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "Mod",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                fontFamily = Inter
+                            )
+                        }
+                    }
+                    itemsIndexed(adminServerList) { _, server ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            ServerItemView(
+                                server = server,
+                                onClick = {
+                                    onSelectServer(server)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (privateServerList.isNotEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = "Groups",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                fontFamily = Inter
+                            )
+                        }
+                    }
+                    itemsIndexed(privateServerList) { _, server ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            ServerItemView(
+                                server = server,
+                                onClick = {
+                                    onSelectServer(server)
+                                }
                             )
                         }
                     }
                 }
             }
 
-            if (adminServerList.isEmpty() && privateServerList.isEmpty() && !isLoading) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                        Text("Enter an access key to add canvas.", fontFamily = Inter, fontSize = 12.sp, color = Color.White)
-                    }
-                }
-            }
-
-            if (adminServerList.isNotEmpty()) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                        Text(
-                            "Mod",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontFamily = Inter,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
-                }
-                itemsIndexed(adminServerList) { index, server ->
-                    ServerItemView(
-                        server = server,
-                        onClick = {
-                            onSelectServer(server)
-                        },
-                        onLongClick = {
-                            serverToRemove = it
-                            showDeleteConfirmation = true
-                        }
-                    )
-
-                    if (index < adminServerList.size - 1) {
-                        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
-                    }
-                }
-            }
-            if (adminServerList.isNotEmpty() && privateServerList.isNotEmpty()) {
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
-                        Text(
-                            "Private",
-                            color = Color.White,
-                            fontSize = 14.sp,
-                            fontFamily = Inter,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color(android.graphics.Color.parseColor("#FAD452")).copy(0.5f)))
-                }
-            }
-            items(privateServerList) { server ->
-                ServerItemView(
-                    server = server,
-                    onClick = {
-                        onSelectServer(server)
-                    },
-                    onLongClick = {
-                        serverToRemove = it
-                        showDeleteConfirmation = true
-                    }
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 2.dp
                 )
             }
-        }
-
-        if (showDeleteConfirmation) {
-            AlertDialog(
-                containerColor = Color.Black,
-                textContentColor = Color.White,
-                text = {
-                    Text("Remove ${serverToRemove?.name ?: "{ERROR}"} from your private server list?")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            serverToRemove?.let { serverToRemove ->
-                                SessionSettings.instance.removeServer(context, serverToRemove, true)
-                                privateServerListState.value =
-                                    SessionSettings.instance.servers.sortedBy { -it.lastVisited }
-                            }
-                            showDeleteConfirmation = false
-                        }
-                    ) {
-                        Text("Remove")
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            showDeleteConfirmation = false
-                        }
-                    ) {
-                        Text("Cancel")
-                    }
-                },
-                onDismissRequest = {
-                    showDeleteConfirmation = false
-                }
-            )
-        }
-
-        if (isLoading) {
-            CircularProgressIndicator(
-                color = Color.White,
-                strokeWidth = 2.dp
-            )
         }
     }
 

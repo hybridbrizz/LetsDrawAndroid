@@ -774,6 +774,7 @@ class SessionSettings {
                         server.online = remoteServer.online
                         server.connectionCount = remoteServer.connectionCount
                         server.maxConnections = remoteServer.maxConnections
+                        server.canvasImageUrl = remoteServer.canvasImageUrl
                     }
 
                     if (remoteServer == null && server.isAdmin) {
@@ -793,6 +794,7 @@ class SessionSettings {
                         server.online = remoteServer.online
                         server.connectionCount = remoteServer.connectionCount
                         server.maxConnections = remoteServer.maxConnections
+                        server.canvasImageUrl = remoteServer.canvasImageUrl
                     }
 
                     if (remoteServer == null && !server.isAdmin) {

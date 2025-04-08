@@ -528,7 +528,7 @@ class MenuFragment: Fragment() {
 
                                         if (downloadCount == 2) {
                                             privateServerListState.value = privateServers
-                                            loadingState.value = false
+                                            refreshingState.value = false
                                         }
                                     }
                                 }
