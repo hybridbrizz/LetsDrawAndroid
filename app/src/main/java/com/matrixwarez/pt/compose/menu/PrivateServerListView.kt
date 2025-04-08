@@ -127,7 +127,7 @@ fun PrivateServerListView(serverService: ServerService,
                                     },
                                     singleLine = true,
                                     placeholder = {
-                                        Text("Access Key", fontFamily = Inter)
+                                        Text("Group Code", fontFamily = Inter)
                                     },
                                     colors = TextFieldDefaults.colors(
                                         unfocusedContainerColor = Color.Transparent,

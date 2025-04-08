@@ -23,25 +23,55 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.signature.ObjectKey
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.DataLoadingCallback
 import com.matrixwarez.pt.listener.SocketConnectCallback
-import com.matrixwarez.pt.model.*
+import com.matrixwarez.pt.model.InteractiveCanvasSocket
+import com.matrixwarez.pt.model.QueueSocket
+import com.matrixwarez.pt.model.Server
+import com.matrixwarez.pt.model.SessionSettings
+import com.matrixwarez.pt.model.StatTracker
 import com.matrixwarez.pt.service.CanvasService
 import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_loading_screen.*
+import kotlinx.android.synthetic.main.fragment_loading_screen.connecting_title
+import kotlinx.android.synthetic.main.fragment_loading_screen.game_tip_text
+import kotlinx.android.synthetic.main.fragment_loading_screen.loading_progress_bar
+import kotlinx.android.synthetic.main.fragment_loading_screen.server_icon
+import kotlinx.android.synthetic.main.fragment_loading_screen.text_queue_pos
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_1
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_10
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_2
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_3
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_4
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_5
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_6
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_7
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_8
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_9
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_1
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_10
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_2
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_3
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_4
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_5
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_6
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_7
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_8
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_name_9
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributors_container_1
+import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributors_container_2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.util.*
+import java.util.Timer
+import java.util.TimerTask
+import java.util.UUID
 
 
 class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConnectCallback {
@@ -122,10 +152,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             connecting_title.text = "Connecting to dev server"
         }
         if (server.isAdmin) {
-            connecting_title.text = "Connecting to ${server.name} (Mod)"
+            connecting_title.text = "${server.name} (Mod)"
         }
         else {
-            connecting_title.text = "Connecting to ${server.name}"
+            connecting_title.text = "${server.name}"
         }
 
         val rIndex = (Math.random() * gameTips.size).toInt()
@@ -140,7 +170,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 }
             }
 
-        }, 3000)
+        }, 0)
 
         // start connect
         val accessKey = if (server.isAdmin) {
@@ -201,43 +231,14 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
             }
 
             if (server.isAdmin) {
-                connecting_title.text = "Connecting to ${server.name} (Mod)"
+                connecting_title.text = "${server.name} (Mod)"
             }
             else {
-                connecting_title.text = "Connecting to ${server.name}"
+                connecting_title.text = "${server.name}"
             }
 
-//            Glide.with(this)
-//                .load(server.iconUrl)
-//                .listener(object: RequestListener<Drawable> {
-//                    override fun onLoadFailed(
-//                        e: GlideException?,
-//                        model: Any?,
-//                        target: Target<Drawable>?,
-//                        isFirstResource: Boolean
-//                    ): Boolean {
-//                        return false
-//                    }
-//
-//                    override fun onResourceReady(
-//                        resource: Drawable?,
-//                        model: Any?,
-//                        target: Target<Drawable>?,
-//                        dataSource: DataSource?,
-//                        isFirstResource: Boolean
-//                    ): Boolean {
-//                        server_icon.alpha = 0F
-//                        server_icon.animate().setDuration(300).alpha(1F).start()
-//                        return false
-//                    }
-//                })
-//                .circleCrop()
-//                .into(server_icon)
-
             Glide.with(this)
-                .load("${server.serviceAltBaseUrl()}/canvas")
-                .signature(ObjectKey(System.currentTimeMillis().toString()))
-                .centerCrop()
+                .load(server.iconUrl)
                 .listener(object: RequestListener<Drawable> {
                     override fun onLoadFailed(
                         e: GlideException?,
@@ -255,32 +256,60 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                         dataSource: DataSource,
                         isFirstResource: Boolean
                     ): Boolean {
-                        realm_art.alpha = 0F
-                        realm_art.animate().setDuration(1000).alpha(1F).start()
+                        server_icon.alpha = 0F
+                        server_icon.animate().setDuration(300).alpha(1F).start()
                         return false
                     }
                 })
-                .into(realm_art)
+                .into(server_icon)
 
-            timer.schedule(object : TimerTask() {
-                override fun run() {
-                    activity?.runOnUiThread {
-                        if (lastDotsStr == "" || lastDotsStr == "." || lastDotsStr == "..") {
-                            lastDotsStr = "$lastDotsStr."
-                        } else {
-                            lastDotsStr = ""
-                        }
-                        dots_title?.text = lastDotsStr
-                    }
-                }
-            }, 200, 200)
+//            Glide.with(this)
+//                .load("${server.serviceAltBaseUrl()}/canvas")
+//                .signature(ObjectKey(System.currentTimeMillis().toString()))
+//                .centerCrop()
+//                .listener(object: RequestListener<Drawable> {
+//                    override fun onLoadFailed(
+//                        e: GlideException?,
+//                        model: Any?,
+//                        target: Target<Drawable>,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        return false
+//                    }
+//
+//                    override fun onResourceReady(
+//                        resource: Drawable,
+//                        model: Any,
+//                        target: Target<Drawable>?,
+//                        dataSource: DataSource,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        realm_art.alpha = 0F
+//                        realm_art.animate().setDuration(1000).alpha(1F).start()
+//                        return false
+//                    }
+//                })
+//                .into(realm_art)
+
+//            timer.schedule(object : TimerTask() {
+//                override fun run() {
+//                    activity?.runOnUiThread {
+//                        if (lastDotsStr == "" || lastDotsStr == "." || lastDotsStr == "..") {
+//                            lastDotsStr = "$lastDotsStr."
+//                        } else {
+//                            lastDotsStr = ""
+//                        }
+//                        dots_title?.text = lastDotsStr
+//                    }
+//                }
+//            }, 200, 200)
 
             Utils.setViewLayoutListener(view, object: Utils.ViewLayoutListener {
                 override fun onViewLayout(view: View) {
                     if (SessionSettings.instance.tablet) {
                         // contributors 1
                         var layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_1.width, top_contributors_container_1.height)
-                        layoutParams.rightToLeft = realm_art.id
+//                        layoutParams.rightToLeft = realm_art.id
                         layoutParams.topToTop = ConstraintSet.PARENT_ID
                         layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
 
@@ -290,7 +319,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
                         // contributors 2
                         layoutParams = ConstraintLayout.LayoutParams(top_contributors_container_2.width, top_contributors_container_2.height)
-                        layoutParams.leftToRight = realm_art.id
+//                        layoutParams.leftToRight = realm_art.id
                         layoutParams.topToTop = ConstraintSet.PARENT_ID
                         layoutParams.bottomToBottom = ConstraintSet.PARENT_ID
 
@@ -695,12 +724,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         if (activity == null) return
 
         requireActivity().runOnUiThread {
-            if (realmId == 2) {
-                status_text?.text = "Loading ${getNumLoaded()} / 4"
-            }
-            else {
-                status_text?.text = "Loading ${getNumLoaded()} / 8"
-            }
+            loading_progress_bar.progress = getNumLoaded() / 8f
         }
     }
 

@@ -5,16 +5,16 @@
         android:layout_width="match_parent"
         android:background="@drawable/gradient_dark_gray">
 
-    <ImageView
-            android:id="@+id/realm_art"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#000" />
+<!--    <ImageView-->
+<!--            android:id="@+id/realm_art"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:background="#000" />-->
 
     <ImageView
             android:id="@+id/server_icon"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -33,56 +33,50 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/inter_semibold"
-                android:textSize="20sp"
-                android:textStyle="bold"
+                android:textSize="28sp"
                 android:text="Connecting to world server"
-                android:textColor="@color/frost"
+                android:textColor="#FFF"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="5dp"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/status_text" />
-
-        <TextView
-                android:id="@+id/dots_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
-                app:layout_constraintLeft_toRightOf="@id/connecting_title"
-                app:layout_constraintTop_toTopOf="@id/connecting_title" />
-
-        <TextView
-                android:id="@+id/status_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="#FFAAAAAA"
-                android:fontFamily="@font/inter_semibold"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/game_tip_text"
-            android:visibility="invisible"
-            android:layout_width="wrap_content"
+    <com.matrixwarez.pt.view.LoadingProgressBar
+            android:id="@+id/loading_progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_marginHorizontal="80dp"
+            android:layout_marginBottom="80dp"
+            android:background="@drawable/loading_progress_bar_bg"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    <FrameLayout
+            android:id="@+id/game_tip_frame"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:gravity="center_horizontal"
-            android:fontFamily="@font/inter_regular"
-            android:textSize="16sp"
-            android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+            app:layout_constraintRight_toRightOf="parent" >
+
+        <TextView
+                android:id="@+id/game_tip_text"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginBottom="20dp"
+                android:gravity="center_horizontal"
+                android:fontFamily="@font/inter_regular"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                />
+    </FrameLayout>
 
     <View
             android:id="@+id/world_canvas_preview"
