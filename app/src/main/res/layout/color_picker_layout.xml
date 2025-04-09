@@ -3,25 +3,35 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="40dp"
+        android:background="#000"
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
-    <com.matrixwarez.pt.colorpicker.SBPalette
-            android:id="@+id/sb_palette"
+    <View
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1" />
+
+    <com.matrixwarez.pt.colorpicker.RGBColorWheel
+            android:id="@+id/rgb_color_wheel"
+            android:layout_width="240dp"
+            android:layout_height="240dp">
 
         <com.matrixwarez.pt.colorpicker.SBIndicator
                 android:id="@+id/sb_indicator"
                 android:layout_width="20dp"
                 android:layout_height="20dp" />
 
-    </com.matrixwarez.pt.colorpicker.SBPalette>
+    </com.matrixwarez.pt.colorpicker.RGBColorWheel>
 
     <com.matrixwarez.pt.colorpicker.HPalette
             android:id="@+id/h_palette"
             android:layout_width="match_parent"
-            android:layout_height="40dp">
+            android:layout_height="20dp"
+            android:layout_marginTop="20dp">
 
         <com.matrixwarez.pt.colorpicker.SBIndicator
                 android:id="@+id/h_indicator"
@@ -33,7 +43,8 @@
     <com.matrixwarez.pt.colorpicker.SPalette
             android:id="@+id/s_palette"
             android:layout_width="match_parent"
-            android:layout_height="40dp">
+            android:layout_height="20dp"
+            android:layout_marginTop="20dp">
 
         <com.matrixwarez.pt.colorpicker.SBIndicator
                 android:id="@+id/s_indicator"
@@ -45,7 +56,8 @@
     <com.matrixwarez.pt.colorpicker.BPalette
             android:id="@+id/b_palette"
             android:layout_width="match_parent"
-            android:layout_height="40dp">
+            android:layout_height="20dp"
+            android:layout_marginTop="20dp">
 
         <com.matrixwarez.pt.colorpicker.SBIndicator
                 android:id="@+id/b_indicator"
@@ -57,33 +69,32 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal">
-
-        <View
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="0dp" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="40dp">
 
         <Button
                 android:id="@+id/cancel_button"
-                android:layout_width="120dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Cancel"
                 android:textColor="#FFF"
                 android:backgroundTint="#232323" />
 
+        <View
+                android:layout_width="20dp"
+                android:layout_height="0dp" />
+
         <Button
                 android:id="@+id/ok_button"
-                android:layout_width="120dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="OK"
                 android:textColor="#FFF"
                 android:backgroundTint="#232323" />
-
-        <View
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="0dp" />
 
     </LinearLayout>
 

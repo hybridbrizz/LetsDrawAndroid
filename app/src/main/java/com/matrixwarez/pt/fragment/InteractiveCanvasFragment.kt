@@ -1679,19 +1679,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             recent_colors_container.visibility = View.GONE
 
-            paint_warning_frame.visibility = View.GONE
-
-            //recent_colors_button.visibility = View.GONE
-            //recent_colors_container.visibility = View.GONE
-
+            colorPickerFragment?.setColor(SessionSettings.instance.paintColor)
             surface_view.startPaintSelection()
-
-//            lifecycleScope.launch {
-//                withContext(Dispatchers.Default) {
-//                    delay(3000)
-//                }
-//                colorPickerFragment?.updateViews()
-//            }
         }
         else {
             color_picker_frame.visibility = View.GONE

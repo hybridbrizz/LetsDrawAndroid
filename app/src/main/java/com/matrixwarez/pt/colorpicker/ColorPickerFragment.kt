@@ -23,7 +23,7 @@ class ColorPickerFragment: Fragment() {
         fun requestClose()
     }
 
-    private lateinit var sbPalette: SBPalette
+    private lateinit var rgbColorWheel: RGBColorWheel
     private lateinit var hPalette: HPalette
     private lateinit var sPalette: SPalette
     private lateinit var bPalette: BPalette
@@ -41,13 +41,14 @@ class ColorPickerFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        sbPalette = view.findViewById(R.id.sb_palette)
+        rgbColorWheel = view.findViewById(R.id.rgb_color_wheel)
         hPalette = view.findViewById(R.id.h_palette)
         sPalette = view.findViewById(R.id.s_palette)
         bPalette = view.findViewById(R.id.b_palette)
 
-        sbPalette.sbSelectionListener = object: SBPalette.SBSelectionListener {
-            override fun onSBChanged() {
+        rgbColorWheel.rgbSelectionListener = object: RGBColorWheel.RGBSelectionListener {
+            override fun onRGBChanged() {
+                hPalette.moveIndicator()
                 sPalette.invalidate()
                 bPalette.invalidate()
             }
@@ -55,35 +56,32 @@ class ColorPickerFragment: Fragment() {
 
         hPalette.hSelectionListener = object: HPalette.HColorSelectionListener {
             override fun onHChanged() {
-                sbPalette.invalidate()
+                rgbColorWheel.moveIndicator()
                 sPalette.invalidate()
+                bPalette.invalidate()
             }
         }
 
         sPalette.sSelectionListener = object: SPalette.SColorSelectionListener {
             override fun onSChanged() {
-                sbPalette.moveIndicator()
+                rgbColorWheel.moveIndicator()
                 bPalette.invalidate()
             }
         }
 
         bPalette.bSelectionListener = object: BPalette.BColorSelectionListener {
             override fun onBChanged() {
-                sbPalette.moveIndicator()
+                rgbColorWheel.invalidate()
                 sPalette.invalidate()
             }
         }
 
-        Log.d("Color Picker Frame Test", "fragment with measures = ${sbPalette.width}")
-
-        sbPalette.viewTreeObserver.addOnGlobalLayoutListener(object: OnGlobalLayoutListener {
+        rgbColorWheel.viewTreeObserver.addOnGlobalLayoutListener(object: OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 val listener = this
                 lifecycleScope.launch {
-                    sbPalette.resize()
-                    sbPalette.background = ColorDrawable(Color.parseColor("#F32765"))
-                    Log.d("Color Picker Frame Test", "sb palette width = ${sbPalette.width}")
-                    sbPalette.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+                    rgbColorWheel.postInvalidate()
+                    rgbColorWheel.viewTreeObserver.removeOnGlobalLayoutListener(listener)
                 }
             }
         })
@@ -95,7 +93,7 @@ class ColorPickerFragment: Fragment() {
                     hPalette.resize()
                     hPalette.background = ColorDrawable(Color.BLUE)
                     Log.d("Color Picker Frame Test", "h palette width = ${hPalette.width}")
-                    sbPalette.viewTreeObserver.removeOnGlobalLayoutListener(listener)
+                    hPalette.viewTreeObserver.removeOnGlobalLayoutListener(listener)
                 }
             }
         })
@@ -124,7 +122,7 @@ class ColorPickerFragment: Fragment() {
         })
 
         pcv?.let {
-            sbPalette.setPCV(it)
+            rgbColorWheel.setPCV(it)
             hPalette.setPCV(it)
             sPalette.setPCV(it)
             bPalette.setPCV(it)
@@ -151,8 +149,10 @@ class ColorPickerFragment: Fragment() {
         )
 
         if (view != null) {
-            sbPalette.setPCV(pcv!!)
+            rgbColorWheel.setPCV(pcv!!)
             hPalette.setPCV(pcv!!)
+            sPalette.setPCV(pcv!!)
+            bPalette.setPCV(pcv!!)
         }
     }
 

@@ -6,6 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
+import android.graphics.drawable.ColorDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -53,13 +55,15 @@ class BPalette: FrameLayout {
     }
 
     private fun commonInit() {
-
+        setWillNotDraw(false)
     }
 
     fun resize() {
         w = width / resolutionConstant
 
         pixels = IntArray(w)
+
+        background = ColorDrawable(Color.TRANSPARENT)
 
         invalidate()
     }
@@ -72,6 +76,24 @@ class BPalette: FrameLayout {
 
             if (w > 0) {
                 pcv?.let {
+                    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), Paint().apply { color = Color.BLACK })
+
+                    val cornerRadius = 5 * resources.displayMetrics.density
+
+                    // 1. Create a Path for the Rounded Rectangle
+                    val path = Path()
+                    path.addRoundRect(
+                        RectF(
+                            0f,
+                            0f,
+                            width.toFloat(),
+                            height.toFloat(),
+                        ), cornerRadius, cornerRadius, Path.Direction.CW
+                    )
+
+                    // 2. Clip the Canvas
+                    canvas.clipPath(path)
+
                     drawSPalette(canvas, it)
                 }
             }

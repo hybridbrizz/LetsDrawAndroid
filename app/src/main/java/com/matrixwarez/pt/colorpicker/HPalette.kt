@@ -1,18 +1,20 @@
 package com.matrixwarez.pt.colorpicker
 
+import android.R.attr.radius
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.RectF
+import android.graphics.Region
 import android.util.AttributeSet
 import android.util.Log
+import android.util.TypedValue
 import android.view.MotionEvent
-import android.view.View
 import android.widget.FrameLayout
 import com.matrixwarez.pt.R
-import com.matrixwarez.pt.helper.Utils
 import java.lang.Float.min
 import java.nio.IntBuffer
 import kotlin.math.max
@@ -53,7 +55,7 @@ class HPalette: FrameLayout {
     }
 
     private fun commonInit() {
-
+        setWillNotDraw(false)
     }
 
     fun resize() {
@@ -77,6 +79,24 @@ class HPalette: FrameLayout {
 
             if (w > 0) {
                 pcv?.let {
+                    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), Paint().apply { color = Color.BLACK })
+
+                    val cornerRadius = 5 * resources.displayMetrics.density
+
+                    // 1. Create a Path for the Rounded Rectangle
+                    val path = Path()
+                    path.addRoundRect(
+                        RectF(
+                            0f,
+                            0f,
+                            width.toFloat(),
+                            height.toFloat(),
+                        ), cornerRadius, cornerRadius, Path.Direction.CW
+                    )
+
+                    // 2. Clip the Canvas
+                    canvas.clipPath(path)
+
                     Log.d("Test redraw", "inner draw: w = $width")
                     drawHuePalette(canvas, it)
                 }
