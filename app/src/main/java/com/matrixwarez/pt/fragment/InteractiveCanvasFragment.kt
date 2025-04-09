@@ -23,6 +23,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -64,7 +65,7 @@ import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.Snackbar
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
-import com.matrixwarez.pt.colorpicker.HSBPalette
+import com.matrixwarez.pt.colorpicker.ColorPickerFragment
 import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
 import com.matrixwarez.pt.compose.ClientSummaryLocationsView
@@ -121,10 +122,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_picker_f
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_action_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background_outer
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_black_color_button
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_white_color_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.default_white_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.device_canvas_viewport_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_action_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background
@@ -135,7 +132,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_fragmen
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.help_messages
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.hsb_palette
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.image_no_socket
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.ll_latency_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.lock_paint_panel
@@ -270,6 +266,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var colorPanelIcons = mutableSetOf<ColorPanelIcon>()
 
+    private var colorPickerFragment: ColorPickerFragment? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -306,6 +304,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
             return
         }
+
+        Log.d("Test test", "Adding color picker fragment now")
+        colorPickerFragment = ColorPickerFragment()
+        colorPickerFragment?.setColor(SessionSettings.instance.paintColor)
+
+        Log.d("Color Picker Frame Test", color_picker_frame.width.toString())
+        Log.d("Color Picker Frame Test", color_picker_frame.height.toString())
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.color_picker_frame, colorPickerFragment!!)
+            .commit()
 
         SessionSettings.instance.canvasOpen = true
 
@@ -720,52 +728,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // color picker view
         //color_picker_view.setSelectorColor(Color.WHITE)
 
-        default_black_color_action.type = ActionButtonView.Type.BLACK_COLOR_DEFAULT
-        default_black_color_button.actionBtnView = default_black_color_action
-
-        default_black_color_button.setOnClickListener {
-            hsb_palette.init(ActionButtonView.blackPaint.color)
-        }
-
-        default_white_color_action.type = ActionButtonView.Type.WHITE_COLOR_DEFAULT
-        default_white_color_button.actionBtnView = default_white_color_action
-
-        default_white_color_button.setOnClickListener {
-            hsb_palette.init(ActionButtonView.whitePaint.color)
-        }
-
-        val textChangeListener = object: TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                try {
-                    val color = Color.parseColor("#$s")
-                    hsb_palette.init(color)
-
-                    hideKeyboard()
-                }
-                catch (exception: Exception) {
-
-                }
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-
-            }
-        }
-
-//        color_hex_string_input.addTextChangedListener(textChangeListener)
-//
-//        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
-//            if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                hideKeyboard()
-//            }
-//            true
-//        }
-
-        hsb_palette.listen(object: HSBPalette.ColorListener {
+        colorPickerFragment?.listen(object: ColorPickerFragment.ColorListener {
             override fun onColor(color: Int) {
                 updateSelectedColor(color)
             }
@@ -1709,10 +1672,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // start color selection mode
         if (color_picker_frame.visibility != View.VISIBLE) {
             color_picker_frame.visibility = View.VISIBLE
-            recent_colors_container.visibility = View.GONE
 
-            initalColor = SessionSettings.instance.paintColor
-            hsb_palette.init(initalColor)
+            recent_colors_container.visibility = View.GONE
 
             paint_warning_frame.visibility = View.GONE
 
@@ -1720,6 +1681,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             //recent_colors_container.visibility = View.GONE
 
             surface_view.startPaintSelection()
+
+//            lifecycleScope.launch {
+//                withContext(Dispatchers.Default) {
+//                    delay(3000)
+//                }
+//                colorPickerFragment?.updateViews()
+//            }
         }
         else {
             color_picker_frame.visibility = View.GONE
@@ -2124,7 +2092,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // interactive canvas listener
     override fun notifyPaintColorUpdate(color: Int) {
-        hsb_palette.setColor(color)
+
     }
 
     override fun notifyPaintingStarted() {

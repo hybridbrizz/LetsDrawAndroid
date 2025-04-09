@@ -10,50 +10,32 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
+import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
 import java.lang.Float.min
 import java.nio.IntBuffer
 import kotlin.math.max
 
 
-class SBPalette: View {
+class SBPalette: FrameLayout {
 
-    interface SBColorSelectionListener {
-        fun onSBColorSelected(saturation: Float, brightness: Float)
-    }
-
-    interface SBIndicatorCallback {
-        fun indicatorStartPosition(x: Float, y: Float)
-        fun moveIndicatorToPosition(x: Float, y: Float)
+    interface SBSelectionListener {
+        fun onSBChanged()
     }
 
     private val logging = false
 
     private val resolutionConstant = 8
 
-    private val minSb = 0F
-    private val maxSb = 1F
-
     private var w = 0
     private var h = 0
 
     private lateinit var pixels: IntArray
 
-    private var hue = 0F
-    set(value) {
-        field = value
+    var sbSelectionListener: SBSelectionListener? = null
 
-        invalidate()
-    }
-
-    var saturation = 0.5F
-    private set
-
-    var brightness = 0.5F
-    private set
-
-    var sbColorSelectionListener: SBColorSelectionListener? = null
-    var indicatorCallback: SBIndicatorCallback? = null
+    private var pcv: PickedColorValues? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -75,24 +57,13 @@ class SBPalette: View {
 
     }
 
-    fun init() {
+    fun resize() {
         w = width / resolutionConstant
         h = height / resolutionConstant
 
         pixels = IntArray(w * h)
-    }
 
-    fun setSB(s: Float, b: Float) {
-        saturation = s
-        brightness = b
-
-        sbColorSelectionListener?.onSBColorSelected(saturation, brightness)
-
-        indicatorCallback?.indicatorStartPosition(saturation * width, height - (brightness * height))
-    }
-
-    fun setH(h: Float) {
-        hue = h
+        requestLayout()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -103,9 +74,9 @@ class SBPalette: View {
         canvas.apply {
             save()
 
-            drawSBSquare(hue, canvas)
-
-//            drawBorder(canvas)
+            pcv?.let {
+                drawSBSquare(canvas, it)
+            }
 
             restore()
         }
@@ -115,9 +86,11 @@ class SBPalette: View {
         if (logging) {
             Log.i("Fps = ", (1000 / duration.toFloat()).toString())
         }
+
+        moveIndicator()
     }
 
-    private fun drawSBSquare(hue: Float, canvas: Canvas) {
+    private fun drawSBSquare(canvas: Canvas, pcv: PickedColorValues) {
         if (w == 0 || h == 0) return
 
         val wf = w.toFloat()
@@ -126,9 +99,9 @@ class SBPalette: View {
         for (y in 0 until h) {
             for (x in 0 until w) {
                 val s = x / wf
-                val br = maxSb - (y / hf)
+                val br = pcv.maxValue - (y / hf)
 
-                val color = ColorUtility.colorFromHSB(hue, s, br)
+                val color = ColorUtility.colorFromHSB(pcv.h, s, br)
 
                 pixels[y * w + x] = ColorUtility.getAndroidBitmapFormatRGBA8888(color)
             }
@@ -142,32 +115,33 @@ class SBPalette: View {
         canvas.drawBitmap(bitmap, 0F, 0F, null)
     }
 
-//    private fun drawBorder(canvas: Canvas) {
-//        val borderPaint = Paint()
-//        borderPaint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
-//        borderPaint.color = Color.parseColor("#FAD452")
-//        borderPaint.style = Paint.Style.STROKE
-//
-//        val path = Path()
-//        path.moveTo(0f, 0f)
-//        path.lineTo(canvas.width.toFloat(), 0f)
-//        path.lineTo(canvas.width.toFloat(), canvas.height.toFloat())
-//        path.lineTo(0f, canvas.height.toFloat())
-//        path.lineTo(0f, 0f)
-//
-//        canvas.drawPath(path, borderPaint)
-//    }
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
-            val s = event.x / width.toFloat()
-            val b = 1 - (event.y / height.toFloat())
+            pcv?.let {
+                it.s = max(min(event.x / width.toFloat(), it.maxValue), it.minValue)
+                it.b = max(min(1 - (event.y / height.toFloat()), it.maxValue), it.minValue)
 
-            setSB(max(min(s, maxSb), minSb), max(min(b, maxSb), minSb))
+                sbSelectionListener?.onSBChanged()
+
+                moveIndicator()
+            }
 
             true
         } else {
             super.onTouchEvent(event)
         }
+    }
+
+    fun moveIndicator() {
+        pcv?.let {
+            val indicator = findViewById<SBIndicator>(R.id.sb_indicator)
+            indicator.x = it.s / it.maxValue * width - indicator.width / 2
+            indicator.y = height - (it.b / it.maxValue * height) - indicator.width / 2
+        }
+    }
+
+    fun setPCV(pcv: PickedColorValues) {
+        this.pcv = pcv
+        postInvalidate()
     }
 }

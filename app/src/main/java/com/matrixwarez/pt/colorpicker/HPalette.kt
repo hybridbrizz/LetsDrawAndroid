@@ -10,39 +10,31 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.widget.FrameLayout
+import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
 import java.lang.Float.min
 import java.nio.IntBuffer
 import kotlin.math.max
 
 
-class HPalette: View {
+class HPalette: FrameLayout {
 
     interface HColorSelectionListener {
-        fun onHColorSelected(hue: Float)
-    }
-
-    interface HIndicatorCallback {
-        fun indicatorStartPosition(x: Float)
-        fun moveIndicatorToPosition(x: Float)
+        fun onHChanged()
     }
 
     private val logging = false
 
     private val resolutionConstant = 4
 
-    private val minHue = 0F
-    private val maxHue = 360F
-
     private var w = 0
 
     private lateinit var pixels: IntArray
 
-    var hue = 0F
-    private set
+    private var pcv: PickedColorValues? = null
 
-    var hColorSelectionListener: HColorSelectionListener? = null
-    var indicatorCallback: HIndicatorCallback? = null
+    var hSelectionListener: HColorSelectionListener? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -64,18 +56,13 @@ class HPalette: View {
 
     }
 
-    fun init() {
+    fun resize() {
         w = width / resolutionConstant
 
         pixels = IntArray(w)
-    }
 
-    fun setH(h: Float) {
-        hue = h
-
-        hColorSelectionListener?.onHColorSelected(hue)
-
-        indicatorCallback?.indicatorStartPosition(hue / maxHue * width)
+        Log.d("Test redraw", "init: w = $width")
+        invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -83,13 +70,16 @@ class HPalette: View {
 
         val sTime = System.currentTimeMillis()
 
+        Log.d("Test redraw", "outer draw: w = $width")
+
         canvas.apply {
             save()
 
             if (w > 0) {
-                drawHuePalette(canvas)
-
-                //drawBorder(canvas)
+                pcv?.let {
+                    Log.d("Test redraw", "inner draw: w = $width")
+                    drawHuePalette(canvas, it)
+                }
             }
 
             restore()
@@ -100,13 +90,15 @@ class HPalette: View {
         if (logging) {
             Log.i("Hue Fps = ", (1000 / duration.toFloat()).toString())
         }
+
+        moveIndicator()
     }
 
-    private fun drawHuePalette(canvas: Canvas) {
+    private fun drawHuePalette(canvas: Canvas, pcv: PickedColorValues) {
         val wf = w.toFloat()
 
         for (x in 0 until w) {
-            val h = x / wf * maxHue
+            val h = x / wf * (pcv.maxValue * 360)
 
             val color = ColorUtility.colorFromH(h)
 
@@ -121,31 +113,31 @@ class HPalette: View {
         canvas.drawBitmap(bitmap, 0F, 0F, null)
     }
 
-//    private fun drawBorder(canvas: Canvas) {
-//        val borderPaint = Paint()
-//        borderPaint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
-//        borderPaint.color = Color.parseColor("#FAD452")
-//        borderPaint.style = Paint.Style.STROKE
-//
-//        val path = Path()
-//        path.moveTo(0f, 0f)
-//        path.lineTo(canvas.width.toFloat(), 0f)
-//        path.lineTo(canvas.width.toFloat(), canvas.height.toFloat())
-//        path.lineTo(0f, canvas.height.toFloat())
-//        path.lineTo(0f, 0f)
-//
-//        canvas.drawPath(path, borderPaint)
-//    }
-
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
-            val h = event.x / width.toFloat() * maxHue
+            pcv?.let {
+                it.h = max(min(event.x / width.toFloat() * it.maxValue, it.maxValue), it.minValue)
 
-            setH(max(min(h, maxHue), minHue))
+                hSelectionListener?.onHChanged()
+
+                moveIndicator()
+            }
 
             true
         } else {
             super.onTouchEvent(event)
         }
+    }
+
+    fun moveIndicator() {
+        pcv?.let {
+            val indicator = findViewById<HIndicator>(R.id.h_indicator)
+            indicator.x = it.h / it.maxValue * width - indicator.width / 2
+        }
+    }
+
+    fun setPCV(pcv: PickedColorValues) {
+        this.pcv = pcv
+        invalidate()
     }
 }

@@ -2,7 +2,10 @@ package com.matrixwarez.pt.colorpicker
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.ViewTreeObserver
@@ -22,12 +25,10 @@ class HSBPalette: FrameLayout {
 
     private lateinit var sbPalette: SBPalette
     private lateinit var hPalette: HPalette
-    private lateinit var sbIndicator: SBIndicator
-    private lateinit var hIndicator: HIndicator
-
-    val hsb = FloatArray(3)
 
     private val listeners = LinkedList<ColorListener>()
+
+    private var pcv: PickedColorValues? = null
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     constructor(context: Context): super(context) {
@@ -39,137 +40,80 @@ class HSBPalette: FrameLayout {
     }
 
     private fun initLayout(context: Context) {
+        background = ColorDrawable(Color.RED)
+
         val layout = LayoutInflater.from(context).inflate(R.layout.color_picker_layout, this, false)
         this.addView(layout)
 
         sbPalette = layout.findViewById(R.id.sb_palette)
         hPalette = layout.findViewById(R.id.h_palette)
-        sbIndicator = layout.findViewById(R.id.sb_indicator)
-        hIndicator = layout.findViewById(R.id.h_indicator)
-    }
 
-    fun init(startColor: Int) {
-        //val textContainer = findViewById<LinearLayout>(R.id.linear_layout_text_container)
+        sbPalette.sbSelectionListener = object: SBPalette.SBSelectionListener {
+            override fun onSBChanged() {
 
-        //val hueTextView = findViewById<TextView>(R.id.hue_text)
-        //val saturationTextView = findViewById<TextView>(R.id.saturation_text)
-        //val brightnessTextView = findViewById<TextView>(R.id.brightness_text)
-
-        val hsbValues = FloatArray(3)
-        Color.colorToHSV(startColor, hsbValues)
-
-        val sHue = hsbValues[0]
-        val sSaturation = hsbValues[1]
-        val sBrightness = hsbValues[2]
-
-        hsb[0] = hsbValues[0]
-        hsb[1] = hsbValues[1]
-        hsb[2] = hsbValues[2]
-
-        sbPalette.sbColorSelectionListener = object: SBPalette.SBColorSelectionListener {
-            override fun onSBColorSelected(saturation: Float, brightness: Float) {
-                hsb[1] = saturation
-                hsb[2] = brightness
-
-                //saturationTextView.text = context.getString(R.string.saturation_value_text, (saturation * 100).toInt())
-                //brightnessTextView.text = context.getString(R.string.brightness_value_text, (brightness * 100).toInt())
-
-                listeners.forEach { it.onColor(Color.HSVToColor(hsb)) }
             }
         }
 
-        sbPalette.indicatorCallback = object: SBPalette.SBIndicatorCallback {
-            override fun indicatorStartPosition(x: Float, y: Float) {
-                sbIndicator.x = x - sbIndicator.width / 2
-                sbIndicator.y = y - sbIndicator.height / 2
-            }
-
-            override fun moveIndicatorToPosition(x: Float, y: Float) {
-                if (x >= 0 && x <= sbPalette.width) {
-                    sbIndicator.x = x - sbIndicator.width / 2
-                }
-                if (y >= 0 && y <= sbPalette.height) {
-                    sbIndicator.y = y - sbIndicator.height / 2
-                }
+        hPalette.hSelectionListener = object: HPalette.HColorSelectionListener {
+            override fun onHChanged() {
+                sbPalette.invalidate()
             }
         }
 
-        sbPalette.viewTreeObserver.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                sbPalette.viewTreeObserver.removeOnGlobalLayoutListener(this)
-
-                sbPalette.init()
-                sbPalette.setSB(sSaturation, sBrightness)
-            }
-        })
-
-        hPalette.indicatorCallback = object: HPalette.HIndicatorCallback {
-            override fun indicatorStartPosition(x: Float) {
-                hIndicator.x = x - hIndicator.width / 2
-                hIndicator.y = hPalette.y
-            }
-
-            override fun moveIndicatorToPosition(x: Float) {
-                if (x >= 0 && x <= hPalette.width) {
-                    hIndicator.x = x - hIndicator.width / 2
-                }
-            }
+        sbPalette.viewTreeObserver.addOnGlobalLayoutListener {
+            sbPalette.resize()
         }
 
-        hPalette.hColorSelectionListener = object: HPalette.HColorSelectionListener {
-            override fun onHColorSelected(hue: Float) {
-                sbPalette.setH(hue)
-                hsb[0] = hue
-
-                //hueTextView.text = context.getString(R.string.hue_value_text, hue.toInt())
-
-                listeners.forEach { it.onColor(Color.HSVToColor(hsb)) }
-            }
+        hPalette.viewTreeObserver.addOnGlobalLayoutListener {
+            hPalette.resize()
         }
-
-        hPalette.viewTreeObserver.addOnGlobalLayoutListener(object: ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                hPalette.viewTreeObserver.removeOnGlobalLayoutListener(this)
-
-                hPalette.init()
-                hPalette.setH(sHue)
-            }
-        })
-
-        /*textContainer.setOnClickListener {
-            if (it.alpha == 1F) {
-                it.alpha = 0F
-            }
-            else {
-                it.alpha = 1F
-            }
-
-            SessionSettings.instance.hsbTextVisible = it.alpha == 1F
-            SessionSettings.instance.saveHsbTextVisible(context)
-        }
-
-        if (!SessionSettings.instance.hsbTextVisible) {
-            textContainer.alpha = 0F
-        }*/
-    }
-
-    fun listen(listener: ColorListener) {
-        listeners.add(listener)
     }
 
     fun setColor(color: Int) {
         val hsbValues = FloatArray(3)
         Color.colorToHSV(color, hsbValues)
 
-        val sHue = hsbValues[0]
-        val sSaturation = hsbValues[1]
-        val sBrightness = hsbValues[2]
+        pcv = PickedColorValues(
+            h = hsbValues[0],
+            s = hsbValues[1],
+            b = hsbValues[2]
+        )
 
-        hsb[0] = hsbValues[0]
-        hsb[1] = hsbValues[1]
-        hsb[2] = hsbValues[2]
-
-        hPalette.setH(sHue)
-        sbPalette.setSB(sSaturation, sBrightness)
+        sbPalette.setPCV(pcv!!)
+        hPalette.setPCV(pcv!!)
     }
+
+    fun listen(listener: ColorListener) {
+        listeners.add(listener)
+    }
+
+    val textChangeListener = object: TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            try {
+                val color = Color.parseColor("#$s")
+
+                //hideKeyboard()
+            }
+            catch (exception: Exception) {
+
+            }
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+
+        }
+    }
+
+//        color_hex_string_input.addTextChangedListener(textChangeListener)
+//
+//        color_hex_string_input.setOnEditorActionListener { textView, actionId, keyEvent ->
+//            if (actionId == EditorInfo.IME_ACTION_DONE) {
+//                hideKeyboard()
+//            }
+//            true
+//        }
 }
