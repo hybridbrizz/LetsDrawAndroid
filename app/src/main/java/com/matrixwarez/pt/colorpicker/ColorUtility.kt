@@ -14,6 +14,22 @@ object ColorUtility {
         return Color.HSVToColor(colorValues)
     }
 
+    fun colorFromS(s: Float, pcv: PickedColorValues): Int {
+        colorValues[0] = pcv.h * 360f
+        colorValues[1] = s
+        colorValues[2] = pcv.b
+
+        return Color.HSVToColor(colorValues)
+    }
+
+    fun colorFromB(b: Float, pcv: PickedColorValues): Int {
+        colorValues[0] = pcv.h * 360f
+        colorValues[1] = pcv.s
+        colorValues[2] = b
+
+        return Color.HSVToColor(colorValues)
+    }
+
     fun colorFromHSB(hue: Float, saturation: Float, brightness: Float): Int {
         colorValues[0] = hue
         colorValues[1] = saturation

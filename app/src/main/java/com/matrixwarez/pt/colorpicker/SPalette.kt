@@ -18,10 +18,10 @@ import java.nio.IntBuffer
 import kotlin.math.max
 
 
-class HPalette: FrameLayout {
+class SPalette: FrameLayout {
 
-    interface HColorSelectionListener {
-        fun onHChanged()
+    interface SColorSelectionListener {
+        fun onSChanged()
     }
 
     private val logging = false
@@ -34,7 +34,7 @@ class HPalette: FrameLayout {
 
     private var pcv: PickedColorValues? = null
 
-    var hSelectionListener: HColorSelectionListener? = null
+    var sSelectionListener: SColorSelectionListener? = null
 
     constructor(context: Context) : super(context) {
         commonInit()
@@ -61,46 +61,34 @@ class HPalette: FrameLayout {
 
         pixels = IntArray(w)
 
-        Log.d("Test redraw", "init: w = $width")
         invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        val sTime = System.currentTimeMillis()
-
-        Log.d("Test redraw", "outer draw: w = $width")
-
         canvas.apply {
             save()
 
             if (w > 0) {
                 pcv?.let {
-                    Log.d("Test redraw", "inner draw: w = $width")
-                    drawHuePalette(canvas, it)
+                    drawSPalette(canvas, it)
                 }
             }
 
             restore()
         }
 
-        val duration = System.currentTimeMillis() - sTime
-
-        if (logging) {
-            Log.i("Hue Fps = ", (1000 / duration.toFloat()).toString())
-        }
-
         moveIndicator()
     }
 
-    private fun drawHuePalette(canvas: Canvas, pcv: PickedColorValues) {
+    private fun drawSPalette(canvas: Canvas, pcv: PickedColorValues) {
         val wf = w.toFloat()
 
         for (x in 0 until w) {
-            val h = x / wf * (pcv.maxValue * 360)
+            val s = x / wf * pcv.maxValue
 
-            val color = ColorUtility.colorFromH(h)
+            val color = ColorUtility.colorFromS(s, pcv)
 
             pixels[x] = ColorUtility.getAndroidBitmapFormatRGBA8888(color)
         }
@@ -116,9 +104,9 @@ class HPalette: FrameLayout {
     override fun onTouchEvent(event: MotionEvent): Boolean {
         return if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
             pcv?.let {
-                it.h = max(min(event.x / width.toFloat() * it.maxValue, it.maxValue), it.minValue)
+                it.s = max(min(event.x / width.toFloat() * it.maxValue, it.maxValue), it.minValue)
 
-                hSelectionListener?.onHChanged()
+                sSelectionListener?.onSChanged()
 
                 moveIndicator()
             }
@@ -131,8 +119,8 @@ class HPalette: FrameLayout {
 
     fun moveIndicator() {
         pcv?.let {
-            val indicator = findViewById<SBIndicator>(R.id.h_indicator)
-            indicator.x = it.h / it.maxValue * width - indicator.width / 2
+            val indicator = findViewById<SBIndicator>(R.id.s_indicator)
+            indicator.x = it.s / it.maxValue * width - indicator.width / 2
         }
     }
 
