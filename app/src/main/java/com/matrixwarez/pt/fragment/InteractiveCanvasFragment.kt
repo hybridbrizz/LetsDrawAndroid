@@ -732,6 +732,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             override fun onColor(color: Int) {
                 updateSelectedColor(color)
             }
+
+            override fun requestClose() {
+                onPaintIndicatorClick()
+            }
         })
 
         // button clicks

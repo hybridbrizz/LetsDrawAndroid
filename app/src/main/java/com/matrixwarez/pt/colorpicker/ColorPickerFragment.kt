@@ -11,6 +11,8 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.matrixwarez.pt.R
+import kotlinx.android.synthetic.main.color_picker_layout.cancel_button
+import kotlinx.android.synthetic.main.color_picker_layout.ok_button
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 
@@ -18,6 +20,7 @@ class ColorPickerFragment: Fragment() {
 
     interface ColorListener {
         fun onColor(color: Int)
+        fun requestClose()
     }
 
     private lateinit var sbPalette: SBPalette
@@ -84,6 +87,15 @@ class ColorPickerFragment: Fragment() {
         pcv?.let {
             sbPalette.setPCV(it)
             hPalette.setPCV(it)
+        }
+
+        ok_button.setOnClickListener {
+            listeners.forEach { it.onColor(pcv?.toColor() ?: 0) }
+            listeners.forEach { it.requestClose() }
+        }
+
+        cancel_button.setOnClickListener {
+            listeners.forEach { it.requestClose() }
         }
     }
 

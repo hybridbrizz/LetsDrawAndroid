@@ -101,7 +101,7 @@ class SBPalette: FrameLayout {
                 val s = x / wf
                 val br = pcv.maxValue - (y / hf)
 
-                val color = ColorUtility.colorFromHSB(pcv.h, s, br)
+                val color = ColorUtility.colorFromHSB(pcv.h * 360f, s, br)
 
                 pixels[y * w + x] = ColorUtility.getAndroidBitmapFormatRGBA8888(color)
             }

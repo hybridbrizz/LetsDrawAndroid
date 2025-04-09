@@ -30,4 +30,37 @@
 
     </com.matrixwarez.pt.colorpicker.HPalette>
 
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="0dp" />
+
+        <Button
+                android:id="@+id/cancel_button"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:textColor="#FFF"
+                android:backgroundTint="#232323" />
+
+        <Button
+                android:id="@+id/ok_button"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:text="OK"
+                android:textColor="#FFF"
+                android:backgroundTint="#232323" />
+
+        <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="0dp" />
+
+    </LinearLayout>
+
 </LinearLayout>
