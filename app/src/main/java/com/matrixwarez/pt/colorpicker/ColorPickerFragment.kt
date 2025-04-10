@@ -11,15 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.core.text.isDigitsOnly
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
 import kotlinx.android.synthetic.main.color_picker_layout.cancel_button
 import kotlinx.android.synthetic.main.color_picker_layout.current_color_view
-import kotlinx.android.synthetic.main.color_picker_layout.h_edit_text
 import kotlinx.android.synthetic.main.color_picker_layout.ok_button
 import kotlinx.android.synthetic.main.color_picker_layout.previous_color_view
 import kotlinx.coroutines.launch
@@ -31,6 +30,8 @@ class ColorPickerFragment: Fragment() {
     interface ColorListener {
         fun onColor(color: Int)
         fun requestClose()
+        fun requestPickCanvas()
+        fun pickCanvasColor(color: Int)
     }
 
     private lateinit var rgbColorWheel: RGBColorWheel
@@ -43,7 +44,9 @@ class ColorPickerFragment: Fragment() {
     private lateinit var sEditText: EditText
     private lateinit var bEditText: EditText
 
-    private val listeners = LinkedList<ColorListener>()
+    private lateinit var pickCanvasButton: ImageButton
+
+    val listeners = LinkedList<ColorListener>()
 
     private var pcv: PickedColorValues? = null
 
@@ -65,6 +68,8 @@ class ColorPickerFragment: Fragment() {
         hEditText = view.findViewById(R.id.h_edit_text)
         sEditText = view.findViewById(R.id.s_edit_text)
         bEditText = view.findViewById(R.id.b_edit_text)
+
+        pickCanvasButton = view.findViewById(R.id.pick_canvas_button)
 
         rgbColorWheel.rgbSelectionListener = object: RGBColorWheel.RGBSelectionListener {
             override fun onRGBChanged() {
@@ -166,7 +171,9 @@ class ColorPickerFragment: Fragment() {
             updateText(it)
         }
 
-        previous_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+        pickCanvasButton.setOnClickListener {
+            listeners.forEach { it.requestPickCanvas() }
+        }
 
         ok_button.setOnClickListener {
             listeners.forEach { it.onColor(pcv?.toColor() ?: 0) }
@@ -185,7 +192,7 @@ class ColorPickerFragment: Fragment() {
         }
     }
 
-    fun setColor(color: Int) {
+    fun setColor(color: Int, setPreviousColor: Boolean) {
         pcv = PickedColorValues.fromColor(color)
 
         if (view != null) {
@@ -196,6 +203,12 @@ class ColorPickerFragment: Fragment() {
                 bPalette.setPCV(it)
 
                 updateText(it)
+
+                current_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+
+                if (setPreviousColor) {
+                    previous_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+                }
             }
         }
     }

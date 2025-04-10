@@ -307,7 +307,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         Log.d("Test test", "Adding color picker fragment now")
         colorPickerFragment = ColorPickerFragment()
-        colorPickerFragment?.setColor(SessionSettings.instance.paintColor)
 
         Log.d("Color Picker Frame Test", color_picker_frame.width.toString())
         Log.d("Color Picker Frame Test", color_picker_frame.height.toString())
@@ -735,6 +734,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             override fun requestClose() {
                 onPaintIndicatorClick()
+            }
+
+            override fun requestPickCanvas() {
+                color_picker_frame.visibility = View.INVISIBLE
+            }
+
+            override fun pickCanvasColor(color: Int) {
+                colorPickerFragment?.setColor(color, false)
+                color_picker_frame.visibility = View.VISIBLE
             }
         })
 
@@ -1679,7 +1687,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             recent_colors_container.visibility = View.GONE
 
-            colorPickerFragment?.setColor(SessionSettings.instance.paintColor)
+            colorPickerFragment?.setColor(SessionSettings.instance.paintColor, true)
             surface_view.startPaintSelection()
         }
         else {
@@ -2086,6 +2094,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // interactive canvas listener
     override fun notifyPaintColorUpdate(color: Int) {
 
+    }
+
+    override fun notifyPickCanvasColor(color: Int) {
+        colorPickerFragment?.listeners?.forEach { it.pickCanvasColor(color) }
     }
 
     override fun notifyPaintingStarted() {

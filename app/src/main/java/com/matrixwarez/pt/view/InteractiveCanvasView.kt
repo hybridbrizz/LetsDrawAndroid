@@ -223,8 +223,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 val unitPoint = interactiveCanvas.screenPointToUnit(ev.x, ev.y)
                 unitPoint?.apply {
                     if (unitPoint.x in 0 until interactiveCanvas.cols && unitPoint.y in 0 until interactiveCanvas.rows) {
-                        SessionSettings.instance.paintColor = interactiveCanvas.arr[y][x]
-                        interactiveCanvas.interactiveCanvasListener?.notifyPaintColorUpdate(SessionSettings.instance.paintColor)
+                        interactiveCanvas.interactiveCanvasListener?.notifyPickCanvasColor(interactiveCanvas.arr[y][x])
                     }
                 }
             }

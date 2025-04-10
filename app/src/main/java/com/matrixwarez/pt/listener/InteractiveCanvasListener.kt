@@ -5,6 +5,8 @@ interface InteractiveCanvasListener {
 
     fun notifyPaintColorUpdate(color: Int)
 
+    fun notifyPickCanvasColor(color: Int)
+
     fun notifyPaintActionStarted()
 
     fun notifyPaintingStarted()
