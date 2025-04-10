@@ -41,6 +41,16 @@ class Utils {
 
         val key1 = "8AHI!VR7299G7cq3YsP359HDkKz682oNT3QHh?yyehuvkyzdm674w45o"
 
+        fun colorIntToHex(colorInt: Int): String {
+            // Extract the RGB components from the color int
+            val red = (colorInt shr 16) and 0xFF
+            val green = (colorInt shr 8) and 0xFF
+            val blue = colorInt and 0xFF
+
+            // Format as a hex string with # prefix
+            return String.format("#%02X%02X%02X", red, green, blue)
+        }
+
         fun dpToPx(context: Context?, dp: Int): Int {
             context?.apply {
                 return TypedValue.applyDimension(

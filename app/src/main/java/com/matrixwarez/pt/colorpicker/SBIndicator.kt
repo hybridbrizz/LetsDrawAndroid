@@ -29,9 +29,9 @@ class SBIndicator: View {
     }
 
     private fun commonInit() {
-        paint.color = Color.parseColor("#CCFFFFFF")
+        paint.color = Color.parseColor("#FFFFFFFF")
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = Utils.dpToPx(context, 3).toFloat()
+        paint.strokeWidth = Utils.dpToPx(context, 2).toFloat()
         paint.isAntiAlias = true
     }
 
