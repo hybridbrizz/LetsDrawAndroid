@@ -13,6 +13,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ScrollView
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -34,6 +35,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
         fun requestPickCanvas()
         fun pickCanvasColor(color: Int)
     }
+
+    private lateinit var scrollView: ScrollView
 
     private lateinit var rgbColorWheel: RGBColorWheel
     private lateinit var hPalette: HPalette
@@ -65,6 +68,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        scrollView = view.findViewById(R.id.color_picker_scroll_view)
+
         rgbColorWheel = view.findViewById(R.id.rgb_color_wheel)
         hPalette = view.findViewById(R.id.h_palette)
         sPalette = view.findViewById(R.id.s_palette)
@@ -188,7 +193,7 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                     }
             }
         })
-        
+
         pcv?.let {
             rgbColorWheel.setPCV(it)
             hPalette.setPCV(it)
@@ -254,6 +259,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                     previous_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
                 }
             }
+
+            scrollView.scrollBy(0, 10000)
         }
     }
 

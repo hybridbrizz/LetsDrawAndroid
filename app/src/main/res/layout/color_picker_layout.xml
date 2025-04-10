@@ -1,251 +1,257 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/color_picker_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingHorizontal="40dp"
         android:background="#000"
         android:clipChildren="false"
-        android:clipToPadding="false">
-
-    <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-    <com.matrixwarez.pt.view.ColorPaletteView
-            android:id="@+id/color_picker_color_palette"
-            android:layout_width="match_parent"
-            android:layout_height="0dp" />
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="20dp">
+            android:orientation="vertical"
+            android:gravity="bottom|center_horizontal"
+            android:paddingHorizontal="40dp"
+            android:background="#000"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-        <ImageButton
-                android:id="@+id/load_palette_button"
-                android:layout_width="wrap_content"
+        <com.matrixwarez.pt.view.ColorPaletteView
+                android:id="@+id/color_picker_color_palette"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_marginTop="40dp" />
+
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:src="@drawable/up_arrow"
-                android:foregroundTint="#FFF"
-                android:backgroundTint="#232323" />
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
+
+            <ImageButton
+                    android:id="@+id/load_palette_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/up_arrow"
+                    android:foregroundTint="#FFF"
+                    android:backgroundTint="#232323" />
+
+            <View
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="0dp" />
+
+            <ImageButton
+                    android:id="@+id/pick_canvas_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/colorize"
+                    android:foregroundTint="#FFF"
+                    android:backgroundTint="#232323" />
+
+            <EditText
+                    android:id="@+id/hex_text"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFF"
+                    android:textColorHint="#999"
+                    android:textSize="14dp"
+                    android:textCursorDrawable="@null"
+                    android:fontFamily="@font/inter_semibold"
+                    android:backgroundTint="#FFF"
+                    android:hint="#FFFFFF"
+                    android:inputType="textCapCharacters|textNoSuggestions"
+                    android:lines="1"
+                    android:maxLength="7"
+                    android:gravity="right" />
+
+        </LinearLayout>
 
         <View
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="0dp" />
+                android:id="@+id/current_color_view"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginTop="20dp" />
 
-        <ImageButton
-                android:id="@+id/pick_canvas_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/colorize"
-                android:foregroundTint="#FFF"
-                android:backgroundTint="#232323" />
+        <View
+                android:id="@+id/previous_color_view"
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
 
-        <EditText
-                android:id="@+id/hex_text"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:textColorHint="#999"
-                android:textSize="14dp"
-                android:textCursorDrawable="@null"
-                android:fontFamily="@font/inter_semibold"
-                android:backgroundTint="#FFF"
-                android:hint="#FFFFFF"
-                android:inputType="textCapCharacters|textNoSuggestions"
-                android:lines="1"
-                android:maxLength="7"
-                android:gravity="right" />
-
-    </LinearLayout>
-
-    <View
-            android:id="@+id/current_color_view"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="20dp" />
-
-    <View
-            android:id="@+id/previous_color_view"
-            android:layout_width="match_parent"
-            android:layout_height="40dp" />
-
-    <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp" />
-
-    <com.matrixwarez.pt.colorpicker.RGBColorWheel
-            android:id="@+id/rgb_color_wheel"
-            android:layout_width="240dp"
-            android:layout_height="240dp">
-
-        <com.matrixwarez.pt.colorpicker.SBIndicator
-                android:id="@+id/sb_indicator"
-                android:layout_width="20dp"
+        <View
+                android:layout_width="match_parent"
                 android:layout_height="20dp" />
 
-    </com.matrixwarez.pt.colorpicker.RGBColorWheel>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="10dp">
-
-        <com.matrixwarez.pt.colorpicker.HPalette
-                android:id="@+id/h_palette"
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_weight="1">
+        <com.matrixwarez.pt.colorpicker.RGBColorWheel
+                android:id="@+id/rgb_color_wheel"
+                android:layout_width="240dp"
+                android:layout_height="240dp">
 
             <com.matrixwarez.pt.colorpicker.SBIndicator
-                    android:id="@+id/h_indicator"
+                    android:id="@+id/sb_indicator"
                     android:layout_width="20dp"
                     android:layout_height="20dp" />
 
-        </com.matrixwarez.pt.colorpicker.HPalette>
+        </com.matrixwarez.pt.colorpicker.RGBColorWheel>
 
-        <View
-                android:layout_width="24dp"
-                android:layout_height="0dp" />
-
-        <EditText
-                android:id="@+id/h_edit_text"
-                android:layout_width="40dp"
+        <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:textColorHint="#999"
-                android:textSize="14dp"
-                android:textCursorDrawable="@null"
-                android:fontFamily="@font/inter_semibold"
-                android:backgroundTint="#FFF"
-                android:hint="100"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="3"
-                android:gravity="right" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
 
-    </LinearLayout>
+            <com.matrixwarez.pt.colorpicker.HPalette
+                    android:id="@+id/h_palette"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_weight="1">
 
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+                <com.matrixwarez.pt.colorpicker.SBIndicator
+                        android:id="@+id/h_indicator"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
 
-        <com.matrixwarez.pt.colorpicker.SPalette
-                android:id="@+id/s_palette"
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_weight="1">
+            </com.matrixwarez.pt.colorpicker.HPalette>
 
-            <com.matrixwarez.pt.colorpicker.SBIndicator
-                    android:id="@+id/s_indicator"
+            <View
+                    android:layout_width="24dp"
+                    android:layout_height="0dp" />
+
+            <EditText
+                    android:id="@+id/h_edit_text"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFF"
+                    android:textColorHint="#999"
+                    android:textSize="14dp"
+                    android:textCursorDrawable="@null"
+                    android:fontFamily="@font/inter_semibold"
+                    android:backgroundTint="#FFF"
+                    android:hint="100"
+                    android:inputType="number"
+                    android:lines="1"
+                    android:maxLength="3"
+                    android:gravity="right" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+            <com.matrixwarez.pt.colorpicker.SPalette
+                    android:id="@+id/s_palette"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_weight="1">
+
+                <com.matrixwarez.pt.colorpicker.SBIndicator
+                        android:id="@+id/s_indicator"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
+
+            </com.matrixwarez.pt.colorpicker.SPalette>
+
+            <View
+                    android:layout_width="24dp"
+                    android:layout_height="0dp" />
+
+            <EditText
+                    android:id="@+id/s_edit_text"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFF"
+                    android:textColorHint="#999"
+                    android:textSize="14dp"
+                    android:textCursorDrawable="@null"
+                    android:fontFamily="@font/inter_semibold"
+                    android:backgroundTint="#FFF"
+                    android:hint="100"
+                    android:inputType="number"
+                    android:lines="1"
+                    android:maxLength="3"
+                    android:gravity="right" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+            <com.matrixwarez.pt.colorpicker.BPalette
+                    android:id="@+id/b_palette"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_weight="1">
+
+                <com.matrixwarez.pt.colorpicker.SBIndicator
+                        android:id="@+id/b_indicator"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp" />
+
+            </com.matrixwarez.pt.colorpicker.BPalette>
+
+            <View
+                    android:layout_width="24dp"
+                    android:layout_height="0dp" />
+
+            <EditText
+                    android:id="@+id/b_edit_text"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFF"
+                    android:textColorHint="#999"
+                    android:textSize="14dp"
+                    android:textCursorDrawable="@null"
+                    android:fontFamily="@font/inter_semibold"
+                    android:backgroundTint="#FFF"
+                    android:hint="100"
+                    android:inputType="number"
+                    android:lines="1"
+                    android:maxLength="3"
+                    android:gravity="right" />
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:paddingTop="20dp"
+                android:paddingBottom="40dp">
+
+            <Button
+                    android:id="@+id/cancel_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Cancel"
+                    android:textColor="#FFF"
+                    android:backgroundTint="#232323" />
+
+            <View
                     android:layout_width="20dp"
-                    android:layout_height="20dp" />
+                    android:layout_height="0dp" />
 
-        </com.matrixwarez.pt.colorpicker.SPalette>
+            <Button
+                    android:id="@+id/ok_button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="OK"
+                    android:textColor="#FFF"
+                    android:backgroundTint="#232323" />
 
-        <View
-                android:layout_width="24dp"
-                android:layout_height="0dp" />
-
-        <EditText
-                android:id="@+id/s_edit_text"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:textColorHint="#999"
-                android:textSize="14dp"
-                android:textCursorDrawable="@null"
-                android:fontFamily="@font/inter_semibold"
-                android:backgroundTint="#FFF"
-                android:hint="100"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="3"
-                android:gravity="right" />
+        </LinearLayout>
 
     </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-        <com.matrixwarez.pt.colorpicker.BPalette
-                android:id="@+id/b_palette"
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_weight="1">
-
-            <com.matrixwarez.pt.colorpicker.SBIndicator
-                    android:id="@+id/b_indicator"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp" />
-
-        </com.matrixwarez.pt.colorpicker.BPalette>
-
-        <View
-                android:layout_width="24dp"
-                android:layout_height="0dp" />
-
-        <EditText
-                android:id="@+id/b_edit_text"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:textColor="#FFF"
-                android:textColorHint="#999"
-                android:textSize="14dp"
-                android:textCursorDrawable="@null"
-                android:fontFamily="@font/inter_semibold"
-                android:backgroundTint="#FFF"
-                android:hint="100"
-                android:inputType="number"
-                android:lines="1"
-                android:maxLength="3"
-                android:gravity="right" />
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:paddingTop="20dp"
-            android:paddingBottom="40dp">
-
-        <Button
-                android:id="@+id/cancel_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Cancel"
-                android:textColor="#FFF"
-                android:backgroundTint="#232323" />
-
-        <View
-                android:layout_width="20dp"
-                android:layout_height="0dp" />
-
-        <Button
-                android:id="@+id/ok_button"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="OK"
-                android:textColor="#FFF"
-                android:backgroundTint="#232323" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
