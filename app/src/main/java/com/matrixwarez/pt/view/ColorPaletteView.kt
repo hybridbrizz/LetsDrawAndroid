@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
@@ -15,18 +16,35 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.RequiresApi
+import com.matrixwarez.pt.helper.Utils
 import kotlin.math.floor
 
 
-class RecentColorsView: View {
+class ColorPaletteView: View {
 
     interface Listener {
-        fun onSelectRecentColor(color: Int)
+        fun onSelectColor(color: Int)
+        fun onRequestLoadColor(index: Int)
+    }
+
+    enum class Mode {
+        SELECT,
+        LOAD
     }
 
     var listener: Listener? = null
 
-    var recentColors = mutableListOf<Int>()
+    var mode = Mode.SELECT
+        set(value) {
+            snapshotOldState()
+
+            field = value
+
+            snapshotNewState()
+            transitionToNewState()
+        }
+
+    var colors = mutableListOf<Int>()
         set(value) {
             when (sameRecentColors(field, value)) {
                 true -> {
@@ -165,24 +183,76 @@ class RecentColorsView: View {
 
                 val index = i * cols + j
 
-                paint.color = recentColors[index]
+                paint.color = colors[index]
                 canvas.drawRect(
                     Rect(x, y, x + itemWidth, y + itemWidth),
                     paint
                 )
             }
         }
+
+        if (mode == Mode.LOAD) {
+            val linePaint = Paint()
+
+            var count = 0
+            for (color in colors) {
+                if (color == Color.WHITE) {
+                    count += 1
+                }
+            }
+
+            if (count > 7) {
+                linePaint.color = Color.BLACK
+            }
+            else {
+                linePaint.color = Color.WHITE
+            }
+
+            linePaint.strokeWidth = Utils.dpToPx(context, 1).toFloat()
+
+            for (i in 0 until rows) {
+                for (j in 0 until cols) {
+                    val x = itemWidth * (cols - 1 - j)
+                    val y = itemWidth * i
+
+                    canvas.drawLine(x.toFloat(), y.toFloat(), x + itemWidth.toFloat(), y.toFloat(), linePaint)
+                    canvas.drawLine(x.toFloat(), y.toFloat(), x.toFloat(), y + itemWidth.toFloat(), linePaint)
+
+                    if (i == rows - 1) {
+                        canvas.drawLine(x.toFloat(), y.toFloat() + itemWidth, x + itemWidth.toFloat(), y.toFloat() + itemWidth, linePaint)
+                    }
+                    if (j == 0) {
+                        canvas.drawLine(x.toFloat() + itemWidth, y.toFloat(), x.toFloat() + itemWidth, y + itemWidth.toFloat(), linePaint)
+                    }
+                }
+            }
+        }
     }
 
+    private var touchDownIndex = -1
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE) {
+        if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_UP) {
             val x = cols - 1 - floor(event.x / itemWidth).toInt()
             val y = floor(event.y / itemWidth).toInt()
 
             val index = y * cols + x
-            if (index in recentColors.indices) {
-                listener?.onSelectRecentColor(recentColors[index])
-                return true
+            if (index in colors.indices) {
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    touchDownIndex = index
+                    return true
+                }
+                else if (event.action == MotionEvent.ACTION_UP) {
+                    if (index == touchDownIndex) {
+                        if (mode == Mode.SELECT) {
+                            listener?.onSelectColor(colors[index])
+                        }
+                        else if (mode == Mode.LOAD) {
+                            listener?.onRequestLoadColor(index)
+                        }
+                    }
+                    return true
+                }
             }
 
         }

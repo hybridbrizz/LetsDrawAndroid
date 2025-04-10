@@ -15,15 +15,12 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -105,7 +102,7 @@ import com.matrixwarez.pt.service.CanvasService
 import com.matrixwarez.pt.view.ActionButtonView
 import com.matrixwarez.pt.view.ButtonFrame
 import com.matrixwarez.pt.view.InteractiveCanvasView
-import com.matrixwarez.pt.view.RecentColorsView
+import com.matrixwarez.pt.view.ColorPaletteView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.background_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.background_button
@@ -168,7 +165,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_palette_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_yes_action
@@ -202,7 +199,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     RecentColorsListener, PaintBarActionListener, PixelHistoryListener,
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
-    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, RecentColorsView.Listener,
+    SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, ColorPaletteView.Listener,
     InteractiveCanvasViewModeListener {
 
     var initalColor = 0
@@ -1508,18 +1505,16 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun setupColorPalette(colors: Array<Int>?) {
         if (Utils.isTablet(requireContext())) {
-            val layoutParams = recent_colors_view.layoutParams as ConstraintLayout.LayoutParams
+            val layoutParams = color_palette_view.layoutParams as ConstraintLayout.LayoutParams
             layoutParams.dimensionRatio = "16:1"
-            recent_colors_view.layoutParams = layoutParams
+            color_palette_view.layoutParams = layoutParams
 
-            recent_colors_view.rows = 1
-            recent_colors_view.cols = 16
+            color_palette_view.rows = 1
+            color_palette_view.cols = 16
         }
 
-        recent_colors_view.listener = this
-        recent_colors_view.recentColors = colors
-            ?.toList()
-            ?.reversed()
+        color_palette_view.listener = this
+        color_palette_view.colors = SessionSettings.instance.colorPaletteColors
             ?.toMutableList() ?: mutableListOf()
     }
 
@@ -2905,9 +2900,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     // Recent Colors View Listener
-    override fun onSelectRecentColor(color: Int) {
+    override fun onSelectColor(color: Int) {
         updateSelectedColor(color)
     }
+
+    override fun onRequestLoadColor(index: Int) {}
 
     private fun showHelpMessages() {
         help_messages.visibility = View.VISIBLE

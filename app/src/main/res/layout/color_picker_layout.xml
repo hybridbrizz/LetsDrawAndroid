@@ -15,10 +15,24 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
+    <com.matrixwarez.pt.view.ColorPaletteView
+            android:id="@+id/color_picker_color_palette"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp">
+
+        <ImageButton
+                android:id="@+id/load_palette_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/up_arrow"
+                android:foregroundTint="#FFF"
+                android:backgroundTint="#232323" />
 
         <View
                 android:layout_width="0dp"

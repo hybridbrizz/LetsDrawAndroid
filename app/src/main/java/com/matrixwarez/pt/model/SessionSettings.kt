@@ -221,6 +221,8 @@ class SessionSettings {
 
     var agreedToTermOfService = false
 
+    var colorPaletteColors: MutableList<Int>? = null
+
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
     }
@@ -342,6 +344,8 @@ class SessionSettings {
 
         ed.putBoolean("show_help_messages", showHelpMessages)
 
+        ed.putString("color_palette_colors", gson.toJson(colorPaletteColors))
+
         ed.apply()
     }
 
@@ -397,7 +401,7 @@ class SessionSettings {
     }
 
     fun load(context: Context) {
-        paintColor = getSharedPrefs(context).getInt("paint_color", Color.parseColor("#ff023020"))
+        paintColor = getSharedPrefs(context).getInt("paint_color", Color.parseColor("#FFFFFFFF"))
 
         dropsAmt = getSharedPrefs(context).getInt("drops_amt", 0)
 
@@ -541,6 +545,18 @@ class SessionSettings {
                 map[key] = it.get(key).asLong
             }
             map
+        }
+
+        colorPaletteColors = gson.fromJson(getSharedPrefs(context).getString("color_palette_colors", "[]"), JsonArray::class.java).let {
+            val colors = mutableListOf<Int>()
+            it.forEach { element ->
+                colors.add(element.asInt)
+            }
+            colors
+        }
+
+        if (colorPaletteColors!!.isEmpty()) {
+            loadDefaultColorPalette()
         }
     }
 
@@ -899,6 +915,19 @@ class SessionSettings {
             "Tap brush to edit canvas.",
             "Number shows remaining edits."
         )
+    }
+
+    private fun loadDefaultColorPalette() {
+        colorPaletteColors?.apply {
+            for (i in 0 until 16) {
+                add(Color.WHITE)
+            }
+        }
+    }
+
+    fun loadColorPaletteAtIndex(context: Context, index: Int, color: Int) {
+        colorPaletteColors?.set(index, color)
+        save(context)
     }
 
     companion object {

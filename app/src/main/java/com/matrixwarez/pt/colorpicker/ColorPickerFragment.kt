@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import androidx.core.text.isDigitsOnly
@@ -17,15 +18,15 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
-import kotlinx.android.synthetic.main.color_picker_layout.cancel_button
+import com.matrixwarez.pt.model.SessionSettings
+import com.matrixwarez.pt.view.ColorPaletteView
 import kotlinx.android.synthetic.main.color_picker_layout.current_color_view
-import kotlinx.android.synthetic.main.color_picker_layout.ok_button
 import kotlinx.android.synthetic.main.color_picker_layout.previous_color_view
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 import kotlin.math.roundToInt
 
-class ColorPickerFragment: Fragment() {
+class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
     interface ColorListener {
         fun onColor(color: Int)
@@ -44,7 +45,12 @@ class ColorPickerFragment: Fragment() {
     private lateinit var sEditText: EditText
     private lateinit var bEditText: EditText
 
+    private lateinit var okButton: Button
+    private lateinit var cancelButton: Button
     private lateinit var pickCanvasButton: ImageButton
+    private lateinit var loadPaletteButton: ImageButton
+
+    private lateinit var colorPickerColorPalette: ColorPaletteView
 
     val listeners = LinkedList<ColorListener>()
 
@@ -69,7 +75,12 @@ class ColorPickerFragment: Fragment() {
         sEditText = view.findViewById(R.id.s_edit_text)
         bEditText = view.findViewById(R.id.b_edit_text)
 
+        okButton = view.findViewById(R.id.ok_button)
+        cancelButton = view.findViewById(R.id.cancel_button)
         pickCanvasButton = view.findViewById(R.id.pick_canvas_button)
+        loadPaletteButton = view.findViewById(R.id.load_palette_button)
+
+        colorPickerColorPalette = view.findViewById(R.id.color_picker_color_palette)
 
         rgbColorWheel.rgbSelectionListener = object: RGBColorWheel.RGBSelectionListener {
             override fun onRGBChanged() {
@@ -162,6 +173,22 @@ class ColorPickerFragment: Fragment() {
             }
         })
 
+        okButton.viewTreeObserver.addOnGlobalLayoutListener(object: OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                loadPaletteButton.layoutParams = loadPaletteButton.layoutParams.apply { width = okButton.width }
+                okButton.viewTreeObserver.removeOnGlobalLayoutListener(this)
+
+                val viewWidth = view.width - Utils.dpToPx(requireContext(), 80)
+                colorPickerColorPalette.layoutParams =
+                    colorPickerColorPalette.layoutParams.apply {
+                        width = viewWidth
+                        height = (viewWidth /
+                                (colorPickerColorPalette.cols /
+                                        colorPickerColorPalette.rows.toFloat())).roundToInt()
+                    }
+            }
+        })
+        
         pcv?.let {
             rgbColorWheel.setPCV(it)
             hPalette.setPCV(it)
@@ -171,16 +198,33 @@ class ColorPickerFragment: Fragment() {
             updateText(it)
         }
 
+        colorPickerColorPalette.colors =
+            SessionSettings.instance.colorPaletteColors?.toMutableList() ?: mutableListOf()
+
+        if (Utils.isTablet(requireContext())) {
+            colorPickerColorPalette.rows = 1
+            colorPickerColorPalette.cols = 16
+        }
+
         pickCanvasButton.setOnClickListener {
             listeners.forEach { it.requestPickCanvas() }
         }
+        
+        loadPaletteButton.setOnClickListener { 
+            when (colorPickerColorPalette.mode == ColorPaletteView.Mode.SELECT) {
+                true -> colorPickerColorPalette.mode = ColorPaletteView.Mode.LOAD
+                false -> colorPickerColorPalette.mode = ColorPaletteView.Mode.SELECT
+            }
+        }
 
-        ok_button.setOnClickListener {
+        colorPickerColorPalette.listener = this
+
+        okButton.setOnClickListener {
             listeners.forEach { it.onColor(pcv?.toColor() ?: 0) }
             listeners.forEach { it.requestClose() }
         }
 
-        cancel_button.setOnClickListener {
+        cancelButton.setOnClickListener {
             listeners.forEach { it.requestClose() }
         }
 
@@ -290,5 +334,15 @@ class ColorPickerFragment: Fragment() {
 
             }
         })
+    }
+
+    // Color Palette View Listener
+    override fun onSelectColor(color: Int) {
+        setColor(color, false)
+    }
+
+    override fun onRequestLoadColor(index: Int) {
+        SessionSettings.instance.loadColorPaletteAtIndex(requireContext(), index, pcv?.toColor() ?: 0)
+        colorPickerColorPalette.colors = SessionSettings.instance.colorPaletteColors?.toMutableList() ?: mutableListOf()
     }
 }

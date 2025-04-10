@@ -57,8 +57,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:background="@drawable/paint_warning_frame_background" />
 
-    <com.matrixwarez.pt.view.RecentColorsView
-            android:id="@+id/recent_colors_view"
+    <com.matrixwarez.pt.view.ColorPaletteView
+            android:id="@+id/color_palette_view"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintDimensionRatio="8:2"
