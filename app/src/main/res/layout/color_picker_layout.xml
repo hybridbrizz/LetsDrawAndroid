@@ -10,6 +10,7 @@
         android:fillViewport="true">
 
     <LinearLayout
+            android:id="@+id/content_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -252,6 +253,12 @@
                     android:backgroundTint="#232323" />
 
         </LinearLayout>
+
+        <View
+                android:id="@+id/keyboard_lift_view"
+                android:layout_width="match_parent"
+                android:layout_height="500dp"
+                android:visibility="gone" />
 
     </LinearLayout>
 </ScrollView>

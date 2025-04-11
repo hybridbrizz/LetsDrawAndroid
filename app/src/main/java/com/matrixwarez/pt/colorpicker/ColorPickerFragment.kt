@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -37,6 +38,7 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
     }
 
     private lateinit var scrollView: ScrollView
+    private lateinit var contentView: View
 
     private lateinit var rgbColorWheel: RGBColorWheel
     private lateinit var hPalette: HPalette
@@ -55,6 +57,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
     private lateinit var colorPickerColorPalette: ColorPaletteView
 
+    private lateinit var keyboardLiftView: View
+
     val listeners = LinkedList<ColorListener>()
 
     private var pcv: PickedColorValues? = null
@@ -69,6 +73,7 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         scrollView = view.findViewById(R.id.color_picker_scroll_view)
+        contentView = view.findViewById(R.id.content_view)
 
         rgbColorWheel = view.findViewById(R.id.rgb_color_wheel)
         hPalette = view.findViewById(R.id.h_palette)
@@ -86,6 +91,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
         loadPaletteButton = view.findViewById(R.id.load_palette_button)
 
         colorPickerColorPalette = view.findViewById(R.id.color_picker_color_palette)
+
+        keyboardLiftView = view.findViewById(R.id.keyboard_lift_view)
 
         rgbColorWheel.rgbSelectionListener = object: RGBColorWheel.RGBSelectionListener {
             override fun onRGBChanged() {
@@ -233,11 +240,19 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
             listeners.forEach { it.requestClose() }
         }
 
-        pcv?.let {
-            addTextChangedListener(hEditText, 360, "h")
-            addTextChangedListener(sEditText, 100, "s")
-            addTextChangedListener(bEditText, 100, "b")
-            addTextChangedListener(hexEditText, -1, "hex")
+        addTextChangedListener(hEditText, 360, "h")
+        addTextChangedListener(sEditText, 100, "s")
+        addTextChangedListener(bEditText, 100, "b")
+        addTextChangedListener(hexEditText, -1, "hex")
+
+        addFocusChangedListener(hEditText)
+        addFocusChangedListener(bEditText)
+        addFocusChangedListener(sEditText)
+
+        contentView.setOnClickListener {
+            hEditText.clearFocus()
+            sEditText.clearFocus()
+            bEditText.clearFocus()
         }
     }
 
@@ -285,9 +300,34 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                val text = view.text.toString()
+                val text = view.text.toString().uppercase()
                 Log.d("Text Test", text)
-                if (text.isDigitsOnly() && text.isNotBlank()) {
+                if (text.matches(Regex("#[0-9A-F]{6}")) || text.matches(Regex("[0-9A-F]{6}"))) {
+                    if (type == "hex") {
+                        pcv?.let {
+                            try {
+                                val colorHex = if (!text.startsWith("#")) {
+                                    "#$text"
+                                }
+                                else {
+                                    text
+                                }
+                                it.setFromColor(Color.parseColor(colorHex))
+                            }
+                            catch (e: Exception) {}
+
+                            hEditText.setText("${(it.h * 360).roundToInt()}")
+                            sEditText.setText("${(it.s * 100).roundToInt()}")
+                            bEditText.setText("${(it.b * 100).roundToInt()}")
+                        }
+
+                        rgbColorWheel.invalidate()
+                        hPalette.moveIndicator()
+                        sPalette.invalidate()
+                        bPalette.invalidate()
+                    }
+                }
+                else if (text.isDigitsOnly() && text.isNotBlank()) {
                     val value = text.toInt()
                     Log.d("Value Test", value.toString())
                     if (value in 0..maxValue) {
@@ -319,28 +359,27 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                         current_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
                     }
                 }
-                else if (text.matches(Regex("#[0-9A-F]{6}")) || text.matches(Regex("[0-9A-F]{6}"))) {
-                    if (type == "hex") {
-                        pcv?.let {
-                            it.setFromColor(Color.parseColor(text))
-
-                            hEditText.setText("${(it.h * 360).roundToInt()}")
-                            sEditText.setText("${(it.s * 100).roundToInt()}")
-                            bEditText.setText("${(it.b * 100).roundToInt()}")
-                        }
-
-                        rgbColorWheel.invalidate()
-                        hPalette.moveIndicator()
-                        sPalette.invalidate()
-                        bPalette.invalidate()
-                    }
-                }
             }
 
             override fun afterTextChanged(p0: Editable?) {
 
             }
         })
+    }
+
+    fun addFocusChangedListener(view: EditText) {
+        view.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                if (keyboardLiftView.visibility == View.GONE) {
+                    keyboardLiftView.visibility = View.VISIBLE
+                }
+            }
+            else {
+                if (keyboardLiftView.visibility == View.VISIBLE) {
+                    keyboardLiftView.visibility = View.GONE
+                }
+            }
+        }
     }
 
     // Color Palette View Listener
