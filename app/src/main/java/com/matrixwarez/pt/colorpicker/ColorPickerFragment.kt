@@ -22,8 +22,6 @@ import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.view.ColorPaletteView
-import kotlinx.android.synthetic.main.color_picker_layout.current_color_view
-import kotlinx.android.synthetic.main.color_picker_layout.previous_color_view
 import kotlinx.coroutines.launch
 import java.util.LinkedList
 import kotlin.math.roundToInt
@@ -39,6 +37,9 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
     private lateinit var scrollView: ScrollView
     private lateinit var contentView: View
+    
+    private lateinit var currentColorView: View
+    private lateinit var previousColorView: View
 
     private lateinit var rgbColorWheel: RGBColorWheel
     private lateinit var hPalette: HPalette
@@ -63,6 +64,10 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
     private var pcv: PickedColorValues? = null
 
+    private var textChangeListeners = mutableMapOf<EditText, TextWatcher>()
+
+    private var previousColor: Int? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -74,6 +79,9 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         scrollView = view.findViewById(R.id.color_picker_scroll_view)
         contentView = view.findViewById(R.id.content_view)
+        
+        currentColorView = view.findViewById(R.id.current_color_view)
+        previousColorView = view.findViewById(R.id.previous_color_view)
 
         rgbColorWheel = view.findViewById(R.id.rgb_color_wheel)
         hPalette = view.findViewById(R.id.h_palette)
@@ -231,6 +239,12 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
         colorPickerColorPalette.listener = this
 
+        previousColorView.setOnClickListener {
+            previousColor?.let {
+                setColor(it, false)
+            }
+        }
+
         okButton.setOnClickListener {
             listeners.forEach { it.onColor(pcv?.toColor() ?: 0) }
             listeners.forEach { it.requestClose() }
@@ -240,16 +254,13 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
             listeners.forEach { it.requestClose() }
         }
 
-        addTextChangedListener(hEditText, 360, "h")
-        addTextChangedListener(sEditText, 100, "s")
-        addTextChangedListener(bEditText, 100, "b")
-        addTextChangedListener(hexEditText, -1, "hex")
-
-        addFocusChangedListener(hEditText)
-        addFocusChangedListener(bEditText)
-        addFocusChangedListener(sEditText)
+        addFocusChangedListener(hEditText, 360, "h")
+        addFocusChangedListener(sEditText, 100, "s")
+        addFocusChangedListener(bEditText, 100, "b")
+        addFocusChangedListener(hexEditText, -1, "hex")
 
         contentView.setOnClickListener {
+            hexEditText.clearFocus()
             hEditText.clearFocus()
             sEditText.clearFocus()
             bEditText.clearFocus()
@@ -268,10 +279,12 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
                 updateText(it)
 
-                current_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+                currentColorView.background = ColorDrawable(pcv?.toColor() ?: 0)
 
                 if (setPreviousColor) {
-                    previous_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+                    val pColor = pcv?.toColor() ?: 0
+                    previousColorView.background = ColorDrawable(pColor)
+                    previousColor = pColor
                 }
             }
 
@@ -286,22 +299,26 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
 
         hexEditText.setText(Utils.colorIntToHex(pcv.toColor()))
 
-        current_color_view.background = ColorDrawable(pcv.toColor())
+        currentColorView.background = ColorDrawable(pcv.toColor())
     }
 
     fun listen(listener: ColorListener) {
         listeners.add(listener)
     }
 
-    fun addTextChangedListener(view: EditText, maxValue: Int, type: String) {
-        view.addTextChangedListener(object: TextWatcher {
+    private fun addTextChangedListener(view: EditText, maxValue: Int, type: String) {
+        if (textChangeListeners.containsKey(view)) {
+            return
+        }
+
+        val listener = object: TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
 
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 val text = view.text.toString().uppercase()
-                Log.d("Text Test", text)
+
                 if (text.matches(Regex("#[0-9A-F]{6}")) || text.matches(Regex("[0-9A-F]{6}"))) {
                     if (type == "hex") {
                         pcv?.let {
@@ -325,6 +342,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                         hPalette.moveIndicator()
                         sPalette.invalidate()
                         bPalette.invalidate()
+
+                        currentColorView.background = ColorDrawable(pcv?.toColor() ?: 0)
                     }
                 }
                 else if (text.isDigitsOnly() && text.isNotBlank()) {
@@ -356,7 +375,8 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                             }
                         }
 
-                        current_color_view.background = ColorDrawable(pcv?.toColor() ?: 0)
+                        currentColorView.background = ColorDrawable(pcv?.toColor() ?: 0)
+                        hexEditText.setText(Utils.colorIntToHex(pcv?.toColor() ?: 0))
                     }
                 }
             }
@@ -364,20 +384,37 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
             override fun afterTextChanged(p0: Editable?) {
 
             }
-        })
+        }
+
+        view.addTextChangedListener(listener)
+        textChangeListeners[view] = listener
     }
 
-    fun addFocusChangedListener(view: EditText) {
+    private fun removeTextChangeListener(view: EditText) {
+        val listener = textChangeListeners.remove(view)
+
+        listener?.let {
+            view.removeTextChangedListener(it)
+        }
+    }
+
+    private fun addFocusChangedListener(view: EditText, maxValue: Int, type: String) {
         view.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                if (keyboardLiftView.visibility == View.GONE) {
-                    keyboardLiftView.visibility = View.VISIBLE
+                if (view != hexEditText) {
+                    if (keyboardLiftView.visibility == View.GONE) {
+                        keyboardLiftView.visibility = View.VISIBLE
+                    }
                 }
+                addTextChangedListener(view, maxValue, type)
             }
             else {
-                if (keyboardLiftView.visibility == View.VISIBLE) {
-                    keyboardLiftView.visibility = View.GONE
+                if (view != hexEditText) {
+                    if (keyboardLiftView.visibility == View.VISIBLE) {
+                        keyboardLiftView.visibility = View.GONE
+                    }
                 }
+                removeTextChangeListener(view)
             }
         }
     }
@@ -390,5 +427,6 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
     override fun onRequestLoadColor(index: Int) {
         SessionSettings.instance.loadColorPaletteAtIndex(requireContext(), index, pcv?.toColor() ?: 0)
         colorPickerColorPalette.colors = SessionSettings.instance.colorPaletteColors?.toMutableList() ?: mutableListOf()
+        colorPickerColorPalette.mode = ColorPaletteView.Mode.SELECT
     }
 }
