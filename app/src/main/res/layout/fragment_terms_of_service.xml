@@ -23,7 +23,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/inter_regular"
-                    android:textColor="@color/colorAccent"
+                    android:textColor="#FFF"
                     android:textSize="12sp" />
 
         </LinearLayout>
@@ -50,7 +50,7 @@
                 android:textColor="#999"
                 android:textSize="12sp"
                 android:layout_marginStart="10dp"
-                android:text="I am at least 13 years old and agree to the Terms of Service." />
+                android:text="I am at least 13 years old and agree to the Terms of Use." />
 
         <CheckBox
                 android:id="@+id/checkbox_agree"

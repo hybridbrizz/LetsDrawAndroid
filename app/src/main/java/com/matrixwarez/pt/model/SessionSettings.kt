@@ -141,7 +141,7 @@ class SessionSettings {
 
     var colorIndicatorOutline = true
 
-    var gridLineMode = 0
+    var gridLineMode = 1
 
     var canvasGridLineColor = -1
 
@@ -440,7 +440,7 @@ class SessionSettings {
 
         colorIndicatorOutline = getSharedPrefs(context).getBoolean("color_indicator_outline", false)
 
-        gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 0)
+        gridLineMode = getSharedPrefs(context).getInt("grid_line_mode", 1)
 
         canvasGridLineColor = getSharedPrefs(context).getInt("canvas_grid_line_color", Color.parseColor("#FF999999"))
 
@@ -909,11 +909,13 @@ class SessionSettings {
 
     fun getHelpMessages(): List<String> {
         return listOf(
-            "Double tap canvas for menu.",
-            "Long press pixel for edit history.",
-            "Tap color area for color selection.",
-            "Tap brush to edit canvas.",
-            "Number shows remaining edits."
+            "Double tap the canvas for a menu. Tap under to close",
+            "Pick colors by pressing the palette icon",
+            "Load your palette colors inside the color picker",
+            "Edit the canvas by pressing the paint icon then drawing",
+            "The number shows your current remaining edits",
+            "Erase the canvas by pressing the erase icon then drawing",
+            "Long press a pixel for an edit history"
         )
     }
 
