@@ -1,5 +1,6 @@
 package com.matrixwarez.pt.colorpicker
 
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -74,6 +75,12 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
         savedInstanceState: Bundle?
     ): View {
         return inflater.inflate(R.layout.color_picker_layout, container, false)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        updateColorPaletteSize(newConfig)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -198,14 +205,7 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
                 loadPaletteButton.layoutParams = loadPaletteButton.layoutParams.apply { width = okButton.width }
                 okButton.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
-                val viewWidth = view.width - Utils.dpToPx(requireContext(), 80)
-                colorPickerColorPalette.layoutParams =
-                    colorPickerColorPalette.layoutParams.apply {
-                        width = viewWidth
-                        height = (viewWidth /
-                                (colorPickerColorPalette.cols /
-                                        colorPickerColorPalette.rows.toFloat())).roundToInt()
-                    }
+                updateColorPaletteSize()
             }
         })
 
@@ -428,5 +428,26 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
         SessionSettings.instance.loadColorPaletteAtIndex(requireContext(), index, pcv?.toColor() ?: 0)
         colorPickerColorPalette.colors = SessionSettings.instance.colorPaletteColors?.toMutableList() ?: mutableListOf()
         colorPickerColorPalette.mode = ColorPaletteView.Mode.SELECT
+    }
+
+    private fun updateColorPaletteSize(config: Configuration? = null) {
+        if (Utils.isTablet(requireContext())) {
+            colorPickerColorPalette.rows = 1
+            colorPickerColorPalette.cols = 16
+        }
+
+        val fullWidth = when (config == null) {
+            true -> requireView().width
+            false -> Utils.dpToPx(requireContext(), config.screenWidthDp)
+        }
+
+        val viewWidth = fullWidth - Utils.dpToPx(requireContext(), 80)
+        colorPickerColorPalette.layoutParams =
+            colorPickerColorPalette.layoutParams.apply {
+                width = viewWidth
+                height = (viewWidth /
+                        (colorPickerColorPalette.cols /
+                                colorPickerColorPalette.rows.toFloat())).roundToInt()
+            }
     }
 }

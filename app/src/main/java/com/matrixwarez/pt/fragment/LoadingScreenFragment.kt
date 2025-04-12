@@ -103,14 +103,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     var timer = Timer()
 
     val gameTips = arrayOf(
-        "You can customize canvas background colors and other various things in Settings.",
-        "All drawings can be exported. Simply choose the export tool, tap on an object, then select share or save.",
-        "Anything you draw on the canvas is shared in real time with others.",
-        "Tap on any pixel on the canvas to view a history of edits.",
-        "No harassment, racism, or hate symbols are allowed on the canvas.",
-        "Anyone can get pixels to draw on the canvas in 3 minutes or less! Simply wait for the next paint cycle.",
-        "Tap the palette icon to show and select from recently used colors.",
-        "Tap on latency text to take a shortcut to the server list and marker settings."
+        "After first joining a canvas you will get steady pixels over time to draw with.",
+        "Check out the community link in the canvas menu for more information about the canvas.",
+        "Tap anyone on the server list to teleport to their location.",
+        "This canvas is interactive meaning your edits show in realtime for everyone."
     )
 
     var showingError = false
