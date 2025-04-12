@@ -203,6 +203,11 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         val frag = LoadingScreenFragment()
         frag.dataLoadingCallback = this
         frag.world = true
+
+        if (server.public) {
+            server.uuid = SessionSettings.instance.publicServerUniqueIds[server.id.toString()] ?: ""
+        }
+
         frag.server = server
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
