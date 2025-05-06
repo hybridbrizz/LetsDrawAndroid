@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.signature.ObjectKey
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
@@ -55,7 +56,9 @@ fun ServerItemView(server: Server, editing: Boolean,
             modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(Dp.Hairline, color = Color.White),
             model = server.canvasImageUrl,
             contentDescription = "${server.name} canvas image"
-        )
+        ) {
+            it.signature(ObjectKey(System.currentTimeMillis() / 1000 / 60 / 15))
+        }
 
         Row(
             modifier = Modifier
