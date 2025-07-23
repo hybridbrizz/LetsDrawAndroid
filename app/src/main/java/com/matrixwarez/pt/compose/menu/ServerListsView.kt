@@ -158,7 +158,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 }
             ) {
                 Text(
-                    text = "Global",
+                    text = "World",
                     fontFamily = Inter,
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp
@@ -184,7 +184,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                 }
             ) {
                 Text(
-                    text = "Group",
+                    text = "Private",
                     fontFamily = Inter,
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp

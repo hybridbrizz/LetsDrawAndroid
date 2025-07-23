@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -52,8 +54,8 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {},
-                columns = GridCells.Fixed(2),
-                contentPadding = PaddingValues(horizontal = 20.dp),
+                columns = GridCells.Fixed(1),
+                contentPadding = PaddingValues(horizontal = 0.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
@@ -67,6 +69,10 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                             }
                         )
                     }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(120.dp))
                 }
             }
 
