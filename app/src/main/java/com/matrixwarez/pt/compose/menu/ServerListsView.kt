@@ -83,6 +83,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
             .background(Color.Black),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(20.dp))
         Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
             Box(
                 modifier = Modifier
@@ -97,7 +98,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                     color = Color.White,
                     fontFamily = Inter,
                     fontWeight = FontWeight.ExtraBold,
-                    fontSize = 18.sp
+                    fontSize = 24.sp
                 )
             }
 
