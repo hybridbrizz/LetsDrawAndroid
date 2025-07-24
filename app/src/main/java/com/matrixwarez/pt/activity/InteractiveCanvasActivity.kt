@@ -7,9 +7,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.fragment.*
 import com.matrixwarez.pt.helper.Utils
@@ -132,6 +136,14 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 //        }
 
         ActionButtonView(this)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, allInsets ->
+            val insets = allInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(0, insets.top, 0, 0)
+            WindowInsetsCompat.CONSUMED
+        }
+
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
     }
 
     override fun onPause() {
@@ -388,19 +400,19 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     }
 
     fun goFullscreen() {
-        // Hide UI first
-        supportActionBar?.hide()
-        fullscreen_content_controls.visibility = View.GONE
-        mVisible = false
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable)
-        mHideHandler.postDelayed(mHidePart2Runnable, 0)
+//        // Hide UI first
+//        supportActionBar?.hide()
+//        fullscreen_content_controls.visibility = View.GONE
+//        mVisible = false
+//
+//        // Schedule a runnable to remove the status and navigation bar after a delay
+//        mHideHandler.removeCallbacks(mShowPart2Runnable)
+//        mHideHandler.postDelayed(mHidePart2Runnable, 0)
     }
 
     fun exitFullscreen() {
-        fullscreen_content.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_VISIBLE
+//        fullscreen_content.systemUiVisibility =
+//            View.SYSTEM_UI_FLAG_VISIBLE
     }
 }
 

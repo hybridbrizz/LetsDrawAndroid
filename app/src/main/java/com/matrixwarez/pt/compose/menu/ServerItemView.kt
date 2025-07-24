@@ -97,14 +97,14 @@ fun ServerItemView(server: Server, editing: Boolean,
                 text = server.name,
                 color = Color.White,
                 fontFamily = Inter,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Normal
             )
 
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             Image(
-                modifier = Modifier.size(10.dp),
+                modifier = Modifier.size(14.dp),
                 painter = onlineImage,
                 contentDescription = "Online Image"
             )
