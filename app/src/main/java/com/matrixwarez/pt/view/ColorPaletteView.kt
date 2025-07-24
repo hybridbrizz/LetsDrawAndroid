@@ -62,8 +62,8 @@ class ColorPaletteView: View {
             }
         }
 
-    var rows = 2
-    var cols = 8
+    var rows = 1
+    var cols = 16
 
     private var itemWidth = 0
 

@@ -104,21 +104,14 @@ import com.matrixwarez.pt.view.ButtonFrame
 import com.matrixwarez.pt.view.InteractiveCanvasView
 import com.matrixwarez.pt.view.ColorPaletteView
 import io.reactivex.rxjava3.core.Observable
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.background_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.background_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_icon
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_text
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_menu
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_clients_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.client_canvas_locations
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_picker_frame
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_action_view
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_select_button_background_outer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.device_canvas_viewport_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_action_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background
@@ -126,8 +119,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_b
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_fragment_container
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_action
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.grid_lines_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.help_messages
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.image_no_socket
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.ll_latency_container
@@ -176,6 +167,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.stream_banner
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.terminal_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_bottom_display
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.toolbar_title
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_latency
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.menu_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.pixel_history_fragment_container
@@ -278,9 +270,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     override fun notifyPixelsReady() {
         //paint_panel_button.visibility = View.VISIBLE
-        background_button.visibility = View.VISIBLE
-        grid_lines_button.visibility = View.VISIBLE
-        canvas_summary_button.visibility = View.VISIBLE
         menu_button.visibility = View.VISIBLE
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
@@ -509,7 +498,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         setupStreamBanner()
 
         visibleActionViews = arrayOf(menu_button,
-            export_button, background_button, grid_lines_button, canvas_summary_button)
+            export_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
 
@@ -585,23 +574,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             )
         )
 
-        colorPanelIcons.add(
-            ColorPanelIcon(
-                context = requireContext(),
-                name = "Color Selection",
-                iconViews = listOf(
-                    color_select_action_view
-                ),
-                bgView = color_select_button_background,
-                outerBgView = color_select_button_background_outer,
-                isSelected = {
-                    color_picker_frame.visibility == View.VISIBLE
-                },
-                onPress = {
-                    onPaintIndicatorClick()
-                }
-            )
-        )
+        paint_indicator_view.setOnClickListener {
+            onPaintIndicatorClick()
+        }
 
         // palette
         palette_name_text.setOnClickListener {
@@ -632,7 +607,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             showPaletteColorRemovePrompt(SessionSettings.instance.paintColor)
         }
 
-
+        paint_panel.visibility = View.GONE
 
         syncPaletteAndColor()
 
@@ -678,6 +653,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view.topLayer = true
 
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
+        toolbar_title.text = SessionSettings.instance.dropsAmt.toString()
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
@@ -927,22 +903,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         Log.i("Panel size", SessionSettings.instance.panelResIds.size.toString())
-
-        // grid lines toggle button
-        grid_lines_button.setOnClickListener {
-            SessionSettings.instance.gridLineMode += 1
-
-            if (SessionSettings.instance.gridLineMode > 1) {
-                SessionSettings.instance.gridLineMode = 0
-            }
-
-            surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
-        }
-
-        // canvas summary toggle button
-        canvas_summary_button.setOnClickListener {
-            toggleCanvasSummary()
-        }
 
         // open tools button
 //        open_tools_button.setOnClickListener {
@@ -1520,11 +1480,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun invalidateButtons() {
         menu_action.invalidate()
-        paint_panel_action_view.invalidate()
         export_action.invalidate()
-        background_action.invalidate()
-        grid_lines_action.invalidate()
-        canvas_summary_action.invalidate()
         object_move_up_action.invalidate()
         object_move_down_action.invalidate()
         object_move_left_action.invalidate()
@@ -1533,95 +1489,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // view toggles
     private fun togglePaintPanel(show: Boolean, softHide: Boolean = false) {
-        if (show) {
-            ll_latency_container.visibility = View.GONE
 
-            paint_panel.visibility = View.VISIBLE
-//            paint_panel_button.visibility = View.GONE
-
-            background_button.visibility = View.INVISIBLE
-            grid_lines_button.visibility = View.INVISIBLE
-            canvas_summary_button.visibility = View.INVISIBLE
-
-            toggleTools(false)
-
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
-            }
-
-            if (canvas_summary_view.visibility == View.VISIBLE) {
-                canvas_summary_container.visibility = View.INVISIBLE
-            }
-
-//            var startLoc = paint_panel.width.toFloat() * 0.99F
-//            if (SessionSettings.instance.rightHanded) {
-//                startLoc = -startLoc
-//            }
-//
-//            paint_panel.animate().translationX(startLoc).setDuration(0).withEndAction {
-//                paint_panel.animate().translationX(0F).setDuration(50).setInterpolator(
-//                    AccelerateDecelerateInterpolator()
-//                ).withEndAction {
-//
-//                    Log.i("ICF", "paint panel width is ${paint_panel.width}")
-//                    Log.i("ICF", "paint panel height is ${paint_panel.height}")
-//
-//                }.start()
-//
-//                if (SessionSettings.instance.canvasLockBorder) {
-//                    context?.apply {
-//                        val drawable: GradientDrawable = paint_warning_frame.background as GradientDrawable
-//                        drawable.setStroke(
-//                            Utils.dpToPx(this, 4),
-//                            SessionSettings.instance.canvasLockBorderColor
-//                        ) // set stroke width and stroke color
-//                    }
-//
-//                    paint_warning_frame.visibility = View.VISIBLE
-//                    paint_warning_frame.alpha = 0F
-//                    paint_warning_frame.animate().alpha(1F).setDuration(50).start()
-//                }
-//            }.start()
-
-            //surface_view.startPainting()
-
-            if (pixel_history_fragment_container.visibility == View.VISIBLE) {
-                pixel_history_fragment_container.visibility = View.GONE
-            }
-
-            menu_button.visibility = View.GONE
-            menu_container.visibility = View.GONE
-
-            SessionSettings.instance.paintPanelOpen = true
-        }
-        else if (softHide) {
-            paint_panel.visibility = View.GONE
-
-            toggleTools(false)
-        }
-        else {
-            ll_latency_container.visibility = View.VISIBLE
-
-            //surface_view.endPainting(false)
-
-            paint_panel.visibility = View.GONE
-            paint_warning_frame.visibility = View.GONE
-
-//            paint_panel_button.visibility = View.VISIBLE
-
-            //recent_colors_action.visibility = View.VISIBLE
-            //recent_colors_container.visibility = View.GONE
-
-            background_button.visibility = View.VISIBLE
-            grid_lines_button.visibility = View.VISIBLE
-            canvas_summary_button.visibility = View.VISIBLE
-
-            menu_button.visibility = View.VISIBLE
-
-            toggleExportBorder(false)
-
-            SessionSettings.instance.paintPanelOpen = false
-        }
     }
 
     private fun showCanvasMenu() {
@@ -1696,15 +1564,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             if (show && !toolboxOpen) {
                 animatingTools = true
 
-                background_button.visibility = View.VISIBLE
-                grid_lines_button.visibility = View.VISIBLE
-                canvas_summary_button.visibility = View.VISIBLE
-
                 Animator.animateMenuItems(
                     listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        ), listOf(canvas_summary_button)
+                        listOf(export_button)
                     ), cascade = false, out = false, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -1722,9 +1584,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                 Animator.animateMenuItems(
                     listOf(
-                        listOf(export_button), listOf(background_button), listOf(
-                            grid_lines_button
-                        ), listOf(canvas_summary_button)
+                        listOf(export_button)
                     ), cascade = false, out = true, inverse = SessionSettings.instance.rightHanded,
                     completion = object: Animator.CompletionHandler {
                         override fun onCompletion() {
@@ -2232,6 +2092,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_amt_info.text = qty.toString()
             }
             text_bottom_display.text = qty.toString()
+            toolbar_title.text = qty.toString()
         }
     }
 
