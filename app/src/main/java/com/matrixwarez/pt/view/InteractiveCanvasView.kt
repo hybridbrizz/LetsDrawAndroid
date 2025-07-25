@@ -439,11 +439,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
         interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
 
-        when (mode) {
-            Mode.PAINTING -> mode = Mode.EXPLORING
-            Mode.PAINT_SELECTION_PAINTING -> mode = Mode.PAINT_SELECTION_EXPLORING
-            else -> {}
-        }
+        mode = Mode.EXPLORING
     }
 
     fun startPaintSelection() {
@@ -471,7 +467,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     }
 
     fun endErasing() {
-        mode = Mode.EXPLORING
+        mode = Mode.PAINTING
     }
 
     fun startExport() {

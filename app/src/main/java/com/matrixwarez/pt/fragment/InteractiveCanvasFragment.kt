@@ -157,6 +157,10 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_palette_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.done_button
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.hamburger_button
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_container_2
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_control_layout
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_yes_action
@@ -539,14 +543,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
                 },
                 onPress = {
-                    if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
-                        || surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
-                        || surface_view.mode == InteractiveCanvasView.Mode.ERASING) {
-                        surface_view.endPainting()
-                    }
-                    else {
-                        surface_view.startPainting()
-                    }
+                    surface_view.startPainting()
+
+                    paint_button_container_2.visibility = View.GONE
+
+                    toolbar_title.text = SessionSettings.instance.dropsAmt.toString()
+
+                    paint_control_layout.visibility = View.VISIBLE
+
+                    color_palette_view.visibility = View.VISIBLE
                 }
             )
         )
@@ -573,6 +578,32 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             )
         )
+
+        hamburger_button.setOnClickListener {
+            if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
+                surface_view.endPainting()
+
+                paint_button_container_2.visibility = View.VISIBLE
+
+                toolbar_title.text = server.name
+
+                paint_control_layout.visibility = View.GONE
+
+                color_palette_view.visibility = View.GONE
+            }
+        }
+
+        done_button.setOnClickListener {
+            surface_view.endPainting()
+
+            paint_button_container_2.visibility = View.VISIBLE
+
+            toolbar_title.text = server.name
+
+            paint_control_layout.visibility = View.GONE
+
+            color_palette_view.visibility = View.GONE
+        }
 
         paint_indicator_view.setOnClickListener {
             onPaintIndicatorClick()
@@ -652,8 +683,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
 
+        toolbar_title.text = server.name
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
-        toolbar_title.text = SessionSettings.instance.dropsAmt.toString()
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
             setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
@@ -2092,7 +2123,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 paint_amt_info.text = qty.toString()
             }
             text_bottom_display.text = qty.toString()
-            toolbar_title.text = qty.toString()
+
+            if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
+                toolbar_title.text = qty.toString()
+            }
         }
     }
 
