@@ -34,13 +34,13 @@ data class ColorPanelIcon(
             true -> {
                 val drawableResId = when (isColorDark) {
                     true -> R.drawable.paint_button_background_light_selected
-                    false -> R.drawable.paint_button_background_dark_selected
+                    false -> R.drawable.paint_button_background_light_selected
                 }
                 bgView.background = ContextCompat.getDrawable(context, drawableResId)
 
                 val outerDrawableResId = when (isColorDark) {
                     true -> R.drawable.paint_button_light_selected_outer_border
-                    false -> R.drawable.paint_button_dark_selected_outer_border
+                    false -> R.drawable.paint_button_light_selected_outer_border
                 }
 
                 outerBgView.background = ContextCompat.getDrawable(context, outerDrawableResId)
@@ -48,7 +48,7 @@ data class ColorPanelIcon(
             false -> {
                 val drawableResId = when (isColorDark) {
                     true -> R.drawable.paint_button_background_light_unselected
-                    false -> R.drawable.paint_button_background_dark_unselected
+                    false -> R.drawable.paint_button_background_light_unselected
                 }
                 bgView.background = ContextCompat.getDrawable(context, drawableResId)
                 outerBgView.background = null
@@ -57,7 +57,7 @@ data class ColorPanelIcon(
 
         val iconColor = when (isColorDark) {
             true -> Color.parseColor("#FFFFFFFF")
-            false -> Color.parseColor("#FF000000")
+            false -> Color.parseColor("#FFFFFFFF")
         }
 
         iconViews.forEach {
