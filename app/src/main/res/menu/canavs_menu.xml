@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:id="@+id/canvas_item_server_list"
+            android:title="Client List"
+            android:icon="@drawable/server_person" />
+
+    <item
+            android:id="@+id/canvas_item_community"
+            android:title="Community"
+            android:icon="@drawable/groups" />
+
+    <item
+            android:id="@+id/canvas_item_options"
+            android:title="Options"
+            android:icon="@drawable/colors" />
+
+    <item
+            android:id="@+id/canvas_item_yank"
+            android:title="Yank Canvas"
+            android:icon="@drawable/photo_camera" />
+
+    <item
+            android:id="@+id/canvas_item_help"
+            android:title="Help"
+            android:icon="@drawable/help" />
+
+    <item
+            android:id="@+id/canvas_item_leave"
+            android:title="Leave"
+            android:icon="@drawable/logout" />
+
+    <item
+            android:id="@+id/canvas_item_grid_lines"
+            android:title="Toggle Grid Lines"
+            android:icon="@drawable/ic_toggle_grid" />
+
+    <item
+            android:id="@+id/canvas_item_background"
+            android:title="Change Background"
+            android:icon="@drawable/ic_background" />
+
+    <item
+            android:id="@+id/canvas_item_map"
+            android:title="Toggle Minimap"
+            android:icon="@drawable/ic_map" />
+
+</menu>

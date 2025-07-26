@@ -32,12 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.bumptech.glide.signature.ObjectKey
@@ -52,6 +54,9 @@ fun ServerItemView(server: Server, editing: Boolean,
                    showDeleteConfirmationState: MutableState<Boolean> = mutableStateOf(false),
                    serverToRemoveState: MutableState<Server?> = mutableStateOf(null),
                    onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
+
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.fillMaxWidth().clickable(
             interactionSource = remember { MutableInteractionSource() },
@@ -71,7 +76,13 @@ fun ServerItemView(server: Server, editing: Boolean,
             model = server.canvasImageUrl,
             contentDescription = "${server.name} canvas image"
         ) {
-            it.signature(ObjectKey(System.currentTimeMillis() / 1000 / 60 / 15))
+            it
+                .signature(ObjectKey(System.currentTimeMillis() / 1000 / 60 / 15))
+                .thumbnail(
+                    Glide.with(context)
+                        .load(server.canvasImageUrl)
+                        .onlyRetrieveFromCache(true)
+                )
         }
 
         Row(

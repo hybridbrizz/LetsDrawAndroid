@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -162,6 +163,12 @@ class MenuFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                activity?.finish()
+            }
 
         portraitState = mutableStateOf(requireActivity().isPortrait())
 

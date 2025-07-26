@@ -9,8 +9,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
@@ -24,6 +26,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.matrixwarez.pt.R
+import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.DataLoadingCallback
@@ -38,6 +41,7 @@ import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.drawer_layout
 import kotlinx.android.synthetic.main.fragment_loading_screen.connecting_title
 import kotlinx.android.synthetic.main.fragment_loading_screen.game_tip_text
 import kotlinx.android.synthetic.main.fragment_loading_screen.loading_progress_bar
@@ -113,6 +117,26 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     var queuePos = -1
 
+    private var abortOnPause = true
+    private var aborted = false
+
+    private fun abort() {
+        aborted = true
+
+        InteractiveCanvasSocket.instance.socketConnectCallback = null
+        InteractiveCanvasSocket.instance.disconnect()
+
+        QueueSocket.instance.socketListener = null
+        QueueSocket.instance.socket?.disconnect()
+
+        serverService.abort()
+        canvasService.abort()
+
+        Log.d("Loading Screen", "Aborted loading!")
+
+        (requireActivity() as? InteractiveCanvasActivity)?.showMenuFragment()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -127,6 +151,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     override fun onPause() {
         super.onPause()
 
+        if (abortOnPause) {
+            abort()
+        }
+
         InteractiveCanvasSocket.instance.socketConnectCallback = null
 
         timer.cancel()
@@ -134,6 +162,12 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                abort()
+            }
 
         requestQueue = Volley.newRequestQueue(context)
         dataRequestQueue = Volley.newRequestQueue(context)
@@ -667,6 +701,8 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     }
 
     private fun showConnectionErrorMessage(socket: Boolean = false, authError: Boolean = false, banError: Boolean = false, queue: Boolean = false) {
+        if (aborted) return
+
         InteractiveCanvasSocket.instance.disconnect()
 
         if (!showingError) {
@@ -712,6 +748,7 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     private fun downloadFinished() {
         updateNumLoaded()
         if (loadingDone()) {
+            abortOnPause = false
             dataLoadingCallback?.onDataLoaded(server)
         }
     }

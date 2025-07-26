@@ -12,13 +12,14 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.matrixwarez.pt.R
-import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.FragmentListener
 import com.matrixwarez.pt.listener.OptionsListener
@@ -30,13 +31,10 @@ import kotlinx.android.synthetic.main.fragment_options.credits_container
 import kotlinx.android.synthetic.main.fragment_options.fragment_container
 import kotlinx.android.synthetic.main.fragment_options.input_name
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_primary_color_reset_button
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_reset_button
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_button
-import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_container
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_reset_button
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
@@ -46,6 +44,25 @@ import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
 class OptionsFragment: Fragment(), FragmentListener {
 
     var optionsListener: OptionsListener? = null
+
+    private fun onBack() {
+        if (credits_container.visibility == View.VISIBLE) {
+            credits_container.visibility = View.GONE
+        }
+        else {
+            context?.apply {
+                SessionSettings.instance.save(this)
+            }
+
+            if (isFromInteractiveCanvas()) {
+                (parentFragment as InteractiveCanvasFragment).closeOptions(this@OptionsFragment)
+                (requireActivity() as? AppCompatActivity)?.supportActionBar?.show()
+            }
+            else {
+                optionsListener?.onOptionsBack()
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,22 +83,14 @@ class OptionsFragment: Fragment(), FragmentListener {
         }
 
         back_button.setOnClickListener {
-            if (credits_container.visibility == View.VISIBLE) {
-                credits_container.visibility = View.GONE
-            }
-            else {
-                context?.apply {
-                    SessionSettings.instance.save(this)
-                }
-
-                if (isFromInteractiveCanvas()) {
-                    (parentFragment as InteractiveCanvasFragment).closeOptions(this@OptionsFragment)
-                }
-                else {
-                    optionsListener?.onOptionsBack()
-                }
-            }
+            onBack()
         }
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                onBack()
+            }
 
         input_name.setText(SessionSettings.instance.displayName)
 

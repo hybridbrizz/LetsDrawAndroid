@@ -1,1018 +1,1017 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <com.matrixwarez.pt.view.InteractiveCanvasView
-            android:id="@+id/surface_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+    <!-- Main content -->
+    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
 
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/help_messages"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/client_canvas_locations"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    <LinearLayout
-            android:id="@+id/ll_latency_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="5dp">
-
-        <TextView
-                android:id="@+id/text_latency"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
-                android:layout_marginEnd="10dp"
-                android:fontFamily="@font/inter_regular"
-                android:textColor="#FFFFFF"
-                android:shadowColor="#000000"
-                android:shadowDx="1"
-                android:shadowDy="1"
-                android:shadowRadius="2"
-                android:text="" />
-
-        <ImageView
-                android:id="@+id/image_no_socket"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginTop="21dp"
-                android:src="@drawable/green_circle" />
-
-    </LinearLayout>
-
-    <FrameLayout
-            android:id="@+id/paint_warning_frame"
-            android:visibility="gone"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toLeftOf="@id/paint_panel"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@drawable/paint_warning_frame_background" />
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/paint_panel"
-            android:visibility="invisible"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:orientation="horizontal"
-            android:gravity="center"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="@drawable/marble_2">
-
-        <TextView
-                android:id="@+id/palette_name_text"
-                android:visibility="invisible"
+        <com.matrixwarez.pt.view.InteractiveCanvasView
+                android:id="@+id/surface_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/inter_light"
-                android:textSize="12pt"
-                android:text="Recent Colors"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="15dp"
-                android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                android:shadowColor="#7F000000"
-                android:shadowDx="2"
-                android:shadowDy="2"
-                android:shadowRadius="3" />
+                android:layout_height="match_parent" />
+
+        <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/help_messages"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/client_canvas_locations"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         <LinearLayout
-                android:id="@+id/color_action_button_menu"
+                android:id="@+id/ll_latency_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/palette_name_text">
+                android:layout_marginEnd="5dp">
 
-            <FrameLayout
+            <TextView
+                    android:id="@+id/text_latency"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginEnd="10dp"
+                    android:fontFamily="@font/inter_regular"
+                    android:textColor="#FFFFFF"
+                    android:shadowColor="#000000"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    android:text="" />
+
+            <ImageView
+                    android:id="@+id/image_no_socket"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:layout_marginTop="21dp"
+                    android:src="@drawable/green_circle" />
+
+        </LinearLayout>
+
+        <FrameLayout
+                android:id="@+id/paint_warning_frame"
+                android:visibility="gone"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/paint_panel"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/paint_warning_frame_background" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/paint_panel"
+                android:visibility="invisible"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="@drawable/marble_2">
+
+            <TextView
+                    android:id="@+id/palette_name_text"
+                    android:visibility="invisible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/inter_light"
+                    android:textSize="12pt"
+                    android:text="Recent Colors"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="15dp"
+                    android:gravity="center"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:shadowColor="#7F000000"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="3" />
+
+            <LinearLayout
+                    android:id="@+id/color_action_button_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/palette_name_text">
+
+                <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                    <com.matrixwarez.pt.view.ActionButtonFrame
+                            android:id="@+id/palette_add_color_button"
+                            android:visibility="gone"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp">
+
+                        <com.matrixwarez.pt.view.ActionButtonView
+                                android:id="@+id/palette_add_color_action"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center" />
+
+                    </com.matrixwarez.pt.view.ActionButtonFrame>
+
+                    <com.matrixwarez.pt.view.ActionButtonFrame
+                            android:id="@+id/palette_remove_color_button"
+                            android:visibility="gone"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp">
+
+                        <com.matrixwarez.pt.view.ActionButtonView
+                                android:id="@+id/palette_remove_color_action"
+                                android:layout_width="20dp"
+                                android:layout_height="2dp"
+                                android:layout_gravity="center" />
+
+                    </com.matrixwarez.pt.view.ActionButtonFrame>
+
+                </FrameLayout>
 
                 <com.matrixwarez.pt.view.ActionButtonFrame
-                        android:id="@+id/palette_add_color_button"
+                        android:id="@+id/lock_paint_panel"
                         android:visibility="gone"
                         android:layout_width="40dp"
                         android:layout_height="40dp">
 
                     <com.matrixwarez.pt.view.ActionButtonView
-                            android:id="@+id/palette_add_color_action"
-                            android:layout_width="20dp"
+                            android:id="@+id/lock_paint_panel_action"
+                            android:layout_width="18dp"
                             android:layout_height="20dp"
                             android:layout_gravity="center" />
 
                 </com.matrixwarez.pt.view.ActionButtonFrame>
 
-                <com.matrixwarez.pt.view.ActionButtonFrame
-                        android:id="@+id/palette_remove_color_button"
-                        android:visibility="gone"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp">
-
-                    <com.matrixwarez.pt.view.ActionButtonView
-                            android:id="@+id/palette_remove_color_action"
-                            android:layout_width="20dp"
-                            android:layout_height="2dp"
-                            android:layout_gravity="center" />
-
-                </com.matrixwarez.pt.view.ActionButtonFrame>
-
-            </FrameLayout>
-
-            <com.matrixwarez.pt.view.ActionButtonFrame
-                    android:id="@+id/lock_paint_panel"
-                    android:visibility="gone"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp">
-
-                <com.matrixwarez.pt.view.ActionButtonView
-                        android:id="@+id/lock_paint_panel_action"
-                        android:layout_width="18dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center" />
-
-            </com.matrixwarez.pt.view.ActionButtonFrame>
-
-        </LinearLayout>
-
-        <TextView
-                android:id="@+id/drops_amt_text"
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:textColor="#CCFFFFFF"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        <com.matrixwarez.pt.view.PaintQuantityBar
-                android:id="@+id/paint_qty_bar"
-                android:layout_width="match_parent"
-                android:layout_height="13dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginRight="40dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        <com.matrixwarez.pt.view.PaintQuantityCircle
-                android:id="@+id/paint_qty_circle"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_marginTop="15dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/paint_time_info_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="invisible"
-                android:background="@drawable/timer_text_background"
-                app:layout_constraintTop_toTopOf="@id/paint_qty_circle"
-                app:layout_constraintBottom_toBottomOf="@id/paint_qty_circle"
-                app:layout_constraintLeft_toLeftOf="@id/paint_qty_circle"
-                app:layout_constraintRight_toRightOf="@id/paint_qty_circle">
+            </LinearLayout>
 
             <TextView
-                    android:id="@+id/paint_time_info"
+                    android:id="@+id/drops_amt_text"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:textColor="#CCFFFFFF"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <com.matrixwarez.pt.view.PaintQuantityBar
+                    android:id="@+id/paint_qty_bar"
+                    android:layout_width="match_parent"
+                    android:layout_height="13dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <com.matrixwarez.pt.view.PaintQuantityCircle
+                    android:id="@+id/paint_qty_circle"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="15dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/paint_time_info_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="invisible"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:lines="1"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:textColor="#FFFFFFFF"
-                    android:layout_margin="10dp"
+                    android:background="@drawable/timer_text_background"
+                    app:layout_constraintTop_toTopOf="@id/paint_qty_circle"
+                    app:layout_constraintBottom_toBottomOf="@id/paint_qty_circle"
+                    app:layout_constraintLeft_toLeftOf="@id/paint_qty_circle"
+                    app:layout_constraintRight_toRightOf="@id/paint_qty_circle">
+
+                <TextView
+                        android:id="@+id/paint_time_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:lines="1"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:textColor="#FFFFFFFF"
+                        android:layout_margin="10dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent" />
+
+                <TextView
+                        android:id="@+id/paint_amt_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="invisible"
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:lines="1"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
+                        android:textColor="#FFFFFFFF"
+                        android:layout_margin="10dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                    android:id="@+id/top_left_anchor"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginLeft="30dp"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <View
+                    android:id="@+id/top_right_anchor"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginRight="30dp"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintRight_toRightOf="parent" />
 
-            <TextView
-                    android:id="@+id/paint_amt_info"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="invisible"
-                    android:textStyle="bold"
-                    android:textSize="16sp"
-                    android:lines="1"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:textColor="#FFFFFFFF"
-                    android:layout_margin="10dp"
+            <View
+                    android:id="@+id/bottom_left_anchor"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="36dp"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <View
+                    android:id="@+id/bottom_right_anchor"
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginTop="36dp"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintRight_toRightOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-                android:id="@+id/top_left_anchor"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginLeft="30dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent" />
-
-        <View
-                android:id="@+id/top_right_anchor"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginRight="30dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
-
-        <View
-                android:id="@+id/bottom_left_anchor"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="36dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent" />
-
-        <View
-                android:id="@+id/bottom_right_anchor"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:layout_marginRight="30dp"
-                android:layout_marginTop="36dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintRight_toRightOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <FrameLayout
-            android:id="@+id/paint_button_container_2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_margin="10dp">
-
         <FrameLayout
-                android:id="@+id/paint_button_background_outer"
-                android:layout_width="160dp"
-                android:layout_height="160dp"
-                android:layout_gravity="center" />
-
-        <com.matrixwarez.pt.view.ColorPanelTouchTargetView
-                android:id="@+id/paint_button_background"
-                android:layout_width="140dp"
-                android:layout_height="140dp"
-                android:layout_gravity="center" />
-
-        <LinearLayout
-                android:id="@+id/paint_button_container"
+                android:id="@+id/paint_button_container_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:gravity="center_horizontal"
-                android:layout_gravity="center">
-
-            <ImageView
-                    android:id="@+id/paint_panel_action_view"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_gravity="center"
-                    android:elevation="5dp"
-                    android:src="@drawable/ic_add_bold" />
-
-            <TextView
-                    android:id="@+id/text_bottom_display"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter_semibold"
-                    android:textSize="14sp" />
-
-        </LinearLayout>
-
-    </FrameLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/color_picker_frame"
-            android:visibility="invisible"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:background="#FFF">
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/recent_colors_container"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="40dp"
-            android:layout_marginLeft="58dp"
-            android:layout_marginRight="58dp"
-            android:elevation="10dp"
-            app:layout_constraintLeft_toRightOf="@id/color_picker_frame"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent1"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent2"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/recent1"/>
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent3"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/recent2"/>
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent4"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/recent3"/>
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent5"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent1" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent6"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent5"
-                app:layout_constraintTop_toBottomOf="@id/recent2" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent7"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent6"
-                app:layout_constraintTop_toBottomOf="@id/recent3" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent8"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent7"
-                app:layout_constraintTop_toBottomOf="@id/recent4" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent9"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent5" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent10"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent9"
-                app:layout_constraintTop_toBottomOf="@id/recent6" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent11"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent10"
-                app:layout_constraintTop_toBottomOf="@id/recent7" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent12"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent11"
-                app:layout_constraintTop_toBottomOf="@id/recent8" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent13"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent9" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent14"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent13"
-                app:layout_constraintTop_toBottomOf="@id/recent10" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent15"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent14"
-                app:layout_constraintTop_toBottomOf="@id/recent11" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent16"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent15"
-                app:layout_constraintTop_toBottomOf="@id/recent12" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent17"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent13" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent18"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent17"
-                app:layout_constraintTop_toBottomOf="@id/recent14" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent19"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent18"
-                app:layout_constraintTop_toBottomOf="@id/recent15" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent20"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent19"
-                app:layout_constraintTop_toBottomOf="@id/recent16" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent21"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent17" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent22"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent21"
-                app:layout_constraintTop_toBottomOf="@id/recent18" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent23"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent22"
-                app:layout_constraintTop_toBottomOf="@id/recent19" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent24"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent23"
-                app:layout_constraintTop_toBottomOf="@id/recent20" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent25"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent21" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent26"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent25"
-                app:layout_constraintTop_toBottomOf="@id/recent22" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent27"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent26"
-                app:layout_constraintTop_toBottomOf="@id/recent23" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent28"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent27"
-                app:layout_constraintTop_toBottomOf="@id/recent24" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent29"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/recent25" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent30"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent29"
-                app:layout_constraintTop_toBottomOf="@id/recent26" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent31"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent30"
-                app:layout_constraintTop_toBottomOf="@id/recent27" />
-
-        <com.matrixwarez.pt.view.RecentColorView
-                android:id="@+id/recent32"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="10dp"
-                app:layout_constraintLeft_toRightOf="@id/recent31"
-                app:layout_constraintTop_toBottomOf="@id/recent28" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/menu_button"
-            android:visibility="gone"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:layout_marginStart="58dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent">
-
-        <ImageView
-                android:id="@+id/menu_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_menu" />
-
-    </com.matrixwarez.pt.view.ButtonFrame>
-
-    <FrameLayout
-        android:id="@+id/pixel_history_fragment_container"
-            android:visibility="invisible"
-            android:layout_width="240dp"
-            android:layout_height="240dp"
-            android:elevation="10dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-    <FrameLayout
-            android:id="@+id/object_selection_view"
-            android:visibility="invisible"
-            android:layout_width="400dp"
-            android:layout_height="240dp"
-            android:elevation="10dp"
-            android:background="@drawable/gradient_blue"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-    <FrameLayout
-            android:id="@+id/export_fragment_container"
-            android:visibility="invisible"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:elevation="10dp"
-            android:background="#99000000"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-
-    <FrameLayout
-            android:id="@+id/canvas_summary_container"
-            android:visibility="invisible"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="60dp"
-            android:layout_marginEnd="10dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-                android:id="@+id/canvas_summary_view"
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:background="@android:color/black"
-                android:layout_gravity="center" />
-
-        <com.matrixwarez.pt.view.DeviceCanvasViewportView
-                android:id="@+id/device_canvas_viewport_view"
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:layout_gravity="center" />
-
-        <androidx.compose.ui.platform.ComposeView
-                android:id="@+id/canvas_summary_clients_view"
-                android:layout_width="180dp"
-                android:layout_height="180dp" />
-
-    </FrameLayout>
-
-    <com.matrixwarez.pt.view.ActionButtonFrame
-            android:id="@+id/object_move_up_button"
-            android:visibility="gone"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <com.matrixwarez.pt.view.ActionButtonView
-                android:id="@+id/object_move_up_action"
-                android:layout_width="15dp"
-                android:layout_height="5dp"
-                android:layout_gravity="bottom|center_horizontal" />
-
-    </com.matrixwarez.pt.view.ActionButtonFrame>
-
-    <com.matrixwarez.pt.view.ActionButtonFrame
-            android:id="@+id/object_move_down_button"
-            android:visibility="gone"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <com.matrixwarez.pt.view.ActionButtonView
-                android:id="@+id/object_move_down_action"
-                android:layout_width="15dp"
-                android:layout_height="5dp"
-                android:layout_gravity="top|center_horizontal" />
-
-    </com.matrixwarez.pt.view.ActionButtonFrame>
-
-    <com.matrixwarez.pt.view.ActionButtonFrame
-            android:id="@+id/object_move_left_button"
-            android:visibility="gone"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <com.matrixwarez.pt.view.ActionButtonView
-                android:id="@+id/object_move_left_action"
-                android:layout_width="5dp"
-                android:layout_height="15dp"
-                android:layout_gravity="end|center_vertical" />
-
-    </com.matrixwarez.pt.view.ActionButtonFrame>
-
-    <com.matrixwarez.pt.view.ActionButtonFrame
-            android:id="@+id/object_move_right_button"
-            android:visibility="gone"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <com.matrixwarez.pt.view.ActionButtonView
-                android:id="@+id/object_move_right_action"
-                android:layout_width="5dp"
-                android:layout_height="15dp"
-                android:layout_gravity="start|center_vertical" />
-
-    </com.matrixwarez.pt.view.ActionButtonFrame>
-
-    <LinearLayout
-            android:id="@+id/selected_object_yes_no_container"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/howto_step_background"
-            android:padding="5dp"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <com.matrixwarez.pt.view.ActionButtonFrame
-                android:id="@+id/selected_object_yes_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp">
-
-            <com.matrixwarez.pt.view.ActionButtonView
-                    android:id="@+id/selected_object_yes_action"
-                    android:layout_width="21dp"
-                    android:layout_height="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_margin="10dp">
+
+            <FrameLayout
+                    android:id="@+id/paint_button_background_outer"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
                     android:layout_gravity="center" />
 
-        </com.matrixwarez.pt.view.ActionButtonFrame>
+            <com.matrixwarez.pt.view.ColorPanelTouchTargetView
+                    android:id="@+id/paint_button_background"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center" />
+
+            <LinearLayout
+                    android:id="@+id/paint_button_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:gravity="center_horizontal"
+                    android:layout_gravity="center">
+
+                <ImageView
+                        android:id="@+id/paint_panel_action_view"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:elevation="5dp"
+                        android:src="@drawable/ic_add_bold" />
+
+                <TextView
+                        android:id="@+id/text_bottom_display"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/inter_semibold"
+                        android:textSize="14sp" />
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/color_picker_frame"
+                android:visibility="invisible"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:background="#FFF">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/recent_colors_container"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="40dp"
+                android:layout_marginLeft="58dp"
+                android:layout_marginRight="58dp"
+                android:elevation="10dp"
+                app:layout_constraintLeft_toRightOf="@id/color_picker_frame"
+                app:layout_constraintBottom_toBottomOf="parent">
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent1"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent2"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/recent1"/>
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent3"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/recent2"/>
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent4"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintLeft_toRightOf="@id/recent3"/>
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent5"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent1" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent6"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent5"
+                    app:layout_constraintTop_toBottomOf="@id/recent2" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent7"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent6"
+                    app:layout_constraintTop_toBottomOf="@id/recent3" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent8"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent7"
+                    app:layout_constraintTop_toBottomOf="@id/recent4" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent9"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent5" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent10"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent9"
+                    app:layout_constraintTop_toBottomOf="@id/recent6" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent11"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent10"
+                    app:layout_constraintTop_toBottomOf="@id/recent7" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent12"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent11"
+                    app:layout_constraintTop_toBottomOf="@id/recent8" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent13"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent9" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent14"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent13"
+                    app:layout_constraintTop_toBottomOf="@id/recent10" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent15"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent14"
+                    app:layout_constraintTop_toBottomOf="@id/recent11" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent16"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent15"
+                    app:layout_constraintTop_toBottomOf="@id/recent12" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent17"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent13" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent18"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent17"
+                    app:layout_constraintTop_toBottomOf="@id/recent14" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent19"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent18"
+                    app:layout_constraintTop_toBottomOf="@id/recent15" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent20"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent19"
+                    app:layout_constraintTop_toBottomOf="@id/recent16" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent21"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent17" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent22"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent21"
+                    app:layout_constraintTop_toBottomOf="@id/recent18" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent23"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent22"
+                    app:layout_constraintTop_toBottomOf="@id/recent19" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent24"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent23"
+                    app:layout_constraintTop_toBottomOf="@id/recent20" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent25"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent21" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent26"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent25"
+                    app:layout_constraintTop_toBottomOf="@id/recent22" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent27"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent26"
+                    app:layout_constraintTop_toBottomOf="@id/recent23" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent28"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent27"
+                    app:layout_constraintTop_toBottomOf="@id/recent24" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent29"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/recent25" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent30"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent29"
+                    app:layout_constraintTop_toBottomOf="@id/recent26" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent31"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent30"
+                    app:layout_constraintTop_toBottomOf="@id/recent27" />
+
+            <com.matrixwarez.pt.view.RecentColorView
+                    android:id="@+id/recent32"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_margin="10dp"
+                    app:layout_constraintLeft_toRightOf="@id/recent31"
+                    app:layout_constraintTop_toBottomOf="@id/recent28" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <com.matrixwarez.pt.view.ButtonFrame
+                android:id="@+id/menu_button"
+                android:visibility="gone"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:layout_marginStart="58dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent">
+
+            <ImageView
+                    android:id="@+id/menu_action"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_menu" />
+
+        </com.matrixwarez.pt.view.ButtonFrame>
+
+        <FrameLayout
+                android:id="@+id/pixel_history_fragment_container"
+                android:visibility="invisible"
+                android:layout_width="240dp"
+                android:layout_height="240dp"
+                android:elevation="10dp"
+                android:background="@android:drawable/dialog_holo_light_frame"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        <FrameLayout
+                android:id="@+id/object_selection_view"
+                android:visibility="invisible"
+                android:layout_width="400dp"
+                android:layout_height="240dp"
+                android:elevation="10dp"
+                android:background="@drawable/gradient_blue"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        <FrameLayout
+                android:id="@+id/export_fragment_container"
+                android:visibility="invisible"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:elevation="10dp"
+                android:background="#99000000"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+        <FrameLayout
+                android:id="@+id/canvas_summary_container"
+                android:visibility="invisible"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                    android:id="@+id/canvas_summary_view"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:background="@android:color/black"
+                    android:layout_gravity="center" />
+
+            <com.matrixwarez.pt.view.DeviceCanvasViewportView
+                    android:id="@+id/device_canvas_viewport_view"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_gravity="center" />
+
+            <androidx.compose.ui.platform.ComposeView
+                    android:id="@+id/canvas_summary_clients_view"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp" />
+
+        </FrameLayout>
 
         <com.matrixwarez.pt.view.ActionButtonFrame
-                android:id="@+id/selected_object_no_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:id="@+id/object_move_up_button"
+                android:visibility="gone"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
             <com.matrixwarez.pt.view.ActionButtonView
-                    android:id="@+id/selected_object_no_action"
+                    android:id="@+id/object_move_up_action"
                     android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:layout_gravity="center" />
+                    android:layout_height="5dp"
+                    android:layout_gravity="bottom|center_horizontal" />
 
         </com.matrixwarez.pt.view.ActionButtonFrame>
-    </LinearLayout>
 
-    <androidx.cardview.widget.CardView
-            android:id="@+id/menu_container"
-            android:visibility="gone"
-            android:background="@drawable/shadow_background"
-            android:layout_width="500dp"
-            android:layout_height="300dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:cardCornerRadius="20dp" />
-
-    <FrameLayout
-            android:id="@+id/terminal_container"
-            android:visibility="gone"
-            android:background="@android:color/transparent"
-            android:layout_width="500dp"
-            android:layout_height="300dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:cardCornerRadius="20dp" />
-
-    <FrameLayout
-            android:id="@+id/options_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    <ProgressBar
-            android:id="@+id/progress_circular"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:indeterminate="true" />
-
-    <androidx.appcompat.widget.LinearLayoutCompat
-            android:id="@+id/stream_banner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha="0"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:background="@drawable/info_banner_background"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="60dp">
-
-        <ImageView
-                android:id="@+id/banner_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/twitch_icon" />
-
-        <TextView
-                android:id="@+id/banner_text"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginStart="5dp"
-                android:fontFamily="@font/inter_semibold"
-                android:textSize="14dp"
-                android:textColor="#FFF"
-                android:text="Banner text" />
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
-
-    <com.matrixwarez.pt.view.ButtonFrame
-            android:id="@+id/export_button"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-                android:id="@+id/export_action"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_export" />
-
-        <FrameLayout
-                android:id="@+id/export_border_view"
+        <com.matrixwarez.pt.view.ActionButtonFrame
+                android:id="@+id/object_move_down_button"
                 android:visibility="gone"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:background="@drawable/export_background" />
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-    </com.matrixwarez.pt.view.ButtonFrame>
+            <com.matrixwarez.pt.view.ActionButtonView
+                    android:id="@+id/object_move_down_action"
+                    android:layout_width="15dp"
+                    android:layout_height="5dp"
+                    android:layout_gravity="top|center_horizontal" />
 
-    <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#000"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:layout_constraintTop_toTopOf="parent">
+        </com.matrixwarez.pt.view.ActionButtonFrame>
 
-        <ImageButton
-                android:id="@+id/hamburger_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_menu"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Menu"
-                android:padding="0dp" />
+        <com.matrixwarez.pt.view.ActionButtonFrame
+                android:id="@+id/object_move_left_button"
+                android:visibility="gone"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="@android:color/white"
-                android:textSize="18sp"
-                android:fontFamily="@font/inter_bold"
-                android:layout_marginStart="30dp" />
+            <com.matrixwarez.pt.view.ActionButtonView
+                    android:id="@+id/object_move_left_action"
+                    android:layout_width="5dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="end|center_vertical" />
+
+        </com.matrixwarez.pt.view.ActionButtonFrame>
+
+        <com.matrixwarez.pt.view.ActionButtonFrame
+                android:id="@+id/object_move_right_button"
+                android:visibility="gone"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <com.matrixwarez.pt.view.ActionButtonView
+                    android:id="@+id/object_move_right_action"
+                    android:layout_width="5dp"
+                    android:layout_height="15dp"
+                    android:layout_gravity="start|center_vertical" />
+
+        </com.matrixwarez.pt.view.ActionButtonFrame>
 
         <LinearLayout
-                android:id="@+id/paint_control_layout"
+                android:id="@+id/selected_object_yes_no_container"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:visibility="gone">
+                android:background="@drawable/howto_step_background"
+                android:padding="5dp"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <FrameLayout
-                    android:id="@+id/erase_button_background_outer"
+            <com.matrixwarez.pt.view.ActionButtonFrame
+                    android:id="@+id/selected_object_yes_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp">
+
+                <com.matrixwarez.pt.view.ActionButtonView
+                        android:id="@+id/selected_object_yes_action"
+                        android:layout_width="21dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center" />
+
+            </com.matrixwarez.pt.view.ActionButtonFrame>
+
+            <com.matrixwarez.pt.view.ActionButtonFrame
+                    android:id="@+id/selected_object_no_button"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/paint_button_background">
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <com.matrixwarez.pt.view.ColorPanelTouchTargetView
-                        android:id="@+id/erase_button_background"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center">
+                <com.matrixwarez.pt.view.ActionButtonView
+                        android:id="@+id/selected_object_no_action"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:layout_gravity="center" />
 
-                    <ImageView
-                            android:id="@+id/erase_action_view"
-                            android:layout_width="25dp"
-                            android:layout_height="25dp"
-                            android:layout_gravity="center"
-                            android:elevation="5dp"
-                            android:src="@drawable/eraser_3" />
-
-                </com.matrixwarez.pt.view.ColorPanelTouchTargetView>
-
-            </FrameLayout>
-
-            <View
-                    android:layout_width="20dp"
-                    android:layout_height="0dp" />
-
-            <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                <com.matrixwarez.pt.view.PaintColorIndicator
-                        android:id="@+id/paint_indicator_view_bottom_layer"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp" />
-
-                <com.matrixwarez.pt.view.PaintColorIndicator
-                        android:id="@+id/paint_indicator_view"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="@color/colorAccent"
-                        android:layout_marginEnd="20dp" />
-
-            </FrameLayout>
-
-            <ImageButton
-                    android:id="@+id/done_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_done"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Back"
-                    android:padding="0dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="20dp" />
-
+            </com.matrixwarez.pt.view.ActionButtonFrame>
         </LinearLayout>
 
-    </androidx.appcompat.widget.Toolbar>
+        <androidx.cardview.widget.CardView
+                android:id="@+id/menu_container"
+                android:visibility="gone"
+                android:background="@drawable/shadow_background"
+                android:layout_width="500dp"
+                android:layout_height="300dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:cardCornerRadius="20dp" />
 
-    <com.matrixwarez.pt.view.ColorPaletteView
-            android:id="@+id/color_palette_view"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintDimensionRatio="16:1"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="gone" />
+        <FrameLayout
+                android:id="@+id/terminal_container"
+                android:visibility="gone"
+                android:background="@android:color/transparent"
+                android:layout_width="500dp"
+                android:layout_height="300dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:cardCornerRadius="20dp" />
 
-    <FrameLayout
-            android:id="@+id/reload_transparent"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <FrameLayout
+                android:id="@+id/options_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/server_list"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <ProgressBar
+                android:id="@+id/progress_circular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:indeterminate="true" />
 
-    <androidx.compose.ui.platform.ComposeView
-            android:id="@+id/canvas_menu"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+        <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/stream_banner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:background="@drawable/info_banner_background"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginTop="60dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                    android:id="@+id/banner_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/twitch_icon" />
+
+            <TextView
+                    android:id="@+id/banner_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:textSize="14dp"
+                    android:textColor="#FFF"
+                    android:text="Banner text" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <com.matrixwarez.pt.view.ButtonFrame
+                android:id="@+id/export_button"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                    android:id="@+id/export_action"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_export" />
+
+            <FrameLayout
+                    android:id="@+id/export_border_view"
+                    android:visibility="gone"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/export_background" />
+
+        </com.matrixwarez.pt.view.ButtonFrame>
+
+        <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="#000"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <LinearLayout
+                    android:id="@+id/paint_control_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:visibility="gone">
+
+                <FrameLayout
+                        android:id="@+id/erase_button_background_outer"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/paint_button_background">
+
+                    <com.matrixwarez.pt.view.ColorPanelTouchTargetView
+                            android:id="@+id/erase_button_background"
+                            android:layout_width="50dp"
+                            android:layout_height="50dp"
+                            android:layout_gravity="center">
+
+                        <ImageView
+                                android:id="@+id/erase_action_view"
+                                android:layout_width="25dp"
+                                android:layout_height="25dp"
+                                android:layout_gravity="center"
+                                android:elevation="5dp"
+                                android:src="@drawable/eraser_3" />
+
+                    </com.matrixwarez.pt.view.ColorPanelTouchTargetView>
+
+                </FrameLayout>
+
+                <View
+                        android:layout_width="20dp"
+                        android:layout_height="0dp" />
+
+                <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                    <com.matrixwarez.pt.view.PaintColorIndicator
+                            android:id="@+id/paint_indicator_view_bottom_layer"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp" />
+
+                    <com.matrixwarez.pt.view.PaintColorIndicator
+                            android:id="@+id/paint_indicator_view"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:background="@color/colorAccent"
+                            android:layout_marginEnd="20dp" />
+
+                </FrameLayout>
+
+                <ImageButton
+                        android:id="@+id/done_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_done"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Back"
+                        android:padding="0dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="20dp" />
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+        <com.matrixwarez.pt.view.ColorPaletteView
+                android:id="@+id/color_palette_view"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="16:1"
+                app:layout_constraintTop_toBottomOf="@id/toolbar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone" />
+
+        <FrameLayout
+                android:id="@+id/reload_transparent"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/server_list"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/canvas_menu"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Navigation drawer -->
+    <com.google.android.material.navigation.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            app:menu="@menu/canavs_menu" />
+
+</androidx.drawerlayout.widget.DrawerLayout>

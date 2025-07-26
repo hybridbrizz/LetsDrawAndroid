@@ -110,4 +110,6 @@
     <string name="hue_value_text">H: %d°</string>
     <string name="saturation_value_text">S: %d%%</string>
     <string name="brightness_value_text">B: %d%%</string>
+    <string name="open_menu">Open Menu</string>
+    <string name="close_menu">Close Menu</string>
 </resources>

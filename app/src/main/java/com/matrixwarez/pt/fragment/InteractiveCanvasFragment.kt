@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.content.BroadcastReceiver
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
@@ -23,7 +24,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -47,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.android.volley.DefaultRetryPolicy
@@ -101,8 +106,8 @@ import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.service.CanvasService
 import com.matrixwarez.pt.view.ActionButtonView
 import com.matrixwarez.pt.view.ButtonFrame
-import com.matrixwarez.pt.view.InteractiveCanvasView
 import com.matrixwarez.pt.view.ColorPaletteView
+import com.matrixwarez.pt.view.InteractiveCanvasView
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_icon
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_text
@@ -111,8 +116,11 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.client_canvas_locations
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_palette_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_picker_frame
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.device_canvas_viewport_view
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.done_button
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.drawer_layout
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_action_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.erase_button_background_outer
@@ -127,6 +135,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.lock_paint_pan
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_container
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.nav_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_move_down_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_move_down_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_move_left_action
@@ -139,6 +148,8 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.object_selecti
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_amt_info
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_background
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_background_outer
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_container_2
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_control_layout
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view_bottom_layer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel
@@ -147,7 +158,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_qty_bar
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_qty_circle
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_time_info
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_time_info_container
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_warning_frame
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_add_color_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_add_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_name_text
@@ -156,11 +166,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.color_palette_view
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.done_button
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.hamburger_button
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_container_2
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_control_layout
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_yes_action
@@ -171,8 +176,8 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.stream_banner
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.terminal_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_bottom_display
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.toolbar_title
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_latency
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.toolbar
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.menu_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.surface_view
@@ -261,6 +266,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var colorPickerFragment: ColorPickerFragment? = null
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        Log.d("Test Option Selection", "Has Options Menu")
+        setHasOptionsMenu(true)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -284,16 +296,173 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         startRecentPixels()
     }
 
+    private lateinit var drawerToggle: ActionBarDrawerToggle
+
+    private fun setupToolbarWithHamburger() {
+        (activity as AppCompatActivity).setSupportActionBar(toolbar)
+
+        // Create the toggle
+        drawerToggle = ActionBarDrawerToggle(
+            requireActivity(),
+            drawer_layout,
+            toolbar,
+            R.string.open_menu,
+            R.string.close_menu
+        )
+
+        // Set the toggle as the DrawerListener
+        drawer_layout.addDrawerListener(drawerToggle)
+
+        // Enable the hamburger icon
+        (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        drawerToggle.syncState()
+
+        toolbar.setNavigationOnClickListener {
+            when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
+                true -> {
+                    Log.d("Test Option Selection", "Painting")
+
+                    surface_view.endPainting()
+
+                    paint_button_container_2.visibility = View.VISIBLE
+
+                    requireActivity().title = server.name
+
+                    paint_control_layout.visibility = View.GONE
+
+                    color_palette_view.visibility = View.GONE
+
+                    true
+                }
+                false -> {
+                    Log.d("Test Option Selection", "Not Painting")
+                    toggleDrawer()
+                }
+            }
+        }
+
+        nav_view.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.canvas_item_server_list -> {
+                    toggleDrawer()
+                    showServerList()
+                    true
+                }
+                R.id.canvas_item_community -> {
+                    toggleDrawer()
+                    if (server.iconLink.isNotBlank()) {
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+                            startActivity(intent)
+                        }
+                        catch (e: Exception) {}
+                    }
+                    true
+                }
+                R.id.canvas_item_options -> {
+                    toggleDrawer()
+                    (requireActivity() as? AppCompatActivity)?.supportActionBar?.hide()
+                    (requireActivity() as InteractiveCanvasActivity).showOptionsFragment(this@InteractiveCanvasFragment)
+                    true
+                }
+                R.id.canvas_item_yank -> {
+                    toggleDrawer()
+                    (requireActivity() as? AppCompatActivity)?.supportActionBar?.hide()
+                    val fragment = ArtExportFragment()
+                    fragment.interactiveCanvas = surface_view.interactiveCanvas
+                    fragment.listener = this@InteractiveCanvasFragment
+
+                    childFragmentManager.apply {
+                        // export_button.background = ResourcesCompat.getDrawable(resources, R.drawable.ic_share, null)
+
+                        beginTransaction().replace(R.id.export_fragment_container, fragment).addToBackStack("Export").commit()
+
+                        export_fragment_container.visibility = View.VISIBLE
+                        export_fragment_container.setOnClickListener {
+
+                        }
+                    }
+                    true
+                }
+                R.id.canvas_item_help -> {
+                    toggleDrawer()
+                    showHelpMessages()
+                    true
+                }
+                R.id.canvas_item_leave -> {
+                    toggleDrawer()
+                    leave()
+                    true
+                }
+                R.id.canvas_item_grid_lines -> {
+                    toggleDrawer()
+
+                    SessionSettings.instance.gridLineMode += 1
+
+                    if (SessionSettings.instance.gridLineMode > 1) {
+                        SessionSettings.instance.gridLineMode = 0
+                    }
+
+                    surface_view.interactiveCanvas.interactiveCanvasDrawer?.notifyRedraw()
+
+                    true
+                }
+                R.id.canvas_item_background -> {
+                    toggleDrawer()
+                    changeBackground()
+                    true
+                }
+                R.id.canvas_item_map -> {
+                    toggleDrawer()
+                    toggleCanvasSummary()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun toggleDrawer() {
+        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+            drawer_layout.closeDrawer(GravityCompat.START, false)
+        } else {
+            drawer_layout.openDrawer(GravityCompat.START)
+        }
+    }
+
+    private fun leave() {
+        InteractiveCanvasSocket.instance.disconnect()
+        lastCanvasSummaryImageTime = 0L
+        leave = true
+    }
+
+    private fun addBackToMenuOnBackPressed() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
+                    drawer_layout.closeDrawer(GravityCompat.START)
+                }
+                else {
+                    leave()
+                }
+            }
+    }
+
     // setup views
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupToolbarWithHamburger()
 
         if (savedInstanceState != null) {
             //SessionSettings.instance.load(requireContext())
             (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
             return
         }
+
+        addBackToMenuOnBackPressed()
 
         Log.d("Test test", "Adding color picker fragment now")
         colorPickerFragment = ColorPickerFragment()
@@ -547,7 +716,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
                     paint_button_container_2.visibility = View.GONE
 
-                    toolbar_title.text = SessionSettings.instance.dropsAmt.toString()
+                    requireActivity().title = SessionSettings.instance.dropsAmt.toString()
 
                     paint_control_layout.visibility = View.VISIBLE
 
@@ -579,26 +748,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             )
         )
 
-        hamburger_button.setOnClickListener {
-            if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
-                surface_view.endPainting()
-
-                paint_button_container_2.visibility = View.VISIBLE
-
-                toolbar_title.text = server.name
-
-                paint_control_layout.visibility = View.GONE
-
-                color_palette_view.visibility = View.GONE
-            }
-        }
-
         done_button.setOnClickListener {
             surface_view.endPainting()
 
             paint_button_container_2.visibility = View.VISIBLE
 
-            toolbar_title.text = server.name
+            requireActivity().title = server.name
 
             paint_control_layout.visibility = View.GONE
 
@@ -683,7 +838,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
 
-        toolbar_title.text = server.name
+        requireActivity().title = server.name
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
@@ -1291,6 +1446,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onResume() {
         super.onResume()
 
+        applyOptions()
+
         saveViewportTimer = Timer()
         saveViewportTimer?.schedule(object: TimerTask() {
             override fun run() {
@@ -1335,6 +1492,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onDestroyView() {
         super.onDestroyView()
         surface_view.interactiveCanvas.cancelLatencyJob()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        drawerToggle.onConfigurationChanged(newConfig)
     }
 
     // screen rotation
@@ -2125,7 +2288,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             text_bottom_display.text = qty.toString()
 
             if (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
-                toolbar_title.text = qty.toString()
+                requireActivity().title = qty.toString()
             }
         }
     }
@@ -2220,10 +2383,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     // art export fragment listener
     override fun onArtExportBack() {
-        fragmentManager?.popBackStack()
+        childFragmentManager.popBackStack()
 
         export_fragment_container.visibility = View.GONE
         surface_view.endExport()
+
+        (requireActivity() as? AppCompatActivity)?.supportActionBar?.show()
+
+        addBackToMenuOnBackPressed()
     }
 
     // palettes fragment listener
@@ -2731,7 +2898,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             .remove(fragment)
             .commit()
 
-        //onViewCreated(requireView(), null)
+        addBackToMenuOnBackPressed()
     }
 
     private fun updateSocketStatus(connected: Boolean) {

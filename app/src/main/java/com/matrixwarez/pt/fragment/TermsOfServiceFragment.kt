@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.*
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
@@ -60,6 +61,10 @@ class TermsOfServiceFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {}
 
         val termsText = view.findViewById<TextView>(R.id.text_terms_of_service)
         termsText.text = termsOfService

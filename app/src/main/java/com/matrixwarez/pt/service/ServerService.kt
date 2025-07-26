@@ -21,13 +21,24 @@ class ServerService {
 
     private val key0 = "MYCEJUCNZ6AVZAVDZBHKJJYM6OIWQVDOC1OU7RZP"
 
+    private val calls = mutableSetOf<Call<*>>()
+
+    fun abort() {
+        calls.forEach {
+            it.cancel()
+        }
+        calls.clear()
+    }
+
     fun getServer(accessKey: String, completionHandler: (statusCode: Int, server: Server?) -> Unit) {
-        service.getServer(key0, accessKey).enqueue(object: Callback<Server> {
+        service.getServer(key0, accessKey).apply { calls.add(this) }.enqueue(object: Callback<Server> {
             override fun onResponse(call: Call<Server>, response: Response<Server>) {
+                calls.remove(call)
                 completionHandler.invoke(response.code(), response.body())
             }
 
             override fun onFailure(call: Call<Server>, t: Throwable) {
+                calls.remove(call)
                 completionHandler.invoke(0, null)
             }
         })
