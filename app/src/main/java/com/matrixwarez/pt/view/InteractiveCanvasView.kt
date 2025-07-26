@@ -13,6 +13,7 @@ import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.*
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.model.InteractiveCanvas
+import com.matrixwarez.pt.model.InteractiveCanvasSocket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -136,6 +137,10 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             context,
             interactiveCanvas.rows / 2F, interactiveCanvas.cols / 2F
         )
+
+        interactiveCanvas.deviceViewport?.let {
+            interactiveCanvas.interactiveCanvasListener?.notifyCoords(it.centerX().toInt(), it.centerY().toInt(), Color.WHITE)
+        }
     }
 
     override fun onTouchEvent(ev: MotionEvent): Boolean {
@@ -164,6 +169,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                     // paint
                     interactiveCanvas.paintUnit(unitPoint)
+                    interactiveCanvas.interactiveCanvasListener?.notifyCoords(x, y, Color.CYAN)
 
                     paintActionListener?.onPaintStart()
                 }
@@ -183,6 +189,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                     // paint
                     interactiveCanvas.paintUnit(unitPoint)
+                    interactiveCanvas.interactiveCanvasListener?.notifyCoords(x, y, Color.CYAN)
                 }
 
                 if (interactiveCanvas.restorePoints.size == 1) {
@@ -207,6 +214,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 unitPoint?.apply {
                     // erase
                     interactiveCanvas.eraseUnit(unitPoint)
+                    interactiveCanvas.interactiveCanvasListener?.notifyCoords(x, y, Color.RED)
                 }
             }
             else if (ev.action == MotionEvent.ACTION_MOVE) {
@@ -215,6 +223,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 unitPoint?.apply {
                     // erase
                     interactiveCanvas.eraseUnit(unitPoint)
+                    interactiveCanvas.interactiveCanvasListener?.notifyCoords(x, y, Color.RED)
                 }
             }
         }
@@ -224,6 +233,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                 unitPoint?.apply {
                     if (unitPoint.x in 0 until interactiveCanvas.cols && unitPoint.y in 0 until interactiveCanvas.rows) {
                         interactiveCanvas.interactiveCanvasListener?.notifyPickCanvasColor(interactiveCanvas.arr[y][x])
+                        interactiveCanvas.interactiveCanvasListener?.notifyCoords(x, y, Color.YELLOW)
                     }
                 }
             }
@@ -331,6 +341,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
             gestureListener?.onInteractiveCanvasPan()
 
+            interactiveCanvas.deviceViewport?.let {
+                interactiveCanvas.interactiveCanvasListener?.notifyCoords(
+                    it.centerX().toInt(),
+                    it.centerY().toInt(),
+                    Color.WHITE
+                )
+            }
+
             return true
         }
     }
@@ -418,6 +436,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                     if (interactiveCanvas.world) {
                         pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
+                        interactiveCanvas.interactiveCanvasListener?.notifyCoords(unitPoint.x, unitPoint.y, Color.GREEN)
                     }
                 }
             }

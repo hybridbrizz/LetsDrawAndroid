@@ -178,6 +178,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.stream_banner
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.surface_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.terminal_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_bottom_display
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_coords
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.text_latency
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.toolbar
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.view.menu_container
@@ -2160,6 +2161,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     // interactive canvas listener
+    override fun notifyCoords(x: Int, y: Int, color: Int) {
+        //text_coords.setTextColor(color)
+        text_coords.text = "($x, $y)"
+    }
+
     override fun notifyPaintColorUpdate(color: Int) {
 
     }

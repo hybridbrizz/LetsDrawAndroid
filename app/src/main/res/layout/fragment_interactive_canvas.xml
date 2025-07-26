@@ -328,6 +328,22 @@
 
         </FrameLayout>
 
+        <TextView
+                android:id="@+id/text_coords"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:textSize="18sp"
+                android:fontFamily="@font/inter_regular"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginBottom="30dp"
+                android:shadowColor="#000"
+                android:shadowRadius="2"
+                android:shadowDx="2"
+                android:shadowDy="2" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/color_picker_frame"
                 android:visibility="invisible"
