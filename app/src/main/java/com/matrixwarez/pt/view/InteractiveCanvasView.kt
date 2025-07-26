@@ -409,33 +409,19 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             return true
         }
 
-        override fun onLongPress(e: MotionEvent) {
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
             e.apply {
-                if (System.currentTimeMillis() - lastPanOrScaleTime > 100) {
-                    val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
+                val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
 
-                    if (unitPoint != null) {
-                        interactiveCanvas.lastSelectedUnitPoint = unitPoint
+                if (unitPoint != null) {
+                    interactiveCanvas.lastSelectedUnitPoint = unitPoint
 
-                        if (interactiveCanvas.world) {
-                            pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
-                        }
+                    if (interactiveCanvas.world) {
+                        pixelHistoryListener?.showPixelHistoryFragmentPopover(Point(x.toInt(), y.toInt()))
                     }
                 }
             }
-//            e.apply {
-//                if (System.currentTimeMillis() - lastPanOrScaleTime > 500) {
-//                    val unitPoint = interactiveCanvas.screenPointToUnit(x, y)
-//
-//                    if (unitPoint != null) {
-//                        interactiveCanvas.lastSelectedUnitPoint = unitPoint
-//
-//                        if (!interactiveCanvas.world) {
-//                            pixelHistoryListener?.showDrawFrameConfigFragmentPopover(Point(x.toInt(), y.toInt()))
-//                        }
-//                    }
-//                }
-//            }
+            return true
         }
     }
 

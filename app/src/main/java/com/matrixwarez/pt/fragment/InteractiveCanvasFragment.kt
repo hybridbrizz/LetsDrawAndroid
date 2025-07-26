@@ -1918,62 +1918,69 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         fragmentManager?.apply {
             if (surface_view.interactiveCanvas.isSelectedPixelBackground()) return
 
+            // set bottom-left of view to screenPoint
+
+            val fragment = pixel_history_fragment_container?.run {
+                val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
+                val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
+                    context,
+                    10
+                )).toFloat()
+
+                pixel_history_fragment_container.x = dX
+                pixel_history_fragment_container.y = dY
+
+                if (firstInfoTap) {
+                    pixel_history_fragment_container.y -= Utils.dpToPx(
+                        context,
+                        firstInfoTapFixYOffset
+                    )
+                    firstInfoTap = false
+                }
+
+                val fragment = view?.run {
+                    if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
+                    } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.x =
+                            width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    if (pixel_history_fragment_container.y < Utils.dpToPx(context, 40).toFloat()) {
+                        pixel_history_fragment_container.y = Utils.dpToPx(context, 40).toFloat()
+                    } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
+                        pixel_history_fragment_container.y =
+                            height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
+                                context,
+                                20
+                            ).toFloat()
+                    }
+
+                    val fragment = PixelHistoryFragment.create(server)
+
+                    fragment.setPixelHistoryJson(null)
+
+                    beginTransaction().replace(
+                        R.id.pixel_history_fragment_container,
+                        fragment
+                    ).commit()
+
+                    pixel_history_fragment_container.visibility = View.VISIBLE
+
+                    fragment
+                }
+
+                fragment
+            }
+
             surface_view.interactiveCanvas.getPixelHistory(surface_view.interactiveCanvas.pixelIdForUnitPoint(
                 surface_view.interactiveCanvas.lastSelectedUnitPoint
             ), object : PixelHistoryCallback {
                 override fun onHistoryJsonResponse(historyJson: JSONArray) {
-                    // set bottom-left of view to screenPoint
-
-                    pixel_history_fragment_container?.apply {
-                        val dX = (screenPoint.x + Utils.dpToPx(context, 10)).toFloat()
-                        val dY = (screenPoint.y - Utils.dpToPx(context, 120) - Utils.dpToPx(
-                            context,
-                            10
-                        )).toFloat()
-
-                        pixel_history_fragment_container.x = dX
-                        pixel_history_fragment_container.y = dY
-
-                        if (firstInfoTap) {
-                            pixel_history_fragment_container.y -= Utils.dpToPx(
-                                context,
-                                firstInfoTapFixYOffset
-                            )
-                            firstInfoTap = false
-                        }
-
-                        view?.apply {
-                            if (pixel_history_fragment_container.x < Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x = Utils.dpToPx(context, 20).toFloat()
-                            } else if (pixel_history_fragment_container.x + pixel_history_fragment_container.width > width - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.x =
-                                    width - pixel_history_fragment_container.width.toFloat() - Utils.dpToPx(
-                                        context,
-                                        20
-                                    ).toFloat()
-                            }
-
-                            if (pixel_history_fragment_container.y < Utils.dpToPx(context, 40).toFloat()) {
-                                pixel_history_fragment_container.y = Utils.dpToPx(context, 40).toFloat()
-                            } else if (pixel_history_fragment_container.y + pixel_history_fragment_container.height > height - Utils.dpToPx(context, 20).toFloat()) {
-                                pixel_history_fragment_container.y =
-                                    height - pixel_history_fragment_container.height.toFloat() - Utils.dpToPx(
-                                        context,
-                                        20
-                                    ).toFloat()
-                            }
-
-                            val fragment = PixelHistoryFragment.create(server)
-                            fragment.pixelHistoryJson = historyJson
-
-                            beginTransaction().replace(
-                                R.id.pixel_history_fragment_container,
-                                fragment
-                            ).commit()
-
-                            pixel_history_fragment_container.visibility = View.VISIBLE
-                        }
-                    }
+                    fragment?.setPixelHistoryJson(historyJson)
                 }
             })
         }

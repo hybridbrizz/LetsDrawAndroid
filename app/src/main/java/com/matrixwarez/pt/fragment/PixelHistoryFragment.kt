@@ -17,7 +17,7 @@ class PixelHistoryFragment: Fragment() {
 
     lateinit var server: Server
 
-    var pixelHistoryJson: JSONArray? = null
+    private var pixelHistoryJson: JSONArray? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,11 +30,12 @@ class PixelHistoryFragment: Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-
+    fun setPixelHistoryJson(pixelHistoryJson: JSONArray?) {
+        this.pixelHistoryJson = pixelHistoryJson
         context?.apply {
-            if (pixelHistoryJson != null && pixelHistoryJson!!.length() > 0) {
+            if (pixelHistoryJson != null && pixelHistoryJson.length() > 0) {
+                progress_indicator.visibility = View.GONE
+
                 // setup recycler view
                 pixel_history_recycler_view.layoutManager = LinearLayoutManager(
                     this,
@@ -46,9 +47,6 @@ class PixelHistoryFragment: Fragment() {
                 )
 
                 pixel_history_recycler_view.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
-            }
-            else {
-                no_history_text.visibility = View.VISIBLE
             }
         }
     }
