@@ -143,7 +143,7 @@ fun ClientsInfoItemView(clientInfo: Triple<String, Int, Int>, interactiveCanvas:
         ) {
             var displayName = name
             if (displayName == SessionSettings.instance.displayNameOrId()) {
-                displayName = "$displayName (me)"
+                displayName = "$displayName (you)"
             }
 
             Box(modifier = Modifier.size(20.dp).background(Color(color), shape = CircleShape))

@@ -2,8 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
             android:id="@+id/canvas_item_server_list"
-            android:title="Client List"
+            android:title="Connected Clients"
             android:icon="@drawable/server_person" />
+
+    <item
+            android:id="@+id/canvas_item_grid_lines"
+            android:title="Grid Lines"
+            android:icon="@drawable/ic_toggle_grid" />
+
+    <item
+            android:id="@+id/canvas_item_background"
+            android:title="Background"
+            android:icon="@drawable/ic_background" />
+
+    <item
+            android:id="@+id/canvas_item_map"
+            android:title="Minimap"
+            android:icon="@drawable/ic_map" />
+
+    <item
+            android:id="@+id/canvas_item_yank"
+            android:title="Yank Canvas"
+            android:icon="@drawable/photo_camera" />
 
     <item
             android:id="@+id/canvas_item_community"
@@ -16,11 +36,6 @@
             android:icon="@drawable/colors" />
 
     <item
-            android:id="@+id/canvas_item_yank"
-            android:title="Yank Canvas"
-            android:icon="@drawable/photo_camera" />
-
-    <item
             android:id="@+id/canvas_item_help"
             android:title="Help"
             android:icon="@drawable/help" />
@@ -29,20 +44,5 @@
             android:id="@+id/canvas_item_leave"
             android:title="Leave"
             android:icon="@drawable/logout" />
-
-    <item
-            android:id="@+id/canvas_item_grid_lines"
-            android:title="Toggle Grid Lines"
-            android:icon="@drawable/ic_toggle_grid" />
-
-    <item
-            android:id="@+id/canvas_item_background"
-            android:title="Change Background"
-            android:icon="@drawable/ic_background" />
-
-    <item
-            android:id="@+id/canvas_item_map"
-            android:title="Toggle Minimap"
-            android:icon="@drawable/ic_map" />
 
 </menu>

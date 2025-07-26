@@ -507,9 +507,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 when (connectionCount > 1) {
                     true -> {
                         latencyTextState.value = "($connectionCount) $latency"
+                        interactiveCanvasListener?.notifySocketLatencyText("($connectionCount) $latency")
                     }
                     false -> {
                         latencyTextState.value = latency
+                        interactiveCanvasListener?.notifySocketLatencyText(latency)
                     }
                 }
 

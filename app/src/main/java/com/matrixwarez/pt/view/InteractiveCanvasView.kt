@@ -343,23 +343,51 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     private val scaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
+            animateScaleJob?.cancel()
+
             oldScaleFactor = scaleFactor
             scaleFactor *= detector.scaleFactor
 
             // Don't let the object get too small or too large.
             scaleFactor = Math.max(interactiveCanvas.minScaleFactor, Math.min(scaleFactor, interactiveCanvas.maxScaleFactor))
 
-            oldPpu = interactiveCanvas.ppu
-            interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
-
-            interactiveCanvas.updateDeviceViewport(context, true)
-
-            interactiveCanvas.lastScaleFactor = scaleFactor
-            lastPanOrScaleTime = System.currentTimeMillis()
-
-            gestureListener?.onInteractiveCanvasScale()
+            applyNewScale()
 
             return true
+        }
+    }
+
+    private fun applyNewScale() {
+        oldPpu = interactiveCanvas.ppu
+        interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
+
+        interactiveCanvas.updateDeviceViewport(context, true)
+
+        interactiveCanvas.lastScaleFactor = scaleFactor
+        lastPanOrScaleTime = System.currentTimeMillis()
+
+        gestureListener?.onInteractiveCanvasScale()
+    }
+
+    private var animateScaleJob: Job? = null
+
+    private fun animateScale(target: Float, duration: Float = 0.25f) {
+        val start = scaleFactor
+        animateScaleJob = coroutineScope.launch {
+            val startTime = System.currentTimeMillis()
+            var elapsed: Float
+            var pTime = 0f
+            while (pTime <= 1f) {
+                scaleFactor = (target - start) * min(pTime, 1f) + start
+                elapsed = (System.currentTimeMillis() - startTime) / 1000f
+                pTime = elapsed / duration
+
+                applyNewScale()
+
+                withContext(Dispatchers.Default) {
+                    delay(1000 / 60)
+                }
+            }
         }
     }
 
@@ -369,6 +397,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
     private val mTapListener = object : GestureDetector.SimpleOnGestureListener() {
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
+            animateScaleJob?.cancel()
+
+            var targetScale = scaleFactor * 2
+            // Don't let the object get too small or too large.
+            targetScale = Math.max(interactiveCanvas.minScaleFactor, Math.min(targetScale, interactiveCanvas.maxScaleFactor))
+
+            animateScale(targetScale)
+
             gestureListener?.onInteractiveCanvasDoubleTap()
             return true
         }

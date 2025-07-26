@@ -23,6 +23,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.annotation.RequiresApi
@@ -266,6 +268,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var colorPickerFragment: ColorPickerFragment? = null
 
+    private var menuLatencyText: TextView? = null
+    private var menuSocketStatusImage: ImageView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -299,6 +304,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
     private fun setupToolbarWithHamburger() {
+        val headerView = nav_view.getHeaderView(0)
+        val serverNameText = headerView.findViewById<TextView>(R.id.text_server_name)
+        serverNameText.text = server.name
+
+        menuLatencyText = headerView.findViewById(R.id.text_latency)
+        menuSocketStatusImage = headerView.findViewById(R.id.image_socket_status)
+
         (activity as AppCompatActivity).setSupportActionBar(toolbar)
 
         // Create the toggle
@@ -2244,6 +2256,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         this.msValue = msValue
     }
 
+    override fun notifySocketLatencyText(text: String) {
+        menuLatencyText?.text = text
+    }
+
     override fun notifyConnectionCount(count: Int) {
         this.count = count
         if (count < 2) return
@@ -2275,7 +2291,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     override fun onInteractiveCanvasDoubleTap() {
-        showCanvasMenu()
+
     }
 
     // paint qty listener
@@ -2905,9 +2921,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         activity?.runOnUiThread {
             if (connected) {
                 image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
+                menuSocketStatusImage?.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.green_circle))
             }
             else {
                 image_no_socket.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.red_circle))
+                menuSocketStatusImage?.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.red_circle))
             }
         }
 
