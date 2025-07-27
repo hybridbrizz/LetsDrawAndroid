@@ -196,6 +196,7 @@ import java.util.TimerTask
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 
@@ -389,6 +390,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 R.id.canvas_item_server_list -> {
                     toggleDrawer()
                     showServerList()
+                    true
+                }
+                R.id.canvas_item_reset_camera -> {
+                    toggleDrawer()
+                    surface_view.setInitialPositionAndScale()
                     true
                 }
                 R.id.canvas_item_community -> {
@@ -2168,7 +2174,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // interactive canvas listener
     override fun notifyCoords(x: Int, y: Int, color: Int) {
         //text_coords.setTextColor(color)
-        text_coords.text = "($x, $y)"
+        text_coords.text = "($x, $y) - ${String.format("%.2f", surface_view.interactiveCanvas.lastScaleFactor * 2)}"
     }
 
     override fun notifyPaintColorUpdate(color: Int) {

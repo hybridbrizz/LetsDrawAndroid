@@ -6,6 +6,11 @@
             android:icon="@drawable/server_person" />
 
     <item
+            android:id="@+id/canvas_item_reset_camera"
+            android:title="Reset Camera"
+            android:icon="@drawable/ic_reset_camera" />
+
+    <item
             android:id="@+id/canvas_item_grid_lines"
             android:title="Grid Lines"
             android:icon="@drawable/ic_toggle_grid" />

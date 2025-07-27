@@ -71,7 +71,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var restorePoints = ArrayList<RestorePoint>()
 
     val maxScaleFactor = 10.0F
-    val minScaleFactor = 0.15F
+    val minScaleFactor = 0.05F
 
     val startScaleFactor = 0.5f
     var lastScaleFactor = startScaleFactor

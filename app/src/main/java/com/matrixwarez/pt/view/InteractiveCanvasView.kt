@@ -129,6 +129,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 //            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
 //        }
 
+        interactiveCanvas.lastScaleFactor = interactiveCanvas.startScaleFactor
         scaleFactor = interactiveCanvas.lastScaleFactor
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()
 
@@ -385,6 +386,14 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         lastPanOrScaleTime = System.currentTimeMillis()
 
         gestureListener?.onInteractiveCanvasScale()
+
+        interactiveCanvas.deviceViewport?.let {
+            interactiveCanvas.interactiveCanvasListener?.notifyCoords(
+                it.centerX().toInt(),
+                it.centerY().toInt(),
+                Color.WHITE
+            )
+        }
     }
 
     private var animateScaleJob: Job? = null
@@ -406,6 +415,8 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
                     delay(1000 / 60)
                 }
             }
+            scaleFactor = target
+            applyNewScale()
         }
     }
 
