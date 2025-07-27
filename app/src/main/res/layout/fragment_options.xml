@@ -154,6 +154,8 @@
                         android:id="@+id/input_name"
                         android:imeOptions="actionSearch"
                         android:singleLine="true"
+                        android:textColor="#FFF"
+                        android:textColorHint="#999"
                         android:layout_width="140dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="10dp"
