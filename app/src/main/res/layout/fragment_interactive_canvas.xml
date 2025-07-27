@@ -1038,6 +1038,9 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:background="#303030"
+            app:itemTextColor="#FFF"
+            app:itemIconTint="#FFF"
             app:headerLayout="@layout/header_canvas_menu"
             app:menu="@menu/canavs_menu" />
 

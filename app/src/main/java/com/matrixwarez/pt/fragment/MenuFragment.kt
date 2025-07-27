@@ -438,7 +438,6 @@ class MenuFragment: Fragment() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(androidx.compose.ui.graphics.Color.Red)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null

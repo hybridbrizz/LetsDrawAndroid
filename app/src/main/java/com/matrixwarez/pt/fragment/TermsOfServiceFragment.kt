@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.*
 import androidx.activity.addCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
@@ -91,6 +93,19 @@ class TermsOfServiceFragment: Fragment() {
                 }
             }
         })
+
+        ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { _, allInsets ->
+            val insets = allInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val agreeContainer = view.findViewById<LinearLayout>(R.id.linear_layout_agree_container)
+            agreeContainer.setPadding(
+                agreeContainer.paddingStart,
+                agreeContainer.paddingTop,
+                agreeContainer.paddingEnd,
+                agreeContainer.paddingBottom + insets.bottom
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+
     }
 
     override fun onDestroyView() {

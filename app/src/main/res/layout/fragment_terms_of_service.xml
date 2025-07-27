@@ -26,6 +26,10 @@
                     android:textColor="#FFF"
                     android:textSize="12sp" />
 
+            <View
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp" />
+
         </LinearLayout>
 
     </ScrollView>
@@ -33,7 +37,7 @@
     <LinearLayout
             android:id="@+id/linear_layout_agree_container"
             android:layout_width="match_parent"
-            android:layout_height="40dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="bottom"
             android:gravity="center_vertical"

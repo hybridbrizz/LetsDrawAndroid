@@ -27,7 +27,7 @@
 
     <item
             android:id="@+id/canvas_item_yank"
-            android:title="Yank Canvas"
+            android:title="Yank"
             android:icon="@drawable/photo_camera" />
 
     <item
