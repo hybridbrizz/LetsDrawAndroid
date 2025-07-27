@@ -125,9 +125,9 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         SessionSettings.instance.loadViewportInfo(context)
 
         // scale
-        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
-            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
-        }
+//        if (SessionSettings.instance.restoreCanvasScaleFactor != 0F) {
+//            interactiveCanvas.lastScaleFactor = SessionSettings.instance.restoreCanvasScaleFactor
+//        }
 
         scaleFactor = interactiveCanvas.lastScaleFactor
         interactiveCanvas.ppu = (interactiveCanvas.basePpu * scaleFactor).toInt()

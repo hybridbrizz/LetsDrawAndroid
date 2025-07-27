@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import androidx.annotation.RequiresApi
 import com.matrixwarez.pt.helper.PanelThemeConfig
@@ -70,59 +71,20 @@ class PaintColorIndicator : View, ActionButtonView.TouchStateListener {
             it.save()
 
             if (topLayer) {
-                if (SessionSettings.instance.colorIndicatorOutline) {
-                    var paint = Paint()
-                    paint.strokeWidth = 2F
+                val borderPaint = Paint()
+                borderPaint.style = Paint.Style.STROKE
+                borderPaint.strokeWidth = 2F
+                borderPaint.color = Color.WHITE
 
-                    if (!SessionSettings.instance.colorIndicatorSquare && !SessionSettings.instance.colorIndicatorFill) {
-                        paint.strokeWidth = ringSizeFromOption(
-                            context,
-                            SessionSettings.instance.colorIndicatorWidth
-                        ).toFloat()
-                    }
-
-                    val borderPaint = Paint()
-                    borderPaint.style = Paint.Style.STROKE
-                    borderPaint.strokeWidth = 2F
-
-                    if (panelThemeConfig.paintColorIndicatorLineColor == ActionButtonView.blackPaint.color) {
-                        borderPaint.color = ActionButtonView.twoThirdGray.color
-                    }
-                    else if (panelThemeConfig.paintColorIndicatorLineColor == ActionButtonView.whitePaint.color) {
-                        borderPaint.color = ActionButtonView.thirdGray.color
-                    }
-
-                    var radius = (width / 3F)
-
-                    val w = SessionSettings.instance.colorIndicatorWidth
-                    if (!SessionSettings.instance.colorIndicatorFill && !SessionSettings.instance.colorIndicatorSquare && w > 3) {
-
-                        if (w == 4) {
-                            radius = width * 0.38F
-                        }
-                        else if (w == 5) {
-                            radius = width * 0.43F
-                        }
-                    }
-
-                    if (paint.strokeWidth > 2) {
-                        // inner border
-                        it.drawCircle(
-                            width / 2F,
-                            height / 2F,
-                            radius - (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                            borderPaint
-                        )
-                    }
-
-                    // outer border
-                    it.drawCircle(
-                        width / 2F,
-                        height / 2F,
-                        radius + (paint.strokeWidth / 2 + borderPaint.strokeWidth / 2),
-                        borderPaint
-                    )
-                }
+                Log.d("Draw Test", "Draw border!")
+                // outer border
+                it.drawRect(
+                    2f,
+                    2f,
+                    width.toFloat() - 2f,
+                    height.toFloat() - 2f,
+                    borderPaint
+                )
             }
             else {
                 val paint = Paint()

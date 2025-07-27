@@ -152,7 +152,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_b
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_background_outer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_button_container_2
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_control_layout
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_indicator_view_bottom_layer
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.paint_panel_action_view
@@ -494,6 +493,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             }
     }
 
+    private fun addBackToColorSelection() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                onPaintIndicatorClick()
+            }
+    }
+
     // setup views
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -789,7 +796,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             endPainting()
         }
 
-        paint_indicator_view.setOnClickListener {
+        paint_indicator_view_bottom_layer.setOnClickListener {
             onPaintIndicatorClick()
         }
 
@@ -864,9 +871,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         lock_paint_panel.actionBtnView = lock_paint_panel_action
 
-        paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.topLayer = true
-
         requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
 
@@ -910,7 +914,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_qty_bar.panelThemeConfig = panelThemeConfig
         paint_qty_circle.panelThemeConfig = panelThemeConfig
-        paint_indicator_view.panelThemeConfig = panelThemeConfig
+        paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
 
         // color picker view
         //color_picker_view.setSelectorColor(Color.WHITE)
@@ -1018,30 +1022,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             else {
                 lock_paint_panel_action.type = ActionButtonView.Type.LOCK_OPEN
             }
-        }
-
-        paint_indicator_view.setOnTouchListener { v, motionEvent ->
-            when (motionEvent.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    paintIndicatorhDownLocation = PointF(motionEvent.x, motionEvent.y)
-                }
-                MotionEvent.ACTION_MOVE -> {}
-                MotionEvent.ACTION_UP -> {
-                    val upLocation = PointF(motionEvent.x, motionEvent.y)
-
-                    val x1 = upLocation.x.toDouble()
-                    val y1 = upLocation.y.toDouble()
-                    val x2 = paintIndicatorhDownLocation?.x?.toDouble() ?: x1
-                    val y2 = paintIndicatorhDownLocation?.y?.toDouble() ?: y1
-
-                    if (sqrt((y2 - y1).pow(2.0) + (x2 - x1).pow(2.0)) < 10) {
-                        //onPaintIndicatorClick()
-                        v.performClick()
-                    }
-                }
-            }
-
-            true
         }
 
 //        paint_color_accept.setOnClickListener {
@@ -1775,10 +1755,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
             colorPickerFragment?.setColor(SessionSettings.instance.paintColor, true)
             surface_view.startPaintSelection()
+            addBackToColorSelection()
         }
         else {
             color_picker_frame.visibility = View.GONE
             surface_view.endPaintSelection()
+            addBackToEndPainting()
         }
     }
 

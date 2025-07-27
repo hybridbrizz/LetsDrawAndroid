@@ -11,11 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ScrollView
+import androidx.core.content.ContextCompat
 import androidx.core.text.isDigitsOnly
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -231,9 +231,16 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
         }
         
         loadPaletteButton.setOnClickListener { 
-            when (colorPickerColorPalette.mode == ColorPaletteView.Mode.SELECT) {
-                true -> colorPickerColorPalette.mode = ColorPaletteView.Mode.LOAD
-                false -> colorPickerColorPalette.mode = ColorPaletteView.Mode.SELECT
+            when (colorPickerColorPalette.visibility == View.GONE) {
+                true -> {
+                    colorPickerColorPalette.visibility = View.VISIBLE
+                    colorPickerColorPalette.mode = ColorPaletteView.Mode.LOAD
+                    loadPaletteButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.down_arrow))
+                }
+                false -> {
+                    colorPickerColorPalette.visibility = View.GONE
+                    loadPaletteButton.setImageDrawable(ContextCompat.getDrawable(requireContext(), R.drawable.up_arrow))
+                }
             }
         }
 
@@ -427,7 +434,6 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
     override fun onRequestLoadColor(index: Int) {
         SessionSettings.instance.loadColorPaletteAtIndex(requireContext(), index, pcv?.toColor() ?: 0)
         colorPickerColorPalette.colors = SessionSettings.instance.colorPaletteColors?.toMutableList() ?: mutableListOf()
-        colorPickerColorPalette.mode = ColorPaletteView.Mode.SELECT
     }
 
     private fun updateColorPaletteSize(config: Configuration? = null) {
@@ -441,7 +447,7 @@ class ColorPickerFragment: Fragment(), ColorPaletteView.Listener {
             false -> Utils.dpToPx(requireContext(), config.screenWidthDp)
         }
 
-        val viewWidth = fullWidth - Utils.dpToPx(requireContext(), 80)
+        val viewWidth = fullWidth
         colorPickerColorPalette.layoutParams =
             colorPickerColorPalette.layoutParams.apply {
                 width = viewWidth
