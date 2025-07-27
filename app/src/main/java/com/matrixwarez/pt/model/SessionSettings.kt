@@ -933,8 +933,8 @@ class SessionSettings {
     fun getHelpMessages(): List<String> {
         return listOf(
             "The number you see near the plus sign is how many pixels worth of paint you have. It will automatically update when new paint arrives.",
-            "The 4-character string you see next to the canvas name in () is your name. You can change it anytime for each canvas separately in Options.",
-            "When viewing a pixel's history you can click the different updates to reveal the date and time the pixel was added."
+            "The 4-character string you see next to the space's name in () is your name. You can change it anytime for each space separately in Options.",
+            "When viewing a pixel's history you can click the different updates to reveal the date and time it was added."
         )
     }
 

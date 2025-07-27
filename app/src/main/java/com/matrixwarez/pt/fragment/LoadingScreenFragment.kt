@@ -107,10 +107,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     var timer = Timer()
 
     val gameTips = arrayOf(
-        "After first joining a canvas you will get steady pixels over time to draw with.",
-        "Check out the community link in the canvas menu for more information about the canvas.",
-        "Tap anyone on the server list to teleport to their location.",
-        "This canvas is interactive meaning your edits show in realtime for everyone."
+        "After first joining a space you will get steady pixels over time to draw with.",
+        "Check out the community link in the menu for more information about the space.",
+        "Tap a name on the connected clients list to teleport to their location.",
+        "These spaces are interactive meaning your edits show up realtime for everyone."
     )
 
     var showingError = false

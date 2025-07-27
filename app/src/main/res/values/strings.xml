@@ -32,8 +32,8 @@
     <string name="option_paint_indicator_square">Square current color</string>
     <string name="option_paint_indicator_outline_title">Current color outline</string>
     <string name="option_grid_line_color_title">Grid line color</string>
-    <string name="option_canvas_background_primary_color_title">Custom canvas color (1)</string>
-    <string name="option_canvas_background_secondary_color_title">Custom canvas color (2)</string>
+    <string name="option_canvas_background_primary_color_title">Custom bg color (1)</string>
+    <string name="option_canvas_background_secondary_color_title">Custom bg color (2)</string>
     <string name="option_frame_color_title">Frame color</string>
     <string name="option_close_paint_panel_color_title">Close panel color</string>
     <string name="step1">Welcome. This will help you get all set up and fill you in on what you need to know. Once you connect to server you will start to get pixels that you can use to paint onto the canvas.</string>
