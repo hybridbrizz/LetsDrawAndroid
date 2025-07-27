@@ -222,6 +222,7 @@ class SessionSettings {
     var agreedToTermOfService = false
 
     var colorPaletteColors: MutableList<Int>? = null
+    var recentColorPaletteColors: MutableList<Int>? = null
 
     fun getSharedPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(spKey, Context.MODE_PRIVATE)
@@ -346,6 +347,8 @@ class SessionSettings {
 
         ed.putString("color_palette_colors", gson.toJson(colorPaletteColors))
 
+        ed.putString("recent_color_palette_colors", gson.toJson(recentColorPaletteColors))
+
         ed.apply()
     }
 
@@ -369,6 +372,14 @@ class SessionSettings {
         else {
             ed.putInt("last_single_paint_color", paintColor)
         }
+        ed.apply()
+    }
+
+    fun saveRecentColors(context: Context) {
+        val ed = getSharedPrefs(context).edit()
+
+        ed.putString("recent_color_palette_colors", gson.toJson(recentColorPaletteColors))
+
         ed.apply()
     }
 
@@ -557,6 +568,18 @@ class SessionSettings {
 
         if (colorPaletteColors!!.isEmpty()) {
             loadDefaultColorPalette()
+        }
+
+        recentColorPaletteColors = gson.fromJson(getSharedPrefs(context).getString("recent_color_palette_colors", "[]"), JsonArray::class.java).let {
+            val colors = mutableListOf<Int>()
+            it.forEach { element ->
+                colors.add(element.asInt)
+            }
+            colors
+        }
+
+        if (recentColorPaletteColors!!.isEmpty()) {
+            loadDefaultRecentColorPalette()
         }
     }
 
@@ -940,6 +963,14 @@ class SessionSettings {
     fun loadColorPaletteAtIndex(context: Context, index: Int, color: Int) {
         colorPaletteColors?.set(index, color)
         save(context)
+    }
+
+    private fun loadDefaultRecentColorPalette() {
+        recentColorPaletteColors?.apply {
+            for (i in 0 until 16) {
+                add(Color.BLACK)
+            }
+        }
     }
 
     companion object {

@@ -68,8 +68,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var deviceCanvasViewportResetListener: DeviceCanvasViewportResetListener? = null
     var selectedObjectListener: SelectedObjectListener? = null
 
-    var recentColorsList: MutableList<Int> = ArrayList()
-
     var restorePoints = ArrayList<RestorePoint>()
 
     val maxScaleFactor = 10.0F
@@ -252,23 +250,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             } catch (e: URISyntaxException) {
 
             }
-
-            recentColorsList.add(Color.parseColor("#ffffffff"))
-            recentColorsList.add(Color.parseColor("#ff999999"))
-            recentColorsList.add(Color.parseColor("#ff000000"))
-            recentColorsList.add(Color.parseColor("#ffff0000"))
-            recentColorsList.add(Color.parseColor("#ff00ff00"))
-            recentColorsList.add(Color.parseColor("#ff0000ff"))
-            recentColorsList.add(Color.parseColor("#ffffff00"))
-            recentColorsList.add(Color.parseColor("#ffff00ff"))
-            recentColorsList.add(Color.parseColor("#ff00ffff"))
-            recentColorsList.add(Color.parseColor("#ffffa500"))
-            recentColorsList.add(Color.parseColor("#ffffc0cb"))
-            recentColorsList.add(Color.parseColor("#ff964b00"))
-            recentColorsList.add(Color.parseColor("#ff000040"))
-            recentColorsList.add(Color.parseColor("#ff8b0000"))
-            recentColorsList.add(Color.parseColor("#ff800080"))
-            recentColorsList.add(Color.parseColor("#ff023020"))
 //
 //            // short term pixels
 //            for (shortTermPixel in sessionSettings.shortTermPixels) {
@@ -292,58 +273,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }
             else {
                 initDefault()
-            }
-
-            val recentColorsJsonStr = sessionSettings.getSharedPrefs(context).getString(
-                "recent_colors_single",
-                null
-            )
-
-            if (recentColorsJsonStr != null) {
-                val recentColorsArr = JSONArray(recentColorsJsonStr)
-                val sizeDiff = sessionSettings.numRecentColors - recentColorsArr.length()
-
-                if (sizeDiff < 0) {
-                    for (i in 0 until sessionSettings.numRecentColors) {
-                        // because the most recent is at the end of the list
-                        recentColorsList.add(recentColorsArr.getInt(-sizeDiff + i))
-                    }
-                }
-                else {
-                    for (i in 0 until recentColorsArr.length()) {
-                        recentColorsList.add(recentColorsArr.getInt(i))
-                    }
-
-                    if (sizeDiff > 0) {
-                        val gridLineColor = getGridLineColor()
-                        for (i in 0 until sizeDiff) {
-                            recentColorsList.add(0, gridLineColor)
-                        }
-                    }
-                }
-            }
-            else {
-                val gridLineColor = getGridLineColor()
-                for (i in 0 until sessionSettings.numRecentColors) {
-                    // default to size - 1 of the grid line color
-                    if (i < sessionSettings.numRecentColors - 1) {
-                        if (gridLineColor == Color.BLACK) {
-                            recentColorsList.add(Color.BLACK)
-                        }
-                        else {
-                            recentColorsList.add(Color.WHITE)
-                        }
-                    }
-                    // and 1 of the opposite color
-                    else {
-                        if (gridLineColor == Color.BLACK) {
-                            recentColorsList.add(Color.WHITE)
-                        }
-                        else {
-                            recentColorsList.add(Color.BLACK)
-                        }
-                    }
-                }
             }
         }
     }
@@ -673,28 +602,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun saveUnits(context: Context) {
-        val jsonArr = JSONArray(arr)
-
-        val ed = sessionSettings.getSharedPrefs(context).edit()
-
-        if (world) {
-            ed.putString("arr", jsonArr.toString())
-            ed.putString("recent_colors", JSONArray(recentColorsList.toTypedArray()).toString())
-        }
-        else {
-            ed.putString("arr_canvas", exportCanvasToJson(arr))
-            ed.putString(
-                "recent_colors_single",
-                JSONArray(recentColorsList.toTypedArray()).toString()
-            )
-            ed.putInt("grid_line_color", getGridLineColor())
-        }
-
-        ed.apply()
-    }
-
     fun getGridLineColor(): Int {
         if (sessionSettings.canvasGridLineColor != -1) {
             return sessionSettings.canvasGridLineColor
@@ -724,29 +631,25 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         return listOf()
     }
 
-    fun updateRecentColors() {
-        var colorIndex = -1
-        for (restorePoint in restorePoints) {
-            var contains = false
-            for (i in 0 until recentColorsList.size) {
-                if (restorePoint.newColor == recentColorsList[i]) {
-                    contains = true
-                    colorIndex = i
+    fun updateRecentColors(newColor: Int) {
+        var removeIndex = 0
+        SessionSettings.instance.recentColorPaletteColors?.let {
+            it.forEachIndexed { index, color ->
+                if (color == newColor) {
+                    removeIndex = index
+                    return@forEachIndexed
                 }
-            }
-            if (!contains) {
-                if (recentColorsList.size == sessionSettings.numRecentColors) {
-                    recentColorsList.removeAt(0)
-                }
-                recentColorsList.add(restorePoint.newColor)
-            }
-            else {
-                recentColorsList.removeAt(colorIndex)
-                recentColorsList.add(restorePoint.newColor)
             }
         }
 
-        recentColorsListener?.onNewRecentColors(recentColorsList.toTypedArray())
+        SessionSettings.instance.recentColorPaletteColors?.removeAt(removeIndex)
+        SessionSettings.instance.recentColorPaletteColors?.add(newColor)
+
+        SessionSettings.instance.recentColorPaletteColors?.let {
+            recentColorsListener?.onNewRecentColors(it)
+        }
+
+        SessionSettings.instance.saveRecentColors(context)
     }
 
     fun isBackground(unitPoint: Point): Boolean {
@@ -775,7 +678,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                     arr[unitPoint.y][unitPoint.x] = sessionSettings.paintColor
 
                     sessionSettings.dropsAmt -= 1
-                    updateRecentColors()
+                    updateRecentColors(sessionSettings.paintColor)
 
                     cancelBatchPixels()
                     startBatchPixels()

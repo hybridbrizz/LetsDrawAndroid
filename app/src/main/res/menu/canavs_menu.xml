@@ -42,7 +42,7 @@
 
     <item
             android:id="@+id/canvas_item_leave"
-            android:title="Leave"
+            android:title="Exit"
             android:icon="@drawable/logout" />
 
 </menu>

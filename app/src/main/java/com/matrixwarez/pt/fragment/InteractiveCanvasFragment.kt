@@ -166,6 +166,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_color_palette_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_button
@@ -314,6 +315,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         color_palette_view.visibility = View.VISIBLE
 
+        recent_color_palette_view.visibility = View.VISIBLE
+
         (requireActivity() as? InteractiveCanvasActivity)?.colorActionBar(Color.parseColor("#202020"))
 
         addBackToEndPainting()
@@ -331,6 +334,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_control_layout.visibility = View.GONE
 
         color_palette_view.visibility = View.GONE
+
+        recent_color_palette_view.visibility = View.GONE
 
         (requireActivity() as? InteractiveCanvasActivity)?.colorActionBar(Color.BLACK)
 
@@ -561,7 +566,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             invalidateButtons()
         }
 
-        setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+        setupColorPalette()
 
         lineColorDarkState.value = SessionSettings.instance.darkIcons
 
@@ -875,10 +880,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
-
-        if (SessionSettings.instance.selectedPaletteIndex == 0) {
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
-        }
 
         recolorVisibleActionViews()
 
@@ -1668,7 +1669,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         syncPaletteAndColor()
     }
 
-    private fun setupColorPalette(colors: Array<Int>?) {
+    private fun setupColorPalette() {
         if (Utils.isTablet(requireContext())) {
             val layoutParams = color_palette_view.layoutParams as ConstraintLayout.LayoutParams
             layoutParams.dimensionRatio = "16:1"
@@ -1680,6 +1681,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         color_palette_view.listener = this
         color_palette_view.colors = SessionSettings.instance.colorPaletteColors
+            ?.toMutableList() ?: mutableListOf()
+
+        recent_color_palette_view.listener = this
+        recent_color_palette_view.colors = SessionSettings.instance.recentColorPaletteColors
             ?.toMutableList() ?: mutableListOf()
     }
 
@@ -2323,10 +2328,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     // recent colors listener
-    override fun onNewRecentColors(colors: Array<Int>) {
-        if (SessionSettings.instance.selectedPaletteIndex == 0) {
-            setupColorPalette(colors)
-        }
+    override fun onNewRecentColors(colors: List<Int>) {
+        setupColorPalette()
     }
 
     // paint bar action listener
@@ -2470,7 +2473,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             palette_add_color_button.visibility = View.GONE
             palette_remove_color_button.visibility = View.GONE
 
-            setupColorPalette(surface_view.interactiveCanvas.recentColorsList.toTypedArray())
+            setupColorPalette()
         }
         else {
             if (SessionSettings.instance.palette.colors.contains(SessionSettings.instance.paintColor)) {
@@ -2483,7 +2486,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 palette_remove_color_button.visibility = View.GONE
             }
 
-            setupColorPalette(SessionSettings.instance.palette.colors.toTypedArray())
+            setupColorPalette()
         }
     }
 

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.activity.addCallback
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.helper.Utils
@@ -19,7 +18,6 @@ import kotlinx.android.synthetic.main.fragment_art_export.actual_size_text
 import kotlinx.android.synthetic.main.fragment_art_export.art_view
 import kotlinx.android.synthetic.main.fragment_art_export.back_button_export
 import kotlinx.android.synthetic.main.fragment_art_export.canvas_bitmap
-import kotlinx.android.synthetic.main.fragment_art_export.save_button
 import kotlinx.android.synthetic.main.fragment_art_export.screen_size_switch
 import kotlinx.android.synthetic.main.fragment_art_export.screen_size_text
 import kotlinx.android.synthetic.main.fragment_art_export.share_button
@@ -118,19 +116,19 @@ class ArtExportFragment: Fragment() {
             }
         }
 
-        save_button.setOnClickListener {
-            context?.apply {
-                when (bitmap != null) {
-                    true -> {
-                        art_view.saveArt(this, bitmap)
-                    }
-                    false -> {
-                        art_view.saveArt(this)
-                    }
-                }
-
-            }
-        }
+//        save_button.setOnClickListener {
+//            context?.apply {
+//                when (bitmap != null) {
+//                    true -> {
+//                        art_view.saveArt(this, bitmap)
+//                    }
+//                    false -> {
+//                        art_view.saveArt(this)
+//                    }
+//                }
+//
+//            }
+//        }
 
         //sendArtPixels()
 

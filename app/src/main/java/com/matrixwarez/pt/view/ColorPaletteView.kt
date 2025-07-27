@@ -10,6 +10,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.graphics.RectF
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -65,7 +66,7 @@ class ColorPaletteView: View {
     var rows = 1
     var cols = 16
 
-    private var itemWidth = 0
+    private var itemWidth = 0f
 
     private var oldStateBitmap: Bitmap? = null
     private var newStateBitmap: Bitmap? = null
@@ -172,7 +173,7 @@ class ColorPaletteView: View {
     }
 
     private fun drawToCanvas(canvas: Canvas) {
-        itemWidth = width / cols
+        itemWidth = width / cols.toFloat()
 
         val paint = Paint()
 
@@ -185,7 +186,7 @@ class ColorPaletteView: View {
 
                 paint.color = colors[index]
                 canvas.drawRect(
-                    Rect(x, y, x + itemWidth, y + itemWidth),
+                    RectF(x, 0f, x + itemWidth, height.toFloat()),
                     paint
                 )
             }
