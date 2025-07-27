@@ -317,6 +317,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         (requireActivity() as? InteractiveCanvasActivity)?.colorActionBar(Color.parseColor("#202020"))
 
         addBackToEndPainting()
+
+        pixel_history_fragment_container.visibility = View.GONE
     }
 
     private fun endPainting() {
@@ -2989,7 +2991,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     }.start()
                 }
             }
-        }, 7000)
+        }, 3000)
     }
 
     // Recent Colors View Listener

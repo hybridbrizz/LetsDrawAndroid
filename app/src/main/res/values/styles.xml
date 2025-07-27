@@ -25,8 +25,9 @@
 
     <style name="AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="android:windowBackground">#333</item>
+        <item name="android:textColorPrimary">#FFF</item>
+        <item name="android:windowBackground">#1b1b1b</item>
+        <item name="android:buttonBarButtonStyle">@style/AlertDialogPositiveButtonStyle</item>
     </style>
 
     <style name="AlertDialogNegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">
@@ -38,7 +39,7 @@
     </style>
 
     <style name="ButtonStyle" parent="Widget.MaterialComponents.Button">
-        <item name="android:backgroundTint">#FF4D00</item>
+        <item name="android:backgroundTint">@color/button_background</item>
         <item name="android:textColor">#FFF</item>
     </style>
 

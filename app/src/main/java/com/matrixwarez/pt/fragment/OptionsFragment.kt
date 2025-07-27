@@ -1,9 +1,11 @@
 package com.matrixwarez.pt.fragment
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +16,7 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.Request
@@ -36,6 +39,7 @@ import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_
 import kotlinx.android.synthetic.main.fragment_options.option_canvas_background_secondary_color_reset_button
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_button
 import kotlinx.android.synthetic.main.fragment_options.option_grid_line_color_reset_button
+import kotlinx.android.synthetic.main.fragment_options.option_reset_color_palette_button
 import org.json.JSONObject
 import top.defaults.colorpicker.ColorPickerPopup
 import top.defaults.colorpicker.ColorPickerPopup.ColorPickerObserver
@@ -92,11 +96,9 @@ class OptionsFragment: Fragment(), FragmentListener {
                 onBack()
             }
 
-        input_name.setText(SessionSettings.instance.displayName)
-
         input_name.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     val input = input_name.text.toString().trim()
                     if (input.length > 20) {
                         input_name.setBackgroundDrawable(
@@ -192,6 +194,21 @@ class OptionsFragment: Fragment(), FragmentListener {
             }
         }
 
+        // option reset color palette
+        option_reset_color_palette_button.setOnClickListener {
+            AlertDialog.Builder(context, R.style.AlertDialogTheme)
+                .setTitle("Confirm Reset")
+                .setMessage("Reset your color palette?")
+                .setPositiveButton("Reset") { dialog, _ ->
+                    SessionSettings.instance.loadDefaultColorPalette()
+                    dialog.dismiss()
+                }
+                .setNeutralButton("Cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+
 //        if (!SessionSettings.instance.tablet) {
 //            Animator.animateTitleFromTop(back_button)
 //            Animator.animateHorizontalViewEnter(option_grid_line_color_container, true)
@@ -203,7 +220,7 @@ class OptionsFragment: Fragment(), FragmentListener {
     override fun onResume() {
         super.onResume()
 
-        input_name.setText(SessionSettings.instance.displayName)
+        input_name.hint = SessionSettings.instance.displayNameOrId()
 
         fragment_container.visibility = View.GONE
     }
@@ -230,6 +247,7 @@ class OptionsFragment: Fragment(), FragmentListener {
                                 null
                             )
                         )
+                        change_name_button.text = "Taken"
                         change_name_button.isEnabled = false
                     } else {
                         input_name.setBackgroundDrawable(
@@ -239,6 +257,7 @@ class OptionsFragment: Fragment(), FragmentListener {
                                 null
                             )
                         )
+                        change_name_button.text = "Update"
                         change_name_button.isEnabled = true
                     }
                 }
@@ -281,12 +300,29 @@ class OptionsFragment: Fragment(), FragmentListener {
                 SessionSettings.instance.displayName = response.getString("name")
                 change_name_button.text = "Updated"
                 change_name_button.isEnabled = false
-                input_name.isEnabled = false
+
+                input_name.setText("")
+                input_name.hint = SessionSettings.instance.displayNameOrId()
+                input_name.clearFocus()
+                input_name.setBackgroundDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.input_display_name_default,
+                        null
+                    )
+                )
             },
             { error ->
                 change_name_button.text = "Error"
                 change_name_button.isEnabled = false
-                input_name.isEnabled = false
+                input_name.clearFocus()
+                input_name.setBackgroundDrawable(
+                    ResourcesCompat.getDrawable(
+                        resources,
+                        R.drawable.input_display_name_default,
+                        null
+                    )
+                )
             }) {
 
             override fun getHeaders(): MutableMap<String, String> {

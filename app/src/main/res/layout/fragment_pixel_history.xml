@@ -3,7 +3,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:background="#000">
+        android:background="#1b1b1b">
 
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/pixel_history_recycler_view"

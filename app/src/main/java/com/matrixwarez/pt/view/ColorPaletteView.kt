@@ -178,7 +178,7 @@ class ColorPaletteView: View {
 
         for (i in 0 until rows) {
             for (j in 0 until cols) {
-                val x = itemWidth * (cols - 1 - j)
+                val x = itemWidth * j
                 val y = itemWidth * i
 
                 val index = i * cols + j
@@ -233,7 +233,7 @@ class ColorPaletteView: View {
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_UP) {
-            val x = cols - 1 - floor(event.x / itemWidth).toInt()
+            val x = floor(event.x / itemWidth).toInt()
             val y = floor(event.y / itemWidth).toInt()
 
             val index = y * cols + x

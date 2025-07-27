@@ -175,7 +175,7 @@ class SessionSettings {
 
     var firstLaunch = true
 
-    var showHelpMessages = true
+    var showHelpMessages = false
 
     var palettes: MutableList<Palette> = ArrayList()
 
@@ -485,7 +485,7 @@ class SessionSettings {
 
         selectedPaletteIndex = getSharedPrefs(context).getInt("selected_palette_index", 0)
 
-        showHelpMessages = getSharedPrefs(context).getBoolean("show_help_messages", true)
+        showHelpMessages = getSharedPrefs(context).getBoolean("show_help_messages", false)
 
         //selectedPaletteIndex = 0
 
@@ -915,11 +915,25 @@ class SessionSettings {
         )
     }
 
-    private fun loadDefaultColorPalette() {
+    fun loadDefaultColorPalette() {
+        colorPaletteColors?.clear()
         colorPaletteColors?.apply {
-            for (i in 0 until 16) {
-                add(Color.WHITE)
-            }
+            add(Color.parseColor("#FF1a1c2c"))
+            add(Color.parseColor("#FF5d275d"))
+            add(Color.parseColor("#FFb13e53"))
+            add(Color.parseColor("#FFef7d57"))
+            add(Color.parseColor("#FFffcd75"))
+            add(Color.parseColor("#FFa7f070"))
+            add(Color.parseColor("#FF38b764"))
+            add(Color.parseColor("#FF257179"))
+            add(Color.parseColor("#FF29366f"))
+            add(Color.parseColor("#FF3b5dc9"))
+            add(Color.parseColor("#FF41a6f6"))
+            add(Color.parseColor("#FF73eff7"))
+            add(Color.parseColor("#FFf4f4f4"))
+            add(Color.parseColor("#FF94b0c2"))
+            add(Color.parseColor("#FF566c86"))
+            add(Color.parseColor("#FF333c57"))
         }
     }
 
