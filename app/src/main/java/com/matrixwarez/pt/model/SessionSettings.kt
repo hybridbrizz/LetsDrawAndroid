@@ -909,13 +909,9 @@ class SessionSettings {
 
     fun getHelpMessages(): List<String> {
         return listOf(
-            "Double tap the canvas for a menu. Tap under to close",
-            "Pick colors by pressing the palette icon",
-            "Load your palette colors inside the color picker",
-            "Edit the canvas by pressing the paint icon then drawing",
-            "The number shows your current remaining edits",
-            "Erase the canvas by pressing the erase icon then drawing",
-            "Long press a pixel for an edit history"
+            "The number you see near the plus sign is how many pixels worth of paint you have. It will automatically update when new paint arrives.",
+            "The 4-character string you see next to the canvas name in () is your name. You can change it anytime for each canvas separately in Options.",
+            "When viewing a pixel's history you can click the different updates to reveal the date and time the pixel was added."
         )
     }
 

@@ -60,7 +60,7 @@ fun ClientsInfoListView(modifier: Modifier = Modifier, clientsInfo: List<Triple<
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp)
-                .background(Color.DarkGray)
+                .background(Color.Black)
                 .clickable(
                     indication = null,
                     interactionSource = remember {
@@ -77,7 +77,7 @@ fun ClientsInfoListView(modifier: Modifier = Modifier, clientsInfo: List<Triple<
                 fontWeight = FontWeight.Normal
             )
             Spacer(modifier = Modifier.weight(1f))
-            Box(modifier = Modifier.fillMaxWidth(0.6f).fillMaxHeight().background(Color(50, 50, 50)).clickable {
+            Box(modifier = Modifier.fillMaxWidth(0.6f).fillMaxHeight().background(Color.Black).clickable {
                 mapMarkerIndex += 1
             }, contentAlignment = Alignment.Center) {
                 Text(
@@ -90,7 +90,7 @@ fun ClientsInfoListView(modifier: Modifier = Modifier, clientsInfo: List<Triple<
             }
         }
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().aspectRatio(16 / 9f).background(Color.DarkGray)
+            modifier = Modifier.fillMaxWidth().aspectRatio(16 / 9f).background(Color.Black)
         ) {
             items(clientsInfo) {
                 ClientsInfoItemView(

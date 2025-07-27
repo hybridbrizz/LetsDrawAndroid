@@ -389,7 +389,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     private var animateScaleJob: Job? = null
 
-    private fun animateScale(target: Float, duration: Float = 0.25f) {
+    private fun animateScale(target: Float, duration: Float = 0.20f) {
         val start = scaleFactor
         animateScaleJob = coroutineScope.launch {
             val startTime = System.currentTimeMillis()

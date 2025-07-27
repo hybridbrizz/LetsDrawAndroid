@@ -3,6 +3,7 @@ package com.matrixwarez.pt.activity
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -414,6 +415,11 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
     fun exitFullscreen() {
 //        fullscreen_content.systemUiVisibility =
 //            View.SYSTEM_UI_FLAG_VISIBLE
+    }
+
+    fun colorActionBar(color: Int) {
+        findViewById<View>(R.id.root).background = ColorDrawable(color)
+        supportActionBar?.setBackgroundDrawable(ColorDrawable(color))
     }
 }
 

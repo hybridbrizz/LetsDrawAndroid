@@ -34,7 +34,7 @@ fun HelpMessageListView(modifier: Modifier = Modifier, onClose: () -> Unit) {
             .width(300.dp)
             .aspectRatio(3/4f)
             .background(Color.White, shape = RoundedCornerShape(10.dp)),
-        verticalArrangement = Arrangement.spacedBy(30.dp)
+        verticalArrangement = Arrangement.spacedBy(15.dp)
     ) {
         item {
             Box(modifier = Modifier.fillMaxWidth()) {
@@ -62,7 +62,7 @@ fun HelpMessageListView(modifier: Modifier = Modifier, onClose: () -> Unit) {
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 60.dp)) {
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "A few tips to help you get started.",
+                    text = "Help",
                     textAlign = TextAlign.Center,
                     color = Color.Black,
                     fontFamily = Inter,

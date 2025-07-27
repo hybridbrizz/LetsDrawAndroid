@@ -304,6 +304,38 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
+    private fun startPainting() {
+        surface_view.startPainting()
+
+        paint_button_container_2.visibility = View.GONE
+
+        requireActivity().title = SessionSettings.instance.dropsAmt.toString()
+
+        paint_control_layout.visibility = View.VISIBLE
+
+        color_palette_view.visibility = View.VISIBLE
+
+        (requireActivity() as? InteractiveCanvasActivity)?.colorActionBar(Color.parseColor("#202020"))
+
+        addBackToEndPainting()
+    }
+
+    private fun endPainting() {
+        surface_view.endPainting()
+
+        paint_button_container_2.visibility = View.VISIBLE
+
+        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
+
+        paint_control_layout.visibility = View.GONE
+
+        color_palette_view.visibility = View.GONE
+
+        (requireActivity() as? InteractiveCanvasActivity)?.colorActionBar(Color.BLACK)
+
+        addBackToMenuOnBackPressed()
+    }
+
     private fun setupToolbarWithHamburger() {
         val headerView = nav_view.getHeaderView(0)
         val serverNameText = headerView.findViewById<TextView>(R.id.text_server_name)
@@ -335,15 +367,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 true -> {
                     Log.d("Test Option Selection", "Painting")
 
-                    surface_view.endPainting()
-
-                    paint_button_container_2.visibility = View.VISIBLE
-
-                    requireActivity().title = server.name
-
-                    paint_control_layout.visibility = View.GONE
-
-                    color_palette_view.visibility = View.GONE
+                    endPainting()
 
                     true
                 }
@@ -459,6 +483,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 else {
                     leave()
                 }
+            }
+    }
+
+    private fun addBackToEndPainting() {
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback {
+                endPainting()
             }
     }
 
@@ -725,15 +757,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             surface_view.mode == InteractiveCanvasView.Mode.PAINT_SELECTION_PAINTING
                 },
                 onPress = {
-                    surface_view.startPainting()
-
-                    paint_button_container_2.visibility = View.GONE
-
-                    requireActivity().title = SessionSettings.instance.dropsAmt.toString()
-
-                    paint_control_layout.visibility = View.VISIBLE
-
-                    color_palette_view.visibility = View.VISIBLE
+                    startPainting()
                 }
             )
         )
@@ -762,15 +786,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         )
 
         done_button.setOnClickListener {
-            surface_view.endPainting()
-
-            paint_button_container_2.visibility = View.VISIBLE
-
-            requireActivity().title = server.name
-
-            paint_control_layout.visibility = View.GONE
-
-            color_palette_view.visibility = View.GONE
+            endPainting()
         }
 
         paint_indicator_view.setOnClickListener {
@@ -851,7 +867,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         paint_indicator_view_bottom_layer.panelThemeConfig = panelThemeConfig
         paint_indicator_view.topLayer = true
 
-        requireActivity().title = server.name
+        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
 
         if (SessionSettings.instance.selectedPaletteIndex == 0) {
@@ -2862,6 +2878,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun applyOptions() {
         // panel background
         //setPanelBackground()
+
+        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
 
         // panel theme config
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
