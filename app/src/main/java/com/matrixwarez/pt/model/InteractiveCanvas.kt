@@ -3,6 +3,7 @@ package com.matrixwarez.pt.model
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Point
 import android.graphics.Rect
@@ -109,6 +110,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
 
     var summary: MutableList<RestorePoint> = ArrayList()
+
+    var bitmap: Bitmap? = null
 
     var selectedPixels: List<RestorePoint>? = null
     set(value) {
@@ -506,6 +509,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             Log.d("Receive Pixel", "pixelId($pixelId) = ($x, $y)")
 
             arr[y][x] = color
+            bitmap?.setPixel(x, y, color)
         }
 
         interactiveCanvasDrawer?.notifyRedraw()
@@ -591,6 +595,15 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }
             }
         }
+
+        bitmap = Bitmap.createBitmap(
+            arr.flatMap { it.asIterable() }.toIntArray(),
+            sessionSettings.chunk1.get(0).asJsonArray.size(),
+            sessionSettings.chunk1.get(0).asJsonArray.size(),
+            Bitmap.Config.ARGB_8888,
+        )
+
+        bitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
     }
 
     private fun initDefault() {
@@ -676,6 +689,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                         )
                     )
                     arr[unitPoint.y][unitPoint.x] = sessionSettings.paintColor
+                    bitmap?.setPixel(unitPoint.x, unitPoint.y, sessionSettings.paintColor)
 
                     sessionSettings.dropsAmt -= 1
                     updateRecentColors(sessionSettings.paintColor)
@@ -802,6 +816,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             }, sendStrMinusKey) { restorePoints ->
                 for(restorePoint: RestorePoint in restorePoints) {
                     arr[restorePoint.point.y][restorePoint.point.x] = restorePoint.color
+                    bitmap?.setPixel(restorePoint.point.x, restorePoint.point.y, restorePoint.color)
                 }
                 interactiveCanvasDrawer?.notifyRedraw()
             })

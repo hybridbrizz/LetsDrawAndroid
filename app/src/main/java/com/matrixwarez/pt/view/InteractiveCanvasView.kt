@@ -703,7 +703,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
     private fun drawGridLines(canvas: Canvas, deviceViewport: RectF, ppu: Int) {
         val gridLineMode = SessionSettings.instance.gridLineMode
-        if (gridLineMode == InteractiveCanvas.GRID_LINE_MODE_ON && interactiveCanvas.ppu >= interactiveCanvas.autoCloseGridLineThreshold) {
+        if (gridLineMode == InteractiveCanvas.GRID_LINE_MODE_ON) {
 
             val gridLineColor = interactiveCanvas.getGridLineColor()
 
@@ -801,65 +801,27 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
             val startUnitIndexY = floor(top).toInt()
             val endUnitIndexY = ceil(bottom).toInt()
 
+            val paint = Paint().apply {
+                isAntiAlias = false
+                isFilterBitmap = false // Enables bitmap filtering for better scaling
+            }
+
             val rangeX = endUnitIndexX - startUnitIndexX
             val rangeY = endUnitIndexY - startUnitIndexY
 
-            paint.color = Color.BLACK
+            interactiveCanvas.bitmap?.let { bitmap ->
+                val startPoint = interactiveCanvas.unitToScreenPoint(
+                    startUnitIndexX.toFloat(),
+                    startUnitIndexY.toFloat()
+                )
 
-            val isObjectSelected = interactiveCanvas.selectedPixels != null
-
-            val backgroundColors = interactiveCanvas.getBackgroundColors(SessionSettings.instance.backgroundColorsIndex)
-
-            for (x in 0..rangeX) {
-                for (y in 0..rangeY) {
-                    val unitX = x + startUnitIndexX
-                    val unitY = y + startUnitIndexY
-
-                    val inGrid = unitX >= 0 && unitX < interactiveCanvas.cols && unitY >= 0 && unitY < interactiveCanvas.rows
-
-                    if (inGrid) {
-                        val color = interactiveCanvas.arr[unitY][unitX]
-
-                        // background
-                        if (color == 0) {
-                            if ((unitX + unitY) % 2 == 0) {
-                                paint.color = backgroundColors[0]
-                            }
-                            else {
-                                paint.color = backgroundColors[1]
-                            }
-                        }
-                        else {
-                            paint.color = interactiveCanvas.arr[unitY][unitX]
-                        }
-                    }
-                    else {
-                        paint.color = Color.DKGRAY
-                    }
-                    val rect = interactiveCanvas.getScreenSpaceForUnit(
-                        x + startUnitIndexX,
-                        y + startUnitIndexY
+                startPoint?.let {
+                    canvas.drawBitmap(
+                        bitmap,
+                        Rect(startUnitIndexX, startUnitIndexY, endUnitIndexX, endUnitIndexY),
+                        RectF(it.x.toFloat(), it.y.toFloat(), it.x.toFloat() + interactiveCanvas.ppu * rangeX, it.y.toFloat() + interactiveCanvas.ppu * rangeY),
+                        paint
                     )
-
-                    if (isObjectSelected) {
-                        paint.color = Utils.brightenColor(paint.color, -0.5F)
-                    }
-                    canvas.drawRect(rect, paint)
-                }
-            }
-
-            // selected object
-            interactiveCanvas.selectedPixels?.apply {
-                for (pixel in this) {
-                    val x = pixel.point.x
-                    val y = pixel.point.y
-
-                    if (x in startUnitIndexX..endUnitIndexX && y in startUnitIndexY..endUnitIndexY) {
-                        paint.color = pixel.color
-                        val rect = interactiveCanvas.getScreenSpaceForUnit(x, y)
-
-                        canvas.drawRect(rect, paint)
-                    }
                 }
             }
         }
