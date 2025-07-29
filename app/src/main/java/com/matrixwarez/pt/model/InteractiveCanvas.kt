@@ -97,7 +97,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var receivedPaintRecently = false
 
-    val numBackgrounds = 5
+    val numBackgrounds = 2
 
     var numConnect = 0
     lateinit var connectingTimer: Timer
@@ -112,6 +112,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     var summary: MutableList<RestorePoint> = ArrayList()
 
     var bitmap: Bitmap? = null
+    var backgroundBitmaps = mutableListOf<Bitmap>()
 
     var selectedPixels: List<RestorePoint>? = null
     set(value) {
@@ -598,12 +599,31 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
         bitmap = Bitmap.createBitmap(
             arr.flatMap { it.asIterable() }.toIntArray(),
-            sessionSettings.chunk1.get(0).asJsonArray.size(),
-            sessionSettings.chunk1.get(0).asJsonArray.size(),
+            server.size,
+            server.size,
             Bitmap.Config.ARGB_8888,
         )
 
         bitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
+
+        val colors1 = listOf(Color.BLACK, Color.WHITE)
+        val colors2 = listOf(Color.BLACK, Color.WHITE)
+
+        for (i in colors1.indices) {
+            val color1 = colors1[i]
+            val color2 = colors2[i]
+
+            val bitmap = Bitmap.createBitmap(
+                Array(server.size * server.size) { color1 }.toIntArray(),
+                server.size,
+                server.size,
+                Bitmap.Config.ARGB_8888,
+            )
+
+            val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+
+            backgroundBitmaps.add(mutableBitmap)
+        }
     }
 
     private fun initDefault() {

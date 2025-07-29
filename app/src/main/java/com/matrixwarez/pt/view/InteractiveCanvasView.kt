@@ -692,7 +692,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
         val deviceViewport = interactiveCanvas.deviceViewport!!
         val ppu = interactiveCanvas.ppu
 
-        canvas.drawARGB(255, 0, 0, 0)
+        canvas.drawARGB(255, 50, 50, 50)
 
         drawUnits(canvas)
         drawErrors(canvas)
@@ -808,6 +808,24 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
             val rangeX = endUnitIndexX - startUnitIndexX
             val rangeY = endUnitIndexY - startUnitIndexY
+
+            if (interactiveCanvas.backgroundBitmaps.size > SessionSettings.instance.backgroundColorsIndex) {
+                interactiveCanvas.backgroundBitmaps[SessionSettings.instance.backgroundColorsIndex].let { bitmap ->
+                    val startPoint = interactiveCanvas.unitToScreenPoint(
+                        startUnitIndexX.toFloat(),
+                        startUnitIndexY.toFloat()
+                    )
+
+                    startPoint?.let {
+                        canvas.drawBitmap(
+                            bitmap,
+                            Rect(startUnitIndexX, startUnitIndexY, endUnitIndexX, endUnitIndexY),
+                            RectF(it.x.toFloat(), it.y.toFloat(), it.x.toFloat() + interactiveCanvas.ppu * rangeX, it.y.toFloat() + interactiveCanvas.ppu * rangeY),
+                            paint
+                        )
+                    }
+                }
+            }
 
             interactiveCanvas.bitmap?.let { bitmap ->
                 val startPoint = interactiveCanvas.unitToScreenPoint(

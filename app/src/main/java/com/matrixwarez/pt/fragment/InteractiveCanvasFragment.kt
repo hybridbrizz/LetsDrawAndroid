@@ -1850,7 +1850,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun changeBackground() {
-        if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1) {
+        if (SessionSettings.instance.backgroundColorsIndex >= surface_view.interactiveCanvas.numBackgrounds - 1) {
             SessionSettings.instance.backgroundColorsIndex = 0
         }
         else {
@@ -1860,11 +1860,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
         lineColorDarkState.value = SessionSettings.instance.darkIcons
         recolorVisibleActionViews()
-
-        if (SessionSettings.instance.backgroundColorsIndex == surface_view.interactiveCanvas.numBackgrounds - 1
-            && (SessionSettings.instance.canvasBackgroundPrimaryColor == 0 || SessionSettings.instance.canvasBackgroundSecondaryColor == 0)) {
-            SessionSettings.instance.backgroundColorsIndex = 0
-        }
 
         invalidateButtons()
 
@@ -2503,27 +2498,18 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         closePopoverFragment()
     }
 
+    private var summaryUpdateJob: Job? = null
+
     private fun toggleCanvasSummary() {
         if (canvas_summary_container.visibility != View.VISIBLE) {
-            if (System.currentTimeMillis() - lastCanvasSummaryImageTime > 1000 * 60 * 10) {
-                Log.i("Canvas Summary", "Reloading canvas image")
-                Glide.with(this)
-                    .load("${server.serviceAltBaseUrl()}/canvas")
-                    .signature(ObjectKey(System.currentTimeMillis().toString()))
-                    .into(canvas_summary_view)
-
-                lastCanvasSummaryImageTime = System.currentTimeMillis()
-            }
-
-            device_canvas_viewport_view.updateDeviceViewport(surface_view.interactiveCanvas)
-
-            canvas_summary_clients_view.setContent {
-                Box(modifier = Modifier.border(1.dp, androidx.compose.ui.graphics.Color.White.copy(0.4f)).padding(1.dp)) {
-                    if (listOf("on", "minimap only").firstOrNull { it == mapMarkerTypes[mapMarkerIndexState.intValue % mapMarkerTypes.size].lowercase() } != null) {
-                        ClientSummaryLocationsView(
-                            clientsInfoState = clientsInfoState,
-                            interactiveCanvas = surface_view.interactiveCanvas
-                        )
+            summaryUpdateJob?.cancel()
+            summaryUpdateJob = requireActivity().lifecycleScope.launch {
+                while (true) {
+                    surface_view.interactiveCanvas.bitmap?.let {
+                        canvas_summary_view.setImageBitmap(it)
+                    }
+                    withContext(Dispatchers.Default) {
+                        delay(1000 * 7)
                     }
                 }
             }
