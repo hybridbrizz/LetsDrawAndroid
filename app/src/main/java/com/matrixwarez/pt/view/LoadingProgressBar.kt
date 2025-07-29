@@ -9,6 +9,8 @@ import android.util.Log
 import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
+import com.matrixwarez.pt.R
 import kotlin.math.roundToInt
 
 open class LoadingProgressBar: FrameLayout {
@@ -49,7 +51,7 @@ open class LoadingProgressBar: FrameLayout {
 
     private fun commonInit() {
         progressView = View(context)
-        progressView!!.background = ColorDrawable(Color.parseColor("#FAD452"))
+        progressView!!.background = ColorDrawable(ContextCompat.getColor(context, R.color.colorAccent))
         addView(progressView, LayoutParams(0, LayoutParams.MATCH_PARENT))
         clipChildren = true
         clipToOutline = true

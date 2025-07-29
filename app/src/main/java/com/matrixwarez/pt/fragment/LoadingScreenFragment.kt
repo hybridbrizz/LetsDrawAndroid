@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.addCallback
+import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
@@ -27,7 +27,6 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
-import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.DataLoadingCallback
 import com.matrixwarez.pt.listener.SocketConnectCallback
@@ -41,12 +40,10 @@ import com.matrixwarez.pt.service.ServerService
 import com.matrixwarez.pt.view.ActionButtonView
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.schedulers.Schedulers
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.drawer_layout
 import kotlinx.android.synthetic.main.fragment_loading_screen.connecting_title
-import kotlinx.android.synthetic.main.fragment_loading_screen.game_tip_text
 import kotlinx.android.synthetic.main.fragment_loading_screen.loading_progress_bar
-import kotlinx.android.synthetic.main.fragment_loading_screen.server_icon
 import kotlinx.android.synthetic.main.fragment_loading_screen.text_queue_pos
+import kotlinx.android.synthetic.main.fragment_loading_screen.toolbar
 import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_1
 import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_10
 import kotlinx.android.synthetic.main.fragment_loading_screen.top_contributor_amt_2
@@ -74,7 +71,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.util.Timer
-import java.util.TimerTask
 import java.util.UUID
 
 
@@ -163,6 +159,10 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (requireActivity() as? AppCompatActivity)?.title = ""
+        (requireActivity() as? AppCompatActivity)?.setSupportActionBar(toolbar)
+        (requireActivity() as? AppCompatActivity)?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
         requireActivity()
             .onBackPressedDispatcher
             .addCallback {
@@ -187,20 +187,6 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
         else {
             connecting_title.text = "${server.name}"
         }
-
-        val rIndex = (Math.random() * gameTips.size).toInt()
-        game_tip_text.text = "Tip: ${gameTips[rIndex]}"
-
-        Timer().schedule(object : TimerTask() {
-            override fun run() {
-                activity?.runOnUiThread {
-                    if (game_tip_text != null) {
-                        Animator.fadeInView(game_tip_text)
-                    }
-                }
-            }
-
-        }, 0)
 
         // start connect
         val accessKey = if (server.isAdmin) {
@@ -267,31 +253,31 @@ class LoadingScreenFragment : Fragment(), QueueSocket.SocketListener, SocketConn
                 connecting_title.text = "${server.name}"
             }
 
-            Glide.with(this)
-                .load(server.iconUrl)
-                .listener(object: RequestListener<Drawable> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any?,
-                        target: Target<Drawable>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Drawable,
-                        model: Any,
-                        target: Target<Drawable>?,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        server_icon.alpha = 0F
-                        server_icon.animate().setDuration(300).alpha(1F).start()
-                        return false
-                    }
-                })
-                .into(server_icon)
+//            Glide.with(this)
+//                .load(server.iconUrl)
+//                .listener(object: RequestListener<Drawable> {
+//                    override fun onLoadFailed(
+//                        e: GlideException?,
+//                        model: Any?,
+//                        target: Target<Drawable>,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        return false
+//                    }
+//
+//                    override fun onResourceReady(
+//                        resource: Drawable,
+//                        model: Any,
+//                        target: Target<Drawable>?,
+//                        dataSource: DataSource,
+//                        isFirstResource: Boolean
+//                    ): Boolean {
+//                        server_icon.alpha = 0F
+//                        server_icon.animate().setDuration(300).alpha(1F).start()
+//                        return false
+//                    }
+//                })
+//                .into(server_icon)
 
 //            Glide.with(this)
 //                .load("${server.serviceAltBaseUrl()}/canvas")
