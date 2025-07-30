@@ -79,7 +79,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
     var lastSelectedUnitPoint = Point(0, 0)
 
-    lateinit var server: Server
+    var server: Server? = null
 
     private var clientsInfo = mutableListOf<Triple<String, Int, Int>>()
 
@@ -230,7 +230,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             // world
             else {
                 coroutineScope.launch {
-                    startLatencyJob()
                     withContext(Dispatchers.Default) {
                         rows = SessionSettings.instance.canvasSize
                         cols = rows
@@ -247,7 +246,12 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
 
                 // socket.emit("my_event", "test")
 
-                registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
+                if (sessionSettings.chunk1 != null
+                    && sessionSettings.chunk2 != null
+                    && sessionSettings.chunk3 != null
+                    && sessionSettings.chunk4 != null) {
+                    registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
+                }
 
                 // showConnectingAttempts()
 
@@ -527,7 +531,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         AlertDialog.Builder(context, R.style.AlertDialogTheme)
             .setMessage("Erase selected pixels?")
             .setPositiveButton("Yes") { _, _ ->
-                val message = "${server.adminKey}&$left&$top&$right&$bottom"
+                val message = "${server!!.adminKey}&$left&$top&$right&$bottom"
                 InteractiveCanvasSocket.instance.requireSocket().emit("5ypq8062qs", message)
             }
             .setNegativeButton("Cancel", null)
@@ -572,39 +576,55 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
     }
 
     private fun initChunkPixelsFromMemory() {
-        for (c in 1..4) {
-            val chunk = when (c) {
-                1 -> sessionSettings.chunk1
-                2 -> sessionSettings.chunk2
-                3 -> sessionSettings.chunk3
-                4 -> sessionSettings.chunk4
-                else -> JsonArray()
-            }
+        if (sessionSettings.chunk1 != null
+            && sessionSettings.chunk2 != null
+            && sessionSettings.chunk3 != null
+            && sessionSettings.chunk4 != null) {
 
-            val offset = (c - 1) * rows / 4
+            for (c in 1..4) {
+                val chunk = when (c) {
+                    1 -> sessionSettings.chunk1!!
+                    2 -> sessionSettings.chunk2!!
+                    3 -> sessionSettings.chunk3!!
+                    4 -> sessionSettings.chunk4!!
+                    else -> JsonArray()
+                }
 
-            for (i in 0 until chunk.size()) {
-                val chunkInnerJsonArr = chunk.get(i).asJsonArray
-                for (j in 0 until chunkInnerJsonArr.size()) {
-                    arr[i + offset][j] = chunkInnerJsonArr.get(j).asInt
+                val offset = (c - 1) * rows / 4
 
-                    val color = arr[i][j]
+                for (i in 0 until chunk.size()) {
+                    val chunkInnerJsonArr = chunk.get(i).asJsonArray
+                    for (j in 0 until chunkInnerJsonArr.size()) {
+                        arr[i + offset][j] = chunkInnerJsonArr.get(j).asInt
 
-                    if (color != 0) {
-                        summary.add(RestorePoint(Point(j, i), color, color))
+                        val color = arr[i][j]
+
+                        if (color != 0) {
+                            summary.add(RestorePoint(Point(j, i), color, color))
+                        }
                     }
                 }
             }
+
+            bitmap = Bitmap.createBitmap(
+                arr.flatMap { it.asIterable() }.toIntArray(),
+                server!!.size,
+                server!!.size,
+                Bitmap.Config.ARGB_8888,
+            )
+
+            bitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
         }
+        else {
+            val bitmapData = Array(1024) { Array(1024) { -65536 }.toIntArray() }
 
-        bitmap = Bitmap.createBitmap(
-            arr.flatMap { it.asIterable() }.toIntArray(),
-            server.size,
-            server.size,
-            Bitmap.Config.ARGB_8888,
-        )
-
-        bitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
+            bitmap = Bitmap.createBitmap(
+                bitmapData.flatMap { it.asIterable() }.toIntArray(),
+                1024,
+                1024,
+                Bitmap.Config.ARGB_8888,
+            )
+        }
 
         val colors1 = listOf(Color.BLACK, Color.WHITE)
         val colors2 = listOf(Color.BLACK, Color.WHITE)
@@ -614,9 +634,9 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val color2 = colors2[i]
 
             val bitmap = Bitmap.createBitmap(
-                Array(server.size * server.size) { color1 }.toIntArray(),
-                server.size,
-                server.size,
+                Array((server?.size ?: 1024) * (server?.size ?: 1024)) { color1 }.toIntArray(),
+                server?.size ?: 1024,
+                server?.size ?: 1024,
                 Bitmap.Config.ARGB_8888,
             )
 
@@ -694,7 +714,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         if (world && !InteractiveCanvasSocket.instance.isConnected()) return
 
         val restorePoint = unitInRestorePoints(unitPoint)
-        if (restorePoint == null && (sessionSettings.dropsAmt > 0 || server.isAdmin)) {
+        if (restorePoint == null && (sessionSettings.dropsAmt > 0 || server!!.isAdmin)) {
             if (unitPoint.x in 0 until cols && unitPoint.y in 0 until rows) {
                 val unitColor = arr[unitPoint.y][unitPoint.x]
 
@@ -882,8 +902,8 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             val pixelId = y * cols + x
             str += "&$pixelId&$color"
         }
-        if (server.isAdmin && includeAdminKey) {
-            str += "&${server.adminKey}"
+        if (server!!.isAdmin && includeAdminKey) {
+            str += "&${server!!.adminKey}"
         }
         return str
     }
@@ -1455,7 +1475,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         val requestQueue = Volley.newRequestQueue(context)
         val request = object: JsonObjectRequest(
             Method.GET,
-            server.serviceAltBaseUrl() + "api/v1/canvas/pixels/${pixelId}/history",
+            server!!.serviceAltBaseUrl() + "api/v1/canvas/pixels/${pixelId}/history",
             null,
             { response ->
                 (context as Activity?)?.runOnUiThread {

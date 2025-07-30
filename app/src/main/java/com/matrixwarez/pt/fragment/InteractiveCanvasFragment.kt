@@ -209,7 +209,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     var initalColor = 0
 
-    lateinit var server: Server
+    var server: Server? = null
+        set(value) {
+            field = value
+        }
     var world = false
     var realmId = 0
 
@@ -243,7 +246,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     lateinit var visibleActionViews: Array<ButtonFrame>
 
-    lateinit var canvasService: CanvasService
+    var canvasService: CanvasService? = null
 
     var paused = false
     var pauseTime = System.currentTimeMillis()
@@ -273,6 +276,27 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var menuLatencyText: TextView? = null
     private var menuSocketStatusImage: ImageView? = null
 
+    private fun onServer() {
+        server = SessionSettings.instance.lastVisitedServer!!
+
+        SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
+        canvasService = CanvasService(server!!)
+
+        if (server != null && server!!.isAdmin) {
+            export_button.visibility = View.VISIBLE
+        }
+
+        requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
+    }
+
+    private fun onSocket() {
+        surface_view.interactiveCanvas.server = server
+        surface_view.interactiveCanvas.realmId = realmId
+        surface_view.interactiveCanvas.world = world
+
+        setupStreamBanner()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -299,8 +323,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         toggleTools(SessionSettings.instance.toolboxOpen)
 
         progress_circular.visibility = View.GONE
-
-        startRecentPixels()
     }
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
@@ -330,7 +352,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         paint_button_container_2.visibility = View.VISIBLE
 
-        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
+        requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
 
         paint_control_layout.visibility = View.GONE
 
@@ -346,7 +368,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun setupToolbarWithHamburger() {
         val headerView = nav_view.getHeaderView(0)
         val serverNameText = headerView.findViewById<TextView>(R.id.text_server_name)
-        serverNameText.text = server.name
+        serverNameText.text = server?.name ?: ""
 
         menuLatencyText = headerView.findViewById(R.id.text_latency)
         menuSocketStatusImage = headerView.findViewById(R.id.image_socket_status)
@@ -399,9 +421,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
                 R.id.canvas_item_community -> {
                     toggleDrawer()
-                    if (server.iconLink.isNotBlank()) {
+                    if (server!!.iconLink.isNotBlank()) {
                         try {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server!!.iconLink))
                             startActivity(intent)
                         }
                         catch (e: Exception) {}
@@ -480,9 +502,15 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun leave() {
-        InteractiveCanvasSocket.instance.disconnect()
-        lastCanvasSummaryImageTime = 0L
-        leave = true
+        if (server != null) {
+            InteractiveCanvasSocket.instance.disconnect()
+            lastCanvasSummaryImageTime = 0L
+            leave = true
+        }
+        else {
+            leave = true
+            onSocketDisconnect(false)
+        }
     }
 
     private fun addBackToMenuOnBackPressed() {
@@ -546,20 +574,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             SessionSettings.instance.tablet = Utils.isTablet(this)
         }
 
-        server = SessionSettings.instance.lastVisitedServer!!
-
-        SessionSettings.instance.addPaintInterval = server.pixelInterval / 60
-        canvasService = CanvasService(server)
+        surface_view.interactiveCanvas.world = world
 
         // must call before darkIcons
         if (surface_view == null) {
             (requireActivity() as InteractiveCanvasActivity).showMenuFragment()
             return
         }
-
-        surface_view.interactiveCanvas.server = server
-        surface_view.interactiveCanvas.realmId = realmId
-        surface_view.interactiveCanvas.world = world
 
         SessionSettings.instance.darkIcons = (SessionSettings.instance.backgroundColorsIndex == 1 || SessionSettings.instance.backgroundColorsIndex == 3)
         lineColorDarkState.value = SessionSettings.instance.darkIcons
@@ -658,7 +679,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                     )
                 ) {
                     CanvasMenuView(
-                        server = server,
+                        server = server!!,
                         latencyTextState = surface_view.interactiveCanvas.latencyTextState,
                         connectedState = surface_view.interactiveCanvas.connectedState,
                         onServerList = {
@@ -666,9 +687,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             showServerList()
                         },
                         onCommunity = {
-                            if (server.iconLink.isNotBlank()) {
+                            if (server!!.iconLink.isNotBlank()) {
                                 try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server!!.iconLink))
                                     startActivity(intent)
                                 }
                                 catch (e: Exception) {}
@@ -739,10 +760,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
             export_button)
 
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
-
-        if (server.isAdmin) {
-            export_button.visibility = View.VISIBLE
-        }
 
         // listeners
         surface_view.pixelHistoryListener = this
@@ -884,7 +901,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
         lock_paint_panel.actionBtnView = lock_paint_panel_action
 
-        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
+        requireActivity().title = ""
         text_bottom_display.text = SessionSettings.instance.dropsAmt.toString()
 
         recolorVisibleActionViews()
@@ -1966,7 +1983,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                             ).toFloat()
                     }
 
-                    val fragment = PixelHistoryFragment.create(server)
+                    val fragment = PixelHistoryFragment.create(server!!)
 
                     fragment.setPixelHistoryJson(null)
 
@@ -2779,11 +2796,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var recentPixelsJob: Job? = null
 
     private fun startRecentPixels() {
+        if (server == null) return
         if (recentPixelsJob != null) return
 
         recentPixelsJob = coroutineScope.launch {
             while (true) {
-                canvasService.getRecentPixels(pauseTime) { pixels ->
+                canvasService?.getRecentPixels(pauseTime) { pixels ->
                     Log.i("Recent Pixels", "Got recent pixels")
                     pixels?.also {
                         for (element in it) {
@@ -2812,7 +2830,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         startRecentPixels()
 
         SessionSettings.instance.uniqueId?.also { uuid ->
-            canvasService.getPaintQty(uuid) { paintQtyInfo ->
+            canvasService?.getPaintQty(uuid) { paintQtyInfo ->
                 paintQtyInfo?.also {
                     val paintQty = it.get("paint_qty").asInt
                     Log.i("Canvas Service", "Paint qty = $paintQty")
@@ -2844,7 +2862,7 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun reconnectToSocket() {
-        InteractiveCanvasSocket.instance.startSocket(server)
+        InteractiveCanvasSocket.instance.startSocket(server!!)
         updateSocketStatus(true)
     }
 
@@ -2858,7 +2876,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         // panel background
         //setPanelBackground()
 
-        requireActivity().title = "${server.name} (${SessionSettings.instance.displayNameOrId()})"
+        if (server != null) {
+            requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
+        }
 
         // panel theme config
         panelThemeConfig = PanelThemeConfig.buildConfig(SessionSettings.instance.panelResIds[SessionSettings.instance.panelBackgroundResIndex])
@@ -2943,17 +2963,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun setupStreamBanner() {
-        if (!server.showBanner) return
+        if (server == null || !server!!.showBanner) return
 
         stream_banner.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server.iconLink))
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(server!!.iconLink))
             startActivity(intent)
         }
 
-        banner_text.text = server.bannerText
+        banner_text.text = server!!.bannerText
 
         Glide.with(this)
-            .load(server.iconUrl)
+            .load(server!!.iconUrl)
             .listener(object: RequestListener<Drawable> {
                 override fun onLoadFailed(
                     e: GlideException?,

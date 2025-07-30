@@ -243,7 +243,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     fun showInteractiveCanvasFragment(server: Server) {
         val frag = InteractiveCanvasFragment()
-        frag.server = server
+//        frag.server = server
         frag.world = true
         frag.interactiveCanvasFragmentListener = this
 
@@ -320,7 +320,13 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     override fun onServerSelected(server: Server) {
         if (!blockLoadingFragment) {
-            showLoadingFragment(server)
+            Log.d("On Data Loaded", "Callback")
+            if (!SessionSettings.instance.agreedToTermOfService) {
+                showTermsOfServiceFragment(server)
+                return
+            }
+            SessionSettings.instance.save(this)
+            showInteractiveCanvasFragment(server)
         }
         blockLoadingFragment = true
     }

@@ -257,7 +257,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                         if (unitPoint != null && interactiveCanvas.unitInBounds(unitPoint)) {
                             if (mode == Mode.EXPORTING) {
-                                if (interactiveCanvas.server.isAdmin) {
+                                if (interactiveCanvas.server!!.isAdmin) {
                                     interactiveCanvas.erasePixels(unitPoint, unitPoint)
                                 }
                                 else {
@@ -285,7 +285,7 @@ class InteractiveCanvasView : SurfaceView, InteractiveCanvasDrawer, InteractiveC
 
                         if (interactiveCanvas.unitInBounds(startUnit) && interactiveCanvas.unitInBounds(endUnit)) {
                             if (mode == Mode.EXPORTING) {
-                                if (interactiveCanvas.server.isAdmin) {
+                                if (interactiveCanvas.server!!.isAdmin) {
                                     interactiveCanvas.erasePixels(Point(minX, minY), Point(maxX, maxY))
                                 }
                                 else {

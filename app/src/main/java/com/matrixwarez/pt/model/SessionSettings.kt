@@ -121,12 +121,12 @@ class SessionSettings {
 
     var arrJsonStr = ""
 
-    lateinit var chunk1: JsonArray
-    lateinit var chunk2: JsonArray
-    lateinit var chunk3: JsonArray
-    lateinit var chunk4: JsonArray
+    var chunk1: JsonArray? = null
+    var chunk2: JsonArray? = null
+    var chunk3: JsonArray? = null
+    var chunk4: JsonArray? = null
 
-    var canvasSize = 0
+    var canvasSize = 1024
     var maxSend = 10
 
     var firstContributorName = ""
