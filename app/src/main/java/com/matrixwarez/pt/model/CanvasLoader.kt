@@ -5,6 +5,7 @@ import android.app.AlertDialog
 import android.util.Log
 import com.android.volley.RequestQueue
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.helper.Utils
@@ -22,13 +23,13 @@ import org.json.JSONObject
 import java.util.UUID
 
 class CanvasLoader(val activity: Activity, var server: Server, val progressBar: LoadingProgressBar,
-                   val dataLoadingCallback: DataLoadingCallback? = null): QueueSocket.SocketListener, SocketConnectCallback {
+                   val dataLoadingCallback: DataLoadingCallback? = null,
+                   val socketListener: SocketConnectCallback): QueueSocket.SocketListener, SocketConnectCallback {
 
-    private var canvasService = CanvasService(server)
     private val serverService = ServerService()
 
-    private lateinit var requestQueue: RequestQueue
-    private lateinit var dataRequestQueue: RequestQueue
+    private val requestQueue = Volley.newRequestQueue(activity)
+    private val dataRequestQueue = Volley.newRequestQueue(activity)
 
     var showingError = false
 
@@ -37,17 +38,16 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
     private var abortOnPause = true
     private var aborted = false
 
-
-
     var doneLoadingPixels = false
     var doneLoadingPaintQty = false
     var doneSendingDeviceId = false
     var doneLoadingChunkCount = 0
-    var doneLoadingTopContributors = false
     var doneCheckingIp = false
 
     var doneConnectingQueue = false
     var doneConnectingSocket = false
+
+    private var canvasService: CanvasService? = null
 
     private fun abort() {
         aborted = true
@@ -59,14 +59,14 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         QueueSocket.instance.socket?.disconnect()
 
         serverService.abort()
-        canvasService.abort()
+        canvasService?.abort()
 
         Log.d("Loading Screen", "Aborted loading!")
 
         (activity as? InteractiveCanvasActivity)?.showMenuFragment()
     }
 
-    fun startLoading(server: Server) {
+    fun startLoading() {
         // start connect
         val accessKey = if (server.isAdmin) {
             server.adminKey
@@ -76,6 +76,10 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         }
 
         serverService.getServer(accessKey) { code, server ->
+            server?.let {
+                canvasService = CanvasService(server)
+            }
+
             val storeduuid = this.server.uuid
             val storedpublic = this.server.public
 
@@ -145,7 +149,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
     private fun downloadChunkPixels(chunk: Int) {
         Log.d("Connection", "Downloading canvas chunk $chunk.")
 
-        canvasService.getChunkPixels(chunk) { response ->
+        canvasService?.getChunkPixels(chunk) { response ->
             if (response == null) {
                 showConnectionErrorMessage()
                 return@getChunkPixels
@@ -197,7 +201,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
                 downloadFinished()
 
                 if (!server.isAdmin) {
-                    canvasService.logIp(uniqueId) { res ->
+                    canvasService?.logIp(uniqueId) { res ->
                         if (res == null) {
                             showConnectionErrorMessage(socket = false)
                             return@logIp
@@ -264,7 +268,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
 
                 if (!server.isAdmin) {
                     CoroutineScope(Dispatchers.Main.immediate).launch {
-                        canvasService.logIp(uniqueId) { res ->
+                        canvasService?.logIp(uniqueId) { res ->
                             if (res == null) {
                                 showConnectionErrorMessage(socket = false)
                                 return@logIp
@@ -365,11 +369,10 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
     private fun loadingDone(): Boolean {
         Log.d("Check loading done", "doneLoadingPaintQty = $doneLoadingPaintQty, " +
                 "doneSendingDeviceId = $doneSendingDeviceId, " +
-                "doneLoadingTopContributors = $doneLoadingTopContributors, " +
                 "doneLoadingCheckCount = $doneLoadingChunkCount, " +
                 "doneConnectingQueue = $doneConnectingQueue, " +
                 "doneConnectingSocket = $doneConnectingSocket, doneCheckingIp = $doneCheckingIp")
-        return (doneLoadingPaintQty || doneSendingDeviceId) && doneLoadingTopContributors &&
+        return (doneLoadingPaintQty || doneSendingDeviceId) &&
                 doneLoadingChunkCount == 4 &&
                 doneConnectingQueue && doneConnectingSocket && doneCheckingIp
     }
@@ -380,10 +383,6 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         num += doneLoadingChunkCount
 
         if (doneLoadingPaintQty || doneSendingDeviceId) {
-            num++
-        }
-
-        if (doneLoadingTopContributors) {
             num++
         }
 
@@ -451,6 +450,8 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         InteractiveCanvasSocket.instance.socketConnectCallback = null
 
         getCanvas()
+
+        socketListener.onSocketConnect()
     }
 
     override fun onSocketDisconnect(error: Boolean) {
@@ -458,5 +459,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
 
         doneConnectingSocket = false
         showConnectionErrorMessage(true)
+
+        socketListener.onSocketDisconnect(error)
     }
 }

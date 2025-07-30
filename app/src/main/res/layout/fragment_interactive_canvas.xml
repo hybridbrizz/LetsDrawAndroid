@@ -16,6 +16,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
+        <com.matrixwarez.pt.view.LoadingProgressBar
+                android:id="@+id/loading_progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:background="@drawable/loading_progress_bar_bg"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
         <androidx.compose.ui.platform.ComposeView
                 android:id="@+id/help_messages"
                 android:visibility="gone"

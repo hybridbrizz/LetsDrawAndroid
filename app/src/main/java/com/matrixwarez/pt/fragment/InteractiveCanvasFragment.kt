@@ -82,6 +82,7 @@ import com.matrixwarez.pt.helper.Utils
 import com.matrixwarez.pt.listener.ArtExportFragmentListener
 import com.matrixwarez.pt.listener.ArtExportListener
 import com.matrixwarez.pt.listener.CanvasEdgeTouchListener
+import com.matrixwarez.pt.listener.DataLoadingCallback
 import com.matrixwarez.pt.listener.DeviceCanvasViewportResetListener
 import com.matrixwarez.pt.listener.DrawFrameConfigFragmentListener
 import com.matrixwarez.pt.listener.InteractiveCanvasFragmentListener
@@ -99,6 +100,7 @@ import com.matrixwarez.pt.listener.RecentColorsListener
 import com.matrixwarez.pt.listener.SelectedObjectMoveView
 import com.matrixwarez.pt.listener.SelectedObjectView
 import com.matrixwarez.pt.listener.SocketConnectCallback
+import com.matrixwarez.pt.model.CanvasLoader
 import com.matrixwarez.pt.model.ColorPanelIcon
 import com.matrixwarez.pt.model.InteractiveCanvas
 import com.matrixwarez.pt.model.InteractiveCanvasSocket
@@ -132,6 +134,7 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.export_fragmen
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.help_messages
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.image_no_socket
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.ll_latency_container
+import kotlinx.android.synthetic.main.fragment_interactive_canvas.loading_progress_bar
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.lock_paint_panel
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.lock_paint_panel_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.menu_action
@@ -195,9 +198,6 @@ import java.util.Timer
 import java.util.TimerTask
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
-import kotlin.math.pow
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
 
 
 class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQtyListener,
@@ -205,14 +205,13 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     InteractiveCanvasGestureListener, ArtExportListener, ArtExportFragmentListener, ObjectSelectionListener,
     PalettesFragmentListener, DrawFrameConfigFragmentListener, CanvasEdgeTouchListener, DeviceCanvasViewportResetListener,
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, ColorPaletteView.Listener,
-    InteractiveCanvasViewModeListener {
+    InteractiveCanvasViewModeListener, DataLoadingCallback {
 
     var initalColor = 0
 
     var server: Server? = null
-        set(value) {
-            field = value
-        }
+    var tempServer: Server? = null
+
     var world = false
     var realmId = 0
 
@@ -276,9 +275,32 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var menuLatencyText: TextView? = null
     private var menuSocketStatusImage: ImageView? = null
 
-    private fun onServer() {
-        server = SessionSettings.instance.lastVisitedServer!!
+    private var serverLoaded = false
+    private var initialSocketConnected = false
 
+    private fun onServer() {
+        if (initialSocketConnected) {
+            onServerAndSocket()
+        }
+        else {
+            serverLoaded = true
+        }
+    }
+
+    private fun onSocket() {
+        if (serverLoaded) {
+            onServerAndSocket()
+        }
+        else {
+            initialSocketConnected = true
+        }
+    }
+
+    private fun onServerAndSocket() {
+        loading_progress_bar.visibility = View.GONE
+
+        // server
+        surface_view.interactiveCanvas.server = server
         SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
         canvasService = CanvasService(server!!)
 
@@ -287,9 +309,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         }
 
         requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
-    }
 
-    private fun onSocket() {
+        // socket
         surface_view.interactiveCanvas.server = server
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
@@ -546,6 +567,14 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        CanvasLoader(
+            activity = requireActivity(),
+            server = tempServer!!,
+            progressBar = loading_progress_bar,
+            dataLoadingCallback = this,
+            socketListener = this
+        ).startLoading()
 
         setupToolbarWithHamburger()
 
@@ -1467,28 +1496,28 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         cancelRecentPixels()
     }
 
-    private fun saveDeviceViewport() {
-        val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
-
-        SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
-        SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
-
-        SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
-
-        SessionSettings.instance.saveViewportInfo(this@InteractiveCanvasFragment.requireContext())
-    }
+//    private fun saveDeviceViewport() {
+//        val deviceViewport = surface_view.interactiveCanvas.deviceViewport!!
+//
+//        SessionSettings.instance.restoreDeviceViewportCenterX = deviceViewport.centerX()
+//        SessionSettings.instance.restoreDeviceViewportCenterY = deviceViewport.centerY()
+//
+//        SessionSettings.instance.restoreCanvasScaleFactor = surface_view.interactiveCanvas.lastScaleFactor
+//
+//        SessionSettings.instance.saveViewportInfo(this@InteractiveCanvasFragment.requireContext())
+//    }
 
     override fun onResume() {
         super.onResume()
 
         applyOptions()
 
-        saveViewportTimer = Timer()
-        saveViewportTimer?.schedule(object: TimerTask() {
-            override fun run() {
-                saveDeviceViewport()
-            }
-        }, 2000L, 2000L)
+//        saveViewportTimer = Timer()
+//        saveViewportTimer?.schedule(object: TimerTask() {
+//            override fun run() {
+//                saveDeviceViewport()
+//            }
+//        }, 2000L, 2000L)
 
         Log.i("On Resume", "Canvas resumed.")
 
@@ -2846,6 +2875,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas.startLatencyJob()
 
         updateSocketStatus(true)
+
+        onSocket()
     }
 
     override fun onSocketDisconnect(error: Boolean) {
@@ -3023,5 +3054,19 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     // Interactive Canvas View Mode Listener
     override fun onModeChanged(mode: InteractiveCanvasView.Mode) {
         updateSelectedColor(SessionSettings.instance.paintColor)
+    }
+
+    // Data Loading Callback
+    override fun onDataLoaded(server: Server) {
+        this.server = server
+        onServer()
+    }
+
+    override fun onDataLoaded(world: Boolean, realmId: Int) {
+
+    }
+
+    override fun onConnectionError() {
+
     }
 }

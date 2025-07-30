@@ -243,7 +243,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     fun showInteractiveCanvasFragment(server: Server) {
         val frag = InteractiveCanvasFragment()
-//        frag.server = server
+        frag.tempServer = server
         frag.world = true
         frag.interactiveCanvasFragmentListener = this
 
