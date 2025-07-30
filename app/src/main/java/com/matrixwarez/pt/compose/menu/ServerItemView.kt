@@ -3,11 +3,13 @@ package com.matrixwarez.pt.compose.menu
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,7 +53,7 @@ import com.matrixwarez.pt.model.Server
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun ServerItemView(server: Server, editing: Boolean,
+fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
                    showDeleteConfirmationState: MutableState<Boolean> = mutableStateOf(false),
                    serverToRemoveState: MutableState<Server?> = mutableStateOf(null),
                    onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
@@ -58,94 +61,75 @@ fun ServerItemView(server: Server, editing: Boolean,
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier.fillMaxWidth().clickable(
-            interactionSource = remember { MutableInteractionSource() },
-            indication = ripple(true, color = Color.White)
-        ) {
-            onClick(server)
-        }
-        .padding(top = 10.dp),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Log.d("Recompose", "Recompose with img url ${server.canvasImageUrl}")
-
-        GlideImage(
-            modifier = Modifier.fillMaxWidth(0.75f).aspectRatio(1f).border(1.dp, color = Color(android.graphics.Color.parseColor("#FF4D00")), shape = RoundedCornerShape(20.dp)).clip(
-                RoundedCornerShape(20.dp)
-            ),
-            model = server.canvasImageUrl,
-            contentDescription = "${server.name} canvas image"
-        ) {
-            it
-                .signature(ObjectKey(System.currentTimeMillis() / 1000 / 60 / 15))
-                .thumbnail(
-                    Glide.with(context)
-                        .load(server.canvasImageUrl)
-                        .onlyRetrieveFromCache(true)
-                )
-        }
-
-        Row(
-            modifier = Modifier
-                .combinedClickable(
-                    onClick = {
-
-                    },
-                    onLongClick = {
-                        onLongClick(server)
-                    }
-                )
-                .padding(horizontal = 10.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            val onlineImage = when (server.online) {
-                true -> painterResource(R.drawable.green_circle)
-                false -> painterResource(R.drawable.red_circle)
-            }
+        Column(modifier = Modifier.fillMaxWidth(0.75f)) {
+            Log.d("Recompose", "Recompose with img url ${server.canvasImageUrl}")
 
             Text(
-                text = server.name,
+                text = when (index > 0) {
+                    true -> "#$index - ${server.name} (${server.size}x${server.size})"
+                    false -> server.name
+                },
                 color = Color.White,
                 fontFamily = Inter,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Normal
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
             )
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            Image(
-                modifier = Modifier.size(14.dp),
-                painter = onlineImage,
-                contentDescription = "Online Image"
-            )
-        }
-        when (editing) {
-            true -> {
-                Button(
-                    modifier = Modifier.height(30.dp),
-                    onClick = {
-                        serverToRemoveState.value = server
-                        showDeleteConfirmationState.value = true
-                    },
-                    shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.White
-                    ),
-                    contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = "Remove",
-                        fontFamily = Inter,
-                        fontSize = 11.sp,
-                        lineHeight = 14.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+            val borderColor = when (server.online) {
+                true -> Color.Green
+                false -> Color.Red
             }
-            false -> {
+
+            GlideImage(
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, color = Color.White).clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(true, color = Color.White)
+                ) {
+                    onClick(server)
+                },
+                model = server.canvasImageUrl,
+                contentDescription = "${server.name} canvas image"
+            ) {
+                it
+                    .signature(ObjectKey(System.currentTimeMillis() / 1000 / 60 / 15))
+                    .thumbnail(
+                        Glide.with(context)
+                            .load(server.canvasImageUrl)
+                            .onlyRetrieveFromCache(true)
+                    )
+            }
+
+            when (editing) {
+                true -> {
+                    Button(
+                        modifier = Modifier.height(30.dp),
+                        onClick = {
+                            serverToRemoveState.value = server
+                            showDeleteConfirmationState.value = true
+                        },
+                        shape = RoundedCornerShape(5.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = "Remove",
+                            fontFamily = Inter,
+                            fontSize = 11.sp,
+                            lineHeight = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                false -> {
 //                Button(
 //                    modifier = Modifier.height(30.dp),
 //                    onClick = {
@@ -167,7 +151,12 @@ fun ServerItemView(server: Server, editing: Boolean,
 //                        overflow = TextOverflow.Ellipsis
 //                    )
 //                }
+                }
             }
         }
+
+        Spacer(modifier = Modifier.height(30.dp))
+//
+//        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(colorResource(R.color.colorAccent).copy(0.5f)))
     }
 }

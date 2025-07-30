@@ -311,7 +311,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
 
         // socket
-        surface_view.interactiveCanvas.server = server
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
@@ -344,6 +343,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         toggleTools(SessionSettings.instance.toolboxOpen)
 
         progress_circular.visibility = View.GONE
+
+        surface_view.setInitialPositionAndScale()
     }
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
@@ -523,15 +524,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     }
 
     private fun leave() {
-        if (server != null) {
-            InteractiveCanvasSocket.instance.disconnect()
-            lastCanvasSummaryImageTime = 0L
-            leave = true
-        }
-        else {
-            leave = true
-            onSocketDisconnect(false)
-        }
+        leave = true
+        InteractiveCanvasSocket.instance.disconnect()
+        lastCanvasSummaryImageTime = 0L
+        onSocketDisconnect(false)
     }
 
     private fun addBackToMenuOnBackPressed() {
@@ -568,6 +564,9 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        surface_view.interactiveCanvas.server = tempServer
+
+        // call abort in leave()
         CanvasLoader(
             activity = requireActivity(),
             server = tempServer!!,

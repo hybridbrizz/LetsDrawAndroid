@@ -16,6 +16,8 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableStateOf
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.helper.Utils
@@ -231,7 +233,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             else {
                 coroutineScope.launch {
                     withContext(Dispatchers.Default) {
-                        rows = SessionSettings.instance.canvasSize
+                        rows = server?.size ?: SessionSettings.instance.canvasSize
                         cols = rows
                         arr = Array(rows) { IntArray(cols) }
 
@@ -616,14 +618,25 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             bitmap = bitmap!!.copy(Bitmap.Config.ARGB_8888, true)
         }
         else {
-            val bitmapData = Array(1024) { Array(1024) { -65536 }.toIntArray() }
+            val cachedPixels = Glide.with(context)
+                .asBitmap()
+                .load(server?.canvasImageUrl)
+                .submit()
+                .get()
 
-            bitmap = Bitmap.createBitmap(
-                bitmapData.flatMap { it.asIterable() }.toIntArray(),
-                1024,
-                1024,
-                Bitmap.Config.ARGB_8888,
-            )
+            bitmap = when (cachedPixels != null) {
+                true -> cachedPixels
+                false -> {
+                    val bitmapData = Array(1024) { Array(1024) { -65536 }.toIntArray() }
+
+                    Bitmap.createBitmap(
+                        bitmapData.flatMap { it.asIterable() }.toIntArray(),
+                        1024,
+                        1024,
+                        Bitmap.Config.ARGB_8888,
+                    )
+                }
+            }
         }
 
         val colors1 = listOf(Color.BLACK, Color.WHITE)

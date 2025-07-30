@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -24,7 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.matrixwarez.pt.R
 import com.matrixwarez.pt.model.Server
 
 
@@ -38,9 +42,21 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
     val isLoading by loadingState
     val isRefreshing by refreshingState
 
+    val prState = rememberPullToRefreshState()
+
     PullToRefreshBox(
         modifier = Modifier.fillMaxSize(),
         isRefreshing = isRefreshing,
+        state = prState,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                state = prState,
+                containerColor = colorResource(R.color.colorAccent),
+                color = Color.White
+            )
+        },
         onRefresh = {
             onRefreshServerList(true)
         }
@@ -59,11 +75,16 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+
                 itemsIndexed(serverList) { index, server ->
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ServerItemView(
                             server = server,
                             editing = false,
+                            index = index + 1,
                             onClick = {
                                 onSelectServer(server)
                             }

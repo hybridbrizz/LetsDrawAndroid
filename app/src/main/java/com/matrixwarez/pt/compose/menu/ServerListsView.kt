@@ -20,8 +20,15 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,10 +43,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.matrixwarez.pt.R
 import com.matrixwarez.pt.compose.Inter
 import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.service.ServerService
@@ -75,147 +85,136 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
         false -> Modifier
     }
 
-    Column(
-        modifier = Modifier
-            .shadow(2.dp)
-            .then(sizeMod)
-            .then(windowInsetMod)
-            .background(Color.Black),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .border(1.dp, Color.White)
-                    .padding(5.dp)
-                    .background(Color(android.graphics.Color.parseColor("#FF4D00")))
-                    .padding(5.dp),
+    Scaffold(
+        modifier = windowInsetMod,
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color.Black,
+                contentColor = Color.White
             ) {
-                Text(
-                    text = "PIXELS: TOGETHER",
-                    color = Color.White,
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 24.sp
-                )
-            }
-
-            if (pagerState.targetPage == 1) {
-
-                if (!showAddFormState.value) {
-                    Button(
-                        modifier = Modifier.height(30.dp).align(Alignment.CenterEnd).padding(end = 20.dp),
-                        onClick = {
-                            showAddFormState.value = true
-                        },
-                        shape = RoundedCornerShape(5.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0.15f, 0.15f, 0.15f),
-                            contentColor = Color.White
-                        ),
-                        contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
-                    ) {
-                        Text(
-                            text = "Add",
-                            fontFamily = Inter,
-                            fontSize = 11.sp,
-                            lineHeight = 14.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                NavigationBarItem(
+                    selected = pagerState.targetPage == 0,
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_globe),
+                            tint = Color.White,
+                            contentDescription = "World Spaces"
                         )
-                    }
-                }
+                    },
+                    label = {
+                        Text("World", color = Color.White)
+                    },
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(0)
+                        }
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = colorResource(R.color.colorAccent)
+                    )
+                )
+
+                NavigationBarItem(
+                    selected = pagerState.targetPage == 1,
+                    icon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_group),
+                            tint = Color.White,
+                            contentDescription = "Group Spaces"
+                        )
+                    },
+                    label = {
+                        Text("Group", color = Color.White)
+                    },
+                    onClick = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(1)
+                        }
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        indicatorColor = colorResource(R.color.colorAccent)
+                    )
+                )
             }
         }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Row(
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
-                .width(180.dp)
-                .height(40.dp)
-                .clip(RoundedCornerShape(50))
-                .border(1.dp, Color.White, RoundedCornerShape(50))
+                .padding(paddingValues)
+                .shadow(2.dp)
+                .then(sizeMod)
+                .background(Color.Black),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                modifier = Modifier.weight(0.5f).height(40.dp),
-                shape = RectangleShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when (pagerState.targetPage == 0) {
-                        true -> Color.White
-                        false -> Color.Black
-                    },
-                    contentColor = when (pagerState.targetPage == 0) {
-                        true -> Color.Black
-                        false -> Color.White
-                    }
-                ),
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.scrollToPage(0)
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .border(1.dp, Color.White)
+                        .padding(5.dp)
+                        .background(Color(android.graphics.Color.parseColor("#FF4D00")))
+                        .padding(5.dp),
+                ) {
+                    Text(
+                        text = "PIXELS: TOGETHER",
+                        color = Color.White,
+                        fontFamily = Inter,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 24.sp
+                    )
+                }
+
+                if (pagerState.targetPage == 1) {
+
+                    if (!showAddFormState.value) {
+                        Button(
+                            modifier = Modifier.height(30.dp).align(Alignment.CenterEnd).padding(end = 20.dp),
+                            onClick = {
+                                showAddFormState.value = true
+                            },
+                            shape = RoundedCornerShape(5.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0.15f, 0.15f, 0.15f),
+                                contentColor = Color.White
+                            ),
+                            contentPadding = PaddingValues(horizontal = 15.dp, vertical = 5.dp)
+                        ) {
+                            Text(
+                                text = "Add",
+                                fontFamily = Inter,
+                                fontSize = 11.sp,
+                                lineHeight = 14.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
-            ) {
-                Text(
-                    text = "World",
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
             }
-            Button(
-                modifier = Modifier.weight(0.5f).height(40.dp),
-                shape = RectangleShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = when (pagerState.targetPage == 1) {
-                        true -> Color.White
-                        false -> Color.Black
-                    },
-                    contentColor = when (pagerState.targetPage == 1) {
-                        true -> Color.Black
-                        false -> Color.White
-                    }
-                ),
-                onClick = {
-                    coroutineScope.launch {
-                        pagerState.scrollToPage(1)
-                    }
+
+            HorizontalPager(
+                state = pagerState,
+                userScrollEnabled = false
+            ) { page ->
+                when (page == 0) {
+                    true -> PublicServerListView(
+                        serverListState = publicServerListState,
+                        onSelectServer = onSelectServer,
+                        loadingState = loadingState,
+                        refreshingState = refreshingState,
+                        onRefreshServerList = onRefreshServerList
+                    )
+                    false -> PrivateServerListView(
+                        serverService = serverService,
+                        onSelectServer = onSelectServer,
+                        privateServerListState = privateServerListState,
+                        showAddFormState = showAddFormState,
+                        loadingState = loadingState,
+                        refreshingState = refreshingState,
+                        onRefreshServerList = onRefreshServerList
+                    )
                 }
-            ) {
-                Text(
-                    text = "Private",
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        HorizontalPager(
-            state = pagerState,
-            userScrollEnabled = false
-        ) { page ->
-            when (page == 0) {
-                true -> PublicServerListView(
-                    serverListState = publicServerListState,
-                    onSelectServer = onSelectServer,
-                    loadingState = loadingState,
-                    refreshingState = refreshingState,
-                    onRefreshServerList = onRefreshServerList
-                )
-                false -> PrivateServerListView(
-                    serverService = serverService,
-                    onSelectServer = onSelectServer,
-                    privateServerListState = privateServerListState,
-                    showAddFormState = showAddFormState,
-                    loadingState = loadingState,
-                    refreshingState = refreshingState,
-                    onRefreshServerList = onRefreshServerList
-                )
             }
         }
     }
