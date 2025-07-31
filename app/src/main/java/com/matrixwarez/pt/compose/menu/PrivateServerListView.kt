@@ -259,10 +259,11 @@ fun PrivateServerListView(serverService: ServerService,
                                 )
                             }
                         }
-                        itemsIndexed(adminServerList) { _, server ->
+                        itemsIndexed(adminServerList) { index, server ->
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 ServerItemView(
                                     server = server,
+                                    index = index + 1,
                                     editing = editingAdminServers,
                                     showDeleteConfirmationState = showDeleteConfirmationState,
                                     serverToRemoveState = serverToRemoveState,
@@ -293,10 +294,11 @@ fun PrivateServerListView(serverService: ServerService,
                                 )
                             }
                         }
-                        itemsIndexed(privateServerList) { _, server ->
+                        itemsIndexed(privateServerList) { index, server ->
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 ServerItemView(
                                     server = server,
+                                    index = index + 1,
                                     editing = editingPrivateServers,
                                     showDeleteConfirmationState = showDeleteConfirmationState,
                                     serverToRemoveState = serverToRemoveState,

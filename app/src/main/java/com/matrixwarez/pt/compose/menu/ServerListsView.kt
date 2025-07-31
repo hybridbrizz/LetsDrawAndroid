@@ -110,7 +110,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                         )
                     },
                     label = {
-                        
+
                     },
                     onClick = {
                         coroutineScope.launch {
