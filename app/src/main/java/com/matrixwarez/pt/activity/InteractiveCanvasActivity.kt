@@ -141,7 +141,9 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { view, allInsets ->
             val insets = allInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(0, insets.top, 0, 0)
+            if (view.paddingTop == 0) {
+                view.setPadding(0, insets.top, 0, 0)
+            }
             WindowInsetsCompat.CONSUMED
         }
 

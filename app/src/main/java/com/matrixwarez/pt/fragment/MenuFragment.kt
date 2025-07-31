@@ -438,13 +438,14 @@ class MenuFragment: Fragment() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(androidx.compose.ui.graphics.Color.Cyan)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) {},
                 contentAlignment = Alignment.Center
             ) {
-                Row(modifier = Modifier.align(Alignment.CenterEnd)) {
+                Row(modifier = Modifier.align(Alignment.CenterEnd).background(androidx.compose.ui.graphics.Color.Red)) {
                     if (!portraitState.value) {
                         Box(modifier = Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
                             AndroidView(

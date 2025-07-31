@@ -107,7 +107,7 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
             when (editing) {
                 true -> {
                     Button(
-                        modifier = Modifier.height(30.dp),
+                        modifier = Modifier.padding(8.dp).height(30.dp).align(Alignment.CenterHorizontally),
                         onClick = {
                             serverToRemoveState.value = server
                             showDeleteConfirmationState.value = true
