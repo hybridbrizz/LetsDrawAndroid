@@ -346,15 +346,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var pixelsReadyCount = 0
 
     override fun notifyPixelsReady() {
-        //paint_panel_button.visibility = View.VISIBLE
         menu_button.visibility = View.VISIBLE
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
         toggleTools(SessionSettings.instance.toolboxOpen)
 
         progress_circular.visibility = View.GONE
-
-        surface_view.setInitialPositionAndScale()
 
         pixelsReadyCount += 1
 
@@ -543,7 +540,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun leave() {
         leave = true
         lastCanvasSummaryImageTime = 0L
-        SessionSettings.instance.displayName = ""
         when (doneLoading) {
             true -> {
                 InteractiveCanvasSocket.instance.disconnect()

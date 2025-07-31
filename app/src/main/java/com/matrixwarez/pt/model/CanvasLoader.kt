@@ -117,9 +117,10 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
             SessionSettings.instance.canvasSize = server.size
             SessionSettings.instance.maxSend = server.maxSend
 
-            Log.d("Connection", "Got server info, starting queue socket connect.")
-            QueueSocket.instance.socketListener = this
-            QueueSocket.instance.startSocket(server)
+//            Log.d("Connection", "Got server info, starting queue socket connect.")
+//            QueueSocket.instance.socketListener = this
+//            QueueSocket.instance.startSocket(server)
+            onServiceReady()
         }
     }
 
@@ -358,7 +359,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         if (activity == null) return
 
         activity.runOnUiThread {
-            progressBar.progress = getNumLoaded() / 8f
+            progressBar.progress = getNumLoaded() / 6f
         }
     }
 
@@ -369,8 +370,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
                 "doneConnectingQueue = $doneConnectingQueue, " +
                 "doneConnectingSocket = $doneConnectingSocket, doneCheckingIp = $doneCheckingIp")
         return (doneLoadingPaintQty || doneSendingDeviceId) &&
-                doneLoadingChunkCount == 4 &&
-                doneConnectingQueue && doneConnectingSocket && doneCheckingIp
+                doneLoadingChunkCount == 4 && doneConnectingSocket && doneCheckingIp
     }
 
     private fun getNumLoaded(): Int {
@@ -379,10 +379,6 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         num += doneLoadingChunkCount
 
         if (doneLoadingPaintQty || doneSendingDeviceId) {
-            num++
-        }
-
-        if (doneConnectingQueue) {
             num++
         }
 
