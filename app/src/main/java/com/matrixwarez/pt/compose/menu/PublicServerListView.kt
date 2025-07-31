@@ -99,7 +99,7 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
 
             if (isLoading) {
                 CircularProgressIndicator(
-                    color = Color.White,
+                    color = colorResource(R.color.colorAccent),
                     strokeWidth = 2.dp
                 )
             }

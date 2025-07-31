@@ -323,6 +323,22 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         setupStreamBanner()
 
         paint_button_container_2.visibility = View.VISIBLE
+
+        help_messages.setContent {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(120.dp))
+                server?.let {
+                    HelpMessageListView(server = it) {
+                        SessionSettings.instance.showHelpMessages = false
+                        SessionSettings.instance.save(requireContext())
+                        help_messages.visibility = View.GONE
+                    }
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -655,10 +671,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(120.dp))
-                HelpMessageListView {
-                    SessionSettings.instance.showHelpMessages = false
-                    SessionSettings.instance.save(requireContext())
-                    help_messages.visibility = View.GONE
+                server?.let {
+                    HelpMessageListView(server = it) {
+                        SessionSettings.instance.showHelpMessages = false
+                        SessionSettings.instance.save(requireContext())
+                        help_messages.visibility = View.GONE
+                    }
                 }
             }
         }

@@ -1,6 +1,7 @@
 package com.matrixwarez.pt.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,73 +21,78 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.matrixwarez.pt.R
+import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 
 
 @Composable
-fun HelpMessageListView(modifier: Modifier = Modifier, onClose: () -> Unit) {
-    LazyColumn(
+fun HelpMessageListView(modifier: Modifier = Modifier, server: Server?, onClose: () -> Unit) {
+    Column(
         modifier = modifier
             .width(300.dp)
             .aspectRatio(3/4f)
-            .background(Color.White, shape = RoundedCornerShape(10.dp)),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
+            .background(Color.Black)
+            .border(1.dp, colorResource(R.color.colorAccent)),
     ) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(40.dp, 40.dp)
-                        .clickable {
-                            onClose()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .size(40.dp, 40.dp)
+                    .clickable {
+                        onClose()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "x",
+                    color = colorResource(R.color.colorAccent),
+                    fontFamily = Inter,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 16.sp
+                )
+            }
+        }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            item {
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 60.dp)) {
                     Text(
-                        text = "x",
-                        color = Color.Black,
+                        modifier = Modifier.fillMaxWidth(),
+                        text = "Your Pixel Guide",
+                        textAlign = TextAlign.Center,
+                        color = Color.White,
+                        fontFamily = Inter,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 24.sp
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
+            }
+
+            itemsIndexed(SessionSettings.instance.getHelpMessages(server = server)) { index, item ->
+                Box(modifier = Modifier.padding(top = 5.dp, start = 40.dp, end = 40.dp)) {
+                    Text(
+                        text = "• $item",
+                        color = Color.White,
                         fontFamily = Inter,
                         fontWeight = FontWeight.Normal,
-                        fontSize = 16.sp
+                        fontSize = 14.sp
                     )
                 }
             }
-        }
 
-        item {
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 60.dp)) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Help",
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp
-                )
-                Spacer(modifier = Modifier.height(10.dp))
+            item {
+                Spacer(modifier = Modifier.height(20.dp))
             }
-        }
-
-        itemsIndexed(SessionSettings.instance.getHelpMessages()) { index, item ->
-            Box(modifier = Modifier.padding(top = 5.dp, start = 40.dp, end = 40.dp)) {
-                Text(
-                    text = "${index + 1}.) $item",
-                    color = Color.Black,
-                    fontFamily = Inter,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 12.sp
-                )
-            }
-        }
-
-        item {
-            Spacer(modifier = Modifier.height(20.dp))
         }
     }
 }

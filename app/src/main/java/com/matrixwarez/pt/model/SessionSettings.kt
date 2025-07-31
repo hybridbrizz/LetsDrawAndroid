@@ -933,11 +933,12 @@ class SessionSettings {
         }
     }
 
-    fun getHelpMessages(): List<String> {
+    fun getHelpMessages(server: Server?): List<String> {
         return listOf(
-            "The number you see near the plus sign is how many pixels worth of paint you have. It will automatically update when new paint arrives.",
-            "The 4-character string you see next to the space's name in () is your name. You can change it anytime for each space separately in Options.",
-            "When viewing a pixel's history you can click the different updates to reveal the date and time it was added."
+            "The number in the orange diamond is how much paint you have. It automatically updates when new paint arrives.",
+            "The 4-character string next to ${server?.name?.let { "\"$it\"" } ?: "the space's name"} is your random default name. Change it at any time in Options.",
+            "Tap a pixel to view a color history for that spot. Then tap the different history items to reveal date and time information.",
+            "The top row of colors is your palette. Build as needed in color selection. Reset back to the default palette in Options. The bottom row shows your recently placed colors."
         )
     }
 

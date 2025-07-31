@@ -313,7 +313,7 @@ fun PrivateServerListView(serverService: ServerService,
 
                 if (isLoading) {
                     CircularProgressIndicator(
-                        color = Color.White,
+                        color = colorResource(R.color.colorAccent),
                         strokeWidth = 2.dp
                     )
                 }

@@ -1,6 +1,9 @@
 package com.matrixwarez.pt.compose.menu
 
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,6 +11,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,7 +31,10 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -64,6 +71,20 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val clickInteractionSource = remember { MutableInteractionSource() }
+        val clickInteraction by clickInteractionSource.interactions.collectAsState(null)
+
+        val contentColor by animateColorAsState(
+            targetValue = when (clickInteraction) {
+                is PressInteraction.Press -> colorResource(R.color.colorAccent)
+                else -> Color.White
+            },
+            animationSpec = tween(
+                durationMillis = 200,
+                easing = LinearEasing
+            )
+        )
+
         Column(modifier = Modifier.fillMaxWidth(0.75f)) {
             Log.d("Recompose", "Recompose with img url ${server.canvasImageUrl}")
 
@@ -72,7 +93,7 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
                     true -> "#$index - ${server.name} (${server.size}x${server.size})"
                     false -> server.name
                 },
-                color = Color.White,
+                color = contentColor,
                 fontFamily = Inter,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
@@ -80,14 +101,9 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            val borderColor = when (server.online) {
-                true -> Color.Green
-                false -> Color.Red
-            }
-
             GlideImage(
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, color = Color.White).clickable(
-                    interactionSource = remember { MutableInteractionSource() },
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f).border(1.dp, color = contentColor).clickable(
+                    interactionSource = clickInteractionSource,
                     indication = ripple(true, color = Color.White)
                 ) {
                     onClick(server)
