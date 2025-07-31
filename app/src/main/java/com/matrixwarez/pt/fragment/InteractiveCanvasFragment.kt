@@ -278,6 +278,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var serverLoaded = false
     private var initialSocketConnected = false
 
+    private var canvasLoader: CanvasLoader? = null
+
+    private var doneLoading = false
+
     private fun onServer() {
         if (initialSocketConnected) {
             onServerAndSocket()
@@ -299,7 +303,10 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private fun onServerAndSocket() {
         loading_progress_bar.visibility = View.GONE
 
-        // server
+        val headerView = nav_view.getHeaderView(0)
+        val serverNameText = headerView.findViewById<TextView>(R.id.text_server_name)
+        serverNameText.text = server?.name ?: ""
+
         surface_view.interactiveCanvas.server = server
         SessionSettings.instance.addPaintInterval = server!!.pixelInterval / 60
         canvasService = CanvasService(server!!)
@@ -310,11 +317,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         requireActivity().title = "${server!!.name} (${SessionSettings.instance.displayNameOrId()})"
 
-        // socket
         surface_view.interactiveCanvas.realmId = realmId
         surface_view.interactiveCanvas.world = world
 
         setupStreamBanner()
+
+        paint_button_container_2.visibility = View.VISIBLE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -335,6 +343,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         return view
     }
 
+    private var pixelsReadyCount = 0
+
     override fun notifyPixelsReady() {
         //paint_panel_button.visibility = View.VISIBLE
         menu_button.visibility = View.VISIBLE
@@ -345,6 +355,12 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         progress_circular.visibility = View.GONE
 
         surface_view.setInitialPositionAndScale()
+
+        pixelsReadyCount += 1
+
+        if (pixelsReadyCount >= 2) {
+            doneLoading = true
+        }
     }
 
     private lateinit var drawerToggle: ActionBarDrawerToggle
@@ -414,7 +430,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         drawerToggle.syncState()
 
         toolbar.setNavigationOnClickListener {
-            when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING) {
+            when (surface_view.mode == InteractiveCanvasView.Mode.PAINTING
+                    || surface_view.mode == InteractiveCanvasView.Mode.ERASING) {
                 true -> {
                     Log.d("Test Option Selection", "Painting")
 
@@ -525,9 +542,17 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private fun leave() {
         leave = true
-        InteractiveCanvasSocket.instance.disconnect()
         lastCanvasSummaryImageTime = 0L
-        onSocketDisconnect(false)
+        SessionSettings.instance.displayName = ""
+        when (doneLoading) {
+            true -> {
+                InteractiveCanvasSocket.instance.disconnect()
+            }
+            false -> {
+                canvasLoader?.abort()
+                onSocketDisconnect(false)
+            }
+        }
     }
 
     private fun addBackToMenuOnBackPressed() {
@@ -564,16 +589,19 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        paint_button_container_2.visibility = View.GONE
+
         surface_view.interactiveCanvas.server = tempServer
 
         // call abort in leave()
-        CanvasLoader(
+        canvasLoader = CanvasLoader(
             activity = requireActivity(),
             server = tempServer!!,
             progressBar = loading_progress_bar,
             dataLoadingCallback = this,
             socketListener = this
-        ).startLoading()
+        )
+        canvasLoader?.startLoading()
 
         setupToolbarWithHamburger()
 

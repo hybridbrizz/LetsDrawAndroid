@@ -608,6 +608,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                 }
             }
 
+            sessionSettings.chunk1 = null
+            sessionSettings.chunk2 = null
+            sessionSettings.chunk3 = null
+            sessionSettings.chunk4 = null
+
             bitmap = Bitmap.createBitmap(
                 arr.flatMap { it.asIterable() }.toIntArray(),
                 server!!.size,

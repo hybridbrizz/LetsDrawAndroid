@@ -135,12 +135,12 @@ class RGBColorWheel: FrameLayout {
         paint.shader = wheelShader
         canvas.drawCircle(center.x, center.y, radius, paint)
 
-        // Optional: draw a subtle border around the wheel for definition
-        paint.shader = null
-        paint.color = Color.LTGRAY
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1f
-        canvas.drawCircle(center.x, center.y, radius, paint)
+//        // Optional: draw a subtle border around the wheel for definition
+//        paint.shader = null
+//        paint.color = Color.LTGRAY
+//        paint.style = Paint.Style.STROKE
+//        paint.strokeWidth = 1f
+//        canvas.drawCircle(center.x, center.y, radius, paint)
     }
 
     /**

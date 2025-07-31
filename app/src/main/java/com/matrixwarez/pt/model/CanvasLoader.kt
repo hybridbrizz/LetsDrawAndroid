@@ -49,7 +49,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
 
     private var canvasService: CanvasService? = null
 
-    private fun abort() {
+    fun abort() {
         aborted = true
 
         InteractiveCanvasSocket.instance.socketConnectCallback = null
@@ -60,10 +60,6 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
 
         serverService.abort()
         canvasService?.abort()
-
-        Log.d("Loading Screen", "Aborted loading!")
-
-        (activity as? InteractiveCanvasActivity)?.showMenuFragment()
     }
 
     fun startLoading() {
@@ -447,7 +443,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
 
         doneConnectingSocket = true
         updateNumLoaded()
-        InteractiveCanvasSocket.instance.socketConnectCallback = null
+        InteractiveCanvasSocket.instance.socketConnectCallback = socketListener
 
         getCanvas()
 
