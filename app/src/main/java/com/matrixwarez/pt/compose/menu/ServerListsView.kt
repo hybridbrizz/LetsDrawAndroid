@@ -194,8 +194,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
             }
 
             HorizontalPager(
-                state = pagerState,
-                userScrollEnabled = false
+                state = pagerState
             ) { page ->
                 when (page == 0) {
                     true -> PublicServerListView(

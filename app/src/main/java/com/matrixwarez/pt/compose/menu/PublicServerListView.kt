@@ -79,7 +79,7 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                     Spacer(modifier = Modifier.height(10.dp))
                 }
 
-                itemsIndexed(serverList) { index, server ->
+                itemsIndexed(serverList.sortedBy { -it.size }) { index, server ->
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ServerItemView(
                             server = server,
