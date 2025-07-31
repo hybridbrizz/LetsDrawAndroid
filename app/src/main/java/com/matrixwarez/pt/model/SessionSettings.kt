@@ -924,8 +924,11 @@ class SessionSettings {
         return when (displayName.isNotBlank()) {
             true -> displayName
             false -> {
-                val serverUUID = lastVisitedServer?.uuid?.substring(0, 4)
-                serverUUID ?: uniqueId2!!
+                var serverUUID = (lastVisitedServer?.uuid ?: "")
+                if (serverUUID.length > 4) {
+                    serverUUID = serverUUID.substring(0, 4)
+                }
+                serverUUID
             }
         }
     }

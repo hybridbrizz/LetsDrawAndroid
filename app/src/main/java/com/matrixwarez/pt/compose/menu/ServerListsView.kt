@@ -110,7 +110,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                         )
                     },
                     label = {
-                        Text("World", color = Color.White)
+                        
                     },
                     onClick = {
                         coroutineScope.launch {
@@ -132,7 +132,7 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                         )
                     },
                     label = {
-                        Text("Group", color = Color.White)
+
                     },
                     onClick = {
                         coroutineScope.launch {

@@ -63,6 +63,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,13 +115,37 @@ fun PrivateServerListView(serverService: ServerService,
             onRefreshServerList(false)
         }
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        val bgColor = when (privateServerList.isEmpty() && adminServerList.isEmpty()) {
+            true -> {
+                Color.Transparent
+            }
+            false -> {
+                Color.Black
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            if (privateServerList.isEmpty() && adminServerList.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center).width(240.dp),
+                        text = "No groups added yet. Enter GROUP to add that space now!",
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        fontFamily = Inter,
+                        fontWeight = FontWeight.Light
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(10.dp))
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LazyVerticalGrid(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.Black)
+                        .background(bgColor)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
