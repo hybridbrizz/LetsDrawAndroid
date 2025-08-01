@@ -243,23 +243,6 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
                     interactiveCanvasListener?.notifyPixelsReady()
                 }
             }
-
-            try {
-
-                // socket.emit("my_event", "test")
-
-                if (sessionSettings.chunk1 != null
-                    && sessionSettings.chunk2 != null
-                    && sessionSettings.chunk3 != null
-                    && sessionSettings.chunk4 != null) {
-                    registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
-                }
-
-                // showConnectingAttempts()
-
-            } catch (e: URISyntaxException) {
-
-            }
 //
 //            // short term pixels
 //            for (shortTermPixel in sessionSettings.shortTermPixels) {
@@ -363,13 +346,13 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
         }
 
         socket?.on("canvas_error") {
-            if (!isShowingCanvasError) {
-                Utils.showErrorDialog(context, "Unfortunately one or more of the pixels you just placed didn't make it to the database.") {
-                    (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
-                }
-
-                isShowingCanvasError = true
-            }
+//            if (!isShowingCanvasError) {
+//                Utils.showErrorDialog(context, "Unfortunately one or more of the pixels you just placed didn't make it to the database.") {
+//                    (context as InteractiveCanvasActivity).onInteractiveCanvasBack()
+//                }
+//
+//                isShowingCanvasError = true
+//            }
         }
 
         socket?.on("paint_qty") {
@@ -377,9 +360,11 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             sessionSettings.dropsAmt = deviceJsonObject.getInt("paint_qty")
         }
 
+        Log.d("Amount Test", "registered for add_paint")
         socket?.on("add_paint") {
             val data = it[0] as JSONObject
             val amt = data.getInt("value")
+            Log.d("Amount Test", "$amt")
             sessionSettings.dropsAmt = (sessionSettings.dropsAmt + amt).coerceAtMost(SessionSettings.instance.maxPaintAmt)
             SessionSettings.instance.timeSync = SessionSettings.instance.addPaintInterval
         }
@@ -632,7 +617,7 @@ class InteractiveCanvas(var context: Context, val sessionSettings: SessionSettin
             bitmap = when (cachedPixels != null) {
                 true -> cachedPixels
                 false -> {
-                    val bitmapData = Array(1024) { Array(1024) { -65536 }.toIntArray() }
+                    val bitmapData = Array(1024) { Array(1024) { 0 }.toIntArray() }
 
                     Bitmap.createBitmap(
                         bitmapData.flatMap { it.asIterable() }.toIntArray(),

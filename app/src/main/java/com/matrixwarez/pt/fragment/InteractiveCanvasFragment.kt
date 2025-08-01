@@ -2897,6 +2897,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     override fun onSocketConnect() {
         Log.i("Canvas Socket", "Socket connected!")
 
+        SessionSettings.instance.paintQtyListeners.add(this)
+
         startRecentPixels()
 
         SessionSettings.instance.uniqueId?.also { uuid ->

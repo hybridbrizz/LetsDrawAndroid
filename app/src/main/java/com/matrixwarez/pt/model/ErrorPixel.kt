@@ -3,7 +3,7 @@ package com.matrixwarez.pt.model
 import android.graphics.Color
 import androidx.core.graphics.ColorUtils
 
-class ErrorPixel(val x: Int, val y: Int, private val duration: Float, val startColor: Int = Color.RED) {
+class ErrorPixel(val x: Int, val y: Int, private val duration: Float, val startColor: Int = Color.WHITE) {
     var isActive = true
     private val startTime = System.currentTimeMillis()
 

@@ -155,7 +155,7 @@ class ArtExportFragment: Fragment() {
         })
     }*/
 
-//    private fun sendArtPixels() {
+//    private fun sendArtPixels() {\
 //        val requestQueue = Volley.newRequestQueue(context)
 //
 //        context?.apply {
