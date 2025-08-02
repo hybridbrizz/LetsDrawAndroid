@@ -210,15 +210,17 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         if (initial) {
             frag.publicServerItemReadyOnScreen.observe(this, object: Observer<Boolean> {
                 override fun onChanged(value: Boolean) {
-                    Log.d("Splash Screen", "Server thumbnails are ready")
-                    lifecycleScope.launch {
+                    if (value) {
+                        Log.d("Splash Screen", "Server thumbnails are ready")
+                        lifecycleScope.launch {
 //                        withContext(Dispatchers.Default) {
 //                            delay(500)
 //                        }
-                        Log.d("Splash Screen", "Hide splash screen")
-                        hideSplashScreen = true
+                            Log.d("Splash Screen", "Hide splash screen")
+                            hideSplashScreen = true
+                        }
+                        frag.publicServerItemReadyOnScreen.removeObserver(this)
                     }
-                    frag.publicServerItemReadyOnScreen.removeObserver(this)
                 }
             })
         }
