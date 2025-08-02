@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -53,7 +54,8 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                     privateServerListState: MutableState<List<Server>>,
                     loadingState: MutableState<Boolean>, refreshingState: MutableState<Boolean>,
                     portraitState: MutableState<Boolean>,
-                    onSelectServer: (Server) -> Unit, onRefreshServerList: (Boolean) -> Unit) {
+                    onSelectServer: (Server) -> Unit, onRefreshServerList: (Boolean) -> Unit,
+                    publicServerItemReadyOnScreen: () -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -183,7 +185,8 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
                         onSelectServer = onSelectServer,
                         loadingState = loadingState,
                         refreshingState = refreshingState,
-                        onRefreshServerList = onRefreshServerList
+                        onRefreshServerList = onRefreshServerList,
+                        publicServerItemReadyOnScreen = publicServerItemReadyOnScreen
                     )
                     false -> PrivateServerListView(
                         serverService = serverService,
@@ -200,6 +203,8 @@ fun ServerListsView(serverService: ServerService, publicServerListState: Mutable
     }
 
     LaunchedEffect(Unit) {
-        loadingState.value = true
+        if (publicServerListState.value.isEmpty()) {
+            loadingState.value = true
+        }
     }
 }

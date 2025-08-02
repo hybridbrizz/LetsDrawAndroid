@@ -8,13 +8,18 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.Log
 import android.view.View
+import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.compose.MenuItem
 import com.matrixwarez.pt.fragment.*
@@ -27,6 +32,10 @@ import com.matrixwarez.pt.model.StatTracker
 import com.matrixwarez.pt.service.CanvasService
 import com.matrixwarez.pt.view.ActionButtonView
 import kotlinx.android.synthetic.main.activity_fullscreen.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 /**
@@ -72,8 +81,12 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
 
     var canvasFragment: InteractiveCanvasFragment? = null
 
+    private var hideSplashScreen = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        installSplashScreen()
 
         setContentView(R.layout.activity_fullscreen)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -99,7 +112,7 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         //goFullscreen()
 
         //showInteractiveCanvasFragment(false, 0)
-        showMenuFragment()
+        showMenuFragment(true)
 
         //TrustAllSSLCertsDebug.trust()
 
@@ -148,6 +161,32 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         }
 
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
+
+        lifecycleScope.launch {
+            withContext(Dispatchers.Default) {
+                delay(3000)
+            }
+            hideSplashScreen = true
+            Log.d("Splash Screen", "Splash screen timeout.")
+        }
+
+        // Set up an OnPreDrawListener to the root view.
+        val content: View = findViewById(android.R.id.content)
+        content.viewTreeObserver.addOnPreDrawListener(
+            object : ViewTreeObserver.OnPreDrawListener {
+                override fun onPreDraw(): Boolean {
+                    // Check whether the initial data is ready.
+                    return if (hideSplashScreen) {
+                        // The content is ready. Start drawing.
+                        content.viewTreeObserver.removeOnPreDrawListener(this)
+                        true
+                    } else {
+                        // The content isn't ready. Suspend.
+                        false
+                    }
+                }
+            }
+        )
     }
 
     override fun onPause() {
@@ -161,14 +200,28 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
         StatTracker.instance.save(this)
     }
 
-    fun showMenuFragment() {
+    fun showMenuFragment(initial: Boolean = false) {
         if (!Utils.isTablet(this)) {
             portraitLock()
         }
-        //exitFullscreen()
 
         val frag = MenuFragment()
         frag.menuButtonListener = this
+        if (initial) {
+            frag.publicServerItemReadyOnScreen.observe(this, object: Observer<Boolean> {
+                override fun onChanged(value: Boolean) {
+                    Log.d("Splash Screen", "Server thumbnails are ready")
+                    lifecycleScope.launch {
+//                        withContext(Dispatchers.Default) {
+//                            delay(500)
+//                        }
+                        Log.d("Splash Screen", "Hide splash screen")
+                        hideSplashScreen = true
+                    }
+                    frag.publicServerItemReadyOnScreen.removeObserver(this)
+                }
+            })
+        }
 
         supportFragmentManager.beginTransaction().replace(R.id.fullscreen_content, frag).commit()
     }

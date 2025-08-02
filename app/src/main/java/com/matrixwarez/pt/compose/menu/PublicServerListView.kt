@@ -22,7 +22,9 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,7 +38,8 @@ import com.matrixwarez.pt.model.Server
 @Composable
 fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingState: MutableState<Boolean>,
                          refreshingState: MutableState<Boolean>,
-                         onRefreshServerList: (Boolean) -> Unit, onSelectServer: (Server) -> Unit) {
+                         onRefreshServerList: (Boolean) -> Unit, onSelectServer: (Server) -> Unit,
+                         publicServerItemReadyOnScreen: () -> Unit) {
 
     val serverList by serverListState
     val isLoading by loadingState
@@ -87,7 +90,8 @@ fun PublicServerListView(serverListState: MutableState<List<Server>>, loadingSta
                             index = index + 1,
                             onClick = {
                                 onSelectServer(server)
-                            }
+                            },
+                            publicServerItemReadyOnScreen = publicServerItemReadyOnScreen
                         )
                     }
                 }

@@ -1,5 +1,6 @@
 package com.matrixwarez.pt.compose.menu
 
+import android.graphics.drawable.Drawable
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -52,6 +54,10 @@ import androidx.compose.ui.unit.sp
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.compose.Inter
@@ -63,7 +69,8 @@ import com.matrixwarez.pt.model.Server
 fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
                    showDeleteConfirmationState: MutableState<Boolean> = mutableStateOf(false),
                    serverToRemoveState: MutableState<Server?> = mutableStateOf(null),
-                   onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {}) {
+                   onClick: (Server) -> Unit, onLongClick: (Server) -> Unit = {},
+                   publicServerItemReadyOnScreen: () -> Unit = {}) {
 
     val context = LocalContext.current
 
@@ -107,6 +114,9 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
                     indication = ripple(true, color = Color.White)
                 ) {
                     onClick(server)
+                }
+                .onGloballyPositioned {
+                    publicServerItemReadyOnScreen()
                 },
                 model = server.canvasImageUrl,
                 contentDescription = "${server.name} canvas image"
@@ -118,6 +128,26 @@ fun ServerItemView(server: Server, editing: Boolean, index: Int = 0,
                             .load(server.canvasImageUrl)
                             .onlyRetrieveFromCache(true)
                     )
+                    .listener(object: RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
+                        }
+                    })
             }
 
             when (editing) {
