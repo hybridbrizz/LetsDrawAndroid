@@ -213,12 +213,18 @@ class InteractiveCanvasActivity : AppCompatActivity(), DataLoadingCallback, Menu
                     if (value) {
                         Log.d("Splash Screen", "Server thumbnails are ready")
                         lifecycleScope.launch {
-//                        withContext(Dispatchers.Default) {
-//                            delay(500)
-//                        }
                             Log.d("Splash Screen", "Hide splash screen")
                             hideSplashScreen = true
                         }
+                        Utils.preloadThumbnails(
+                            context = this@InteractiveCanvasActivity,
+                            servers = frag.publicServerListState.value.sortedBy { -it.size },
+                            startIndex = 2,
+                            amount = 2,
+                            onDone = {
+                                Log.d("Splash Screen", "Remaining thumbnails preloaded")
+                            }
+                        )
                         frag.publicServerItemReadyOnScreen.removeObserver(this)
                     }
                 }

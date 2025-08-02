@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.LinearGradient
 import android.graphics.Point
 import android.graphics.Shader
+import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
@@ -15,7 +16,13 @@ import android.util.TypedValue
 import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.TextView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.matrixwarez.pt.R
+import com.matrixwarez.pt.model.Server
 import com.matrixwarez.pt.model.SessionSettings
 import com.matrixwarez.pt.view.InteractiveCanvasView
 import kotlinx.android.synthetic.main.fragment_menu.*
@@ -311,6 +318,52 @@ class Utils {
          */
         private fun abs(value: Float): Float {
             return if (value < 0) -value else value
+        }
+
+        fun preloadThumbnails(context: Context, servers: List<Server>, startIndex: Int, amount: Int,
+                                      onDone: () -> Unit, onError: () -> Unit = {}) {
+
+            val indices = servers.indices
+            if (startIndex !in indices || startIndex + amount - 1 !in indices) {
+                onError()
+                return
+            }
+
+            var numLoaded = 0
+
+            for (i in startIndex until startIndex + amount) {
+                Glide.with(context)
+                    .load(servers[i].canvasImageUrl)
+                    .listener(object: RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any?,
+                            target: Target<Drawable>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            numLoaded += 1
+                            if (numLoaded >= amount) {
+                                onDone()
+                            }
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable,
+                            model: Any,
+                            target: Target<Drawable>?,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            numLoaded += 1
+                            if (numLoaded >= amount) {
+                                onDone()
+                            }
+                            return false
+                        }
+                    })
+                    .preload()
+            }
         }
     }
 

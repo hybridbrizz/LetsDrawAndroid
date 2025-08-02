@@ -3,7 +3,6 @@ package com.matrixwarez.pt.fragment
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.GestureDetector
@@ -38,10 +37,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.activity.isPortrait
@@ -127,8 +122,7 @@ class MenuFragment: Fragment() {
     private val service = ServerService()
 
     private val showServerListState = mutableStateOf(false)
-    private val publicServerListStateInitial = mutableStateOf(listOf<Server>())
-    private val publicServerListState = mutableStateOf(listOf<Server>())
+    val publicServerListState = mutableStateOf(listOf<Server>())
     private val privateServerListState = mutableStateOf(listOf<Server>())
     private val loadingState = mutableStateOf(false)
     private val refreshingState = mutableStateOf(false)
@@ -138,76 +132,32 @@ class MenuFragment: Fragment() {
     var serverThumbnailsReady = MutableLiveData(false)
     var publicServerItemReadyOnScreen = MutableLiveData(false)
 
-    private var lastPublicRefreshTime = 0L
-    private var lastPrivateRefreshTime = 0L
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         service.getServerList { _, list ->
-            Log.d("Pre loading test", "got servers")
-            publicServerListStateInitial.value = list
             loadingState.value = false
 
-            preloadThumbnails(list)
-        }
-    }
+            Utils.preloadThumbnails(
+                context = requireContext(),
+                servers = list.sortedBy { -it.size },
+                startIndex = 0,
+                amount = 2,
+                onDone = {
+                    thumbnailsPreloaded.value = true
+                    serverThumbnailsReady.value = true
 
-    private fun preloadThumbnails(servers: List<Server>) {
-        val sorted = servers.sortedBy { -it.size }
+                    publicServerListState.value = list
 
-        var numLoaded = 0
+                    Log.d("Splash Screen", "2 thumbnails")
+                },
+                onError = {
+                    thumbnailsPreloaded.value = true
+                    serverThumbnailsReady.value = true
 
-        if (sorted.size > 1) {
-            for (i in 0 until 2) {
-                Glide.with(this)
-                    .load(sorted[i].canvasImageUrl)
-                    .listener(object: RequestListener<Drawable> {
-                        override fun onLoadFailed(
-                            e: GlideException?,
-                            model: Any?,
-                            target: Target<Drawable>,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            numLoaded += 1
-                            if (numLoaded > 1) {
-                                thumbnailsPreloaded.value = true
-                                serverThumbnailsReady.value = true
-
-                                publicServerListState.value = publicServerListStateInitial.value
-
-                                Log.d("Splash Screen", "$numLoaded thumbnails")
-                            }
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable,
-                            model: Any,
-                            target: Target<Drawable>?,
-                            dataSource: DataSource,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            numLoaded += 1
-                            if (numLoaded > 1) {
-                                thumbnailsPreloaded.value = true
-                                serverThumbnailsReady.value = true
-
-                                publicServerListState.value = publicServerListStateInitial.value
-
-                                Log.d("Splash Screen", "$numLoaded thumbnails")
-                            }
-                            return false
-                        }
-                    })
-                    .preload()
-            }
-        }
-        else {
-            thumbnailsPreloaded.value = true
-            serverThumbnailsReady.value = true
-
-            Log.d("Splash Screen", "No thumbnails to preload")
+                    Log.d("Splash Screen", "No thumbnails to preload")
+                }
+            )
         }
     }
 
@@ -864,8 +814,16 @@ class MenuFragment: Fragment() {
         super.onResume()
 
         menuButtonListener?.clearBlockLoadingFragment()
+    }
 
-
+    private fun preloadRemainingThumbnails() {
+        publicServerListState.value.forEachIndexed { index, server ->
+            if (index > 1) {
+                Glide.with(this)
+                    .load(server.canvasImageUrl)
+                    .preload()
+            }
+        }
     }
 
     private fun resetMenu() {
