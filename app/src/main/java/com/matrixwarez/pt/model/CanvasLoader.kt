@@ -363,7 +363,7 @@ class CanvasLoader(val activity: Activity, var server: Server, val progressBar: 
         }
     }
 
-    private fun loadingDone(): Boolean {
+    fun loadingDone(): Boolean {
         Log.d("Check loading done", "doneLoadingPaintQty = $doneLoadingPaintQty, " +
                 "doneSendingDeviceId = $doneSendingDeviceId, " +
                 "doneLoadingCheckCount = $doneLoadingChunkCount, " +

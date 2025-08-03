@@ -19,7 +19,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -34,7 +33,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -65,17 +63,14 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.signature.ObjectKey
 import com.google.android.material.snackbar.Snackbar
 import com.matrixwarez.pt.R
 import com.matrixwarez.pt.activity.InteractiveCanvasActivity
 import com.matrixwarez.pt.colorpicker.ColorPickerFragment
 import com.matrixwarez.pt.compose.CanvasMenuView
 import com.matrixwarez.pt.compose.ClientCanvasLocationsView
-import com.matrixwarez.pt.compose.ClientSummaryLocationsView
 import com.matrixwarez.pt.compose.ClientsInfoListView
 import com.matrixwarez.pt.compose.HelpMessageListView
-import com.matrixwarez.pt.compose.mapMarkerTypes
 import com.matrixwarez.pt.helper.Animator
 import com.matrixwarez.pt.helper.PanelThemeConfig
 import com.matrixwarez.pt.helper.Utils
@@ -116,7 +111,6 @@ import io.reactivex.rxjava3.core.Observable
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_icon
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.banner_text
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_menu
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_clients_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.canvas_summary_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.client_canvas_locations
@@ -168,7 +162,6 @@ import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_name_t
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove_color_action
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.palette_remove_color_button
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.pixel_history_fragment_container
-import kotlinx.android.synthetic.main.fragment_interactive_canvas.progress_circular
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_color_palette_view
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.recent_colors_container
 import kotlinx.android.synthetic.main.fragment_interactive_canvas.selected_object_no_action
@@ -207,8 +200,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     SelectedObjectMoveView, SelectedObjectView, MenuCardListener, SocketConnectCallback, ColorPaletteView.Listener,
     InteractiveCanvasViewModeListener, DataLoadingCallback {
 
-    var initalColor = 0
-
     var server: Server? = null
     var tempServer: Server? = null
 
@@ -225,12 +216,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     var toolboxOpen = false
 
     lateinit var panelThemeConfig: PanelThemeConfig
-
-    var paintTextMode = -1
-
-    val paintTextModeTime = 0
-    val paintTextModeAmt = 1
-    var paintTextModeHide = -1
 
     var animatingTools = false
 
@@ -253,8 +238,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
     private var lastCanvasSummaryImageTime = 0L
 
-    private var wifiStateReceiver: BroadcastReceiver? = null
-
     private var saveViewportTimer: Timer? = null
 
     private var clientsInfoState = mutableStateOf<List<Triple<String, Int, Int>>?>(null)
@@ -263,8 +246,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private val showServerListState = mutableStateOf(false)
     private val mapMarkerIndexState = mutableIntStateOf(0)
     private val showMenuState = mutableStateOf(false)
-
-    private var paintIndicatorhDownLocation: PointF? = null
 
     private var leave = false
 
@@ -275,32 +256,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
     private var menuLatencyText: TextView? = null
     private var menuSocketStatusImage: ImageView? = null
 
-    private var serverLoaded = false
-    private var initialSocketConnected = false
-
     private var canvasLoader: CanvasLoader? = null
 
     private var doneLoading = false
 
     private fun onServer() {
-        if (initialSocketConnected) {
-            onServerAndSocket()
-        }
-        else {
-            serverLoaded = true
-        }
-    }
-
-    private fun onSocket() {
-        if (serverLoaded) {
-            onServerAndSocket()
-        }
-        else {
-            initialSocketConnected = true
-        }
-    }
-
-    private fun onServerAndSocket() {
         loading_progress_bar.visibility = View.GONE
 
         val headerView = nav_view.getHeaderView(0)
@@ -339,6 +299,8 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
                 }
             }
         }
+
+        surface_view.interactiveCanvas.startLatencyJob()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -366,8 +328,6 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
 
         togglePaintPanel(SessionSettings.instance.paintPanelOpen)
         toggleTools(SessionSettings.instance.toolboxOpen)
-
-        progress_circular.visibility = View.GONE
 
         pixelsReadyCount += 1
 
@@ -2915,11 +2875,11 @@ class InteractiveCanvasFragment : Fragment(), InteractiveCanvasListener, PaintQt
         surface_view.interactiveCanvas
             .registerForSocketEvents(InteractiveCanvasSocket.instance.requireSocket())
 
-        surface_view.interactiveCanvas.startLatencyJob()
+        if (canvasLoader?.loadingDone() == true) {
+            surface_view.interactiveCanvas.startLatencyJob()
+        }
 
         updateSocketStatus(true)
-
-        onSocket()
     }
 
     override fun onSocketDisconnect(error: Boolean) {
